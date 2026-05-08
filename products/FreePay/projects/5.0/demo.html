@@ -210,7 +210,9 @@
       align-items: flex-start;
       gap: 0;
     }
-    .progress-wrap .step-item { min-width: 0; }
+    /* Mobile progress：寬度有限，回到平分模式避免 overflow */
+    .progress-wrap .step-item { flex: 1; min-width: 0; }
+    .progress-wrap .step-item.is-last { flex: 1; }
     .progress-wrap .step-item:not(:last-child)::before {
       left: calc(50% + 16px);
       top: 15px;
@@ -252,7 +254,7 @@
     @media (min-width: 765px) { .progress-wrap { display: none; } }
     @media (max-width: 359px) {
       .progress-wrap { padding: 8px 12px 10px; }
-      .prog-labels span { font-size: 11px; }
+      .prog-labels span { font-size: 12px; }
     }
 
     /* ─── Page Layout ─── */
@@ -305,7 +307,7 @@
       gap: 12px;
     }
     .sidebar-fund-info { flex: 1; min-width: 0; }
-    .sidebar-fund-name { font-size: 18px; font-weight: 700; color: var(--color-text-heading); line-height: 1.4; margin-bottom: 6px; }
+    .sidebar-fund-name { font-size: 18px; font-weight: 500; color: var(--color-text-heading); line-height: 1.4; margin-bottom: 6px; }
     .sidebar-tags { display: flex; flex-wrap: wrap; gap: 4px; }
     .sidebar-tag {
       font-size: 12px;
@@ -315,9 +317,12 @@
       border-radius: 4px;
     }
     /* Horizontal stepper */
-    .stepper { display: flex; flex-direction: row; align-items: flex-start; gap: 0; }
+    .stepper {
+      display: flex; flex-direction: row; align-items: flex-start; gap: 0;
+      width: 500px; max-width: 100%; margin: 0 auto;
+    }
     .step-item {
-      flex: 1;
+      flex: 1 1 140px;
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -325,6 +330,7 @@
       gap: 0;
       position: relative;
     }
+    .step-item.is-last { flex: 0 0 80px; }
     .step-item:not(:last-child)::before {
       content: '';
       position: absolute;
@@ -438,7 +444,7 @@
       padding: 0;
       font-family: var(--font-primary);
     }
-    .toggle-label { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; }
+    .toggle-label { font-size: 14px; color: var(--color-text-secondary); white-space: nowrap; }
     .toggle-label.paused { color: var(--color-text-tertiary); }
     .toggle { position: relative; display: inline-block; width: 38px; height: 22px; flex-shrink: 0; }
     .toggle input { opacity: 0; width: 0; height: 0; position: absolute; }
@@ -535,17 +541,6 @@
     }
     .ccy-card.on .ccy-check { display: flex; }
 
-    /* Min amount table */
-    .min-table {
-      width: 100%;
-      border-collapse: collapse;
-      font-size: 14px;
-      margin-top: 4px;
-    }
-    .min-table td { padding: 9px 0; border-bottom: 1px solid var(--color-border-default); }
-    .min-table tr:last-child td { border-bottom: none; }
-    .min-table td:last-child { text-align: right; font-family: var(--font-mono); font-weight: 700; }
-
     /* ─── Info / Warning ─── */
     .info-box {
       background: var(--color-bg-info-subtle);
@@ -592,22 +587,18 @@
     }
     .contract-card:hover { border-color: var(--color-neutral-300); background: var(--color-bg-muted); }
     .contract-card.on { border-color: var(--color-action-primary); background: var(--color-bg-brand-subtle); }
-    .contract-card.dim { opacity: 0.5; cursor: not-allowed; background: var(--color-bg-muted); pointer-events: none; }
     .cc-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; }
-    .cc-id { font-size: 14px; font-weight: 700; font-family: var(--font-mono); color: var(--color-text-heading); }
-    .cc-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; }
+    .cc-id { font-size: 16px; font-weight: 700; color: var(--color-text-heading); font-variant-numeric: tabular-nums; }
     .status-badge {
-      font-size: 12px;
-      padding: 2px 8px;
+      font-size: 14px;
+      padding: 2px 10px;
       border-radius: 12px;
       font-weight: 500;
       white-space: nowrap;
     }
-    .s-ok      { background: var(--color-bg-info-subtle);    color: var(--color-brand-tertiary-600); }
     .s-pending { background: var(--color-bg-warning-subtle); color: var(--color-brand-secondary-800); }
-    .s-rdm     { background: var(--color-bg-muted);          color: var(--color-text-secondary); }
-    .cc-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--color-text-secondary); margin-top: 4px; }
-    .cc-row strong { font-family: var(--font-mono); color: var(--color-text-primary); font-weight: 500; }
+    .cc-row { display: flex; justify-content: space-between; align-items: center; font-size: 14px; color: var(--color-text-secondary); margin-top: 6px; }
+    .cc-row strong { color: var(--color-text-primary); font-weight: 600; font-size: 16px; font-variant-numeric: tabular-nums; }
     .cc-check {
       position: absolute; top: 12px; right: 12px;
       width: 20px; height: 20px;
@@ -643,8 +634,8 @@
       flex-shrink: 0;
     }
     .ncb-icon i { font-size: 20px; color: var(--color-text-on-brand); }
-    .ncb-title { font-size: 14px; font-weight: 700; color: var(--color-text-heading); text-align: left; }
-    .ncb-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 2px; text-align: left; }
+    .ncb-title { font-size: 16px; font-weight: 700; color: var(--color-text-heading); text-align: left; }
+    .ncb-sub { font-size: 14px; color: var(--color-text-secondary); margin-top: 4px; text-align: left; }
 
     /* 既有交易存在時，新申購採弱化次要樣式，不強烈引導 */
     .new-contract-btn.secondary {
@@ -663,7 +654,7 @@
     .new-contract-btn.secondary .ncb-icon i { font-size: 14px; color: var(--color-text-secondary); }
     .new-contract-btn.secondary.on .ncb-icon { background: var(--color-action-primary); }
     .new-contract-btn.secondary.on .ncb-icon i { color: var(--color-text-on-brand); }
-    .new-contract-btn.secondary .ncb-title { font-size: 13px; font-weight: 600; }
+    .new-contract-btn.secondary .ncb-title { font-size: 14px; font-weight: 600; }
 
     /* ─── Form elements ─── */
     .form-group { margin-bottom: 20px; }
@@ -682,9 +673,9 @@
     .input-prefix {
       position: absolute; left: 12px; top: 50%;
       transform: translateY(-50%);
-      font-size: 14px; font-weight: 700;
+      font-size: 16px; font-weight: 700;
       color: var(--color-text-secondary);
-      font-family: var(--font-mono);
+      font-variant-numeric: tabular-nums;
       pointer-events: none;
       line-height: 1;
     }
@@ -707,8 +698,8 @@
     .form-input.prefixed { padding-left: 50px; }
     .form-input:focus { border-color: var(--color-input-border-focus); box-shadow: var(--color-input-shadow-focus); }
     .form-input.err   { border-color: var(--color-input-border-error); box-shadow: var(--color-input-shadow-error); }
-    .helper { font-size: 12px; color: var(--color-input-helper); margin-top: 5px; display: flex; justify-content: space-between; align-items: center; }
-    .helper-err { font-size: 12px; color: var(--color-input-helper-error); margin-top: 4px; display: none; gap: 4px; align-items: center; }
+    .helper { font-size: 14px; color: var(--color-input-helper); margin-top: 6px; display: flex; justify-content: space-between; align-items: center; }
+    .helper-err { font-size: 14px; color: var(--color-input-helper-error); margin-top: 4px; display: none; gap: 4px; align-items: center; }
     .hint-icon { cursor: pointer; }
     .hint-panel {
       display: none; margin-top: 8px; margin-bottom: 12px; padding: 10px 12px;
@@ -717,9 +708,9 @@
       border-radius: 6px; font-size: 12px;
       color: var(--color-text-secondary); line-height: 1.75;
     }
-    .rate-ok   { font-family: var(--font-mono); font-weight: 700; font-size: 12px; color: var(--color-brand-tertiary-400); }
-    .rate-warn { font-family: var(--font-mono); font-weight: 700; font-size: 12px; color: var(--color-text-brand-strong); }
-    .hint-empty { font-size: 12px; color: var(--color-neutral-400); }
+    .rate-ok   { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; color: var(--color-brand-tertiary-400); }
+    .rate-warn { font-variant-numeric: tabular-nums; font-weight: 700; font-size: 14px; color: var(--color-text-brand-strong); }
+    .hint-empty { font-size: 14px; color: var(--color-neutral-400); }
 
     /* ─── Segmented Control ─── */
     .seg {
@@ -846,7 +837,7 @@
       transform: rotate(45deg);
     }
     .th-icon { font-size: 24px; display: block; margin-bottom: 6px; }
-    .th-label { font-size: 12px; font-weight: 600; color: var(--color-text-primary); line-height: 1.3; }
+    .th-label { font-size: 14px; font-weight: 600; color: var(--color-text-primary); line-height: 1.3; }
     .th-card.on .th-label { color: var(--color-text-brand-strong); font-weight: 700; }
 
     /* ─── Slider Block ─── */
@@ -911,13 +902,12 @@
     .sum-row {
       font-size: 16px;
       display: flex; justify-content: space-between; align-items: flex-start;
-      padding: 12px 0;
+      padding: 14px 0;
       border-bottom: 1px solid var(--color-border-default);
-      font-size: 14px;
     }
     .sum-row:last-child { border-bottom: none; }
     .sum-label { color: var(--color-text-secondary); }
-    .sum-val { font-weight: 500; text-align: right; font-family: var(--font-mono); max-width: 220px; }
+    .sum-val { font-weight: 600; text-align: right; font-variant-numeric: tabular-nums; max-width: 220px; }
     .sum-val.hl  { color: var(--color-text-brand-strong); }
     .sum-val.txt { font-family: var(--font-primary); }
 
@@ -998,7 +988,7 @@
     }
     @media (max-width: 767px) {
       .action-bar { padding: 12px 16px; }
-      .btn-back { padding: 0 18px; font-size: 15px; }
+      .btn-back { padding: 0 18px; font-size: 16px; }
       .btn-next { flex: 1; justify-content: center; font-size: 16px; }
     }
 
@@ -1068,12 +1058,12 @@
       display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
     }
     #demo-bar > span {
-      font-size: 11px; font-weight: 700; letter-spacing: 0.04em;
+      font-size: 12px; font-weight: 700; letter-spacing: 0.04em;
       color: var(--color-brand-tertiary-600); white-space: nowrap;
     }
     #demo-btns { display: flex; flex-wrap: wrap; gap: 5px; }
     .demo-btn {
-      font-size: 11px; padding: 3px 10px; border-radius: 10px;
+      font-size: 12px; padding: 4px 10px; border-radius: 10px;
       border: 1px solid var(--color-brand-tertiary-200);
       background: transparent; color: var(--color-brand-tertiary-600);
       cursor: pointer; font-family: var(--font-primary); transition: all 0.15s;
@@ -1085,159 +1075,6 @@
       color: var(--color-neutral-0); font-weight: 700;
     }
 
-    /* ═══════════════════════════════════════════════
-       帳戶總覽頁面 (Account Overview) — FreePay 5.0
-       ═══════════════════════════════════════════════ */
-    #page-overview {
-      min-height: 100vh;
-      background: var(--color-bg-subtle);
-    }
-    .ov-topbar {
-      background: var(--color-bg-base);
-      border-bottom: 1px solid var(--color-border-default);
-      height: 56px;
-      display: flex; align-items: center;
-      padding: 0 20px; gap: 10px;
-      position: sticky; top: 0; z-index: 200;
-    }
-    .ov-topbar-icon {
-      width: 36px; height: 36px; border-radius: 50%;
-      background: var(--color-bg-info-subtle);
-      display: flex; align-items: center; justify-content: center;
-      color: var(--color-brand-tertiary-400);
-      font-size: 16px; flex-shrink: 0;
-    }
-    .ov-topbar-title { flex: 1; font-size: 16px; font-weight: 700; color: var(--color-text-heading); }
-    .ov-topbar-user { font-size: 14px; color: var(--color-text-secondary); display: flex; align-items: center; gap: 5px; }
-    .ov-tab-bar {
-      background: var(--color-bg-base);
-      border-bottom: 1px solid var(--color-border-default);
-      display: flex; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none;
-    }
-    .ov-tab-bar::-webkit-scrollbar { display: none; }
-    .ov-tab {
-      padding: 13px 20px 11px; font-size: 14px; font-weight: 500;
-      color: var(--color-text-secondary); cursor: pointer;
-      white-space: nowrap; border-bottom: 2.5px solid transparent;
-      transition: all 0.15s; flex-shrink: 0;
-    }
-    .ov-tab:hover { color: var(--color-text-primary); }
-    .ov-tab.active { color: var(--color-text-brand-strong); border-bottom-color: var(--color-action-primary); font-weight: 700; }
-    .ov-body { max-width: 900px; margin: 0 auto; padding: 20px 20px 80px; }
-    #page-overview-list .ov-body { max-width: 1200px; }
-    @media (max-width: 640px) { .ov-body { padding: 0 0 80px; } }
-    .ov-tab-panel { display: none; }
-    .ov-tab-panel.active { display: block; animation: slide-in 0.2s ease both; }
-
-    /* ── Summary Header Card ── */
-    .ov-summary-card {
-      border-radius: 16px; overflow: hidden;
-      box-shadow: 0 2px 12px rgba(0,0,0,0.07), 0 1px 3px rgba(0,0,0,0.05);
-      margin-bottom: 0;
-      border: 1px solid var(--color-border-default);
-    }
-    @media (max-width: 640px) { .ov-summary-card { border-radius: 0; border-left: none; border-right: none; } }
-    .ov-summary-kyc { display: none; }
-    .sc-accent-bar {
-      height: 5px;
-      background: linear-gradient(90deg, var(--color-brand-primary-400) 0%, var(--color-brand-secondary-400) 100%);
-    }
-    .sc-body { background: var(--color-bg-base); padding: 20px 20px 16px; }
-    @media (max-width: 640px) { .sc-body { padding: 16px 16px 12px; } }
-    .sc-header { display: flex; align-items: center; margin-bottom: 14px; }
-    .sc-title { font-size: 14px; font-weight: 700; color: var(--color-text-secondary); letter-spacing: 0.03em; text-transform: uppercase; }
-    .sc-expandable { display: none; }
-    .sc-expanded .sc-expandable { display: table-row; }
-    .sc-expand-btn {
-      display: flex; align-items: center; justify-content: center; gap: 4px;
-      width: 100%; border: none; background: none; padding: 10px 0 2px;
-      font-size: 13px; font-weight: 500; color: var(--color-text-tertiary);
-      cursor: pointer; font-family: var(--font-primary); transition: color 0.15s;
-    }
-    .sc-expand-btn:hover { color: var(--color-text-secondary); }
-    .sc-expand-icon { font-size: 12px; transition: transform 0.2s; }
-    .sc-expanded .sc-expand-icon { transform: rotate(180deg); }
-    .sc-multiccy-table { width: 100%; border-collapse: collapse; }
-    .sc-ccy-col-header {
-      padding: 8px 10px 8px 0; font-size: 13px; font-weight: 700;
-      font-family: var(--font-mono); border-bottom: 2px solid; text-align: right;
-    }
-    .sc-ccy-col-header.twd { color: var(--color-brand-tertiary-800); border-color: var(--color-brand-tertiary-300); }
-    .sc-ccy-col-header.usd { color: var(--color-brand-secondary-800); border-color: var(--color-brand-secondary-400); }
-    .sc-ccy-col-header.label-cell { text-align: left; color: transparent; border-color: var(--color-border-default); }
-    .sc-ccy-badge {
-      display: inline-flex; align-items: center; gap: 5px; padding: 3px 10px;
-      border-radius: 4px; font-size: 13px; font-weight: 700; font-family: var(--font-mono);
-    }
-    .sc-ccy-badge.twd { background: var(--color-brand-tertiary-50); color: var(--color-brand-tertiary-800); }
-    .sc-ccy-badge.usd { background: var(--color-brand-secondary-50); color: var(--color-brand-secondary-800); }
-    .sc-row { border-bottom: 1px solid var(--color-border-default); }
-    .sc-row:last-child { border-bottom: none; }
-    .sc-row.hero-row td { background: var(--color-brand-primary-50); }
-    .sc-row-label { font-size: 13px; color: var(--color-text-secondary); padding: 10px 12px 10px 0; white-space: nowrap; width: 36%; }
-    .sc-row-val {
-      font-size: 16px; font-weight: 700; font-family: var(--font-mono);
-      color: var(--color-text-primary); text-align: right; padding: 10px 10px 10px 8px;
-    }
-    .sc-row-val.brand { color: var(--color-text-brand-strong); }
-    .sc-row-val.up    { color: var(--color-price-up); }
-    .sc-row-val.down  { color: var(--color-price-down); }
-    @media (max-width: 480px) {
-      .sc-multiccy-table, .sc-multiccy-table tbody, .sc-multiccy-table tr,
-      .sc-multiccy-table td, .sc-multiccy-table th { display: block; }
-      .sc-ccy-thead { display: none; }
-      .sc-row { display: grid; grid-template-columns: 1fr 1fr 1fr; align-items: center; }
-      .sc-row-label { padding: 10px 8px 10px 0; font-size: 12px; }
-      .sc-row-val { padding: 10px 0; text-align: right; font-size: 14px; }
-      .sc-row-val.twd-col::before { content: 'TWD'; display: block; font-size: 11px; font-weight: 400; font-family: var(--font-primary); color: var(--color-brand-tertiary-600); margin-bottom: 2px; }
-      .sc-row-val.usd-col::before { content: 'USD'; display: block; font-size: 11px; font-weight: 400; font-family: var(--font-primary); color: var(--color-brand-secondary-600); margin-bottom: 2px; }
-    }
-    /* Section divider */
-    .section-divider { display: flex; align-items: center; gap: 10px; padding: 16px 0 10px; }
-    .section-divider-label { font-size: 14px; font-weight: 700; color: var(--color-text-secondary); white-space: nowrap; }
-    .section-divider-line { flex: 1; height: 1px; background: var(--color-border-default); }
-    @media (max-width: 640px) { .section-divider { padding: 16px 16px 10px; } }
-
-    /* ── Holdings Section ── */
-    .ov-note { font-size: 14px; color: var(--color-text-secondary); padding: 8px 4px; margin-bottom: 12px; }
-    @media (max-width: 640px) { .ov-note { padding: 8px 16px; } }
-    .ov-fund-group { margin-bottom: 20px; }
-    .ov-fund-header {
-      background: var(--color-bg-base); border: 1px solid var(--color-border-default);
-      border-radius: 12px 12px 0 0; padding: 14px 16px;
-      display: flex; align-items: flex-start; gap: 10px;
-    }
-    @media (max-width: 640px) { .ov-fund-header { border-radius: 0; border-left: none; border-right: none; } }
-
-    .ov-fund-name { font-size: 16px; font-weight: 700; color: var(--color-text-heading); line-height: 1.4; }
-    .ov-fund-code { font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono); margin-top: 2px; }
-    .ov-fund-contract-count { margin-left: auto; font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; padding-top: 2px; }
-    .ov-contracts-list {
-      background: var(--color-bg-base); border: 1px solid var(--color-border-default);
-      border-top: none; border-radius: 0 0 12px 12px; overflow: hidden;
-    }
-    @media (max-width: 640px) { .ov-contracts-list { border-radius: 0; border-left: none; border-right: none; } }
-    .ov-contract-item {
-      padding: 16px 16px 16px 20px;
-      border-bottom: 1px solid var(--color-border-default);
-      position: relative;
-    }
-    .ov-contract-item:last-child { border-bottom: none; }
-    .ov-contract-item::before {
-      content: ''; position: absolute;
-      left: 0; top: 0; bottom: 0; width: 4px;
-    }
-    .ov-contract-item.ccy-twd::before { background: var(--color-brand-tertiary-300); }
-    .ov-contract-item.ccy-usd::before { background: var(--color-brand-secondary-400); }
-    .ov-contract-item.status-pending::before { opacity: 0.4; }
-    .ov-ct-header { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
-    .ov-ct-name-group { display: flex; flex-direction: column; flex: 1; min-width: 0; }
-    .ov-ct-alias-row { display: flex; align-items: center; gap: 4px; }
-    .ov-ct-name { font-size: 16px; font-weight: 700; color: var(--color-text-heading); }
-    .ov-ct-alias-btn { background: none; border: none; padding: 2px; cursor: pointer; color: var(--color-text-tertiary); font-size: 12px; line-height: 1; transition: color 0.15s; }
-    .ov-ct-alias-btn:hover { color: var(--color-text-secondary); }
-    .ct-alias-input { font-size: 16px; font-weight: 700; font-family: var(--font-primary); color: var(--color-text-heading); border: 1px solid var(--color-input-border-focus); border-radius: 4px; padding: 0 4px; outline: none; width: 140px; }
-    .ov-ct-id { font-size: 12px; font-family: var(--font-mono); color: var(--color-text-secondary); margin-top: 1px; }
     .ccy-badge { font-size: 12px; font-weight: 700; padding: 2px 7px; border-radius: 4px; font-family: var(--font-mono); }
     .ccy-badge.twd { background: var(--color-brand-tertiary-50); color: var(--color-brand-tertiary-800); }
     .ccy-badge.usd { background: var(--color-brand-secondary-50); color: var(--color-brand-secondary-800); }
@@ -1247,7 +1084,7 @@
       border-color: var(--color-border-default);
     }
     .addon-summary-note {
-      font-size: 13px;
+      font-size: 14px;
       color: var(--color-text-secondary);
       margin-top: 8px;
       display: flex;
@@ -1263,169 +1100,9 @@
       word-break: break-word;
     }
     .addon-plan-id {
-      font-size: 13px;
+      font-size: 14px;
       font-weight: 500;
       color: var(--color-text-secondary);
-    }
-    .ov-status-badge { font-size: 12px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
-    .ov-s-normal  { background: var(--color-bg-info-subtle); color: var(--color-brand-tertiary-600); }
-    .ov-s-pending { background: var(--color-bg-warning-subtle); color: var(--color-brand-secondary-800); }
-    .ov-s-redeem  { background: var(--color-bg-muted); color: var(--color-text-secondary); }
-    .ov-ct-stats { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 0; margin-bottom: 10px; border: 1px solid var(--color-border-default); border-radius: 8px; overflow: hidden; }
-    .ov-ct-stat { padding: 8px 10px; border-right: 1px solid var(--color-border-default); }
-    .ov-ct-stat:last-child { border-right: none; }
-    .ov-ct-stat.hero { background: var(--color-bg-brand-subtle); }
-    .ov-ct-stat-label { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 2px; }
-    .ov-ct-stat-val { font-size: 16px; font-weight: 700; font-family: var(--font-mono); color: var(--color-text-primary); }
-    .ov-ct-stat-val.up      { color: var(--color-price-up); }
-    .ov-ct-stat-val.down    { color: var(--color-price-down); }
-    .ov-ct-stat-val.neutral { color: var(--color-text-secondary); font-weight: 500; }
-    .ov-ct-stat-val.brand   { color: var(--color-action-primary); }
-    .ov-ct-stat-sub { font-size: 13px; color: var(--color-text-secondary); margin-top: 1px; }
-    .ov-threshold {
-      display: flex; align-items: flex-start; gap: 5px;
-      padding: 7px 10px; border-radius: 6px;
-      font-size: 14px; font-weight: 500; margin-top: 8px; line-height: 1.55;
-    }
-    .ov-threshold i { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
-    .th-none           { background: var(--color-bg-muted); color: var(--color-text-secondary); }
-    .th-protect        { background: var(--color-bg-brand-subtle); color: var(--color-text-brand-strong); }
-    .th-unlock-pending { background: var(--color-bg-warning-subtle); color: var(--color-brand-secondary-800); }
-    .th-unlock-active  { background: var(--color-bg-info-subtle); color: var(--color-brand-tertiary-800); }
-    .ov-ct-actions { display: flex; gap: 6px; margin-top: 12px; flex-wrap: wrap; }
-    .ov-act-btn {
-      font-size: 14px; padding: 6px 13px; border-radius: 8px;
-      border: 1.5px solid var(--color-action-ghost-border);
-      background: transparent; color: var(--color-text-secondary);
-      cursor: pointer; font-family: var(--font-primary); font-weight: 500;
-      transition: all 0.15s; display: flex; align-items: center; gap: 4px;
-    }
-    .ov-act-btn:hover { border-color: var(--color-action-ghost-border-hover); background: var(--color-action-ghost-bg-hover); color: var(--color-text-primary); }
-    .ov-act-btn.primary { background: var(--color-action-primary); border-color: var(--color-action-primary); color: var(--color-text-on-brand); }
-    .ov-act-btn.primary:hover { background: var(--color-action-primary-hover); border-color: var(--color-action-primary-hover); }
-    .ov-act-btn.disabled { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
-    .ov-placeholder { text-align: center; padding: 60px 20px; color: var(--color-text-secondary); }
-    .ov-placeholder i { font-size: 36px; color: var(--color-neutral-250); display: block; margin-bottom: 10px; }
-    .ov-placeholder p { font-size: 14px; }
-
-    /* ─── Overview List Layout ─── */
-    .ovl-fund-group { margin-bottom: 10px; border: 1px solid var(--color-border-default); border-radius: 12px; overflow: hidden; }
-    @media (max-width: 640px) { .ovl-fund-group { border-radius: 0; border-left: none; border-right: none; } }
-    .ovl-header { display: flex; flex-direction: column; padding: 14px 16px 0; cursor: pointer; background: var(--color-bg-base); transition: background 0.15s; user-select: none; }
-    .ovl-header:hover { background: var(--color-bg-subtle); }
-    .ovl-header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
-    .ovl-header-info { flex: 1; min-width: 0; }
-    .ovl-header-name { font-size: 16px; font-weight: 700; color: var(--color-text-heading); line-height: 1.4; }
-    .ovl-header-code { font-size: 12px; color: var(--color-text-secondary); font-family: var(--font-mono); margin-top: 4px; display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .ovl-header-stats { display: flex; gap: 8px; flex-wrap: nowrap; padding-bottom: 14px; }
-    @media (max-width: 640px) { .ovl-header-stats { flex-wrap: wrap; } }
-    .ovl-stat-block { flex: 1; min-width: 0; background: var(--color-bg-base); border: 1px solid var(--color-border-default); border-radius: 8px; padding: 8px 12px; }
-    .ovl-header:hover .ovl-stat-block { background: var(--color-neutral-0); }
-    .ovl-stat-label-sm { font-size: 12px; color: var(--color-text-secondary); margin-bottom: 3px; }
-    .ovl-stat-value-sm { font-size: 14px; font-weight: 700; font-family: var(--font-mono); color: var(--color-text-primary); }
-    .ovl-stat-value-sm.up    { color: var(--color-price-up); }
-    .ovl-stat-value-sm.down  { color: var(--color-price-down); }
-    .ovl-stat-value-sm.brand { color: var(--color-action-primary); }
-    .ovl-header-right { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .ovl-count { font-size: 12px; color: var(--color-text-secondary); white-space: nowrap; }
-    .ovl-chevron { font-size: 13px; color: var(--color-text-tertiary); transition: transform 0.2s; }
-    .ovl-fund-group.open .ovl-chevron { transform: rotate(180deg); }
-
-    /* Table — 單一 grid 容器確保欄位對齊 */
-    .ovl-ct-list { border-top: 1px solid var(--color-border-default); overflow-x: auto; }
-    /* 契約固定 200px、操作固定 auto、中間 5 欄均分剩餘空間 */
-    .ovl-grid-table {
-      display: grid;
-      grid-template-columns: 200px repeat(5, 1fr) auto;
-      min-width: 760px;
-    }
-    /* Header */
-    .ovl-th {
-      padding: 7px 8px; background: var(--color-bg-subtle);
-      font-size: 14px; color: var(--color-text-secondary); font-weight: 500;
-      border-bottom: 1px solid var(--color-border-default);
-      display: flex; align-items: center; justify-content: center;
-      text-align: center;
-    }
-    .ovl-th:first-child { justify-content: flex-start; text-align: left; padding-left: 20px; }
-    /* Data cells */
-    .ovl-td {
-      padding: 10px 8px; border-top: 1px solid var(--color-border-default);
-      display: flex; flex-direction: column; justify-content: center; align-items: center;
-    }
-    .ovl-td:first-child { align-items: flex-start; padding-left: 20px; }
-    .ovl-td.ccy-twd { border-left: 3px solid var(--color-brand-tertiary-300); padding-left: 17px; align-items: flex-start; }
-    .ovl-td.ccy-usd { border-left: 3px solid var(--color-brand-secondary-400); padding-left: 17px; align-items: flex-start; }
-    .ovl-td.pending  { opacity: 0.72; }
-    /* Cell content */
-    .ovl-row-alias { font-size: 16px; font-weight: 600; color: var(--color-text-heading); display: flex; align-items: center; gap: 4px; }
-    .ovl-row-meta { display: flex; gap: 4px; align-items: center; margin-top: 3px; flex-wrap: wrap; }
-    .ovl-row-id { font-size: 12px; font-family: var(--font-mono); color: var(--color-text-secondary); }
-    .ovl-val { font-size: 16px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; color: var(--color-text-primary); }
-    .ovl-val-sub { font-size: 12px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; margin-top: 1px; }
-    .ovl-val.up, .ovl-val-sub.up     { color: var(--color-price-up); }
-    .ovl-val.down, .ovl-val-sub.down  { color: var(--color-price-down); }
-    .ovl-val.neutral, .ovl-val-sub.neutral { color: var(--color-text-secondary); font-weight: 400; }
-    .ovl-pay-val { font-size: 16px; font-family: var(--font-mono); font-variant-numeric: tabular-nums; font-weight: 600; color: var(--color-action-primary); }
-    .ovl-pay-sub { font-size: 12px; color: var(--color-text-secondary); margin-top: 1px; }
-    .ovl-threshold-text { font-size: 13px; line-height: 1.5; text-align: center; }
-    .ovl-threshold-text.protect    { color: var(--color-brand-primary-600); }
-    .ovl-threshold-text.pending-th { color: var(--color-brand-secondary-800); }
-    .ovl-threshold-text.none       { color: var(--color-text-secondary); }
-    .ovl-act-group { display: flex; gap: 4px; flex-wrap: wrap; }
-    .ovl-act {
-      font-size: 14px; padding: 4px 9px; border-radius: 6px;
-      border: 1px solid var(--color-action-ghost-border);
-      background: transparent; color: var(--color-text-secondary);
-      cursor: pointer; font-family: var(--font-primary); white-space: nowrap;
-      transition: all 0.15s;
-    }
-    .ovl-act:hover { border-color: var(--color-action-ghost-border-hover); background: var(--color-action-ghost-bg-hover); color: var(--color-text-primary); }
-    .ovl-act.primary { background: var(--color-action-primary); border-color: var(--color-action-primary); color: var(--color-text-on-brand); }
-    .ovl-act.primary:hover { background: var(--color-action-primary-hover); border-color: var(--color-action-primary-hover); }
-    .ovl-act.disabled { opacity: 0.38; cursor: not-allowed; pointer-events: none; }
-
-    /* 桌機：row wrapper 透明，子元素直接成為 grid items */
-    .ovl-row { display: contents; }
-
-    @media (max-width: 640px) {
-      /* 15px 左右 padding，與申購流程 .block 一致 */
-      #page-overview-list .ov-body { padding: 0 15px 80px; }
-      .ovl-fund-group { border-radius: 8px; }
-      /* grid 退場，讓 row wrapper 接管佈局 */
-      .ovl-grid-table { display: block; min-width: 0; }
-      .ovl-th { display: none; }
-      /* 每筆 row 成為獨立 block，以分隔線與下一筆區隔 */
-      .ovl-row {
-        display: block;
-        border-bottom: 6px solid var(--color-bg-subtle);
-      }
-      .ovl-row:last-child { border-bottom: none; }
-      /* 每個 cell 橫向 label + value */
-      .ovl-td {
-        display: flex; flex-direction: row; justify-content: space-between; align-items: center;
-        border-top: none; border-left: none !important;
-        border-bottom: 1px solid var(--color-border-default);
-        padding: 8px 16px;
-      }
-      .ovl-td::before {
-        content: attr(data-label); font-size: 12px; color: var(--color-text-secondary);
-        flex-shrink: 0; margin-right: 8px; min-width: 80px;
-      }
-      /* 契約名稱格：block，無 label prefix */
-      .ovl-td:first-child {
-        display: block; padding: 12px 16px 8px 15px;
-        border-bottom: none; align-items: flex-start;
-      }
-      .ovl-td:first-child::before { display: none; }
-      .ovl-td:first-child.ccy-twd { border-left: 3px solid var(--color-brand-tertiary-300) !important; }
-      .ovl-td:first-child.ccy-usd { border-left: 3px solid var(--color-brand-secondary-400) !important; }
-      /* 操作按鈕格：左對齊，無 label，無底線 */
-      .ovl-td:last-child {
-        justify-content: flex-start; flex-wrap: wrap; gap: 6px;
-        padding: 8px 16px 12px; border-bottom: none;
-      }
-      .ovl-td:last-child::before { display: none; }
     }
     /* EC afternoon restore */
     #page-overview-ec { min-height: 100vh; background: #fff; color: #1a1a1a; font-family: 'Noto Sans TC', 'Roboto', sans-serif; }
@@ -1433,7 +1110,7 @@
     .ecov-shell { width: 1200px; margin: 0 auto; padding: 10px 0 80px; background: #fff; display: flex; flex-direction: column; gap: 40px; }
     .ecov-tabs { min-height: 57px; border-bottom: 1px solid #c4c4c4; display: flex; align-items: center; justify-content: space-between; }
     .ecov-tab-list { display: flex; align-items: center; }
-    .ecov-tab { padding: 20px 40px; border-bottom: 5px solid transparent; color: #2b2b2b; font-size: 19px; line-height: 19px; cursor: pointer; white-space: nowrap; }
+    .ecov-tab { padding: 20px 40px; border-bottom: 5px solid transparent; color: #2b2b2b; font-size: 20px; line-height: 20px; cursor: pointer; white-space: nowrap; }
     .ecov-tab.active { border-bottom-color: #f04d29; }
     .ecov-buy { border: 0; border-radius: 32px; background: #faa634; color: #fff; cursor: pointer; font-size: 16px; padding: 8px 32px; }
     .ecov-panel, .ecov-section { width: 1200px; display: flex; flex-direction: column; gap: 40px; }
@@ -1457,7 +1134,7 @@
     .ecov-fund-main { display: grid; grid-template-columns: 300px 1fr; gap: 20px; align-items: center; padding: 24px 0; border-bottom: 1px solid #ccc; }
     .ecov-fund-name { padding-left: 20px; color: #808080; font-size: 16px; line-height: 1.5; min-width: 0; }
     .ecov-fund-name strong { display: block; color: #1a1a1a; font-weight: 400; }
-    .ecov-toggle-btn { width: 100%; border: 1px solid #ccc; border-radius: 8px; background: #fff; box-shadow: 0 4px 2px rgba(0,0,0,.25); color: #1a1a1a; margin-top: -1px; padding: 0; overflow: hidden; }
+    .ecov-toggle-btn { width: 100%; border: 1px solid #ccc; border-top: 0; border-radius: 0 0 8px 8px; background: #fff; box-shadow: 0 4px 2px rgba(0,0,0,.25); color: #1a1a1a; margin-top: 0; padding: 0; overflow: hidden; }
     .ecov-toggle-head { min-height: 39px; display: flex; align-items: center; justify-content: center; gap: 8px; padding: 10px 20px; cursor: pointer; }
     .ecov-chevron { width: 16px; height: 16px; position: relative; display: inline-block; }
     .ecov-chevron::before { content: ""; position: absolute; left: 3px; top: 4px; width: 9px; height: 9px; border-right: 1.5px solid #1a1a1a; border-bottom: 1.5px solid #1a1a1a; transform: rotate(45deg); transform-origin: center; }
@@ -1475,35 +1152,35 @@
     .ecov-actions { display: flex; align-items: center; gap: 8px; }
     .ecov-action { border: 1px solid #808080; border-radius: 4px; background: #fff; color: #1a1a1a; cursor: pointer; font-size: 14px; padding: 8px 12px; white-space: nowrap; }
     .ecov-action.primary { border-color: #f04d29; background: #f04d29; color: #fff; }
-    .order-demo-root, .ec-order-root { display: flex; flex-direction: column; gap: 20px; width: 100%; }
-    .ovl-order-filter, .ec-order-filter { display: flex; align-items: center; gap: 12px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
-    .ovl-order-filter-label, .ec-order-filter-label { color: #808080; font-size: 16px; white-space: nowrap; }
-    .ovl-order-chip-row, .ec-order-chip-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-    .ovl-order-chip, .ec-order-chip { min-height: 36px; padding: 8px 16px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a1a; cursor: pointer; font-size: 16px; }
-    .ovl-order-chip.on, .ec-order-chip.on { border-color: #faa634; background: #faa634; color: #fff; }
-    .ovl-order-section, .ec-order-section { display: flex; flex-direction: column; border: 1px solid #ccc; border-radius: 8px; background: #fff; overflow: hidden; }
-    .ovl-order-section-head, .ec-order-section-head { min-height: 56px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; background: #f2f2f2; border-bottom: 1px solid #ccc; }
-    .ovl-order-section-title, .ec-order-section-title { color: #808080; font-size: 18px; }
-    .ovl-order-count, .ec-order-count { color: #808080; font-size: 14px; }
-    .ovl-order-table, .ec-order-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-    .ovl-order-table th, .ovl-order-table td, .ec-order-table th, .ec-order-table td { border-bottom: 1px solid #ccc; padding: 14px 12px; text-align: left; vertical-align: top; font-size: 14px; font-weight: 400; }
-    .ovl-order-table th, .ec-order-table th { background: #f2f2f2; color: #808080; }
-    .ovl-order-table tbody tr:nth-child(even) td, .ec-order-table tbody tr:nth-child(even) td { background: #f8f8f8; }
-    .ovl-order-table .num, .ec-order-table .num { text-align: right; font-variant-numeric: tabular-nums; }
-    .ovl-order-main, .ec-order-main { color: #1a1a1a; }
-    .ovl-order-sub, .ec-order-sub { color: #808080; font-size: 12px; margin-top: 4px; }
-    .ovl-order-cancel-bar, .ec-order-cancel-bar { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
-    .ovl-order-pwd-row, .ec-order-pwd-row { display: flex; align-items: center; gap: 10px; }
-    .ovl-order-pwd-label, .ec-order-pwd-label { color: #808080; white-space: nowrap; }
-    .ovl-order-pwd-input { height: 38px; border: 1px solid #ccc; border-radius: 6px; padding: 8px 36px 8px 10px; min-width: 180px; }
-    .ovl-order-actions, .ec-order-actions { display: flex; gap: 8px; justify-content: flex-end; }
-    .ovl-order-btn, .ec-order-btn { border: 1px solid #808080; border-radius: 4px; background: #fff; color: #1a1a1a; cursor: pointer; padding: 8px 16px; }
-    .ovl-order-btn.primary, .ec-order-btn.primary { border-color: #f04d29; background: #f04d29; color: #fff; }
-    .ovl-order-btn:disabled, .ec-order-btn:disabled { opacity: .38; cursor: not-allowed; }
+    .ec-order-root { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+    .ec-order-filter { display: flex; align-items: center; gap: 12px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
+    .ec-order-filter-label { color: #808080; font-size: 16px; white-space: nowrap; }
+    .ec-order-chip-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .ec-order-chip { min-height: 36px; padding: 8px 16px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a1a; cursor: pointer; font-size: 16px; }
+    .ec-order-chip.on { border-color: #faa634; background: #faa634; color: #fff; }
+    .ec-order-section { display: flex; flex-direction: column; border: 1px solid #ccc; border-radius: 8px; background: #fff; overflow: hidden; }
+    .ec-order-section-head { min-height: 56px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; background: #f2f2f2; border-bottom: 1px solid #ccc; }
+    .ec-order-section-title { color: #808080; font-size: 18px; }
+    .ec-order-count { color: #808080; font-size: 14px; }
+    .ec-order-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .ec-order-table th, .ec-order-table td { border-bottom: 1px solid #ccc; padding: 14px 12px; text-align: left; vertical-align: top; font-size: 14px; font-weight: 400; }
+    .ec-order-table th { background: #f2f2f2; color: #808080; }
+    .ec-order-table tbody tr:nth-child(even) td { background: #f8f8f8; }
+    .ec-order-table .num { text-align: right; font-variant-numeric: tabular-nums; }
+    .ec-order-main { color: #1a1a1a; }
+    .ec-order-sub { color: #808080; font-size: 12px; margin-top: 4px; }
+    .ec-order-cancel-bar { display: grid; grid-template-columns: 1fr auto; gap: 16px; align-items: center; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
+    .ec-order-pwd-row { display: flex; align-items: center; gap: 10px; }
+    .ec-order-pwd-label { color: #808080; white-space: nowrap; }
+    .ec-order-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .ec-order-btn { border: 1px solid #808080; border-radius: 4px; background: #fff; color: #1a1a1a; cursor: pointer; padding: 8px 16px; }
+    .ec-order-btn.primary { border-color: #f04d29; background: #f04d29; color: #fff; }
+    .ec-order-btn:disabled { opacity: .38; cursor: not-allowed; }
     .ec-order-diff-new.changed { color: #F04D29; }
     #page-overview-ec .ec-order-root { gap: 40px; }
-    #page-overview-ec .ec-order-filter { padding: 0; border: 0; border-radius: 0; background: #fff; }
-    #page-overview-ec .ec-order-chip { min-height: 36px; padding: 8px 16px; border-radius: 8px; font-size: 16px; line-height: normal; }
+    #page-overview-ec .ec-order-filter { align-items: center; gap: 10px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
+    #page-overview-ec .ec-order-filter-label { color: #808080; font-size: 14px; white-space: nowrap; }
+    #page-overview-ec .ec-order-chip { min-height: 32px; padding: 7px 14px; border-radius: 8px; font-size: 14px; line-height: 1.2; }
     #page-overview-ec .ec-order-chip:hover { background: #f8f8f8; color: #1a1a1a; }
     #page-overview-ec .ec-order-chip.on,
     #page-overview-ec .ec-order-chip.on:hover { border-color: #faa634; background: #faa634; color: #fff; }
@@ -1533,8 +1210,8 @@
     #page-overview-ec .ec-order-table .num { text-align: center; }
     #page-overview-ec .ec-order-check { width: 18px; height: 18px; accent-color: #f04d29; cursor: pointer; }
     #page-overview-ec .ec-order-main { color: #1a1a1a; font-size: 16px; line-height: 1.45; }
-    #page-overview-ec .ec-order-sub { color: #808080; font-size: 13px; line-height: 1.45; }
-    #page-overview-ec .ec-order-code { color: #808080; font-size: 13px; line-height: 1.45; }
+    #page-overview-ec .ec-order-sub { color: #808080; font-size: 14px; line-height: 1.45; }
+    #page-overview-ec .ec-order-code { color: #808080; font-size: 14px; line-height: 1.45; }
     #page-overview-ec .ec-order-name { margin-top: 4px; color: #1a1a1a; font-size: 16px; line-height: 1.45; }
     #page-overview-ec .ec-order-cancel-bar { margin-top: -20px; padding: 20px 0 0; border: 0; border-radius: 0; background: #fff; grid-template-columns: minmax(0, 1fr); justify-items: center; }
     #page-overview-ec .ec-order-pwd-row { justify-content: center; }
@@ -1544,6 +1221,41 @@
     #page-overview-ec .ec-order-btn:hover:not(:disabled) { background: #f8f8f8; color: #1a1a1a; }
     #page-overview-ec .ec-order-btn.primary,
     #page-overview-ec .ec-order-btn.primary:hover:not(:disabled) { border-color: #f04d29; background: #f04d29; color: #fff; }
+    .ecov-down { color: #00a05a !important; }
+    #page-overview-ec .ec-profit-root { display: flex; flex-direction: column; gap: 40px; width: 100%; }
+    #page-overview-ec .ec-profit-filter { display: flex; flex-direction: column; gap: 12px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
+    #page-overview-ec .ec-profit-filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+    #page-overview-ec .ec-profit-filter-row + .ec-profit-filter-row { padding-top: 12px; border-top: 1px solid #ccc; }
+    #page-overview-ec .ec-profit-filter-label { color: #808080; font-size: 14px; white-space: nowrap; }
+    #page-overview-ec .ec-profit-date-range { display: inline-flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    #page-overview-ec .ec-profit-date-input { height: 36px; min-width: 144px; border: 1px solid #ccc; border-radius: 8px; padding: 6px 10px; color: #1a1a1a; background: #fff; font: inherit; font-size: 14px; }
+    #page-overview-ec .ec-profit-date-input:focus { outline: none; border-color: #faa634; box-shadow: 0 0 0 2px rgba(250,166,52,.16); }
+    #page-overview-ec .ec-profit-date-sep { color: #808080; font-size: 14px; }
+    #page-overview-ec .ec-profit-section { display: flex; flex-direction: column; gap: 12px; }
+    #page-overview-ec .ec-profit-section-head { display: flex; align-items: center; justify-content: space-between; }
+    #page-overview-ec .ec-profit-section-title { color: #1a1a1a; font-size: 20px; line-height: normal; font-weight: 400; }
+    #page-overview-ec .ec-profit-count { color: #808080; font-size: 14px; line-height: normal; }
+    #page-overview-ec .ec-profit-table { width: 100%; border-collapse: collapse; table-layout: fixed; background: #fff; }
+    #page-overview-ec .ec-profit-table th,
+    #page-overview-ec .ec-profit-table td { height: 60px; padding: 12px 8px; border-bottom: 1px solid #ccc; text-align: center; vertical-align: middle; color: #1a1a1a; font-size: 16px; line-height: normal; font-weight: 400; }
+    #page-overview-ec .ec-profit-table th { background: #f2f2f2; border-bottom: 2px solid #ccc; color: #808080; }
+    #page-overview-ec .ec-profit-table tbody tr:nth-child(even) td { background: #f8f8f8; }
+    #page-overview-ec .ec-profit-table .cell-fund,
+    #page-overview-ec .ec-profit-table th.cell-fund { width: 220px; text-align: left; }
+    #page-overview-ec .ec-profit-table .cell-date,
+    #page-overview-ec .ec-profit-table th.cell-date { width: 128px; }
+    #page-overview-ec .ec-profit-table .cell-currency,
+    #page-overview-ec .ec-profit-table th.cell-currency { width: 96px; }
+    #page-overview-ec .ec-profit-table .cell-pay,
+    #page-overview-ec .ec-profit-table th.cell-pay { width: 150px; }
+    #page-overview-ec .ec-profit-table .cell-amount,
+    #page-overview-ec .ec-profit-table th.cell-amount { width: 120px; }
+    #page-overview-ec .ec-profit-code { color: #808080; font-size: 14px; line-height: 1.45; }
+    #page-overview-ec .ec-profit-name { margin-top: 4px; color: #1a1a1a; font-size: 16px; line-height: 1.45; }
+    #page-overview-ec .ec-profit-sub { margin-top: 4px; color: #808080; font-size: 14px; line-height: 1.45; }
+    #page-overview-ec .ec-profit-info { width: 20px; height: 20px; margin-left: 4px; border: 0; background: transparent; color: #808080; cursor: pointer; padding: 0; display: inline-flex; align-items: center; justify-content: center; vertical-align: middle; }
+    #page-overview-ec .ec-profit-info:hover { color: #1a1a1a; }
+    #page-overview-ec .ec-profit-note { padding-top: 12px; border-top: 1px dashed #ccc; color: #808080; font-size: 14px; line-height: 1.8; }
     .detail-modal { position: fixed; inset: 0; z-index: 2000; display: none; align-items: flex-start; justify-content: center; overflow: auto; font-family: 'Noto Sans TC', 'Roboto', sans-serif; color: #1a1a1a; }
     .detail-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,.35); }
     .detail-panel { position: relative; z-index: 1; width: min(1200px, calc(100vw - 64px)); max-height: calc(100vh - 64px); margin: 32px auto; display: flex; flex-direction: column; overflow: hidden; border: 1px solid #ccc; border-radius: 8px; background: #fff; box-shadow: 0 4px 2px rgba(0,0,0,.25); }
@@ -1559,13 +1271,13 @@
     .detail-fp-edit:hover { color: #1a1a1a; }
     .detail-fp-input { height: 28px; min-width: 120px; border: 1px solid #ccc; border-radius: 6px; padding: 3px 8px; color: #1a1a1a; font: inherit; }
     .detail-tabs { min-height: 57px; display: flex; align-items: center; padding: 0 20px; border-bottom: 1px solid #c4c4c4; background: #fff; }
-    .detail-tab { padding: 20px 40px; border: 0; border-bottom: 5px solid transparent; background: #fff; color: #2b2b2b; cursor: pointer; font-size: 19px; line-height: 19px; font-weight: 400; }
+    .detail-tab { padding: 20px 40px; border: 0; border-bottom: 5px solid transparent; background: #fff; color: #2b2b2b; cursor: pointer; font-size: 20px; line-height: 20px; font-weight: 400; }
     .detail-tab.on { border-bottom-color: #f04d29; color: #2b2b2b; }
     .detail-body { padding: 20px; overflow: auto; background: #fff; }
     .detail-section { display: flex; flex-direction: column; gap: 12px; margin-bottom: 16px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
     .detail-filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
     .detail-filter-row + .detail-filter-row { padding-top: 12px; border-top: 1px solid #ccc; }
-    .detail-filter-label, .detail-list-count { color: #808080; font-size: 13px; white-space: nowrap; }
+    .detail-filter-label, .detail-list-count { color: #808080; font-size: 14px; white-space: nowrap; }
     .detail-chips { display: flex; flex-wrap: wrap; gap: 8px; }
     .detail-chip { min-height: 32px; padding: 7px 14px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a1a; cursor: pointer; font-size: 14px; line-height: 1.2; font-weight: 400; }
     .detail-chip:hover:not(:disabled) { background: #f8f8f8; }
@@ -1573,7 +1285,7 @@
     .detail-chip.on:hover:not(:disabled) { border-color: #faa634; background: #faa634; color: #fff; }
     .detail-chip:disabled { opacity: .45; cursor: not-allowed; }
     .detail-date-range { display: inline-flex; align-items: center; gap: 6px; flex-wrap: wrap; }
-    .detail-date-input { height: 32px; min-width: 136px; border: 1px solid #ccc; border-radius: 8px; padding: 4px 9px; color: #1a1a1a; background: #fff; font: inherit; font-size: 13px; font-variant-numeric: tabular-nums; }
+    .detail-date-input { height: 32px; min-width: 136px; border: 1px solid #ccc; border-radius: 8px; padding: 4px 9px; color: #1a1a1a; background: #fff; font: inherit; font-size: 14px; font-variant-numeric: tabular-nums; }
     .detail-date-input:focus { outline: none; border-color: #faa634; box-shadow: 0 0 0 2px rgba(250,166,52,.16); }
     .detail-date-sep { color: #808080; font-size: 12px; }
     .detail-list-title { margin: 20px 0; display: flex; align-items: center; justify-content: space-between; color: #1a1a1a; font-size: 20px; line-height: 1.4; font-weight: 400; }
@@ -1585,17 +1297,17 @@
     .detail-change-cell { line-height: 1.6; }
     .detail-old { color: #808080; }
     .detail-new.changed, .diff-new.changed { color: #F04D29; }
-    .detail-row-time { margin-top: 4px; color: #808080; font-size: 13px; line-height: 1.4; }
+    .detail-row-time { margin-top: 4px; color: #808080; font-size: 14px; line-height: 1.4; }
     .detail-empty { min-height: 120px; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px dashed #ccc; border-radius: 8px; color: #808080; background: #fff; gap: 6px; }
     .detail-pager { display: flex; justify-content: flex-end; align-items: center; gap: 8px; margin-top: 16px; }
     .detail-pager button { min-width: 34px; height: 34px; border: 1px solid #ccc; border-radius: 8px; background: #fff; color: #1a1a1a; cursor: pointer; }
     .detail-pager button.on { border-color: #faa634; background: #faa634; color: #fff; }
     .detail-pager button:disabled { opacity: .38; cursor: not-allowed; }
-    .detail-notice { margin-top: 20px; padding-top: 12px; border-top: 1px dashed #ccc; color: #808080; font-size: 13px; line-height: 1.8; }
+    .detail-notice { margin-top: 20px; padding-top: 12px; border-top: 1px dashed #ccc; color: #808080; font-size: 14px; line-height: 1.8; }
     .detail-notice strong { display: block; margin-bottom: 4px; color: #808080; font-weight: 400; }
     @media (max-width: 768px) {
       .detail-panel { width: 100%; max-height: 100vh; margin: 0; border-radius: 0; }
-      .detail-tab { padding: 18px 20px; font-size: 17px; }
+      .detail-tab { padding: 18px 20px; font-size: 18px; }
     }
     .ecov-empty { min-height: 180px; border: 1px solid #ccc; border-radius: 8px; background: #fff; display: flex; align-items: center; justify-content: center; color: #808080; font-size: 16px; }
   </style>
@@ -1676,226 +1388,11 @@
           <div class="mobile-fund-bar-name" id="mobile-fund-name">施羅德環球收益基金 A (Acc.)</div>
         </div>
 
-        <!-- ═══ SCREEN 1：幣別選擇 ═══ -->
-        <div id="s-ccy" class="screen active">
-          <div class="block">
-            <div class="block-header">
-              <div class="block-title">選擇申購幣別</div>
-            </div>
-            <div class="ccy-grid" style="margin-bottom:16px">
-              <div class="ccy-card" id="card-twd" onclick="pickCcy('TWD')">
-                <div class="ccy-symbol">TWD</div>
-                <div class="ccy-name">新台幣</div>
-                <div class="ccy-check"><i class="bi bi-check"></i></div>
-              </div>
-              <div class="ccy-card on" id="card-usd" onclick="pickCcy('USD')">
-                <div class="ccy-symbol">USD</div>
-                <div class="ccy-name">美元</div>
-                <div class="ccy-check"><i class="bi bi-check"></i></div>
-              </div>
-            </div>
-          </div>
+        <!-- ═══ SCREEN 1：幣別選擇 / 現有交易（內容由 renderCcyScreen() 動態渲染） ═══ -->
+        <div id="s-ccy" class="screen active"></div>
 
-          <div class="block">
-            <div class="block-header">
-              <div class="block-title">現有交易</div>
-              <span style="font-size:12px;color:var(--color-text-tertiary);font-weight:400;margin-left:2px">此基金目前有 2 份</span>
-            </div>
-            <p style="font-size:14px;color:var(--color-text-secondary);margin-bottom:16px">
-              選擇加碼其中一筆，或新申購以獨立管理提領設定。
-            </p>
-            <div class="contracts-grid">
-              <div class="contract-card" id="cc-fp100123" onclick="pickContract('fp100123',this)">
-                <div class="cc-check"><i class="bi bi-check" style="font-size:12px"></i></div>
-                <div class="cc-top">
-                  <div>
-                    <div class="cc-id">20240315</div>
-                    <div class="cc-sub">加碼至此筆</div>
-                  </div>
-                  <span class="status-badge s-ok">正常</span>
-                </div>
-                <div class="cc-row"><span>幣別</span><strong>TWD</strong></div>
-                <div class="cc-row"><span>約當市值</span><strong>NT$128,500</strong></div>
-                <div class="cc-row"><span>每月 Pay</span><strong>NT$1,000</strong></div>
-                <div class="cc-row"><span>停 Pay 門檻</span><strong style="font-family:var(--font-primary)">跌 20% 停</strong></div>
-              </div>
-            </div>
-
-            <div class="new-contract-btn on" id="cc-new" onclick="pickContract('new',this)">
-              <div class="ncb-icon"><i class="bi bi-plus-lg"></i></div>
-              <div>
-                <div class="ncb-title">新申購</div>
-                <div class="ncb-sub">以 <span id="new-ccy-label" style="font-family:var(--font-mono);font-weight:700">USD</span> 新申購，各筆的提領金額、停 Pay 門檻完全獨立，互不影響。</div>
-              </div>
-            </div>
-
-            <div class="info-box" style="margin-top:14px">
-              <i class="bi bi-layers-fill"></i>
-              <span>自由 Pay 5.0 支援同一基金持有多筆。各筆的提領金額、停 Pay 門檻完全獨立，互不影響。</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- ═══ SCREEN 3：申購設定 ═══ -->
-        <div id="s-settings" class="screen">
-          <!-- 申購金額 -->
-          <div class="block">
-            <div class="block-header">
-              <div class="block-title">單筆申購金額</div>
-            </div>
-            <div class="form-group">
-              <label class="form-label">金額 <span class="req">*</span></label>
-              <div class="input-wrap">
-                <span class="input-prefix">USD</span>
-                <input type="number" class="form-input prefixed" id="inp-amount"
-                  placeholder="最低 3,500" oninput="calcRate(); calcAmt()">
-              </div>
-              <div class="helper">
-                <span>USD 最低申購 3,500・加碼最低 100</span>
-              </div>
-              <div class="helper-err" id="amt-err" style="display:none">
-                <i class="bi bi-exclamation-circle"></i> <span id="amt-err-msg"></span>
-              </div>
-            </div>
-          </div>
-
-          <!-- Pay 設定 -->
-          <div class="block">
-            <div class="block-header">
-              <div class="block-title">Pay 出設定</div>
-            </div>
-
-            <div class="form-group">
-              <label class="form-label">
-                Pay 出方式
-                <i class="bi bi-info-circle hint-icon" onclick="toggleHint('hint-paymode')" style="font-size:13px;color:var(--color-text-tertiary);margin-left:4px;vertical-align:middle"></i>
-              </label>
-              <div class="hint-panel" id="hint-paymode" style="display:none">
-                <strong>依金額</strong>：每月固定提領設定之金額。<br>
-                <strong>依比例</strong>：每月固定按最新市值之年化自由 Pay 率（上限 15%）提領。<br><br>
-                提領單位數以贖回前一日的最新淨值估算，實際金額將依交易淨值而定，可能與設定金額有差異。
-              </div>
-              <div class="seg">
-                <button class="seg-btn on" id="seg-amt" onclick="switchMode('amt')">依金額</button>
-                <button class="seg-btn" id="seg-pct" onclick="switchMode('pct')">依比例</button>
-              </div>
-            </div>
-
-            <div class="form-grid-2">
-              <!-- 依金額 -->
-              <div id="grp-amt" class="form-group">
-                <label class="form-label">每月 Pay 金額 <span class="req">*</span></label>
-                <div class="input-wrap">
-                  <span class="input-prefix">USD</span>
-                  <input type="number" class="form-input prefixed" id="inp-pay"
-                    oninput="calcRate()">
-                </div>
-                <div class="helper">
-                  <span class="hint-empty" id="rate-txt">填入申購金額後自動計算年化率</span>
-                </div>
-                <div class="helper-err" id="rate-err">
-                  <i class="bi bi-exclamation-circle"></i> 年化提領率上限 15%，請調低
-                </div>
-              </div>
-
-              <!-- 依比例 -->
-              <div id="grp-pct" class="form-group" style="display:none">
-                <label class="form-label">年化 Pay 比例 <span class="req">*</span></label>
-                <div class="ratio-row">
-                  <input type="range" class="ratio-r" id="ratio-slider"
-                    min="1" max="15" step="1" value="11"
-                    oninput="document.getElementById('ratio-val').textContent=fmtRatio(this.value); calcAmt()">
-                  <span class="ratio-val" id="ratio-val">11%</span>
-                </div>
-                <div class="helper" style="margin-top:6px">
-                  <span>1%–15%</span>
-                </div>
-                <div class="helper" style="margin-top:3px">
-                  <span class="hint-empty" id="amt-hint">填入申購金額後自動估算每月約當金額</span>
-                </div>
-              </div>
-
-              <!-- 匯費提示 -->
-              <div class="fee-warn" id="fee-warn" style="display:none">
-                <i class="bi bi-info-circle"></i>
-                <span id="fee-warn-msg">每月 Pay 出金額低於 NT$ 30，非集保約定帳戶將被扣抵 30 元匯費，實際入帳金額可能為零或負數。建議調高 Pay 出設定。</span>
-              </div>
-
-              <!-- Pay 基準日 -->
-              <div class="form-group" style="grid-column: 1 / -1">
-                <label class="form-label">
-                  自由 Pay 基準日
-                  <i class="bi bi-info-circle hint-icon" onclick="toggleHint('hint-date')" style="font-size:13px;color:var(--color-text-tertiary);margin-left:4px;vertical-align:middle"></i>
-                </label>
-                <div class="hint-panel" id="hint-date" style="display:none">
-                  自由 Pay 基準日為贖回申請日，實際入帳時間視基金公司付款作業而定，一般而言平均約 7～10 個營業日入帳。<br><br>
-                  變更設定於營業日 14:00 前下單視為當日申請；14:00 以後下單則視為次一營業日申請。設定自由 Pay 基準日若距首次申購日不足 30 個日曆日時，將於屆滿 30 日後之最近一次自由 Pay 基準日開始執行。<br><br>
-                  若當月無設定之基準日（如 29、30、31 日），則遞延至下個營業日申請。
-                </div>
-                <div class="date-grid" id="date-grid"></div>
-                <div class="helper" id="date-long-hint" style="display:none">
-                  <span id="date-long-hint-txt"></span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- 停 Pay 門檻 -->
-          <div class="block" id="th-block">
-            <div class="block-header">
-              <div class="block-title">停 Pay 門檻</div>
-              <button type="button" class="toggle-wrap" onclick="toggleThreshold(event)" aria-pressed="false">
-                <span class="toggle-label paused" id="th-toggle-label">未啟用</span>
-                <span class="toggle">
-                  <input type="checkbox" id="th-toggle" tabindex="-1" aria-hidden="true">
-                  <span class="toggle-track"></span>
-                  <span class="toggle-thumb"></span>
-                </span>
-              </button>
-            </div>
-            <div id="th-off-box">
-              <div class="pay-paused-box">
-                <i class="bi bi-info-circle-fill"></i>
-                <span>每月按設定基準日正常執行 Pay 出，不設觸發條件。</span>
-              </div>
-            </div>
-            <div id="th-on-body" style="display:none">
-              <div class="form-group" style="margin-bottom:16px">
-                <label class="form-label">門檻類型</label>
-                <div class="seg">
-                  <button class="seg-btn on" id="seg-protect" onclick="pickThresholdType('protect')">市值守護</button>
-                  <button class="seg-btn" id="seg-unlock" onclick="pickThresholdType('unlock')">增值啟動</button>
-                </div>
-              </div>
-              <div id="info-protect">
-                <div class="slider-block">
-                  <div class="slider-val protect" id="protect-val">−10%</div>
-                  <div class="slider-desc" id="protect-desc">市值低於投入成本 10% 時，暫停 Pay 出<br>市值回升後自動恢復，等市值回升超過門檻才自動恢復</div>
-                  <input type="range" class="protect-r" id="protect-slider"
-                    min="5" max="20" step="5" value="10"
-                    oninput="updateProtect(this.value)">
-                  <div class="slider-ends">
-                    <span>−5%（較嚴格）</span>
-                    <span>−20%（最大容忍）</span>
-                  </div>
-                </div>
-              </div>
-              <div id="info-unlock" style="display:none">
-                <div class="slider-block">
-                  <div class="slider-val unlock" id="unlock-val">+20%</div>
-                  <div class="slider-desc" id="unlock-desc">市值首次達投入成本 +20% 時，啟動 Pay 出</div>
-                  <input type="range" class="unlock-r" id="unlock-slider"
-                    min="5" max="100" step="5" value="20"
-                    oninput="updateUnlock(this.value)">
-                  <div class="slider-ends">
-                    <span>+5%</span>
-                    <span>+100%</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        <!-- ═══ SCREEN 3：申購設定（內容由 renderSettingsScreen() 動態渲染） ═══ -->
+        <div id="s-settings" class="screen"></div>
 
         <!-- ═══ SCREEN 4：確認送出 ═══ -->
         <div id="s-confirm" class="screen">
@@ -1997,365 +1494,6 @@
     </div>
   </div>
 
-  <!-- Account Overview Page (removed card demo) -->
-  <div id="page-overview" style="display:none"></div>
-
-  <!-- ─── Account Overview (List Layout) ─── -->
-  <div id="page-overview-list" style="display:none">
-    <!-- Top bar -->
-    <div class="ov-topbar">
-      <button onclick="exitOverview()" style="width:36px;height:36px;border:none;background:none;cursor:pointer;display:flex;align-items:center;justify-content:center;border-radius:8px;color:var(--color-text-secondary);flex-shrink:0;transition:background 0.1s" onmouseover="this.style.background='var(--color-bg-muted)'" onmouseout="this.style.background='none'"><i class="bi bi-arrow-left" style="font-size:20px"></i></button>
-      <div class="ov-topbar-icon"><i class="bi bi-bank"></i></div>
-      <div class="ov-topbar-title">自由 Pay</div>
-      <div class="ov-topbar-user"><i class="bi bi-person-circle"></i><span>王小明</span></div>
-    </div>
-    <!-- Tab bar -->
-    <div class="ov-tab-bar">
-      <div class="ov-tab active" data-tab="holding" onclick="switchOvListTab('holding')">現有持有</div>
-      <div class="ov-tab" data-tab="order" onclick="switchOvListTab('order')">委託查詢</div>
-      <div class="ov-tab" data-tab="search" onclick="switchOvListTab('search')">基金搜尋</div>
-      <div class="ov-tab" data-tab="history" onclick="switchOvListTab('history')">歷史持有</div>
-    </div>
-    <!-- Body -->
-    <div class="ov-body">
-
-      <!-- ─ Tab: 現有持有 ─ -->
-      <div id="ovl-panel-holding" class="ov-tab-panel active">
-
-        <!-- Summary card (same as card layout) -->
-        <div class="ov-summary-card">
-          <div class="sc-accent-bar"></div>
-          <div class="sc-body">
-            <div class="sc-header">
-              <div class="sc-title">持倉總覽</div>
-            </div>
-            <table class="sc-multiccy-table">
-              <thead class="sc-ccy-thead">
-                <tr>
-                  <th class="sc-ccy-col-header label-cell">　</th>
-                  <th class="sc-ccy-col-header twd"><span class="sc-ccy-badge twd"><i class="bi bi-circle-fill" style="font-size:8px;"></i> TWD</span></th>
-                  <th class="sc-ccy-col-header usd"><span class="sc-ccy-badge usd"><i class="bi bi-circle-fill" style="font-size:8px;"></i> USD</span></th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr class="sc-row hero-row">
-                  <td class="sc-row-label">約當市值合計</td>
-                  <td class="sc-row-val brand twd-col">680,000</td>
-                  <td class="sc-row-val brand usd-col">8,420</td>
-                </tr>
-                <tr class="sc-row">
-                  <td class="sc-row-label">持有損益</td>
-                  <td class="sc-row-val up twd-col">+18,000</td>
-                  <td class="sc-row-val up usd-col">+420</td>
-                </tr>
-                <tr class="sc-row">
-                  <td class="sc-row-label">月 Pay 設定</td>
-                  <td class="sc-row-val twd-col">5,040</td>
-                  <td class="sc-row-val usd-col">80</td>
-                </tr>
-                <tr class="sc-row sc-expandable">
-                  <td class="sc-row-label">含 Pay 參考報酬率</td>
-                  <td class="sc-row-val up twd-col">+5.30%</td>
-                  <td class="sc-row-val up usd-col">+8.25%</td>
-                </tr>
-                <tr class="sc-row sc-expandable">
-                  <td class="sc-row-label">累計已領</td>
-                  <td class="sc-row-val twd-col">30,000</td>
-                  <td class="sc-row-val usd-col">240</td>
-                </tr>
-                <tr class="sc-row sc-expandable">
-                  <td class="sc-row-label">累積投入成本</td>
-                  <td class="sc-row-val twd-col">902,000</td>
-                  <td class="sc-row-val usd-col">8,000</td>
-                </tr>
-              </tbody>
-            </table>
-            <button class="sc-expand-btn" onclick="toggleSummaryCard(this)">
-              <i class="bi bi-chevron-down sc-expand-icon"></i>更多資訊
-            </button>
-          </div>
-        </div>
-
-        <!-- 區隔帶 -->
-        <div class="section-divider">
-          <span class="section-divider-label">交易明細</span>
-          <div class="section-divider-line"></div>
-        </div>
-
-        <!-- Fund group 1a：貝萊德全球收益 ・ 台幣申購（2 筆） -->
-        <div class="ovl-fund-group">
-          <div class="ovl-header" onclick="toggleFundGroup(this)">
-            <div class="ovl-header-top">
-              <div class="ovl-header-info">
-                <div class="ovl-header-name">貝萊德全球股票收益基金 A2</div>
-                <div class="ovl-header-code">AS778899<span class="ccy-badge neutral">境外</span><span class="ccy-badge neutral">USD 計價</span><span class="ccy-badge twd">TWD 申購</span></div>
-              </div>
-              <div class="ovl-header-right">
-                <span class="ovl-count">2 筆</span>
-                <i class="bi bi-chevron-down ovl-chevron"></i>
-              </div>
-            </div>
-            <div class="ovl-header-stats">
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">市值</div>
-                <div class="ovl-stat-value-sm">518,000</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">損益</div>
-                <div class="ovl-stat-value-sm up">+18,000</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">市值相對投入</div>
-                <div class="ovl-stat-value-sm">依各筆列示</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">月 Pay</div>
-                <div class="ovl-stat-value-sm brand">3,500</div>
-              </div>
-            </div>
-          </div>
-          <div class="ovl-ct-list" style="display:none">
-            <div class="ovl-grid-table">
-              <div class="ovl-th" style="padding-left:20px">筆</div>
-              <div class="ovl-th">市值</div>
-              <div class="ovl-th">持有損益</div>
-              <div class="ovl-th">市值相對投入</div>
-              <div class="ovl-th">每月 Pay</div>
-              <div class="ovl-th">觸發門檻</div>
-              <div class="ovl-th">操作</div>
-
-              <!-- FP2024001 -->
-              <div class="ovl-row">
-                <div class="ovl-td ccy-twd">
-                  <div class="ovl-row-alias">
-                    <span id="ovl-alias-FP2024001">20240315</span>
-                    <button class="ov-ct-alias-btn" onclick="editAliasOvl('FP2024001')" title="編輯名稱"><i class="bi bi-pencil"></i></button>
-                  </div>
-                  <div class="ovl-row-meta">
-                    <span class="ovl-row-id">FP2024001</span>
-                    <span class="ov-status-badge ov-s-normal">正常</span>
-                  </div>
-                </div>
-                <div class="ovl-td" data-label="市值"><span class="ovl-val">318,000</span></div>
-                <div class="ovl-td" data-label="持有損益"><span class="ovl-val up">+18,000</span></div>
-                <div class="ovl-td" data-label="市值相對投入"><span class="ovl-val up">+8.20%</span></div>
-                <div class="ovl-td" data-label="每月Pay">
-                  <div class="ovl-pay-val">2,000</div>
-                  <div class="ovl-pay-sub">依金額・15 日</div>
-                </div>
-                <div class="ovl-td" data-label="觸發門檻"><span class="ovl-threshold-text protect">市值守護<br>跌 20% 停 Pay</span></div>
-                <div class="ovl-td">
-                  <div class="ovl-act-group">
-                    <button class="ovl-act" onclick="alert('交易明細頁面（Demo 未展開）')">明細</button>
-                    <button class="ovl-act" onclick="exitOverview();loadScenario(4)">異動</button>
-                    <button class="ovl-act primary" onclick="addFromOverview(2,'FP2024001','TWD')">加碼</button>
-                    <button class="ovl-act">贖回</button>
-                  </div>
-                </div>
-              </div>
-
-              <!-- FP2024003 申購在途 -->
-              <div class="ovl-row" style="opacity:0.72">
-                <div class="ovl-td ccy-twd">
-                  <div class="ovl-row-alias">
-                    <span id="ovl-alias-FP2024003">20240315-2</span>
-                    <button class="ov-ct-alias-btn" onclick="editAliasOvl('FP2024003')" title="編輯名稱"><i class="bi bi-pencil"></i></button>
-                  </div>
-                  <div class="ovl-row-meta">
-                    <span class="ovl-row-id">FP2024003</span>
-                    <span class="ov-status-badge ov-s-pending">申購在途</span>
-                  </div>
-                </div>
-                <div class="ovl-td" data-label="市值"><span class="ovl-val neutral">200,000</span></div>
-                <div class="ovl-td" data-label="持有損益"><span class="ovl-val neutral">—</span></div>
-                <div class="ovl-td" data-label="市值相對投入"><span class="ovl-val neutral">—</span></div>
-                <div class="ovl-td" data-label="每月Pay">
-                  <div class="ovl-pay-val">1,500</div>
-                  <div class="ovl-pay-sub">依金額・20 日</div>
-                </div>
-                <div class="ovl-td" data-label="觸發門檻"><span class="ovl-threshold-text none">不設門檻</span></div>
-                <div class="ovl-td">
-                  <div class="ovl-act-group">
-                    <button class="ovl-act" onclick="alert('交易明細頁面（Demo 未展開）')">明細</button>
-                    <button class="ovl-act" onclick="exitOverview();loadScenario(4)">異動</button>
-                    <button class="ovl-act primary" onclick="addFromOverview(2,'FP2024003','TWD')">加碼</button>
-                    <button class="ovl-act disabled">贖回</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fund group 1b：貝萊德全球收益 ・ 美元申購（1 筆） -->
-        <div class="ovl-fund-group">
-          <div class="ovl-header" onclick="toggleFundGroup(this)">
-            <div class="ovl-header-top">
-              <div class="ovl-header-info">
-                <div class="ovl-header-name">貝萊德全球股票收益基金 A2</div>
-                <div class="ovl-header-code">AS778899<span class="ccy-badge neutral">境外</span><span class="ccy-badge neutral">USD 計價</span><span class="ccy-badge usd">USD 申購</span></div>
-              </div>
-              <div class="ovl-header-right">
-                <span class="ovl-count">1 筆</span>
-                <i class="bi bi-chevron-down ovl-chevron"></i>
-              </div>
-            </div>
-            <div class="ovl-header-stats">
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">市值</div>
-                <div class="ovl-stat-value-sm">8,420</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">損益</div>
-                <div class="ovl-stat-value-sm up">+420</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">市值相對投入</div>
-                <div class="ovl-stat-value-sm up">+7.75%</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">月 Pay</div>
-                <div class="ovl-stat-value-sm brand">80</div>
-              </div>
-            </div>
-          </div>
-          <div class="ovl-ct-list" style="display:none">
-            <div class="ovl-grid-table">
-              <div class="ovl-th" style="padding-left:20px">筆</div>
-              <div class="ovl-th">市值</div>
-              <div class="ovl-th">持有損益</div>
-              <div class="ovl-th">市值相對投入</div>
-              <div class="ovl-th">每月 Pay</div>
-              <div class="ovl-th">觸發門檻</div>
-              <div class="ovl-th">操作</div>
-
-              <!-- FP2024002 -->
-              <div class="ovl-row">
-                <div class="ovl-td ccy-usd">
-                  <div class="ovl-row-alias">
-                    <span id="ovl-alias-FP2024002">20240315</span>
-                    <button class="ov-ct-alias-btn" onclick="editAliasOvl('FP2024002')" title="編輯名稱"><i class="bi bi-pencil"></i></button>
-                  </div>
-                  <div class="ovl-row-meta">
-                    <span class="ovl-row-id">FP2024002</span>
-                    <span class="ov-status-badge ov-s-normal">正常</span>
-                  </div>
-                </div>
-                <div class="ovl-td" data-label="市值"><span class="ovl-val">8,420</span></div>
-                <div class="ovl-td" data-label="持有損益"><span class="ovl-val up">+420</span></div>
-                <div class="ovl-td" data-label="市值相對投入"><span class="ovl-val up">+7.75%</span></div>
-                <div class="ovl-td" data-label="每月Pay">
-                  <div class="ovl-pay-val">80.00</div>
-                  <div class="ovl-pay-sub">依金額・15 日</div>
-                </div>
-                <div class="ovl-td" data-label="觸發門檻"><span class="ovl-threshold-text pending-th">增值啟動<br>漲 30%（等待解鎖）</span></div>
-                <div class="ovl-td">
-                  <div class="ovl-act-group">
-                    <button class="ovl-act" onclick="alert('交易明細頁面（Demo 未展開）')">明細</button>
-                    <button class="ovl-act" onclick="exitOverview();loadScenario(4)">異動</button>
-                    <button class="ovl-act primary" onclick="addFromOverview(2,'FP2024002','USD')">加碼</button>
-                    <button class="ovl-act">贖回</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Fund group 2：統一大滿貫（1 筆，預設折疊） -->
-        <div class="ovl-fund-group">
-          <div class="ovl-header" onclick="toggleFundGroup(this)">
-            <div class="ovl-header-top">
-              <div class="ovl-header-info">
-                <div class="ovl-header-name">統一大滿貫台灣平衡基金</div>
-                <div class="ovl-header-code">TA123456<span class="ccy-badge neutral">境內</span><span class="ccy-badge twd">TWD 申購</span></div>
-              </div>
-              <div class="ovl-header-right">
-                <span class="ovl-count">1 筆</span>
-                <i class="bi bi-chevron-down ovl-chevron"></i>
-              </div>
-            </div>
-            <div class="ovl-header-stats">
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">市值</div>
-                <div class="ovl-stat-value-sm">162,000</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">損益</div>
-                <div class="ovl-stat-value-sm up">+12,000</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">市值相對投入</div>
-                <div class="ovl-stat-value-sm up">+13.40%</div>
-              </div>
-              <div class="ovl-stat-block">
-                <div class="ovl-stat-label-sm">月 Pay</div>
-                <div class="ovl-stat-value-sm brand">≈810</div>
-              </div>
-            </div>
-          </div>
-          <div class="ovl-ct-list" style="display:none">
-            <div class="ovl-grid-table">
-              <div class="ovl-th" style="padding-left:20px">筆</div>
-              <div class="ovl-th">市值</div>
-              <div class="ovl-th">持有損益</div>
-              <div class="ovl-th">市值相對投入</div>
-              <div class="ovl-th">每月 Pay</div>
-              <div class="ovl-th">觸發門檻</div>
-              <div class="ovl-th">操作</div>
-
-              <!-- FP2025002 -->
-              <div class="ovl-row">
-                <div class="ovl-td ccy-twd">
-                  <div class="ovl-row-alias">
-                    <span id="ovl-alias-FP2025002">20250101</span>
-                    <button class="ov-ct-alias-btn" onclick="editAliasOvl('FP2025002')" title="編輯名稱"><i class="bi bi-pencil"></i></button>
-                  </div>
-                  <div class="ovl-row-meta">
-                    <span class="ovl-row-id">FP2025002</span>
-                    <span class="ov-status-badge ov-s-normal">正常</span>
-                  </div>
-                </div>
-                <div class="ovl-td" data-label="市值"><span class="ovl-val">162,000</span></div>
-                <div class="ovl-td" data-label="持有損益">
-                  <span class="ovl-val up">+12,000</span>
-                </div>
-                <div class="ovl-td" data-label="市值相對投入"><span class="ovl-val up">+13.40%</span></div>
-                <div class="ovl-td" data-label="每月Pay">
-                  <div class="ovl-pay-val">≈810</div>
-                  <div class="ovl-pay-sub">年化 6%・5 日</div>
-                </div>
-                <div class="ovl-td" data-label="觸發門檻"><span class="ovl-threshold-text none">不設門檻</span></div>
-                <div class="ovl-td">
-                  <div class="ovl-act-group">
-                    <button class="ovl-act" onclick="alert('交易明細頁面（Demo 未展開）')">明細</button>
-                    <button class="ovl-act" onclick="exitOverview();loadScenario(4)">異動</button>
-                    <button class="ovl-act primary" onclick="addFromOverview(0,'FP2025002','TWD')">加碼</button>
-                    <button class="ovl-act">贖回</button>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div><!-- end ovl-panel-holding -->
-
-      <!-- ─ Tab: 委託查詢 ─ -->
-      <div id="ovl-panel-order" class="ov-tab-panel">
-        <div class="ov-placeholder"><i class="bi bi-receipt"></i><p>委託查詢 — 此 Demo 未展開</p></div>
-      </div>
-      <!-- ─ Tab: 基金搜尋 ─ -->
-      <div id="ovl-panel-search" class="ov-tab-panel">
-        <div class="ov-placeholder"><i class="bi bi-search"></i><p>基金搜尋 — 此 Demo 未展開</p></div>
-      </div>
-      <!-- ─ Tab: 歷史持有 ─ -->
-      <div id="ovl-panel-history" class="ov-tab-panel">
-        <div class="ov-placeholder"><i class="bi bi-clock-history"></i><p>歷史持有 — 此 Demo 未展開</p></div>
-      </div>
-
-    </div><!-- end ov-body -->
-  </div><!-- end page-overview-list -->
 
   <!-- ─── Account Overview (EC Figma Layout) ─── -->
   <div id="page-overview-ec" style="display:none">
@@ -2407,9 +1545,8 @@
         <div class="ec-order-root" id="ec-order-root"></div>
       </section>
 
-      <section id="ecov-panel-profit" class="ecov-section" aria-labelledby="ecov-profit-title" style="display:none">
-        <h1 class="ecov-title" id="ecov-profit-title">已實現損益</h1>
-        <div class="ecov-empty">此 Demo 未展開</div>
+      <section id="ecov-panel-profit" class="ecov-section" aria-label="已實現損益" style="display:none">
+        <div class="ec-profit-root" id="ec-profit-root"></div>
       </section>
     </div>
   </div>
@@ -2488,6 +1625,14 @@
         ] },
       ]
     };
+    const MOCK_REALIZED_PROFITS = [
+      { id:'hp-001', fund:'貝萊德全球股票收益基金 A2', code:'AS778899', fpNo:'FP2024001', alias:'20240315', ccy:'TWD', fdCcy:'USD', redeemDate:'2026/04/18', totalPaid:12000, monthlyPay:'2,000', paySetting:'依金額・15日', threshold:'市值守護・跌20%', cost:300000, redeemAmount:318000, unit:'120.5000', nav:'26.3890', exRate:'1.0000', profit:30000, returnRate:10.00, status:'已完成' },
+      { id:'hp-002', fund:'貝萊德全球股票收益基金 A2', code:'AS778899', fpNo:'FP2024002', alias:'20240315', ccy:'USD', fdCcy:'USD', redeemDate:'2026/03/22', totalPaid:240, monthlyPay:'80', paySetting:'依金額・15日', threshold:'增值啟動・漲30%', cost:8000, redeemAmount:8420, unit:'100.0000', nav:'84.2000', exRate:'1.0000', profit:660, returnRate:8.25, status:'已完成' },
+      { id:'hp-003', fund:'統一大滿貫台灣平衡基金', code:'TA123456', fpNo:'FP2025002', alias:'20250101', ccy:'TWD', fdCcy:'TWD', redeemDate:'2026/02/10', totalPaid:18000, monthlyPay:'6%', paySetting:'依比例・6%・5日', threshold:'不設門檻', cost:150000, redeemAmount:162000, unit:'8053.2812', nav:'20.1175', exRate:'1.0000', profit:30000, returnRate:20.00, status:'已完成' },
+      { id:'hp-004', fund:'施羅德環球收益基金 A', code:'TU778899', fpNo:'FP2025001', alias:'20250318', ccy:'USD', fdCcy:'USD', redeemDate:'2025/12/19', totalPaid:150, monthlyPay:'50', paySetting:'依金額・10日', threshold:'不設門檻', cost:5000, redeemAmount:4860, unit:'60.0000', nav:'81.0000', exRate:'1.0000', profit:10, returnRate:0.20, status:'已完成' },
+      { id:'hp-005', fund:'貝萊德全球股票收益基金 A2', code:'AS778899', fpNo:'FP2023008', alias:'20231201', ccy:'TWD', fdCcy:'USD', redeemDate:'2025/10/06', totalPaid:6000, monthlyPay:'1,500', paySetting:'依金額・20日', threshold:'不設門檻', cost:200000, redeemAmount:188000, unit:'80.0000', nav:'78.3333', exRate:'30.0000', profit:-6000, returnRate:-3.00, status:'已完成' },
+    ];
+    const profitState = { period:'6M', ccy:'all', customStart:'2026-01-01', customEnd:'2026-05-08' };
 
     // ── App State ──
     let cur = 0;
@@ -2578,13 +1723,11 @@
 
     // ── Demo Bar ──
     function renderDemoBar() {
-      const isOvList = document.getElementById('page-overview-list').style.display !== 'none';
       const isOvEc   = document.getElementById('page-overview-ec').style.display !== 'none';
       document.getElementById('demo-btns').innerHTML =
-        `<button class="demo-btn${isOvList ? ' on' : ''}" onclick="showOverviewList()">帳戶總覽（列表）</button>` +
         `<button class="demo-btn${isOvEc ? ' on' : ''}" onclick="showOverviewEc()">帳戶總覽（EC版）</button>` +
         SCENARIOS.map((s, i) =>
-          `<button class="demo-btn${!isOvList && !isOvEc && scenario === s ? ' on' : ''}" onclick="exitOverview();loadScenario(${i})">${s.label}</button>`
+          `<button class="demo-btn${!isOvEc && scenario === s ? ' on' : ''}" onclick="exitOverview();loadScenario(${i})">${s.label}</button>`
         ).join('');
     }
 
@@ -2653,7 +1796,7 @@
               <div class="cc-check" style="display:flex"><i class="bi bi-check" style="font-size:12px"></i></div>
               <div class="cc-top">
                 <div>
-                  <div class="cc-id" style="font-size:14px;font-weight:700;font-family:var(--font-primary);color:var(--color-text-heading)">${getPlanName(c)}</div>
+                  <div class="cc-id">${getPlanName(c)}</div>
                 </div>
               </div>
               <div class="cc-row"><span>申購幣別</span><strong>${ccyZh(c.ccy)}</strong></div>
@@ -2701,14 +1844,14 @@
               <div class="block-title">現有交易</div>
               ${ccyContracts.length > 0 ? `<span style="font-size:12px;color:var(--color-text-tertiary);font-weight:400;margin-left:2px">此基金 ${ccyContracts.length} 筆</span>` : ''}
             </div>
-            ${eligible.length > 0 ? `<p style="font-size:13px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.6">選擇加碼至既有任一筆，將沿用該筆原 Pay 設定。</p>` : ''}
+            ${eligible.length > 0 ? `<p style="font-size:14px;color:var(--color-text-secondary);margin-bottom:14px;line-height:1.6">選擇加碼至既有任一筆，將沿用該筆原 Pay 設定。</p>` : ''}
             <div class="contracts-grid">
               ${eligible.map(c => `
                 <div class="contract-card${state.contract===c.fpNo?' on':''}" onclick="pickContract('${c.fpNo}')">
                   <div class="cc-check"><i class="bi bi-check" style="font-size:12px"></i></div>
                   <div class="cc-top">
                     <div>
-                      <div class="cc-id" style="font-size:14px;font-weight:700;font-family:var(--font-primary);color:var(--color-text-heading)">${getPlanName(c)}</div>
+                      <div class="cc-id">${getPlanName(c)}</div>
                     </div>
                     ${c.status==='Y' ? '' : `<span class="status-badge s-pending">申購在途</span>`}
                   </div>
@@ -2733,7 +1876,7 @@
               <div class="ncb-icon"><i class="bi bi-plus-lg"></i></div>
               <div>
                 <div class="ncb-title">新申購</div>
-                <div class="ncb-sub">以 <span style="font-family:var(--font-mono);font-weight:700">${state.ccy}</span> 新申購，各筆獨立管理</div>
+                <div class="ncb-sub">以 <span style="font-weight:700">${ccyZh(state.ccy)}</span> 新申購，各筆獨立管理</div>
               </div>
             </button>
             <div class="info-box" style="margin-top:14px">
@@ -2868,7 +2011,7 @@
             <div class="form-group">
               <label class="form-label">
                 Pay 出方式
-                <i class="bi bi-info-circle hint-icon" onclick="toggleHint('hint-paymode')" style="font-size:13px;color:var(--color-text-tertiary);margin-left:4px;vertical-align:middle"></i>
+                <i class="bi bi-info-circle hint-icon" onclick="toggleHint('hint-paymode')" style="font-size:14px;color:var(--color-text-tertiary);margin-left:4px;vertical-align:middle"></i>
               </label>
               <div class="hint-panel" id="hint-paymode" style="display:none">
                 <strong>依金額</strong>：每月固定提領設定之金額。<br>
@@ -2914,7 +2057,7 @@
               <div class="form-group" style="grid-column:1/-1">
                 <label class="form-label">
                   自由 Pay 基準日
-                  <i class="bi bi-info-circle hint-icon" onclick="toggleHint('hint-date')" style="font-size:13px;color:var(--color-text-tertiary);margin-left:4px;vertical-align:middle"></i>
+                  <i class="bi bi-info-circle hint-icon" onclick="toggleHint('hint-date')" style="font-size:14px;color:var(--color-text-tertiary);margin-left:4px;vertical-align:middle"></i>
                 </label>
                 <div class="hint-panel" id="hint-date" style="display:none">
                   自由 Pay 基準日為贖回申請日，實際入帳時間視基金公司付款作業而定，一般而言平均約 7～10 個營業日入帳。<br><br>
@@ -3386,82 +2529,6 @@
       document.getElementById('done-date').textContent   = state.date;
     }
 
-    // ── Overview: 加碼（從指定契約直接進入金額設定，跳過幣別/現有交易）──
-    function addFromOverview(scenarioIdx, contractId, contractCcy) {
-      exitOverview();
-      loadScenario(scenarioIdx);
-      // loadScenario 內部重置 state.contract = 'new' 並用該狀態 renderSettingsScreen()
-      // 必須覆寫 state 後重新 render，否則畫面仍顯示完整新申購設定（含 Pay 出設定）
-      state.contract = contractId;
-      state.ccy = contractCcy;
-      renderSettingsScreen(); // isAddOn = true，只顯示單筆加碼金額輸入
-      renderSidebar();
-      jumpTo('s-settings');
-    }
-
-    function editAliasOvl(fpNo) {
-      const span = document.getElementById('ovl-alias-' + fpNo);
-      if (!span) return;
-      const btn = span.nextElementSibling;
-      const original = span.textContent;
-      const input = document.createElement('input');
-      input.className = 'ct-alias-input';
-      input.value = original;
-      span.style.display = 'none';
-      btn.style.display = 'none';
-      span.parentNode.insertBefore(input, span);
-      input.focus(); input.select();
-      const finish = (save) => {
-        if (save && input.value.trim()) span.textContent = input.value.trim();
-        input.remove();
-        span.style.display = '';
-        btn.style.display = '';
-      };
-      input.addEventListener('blur', () => finish(true));
-      input.addEventListener('keydown', e => {
-        if (e.key === 'Enter') { e.preventDefault(); finish(true); }
-        if (e.key === 'Escape') finish(false);
-      });
-    }
-
-    function toggleSummaryCard(btn) {
-      const body = btn.closest('.sc-body');
-      const expanded = body.classList.toggle('sc-expanded');
-      btn.querySelector('.sc-expand-icon').style.transform = expanded ? 'rotate(180deg)' : '';
-      btn.lastChild.textContent = expanded ? '收合' : '更多資訊';
-    }
-
-    function toggleFundGroup(header) {
-      const group = header.closest('.ovl-fund-group');
-      const list = group.querySelector('.ovl-ct-list');
-      const isOpen = group.classList.contains('open');
-      if (isOpen) {
-        group.classList.remove('open');
-        list.style.display = 'none';
-      } else {
-        group.classList.add('open');
-        list.style.display = 'block';
-      }
-    }
-
-    function switchOvListTab(tab) {
-      document.querySelectorAll('#page-overview-list .ov-tab').forEach(el => {
-        el.classList.toggle('active', el.dataset.tab === tab);
-      });
-      ['holding','order','search','history'].forEach(t => {
-        const el = document.getElementById('ovl-panel-' + t);
-        if (el) el.classList.toggle('active', t === tab);
-      });
-    }
-
-    function collapseOverviewListGroups() {
-      document.querySelectorAll('#page-overview-list .ovl-fund-group').forEach(group => {
-        group.classList.remove('open');
-        const list = group.querySelector('.ovl-ct-list');
-        if (list) list.style.display = 'none';
-      });
-    }
-
     function orderCurrencyText(ccy) {
       return ccy === 'TWD' ? '台幣' : ccy === 'USD' ? '美元' : ccy;
     }
@@ -3567,27 +2634,6 @@
       clearOrderSelection();
       orderState.pwd = '';
     }
-    function orderRows(group, items, mode) {
-      const cls = mode === 'ec' ? 'ec' : 'ovl';
-      return items.map(item => {
-        const selected = orderState.selected[group].has(item.id);
-        const value = group === 'rdm'
-          ? `<div class="${cls}-order-main">${item.unit} 單位</div><div class="${cls}-order-sub">${fmtOrderMoney(item.ccy, item.amount)}</div>`
-          : group === 'chg'
-            ? `<div class="${cls}-order-main">${item.oldPay} → <span class="ec-order-diff-new changed">${item.newPay}</span></div>`
-            : `<div class="${cls}-order-main">${fmtOrderMoney(item.ccy, item.amount)}</div>`;
-        return `
-          <tr>
-            <td><input type="checkbox" ${selected ? 'checked' : ''} onchange="toggleOrderSelection('${group}','${item.id}')"></td>
-            <td><div class="${cls}-order-main">${item.fund}</div><div class="${cls}-order-sub">${item.code}</div></td>
-            <td>${item.tx}</td>
-            <td>${orderCurrencyText(item.ccy)}</td>
-            <td class="num">${value}</td>
-            <td><div class="${cls}-order-main">${item.date}</div><div class="${cls}-order-sub">${item.time}</div></td>
-            <td>${item.status}</td>
-          </tr>`;
-      }).join('');
-    }
     function renderEcOrderAltRows(group, items) {
       return items.map(item => {
         const selected = orderState.selected[group].has(item.id);
@@ -3655,58 +2701,207 @@
           </table>
         </section>`;
     }
-    function renderOrderPanel(mode) {
-      const cls = mode === 'ec' ? 'ec' : 'ovl';
+    function renderOrderPanel() {
       const chips = [
         ['all','全部'], ['alt','申購'], ['chg','異動'], ['rdm','贖回']
-      ].map(([key, label]) => `<button class="${cls}-order-chip${orderState.filter===key?' on':''}" onclick="setOrderFilter('${key}')">${label}</button>`).join('');
+      ].map(([key, label]) => `<button class="ec-order-chip${orderState.filter===key?' on':''}" onclick="setOrderFilter('${key}')">${label}</button>`).join('');
       const visibleGroups = getVisibleOrderGroups();
-      const sections = mode === 'ec' ? visibleGroups.map(([group, items]) => renderEcOrderSection(group, items)).join('') : visibleGroups.map(([group, items]) => {
-        const title = group === 'alt' ? '申購委託' : group === 'chg' ? '異動委託' : '贖回委託';
-        return `
-          <section class="${cls}-order-section">
-            <div class="${cls}-order-section-head">
-              <div class="${cls}-order-section-title">${title}</div>
-              <div class="${cls}-order-count">${items.length} 筆</div>
-            </div>
-            <table class="${cls}-order-table">
-              <thead><tr>
-                <th style="width:64px">取消</th>
-                <th>基金名稱</th>
-                <th>交易類別</th>
-                <th>幣別</th>
-                <th class="num">委託內容</th>
-                <th>委託時間</th>
-                <th>狀態</th>
-              </tr></thead>
-              <tbody>${orderRows(group, items, mode)}</tbody>
-            </table>
-          </section>`;
-      }).join('');
+      const sections = visibleGroups.map(([group, items]) => renderEcOrderSection(group, items)).join('');
       const count = selectedOrderCount();
       return `
-        <div class="${cls}-order-filter">
-          <div class="${cls}-order-filter-label">交易類別</div>
-          <div class="${cls}-order-chip-row">${chips}</div>
+        <div class="ec-order-filter">
+          <div class="ec-order-filter-label">交易類別</div>
+          <div class="ec-order-chip-row">${chips}</div>
         </div>
         ${sections}
-        <div class="${cls}-order-cancel-bar">
-          <div class="${cls}-order-pwd-row">
-            <span class="${cls}-order-pwd-label">交易密碼</span>
-            <input type="password" class="ovl-order-pwd-input" value="${orderState.pwd.replace(/"/g,'&quot;')}" oninput="setOrderPwd(this.value)" autocomplete="off">
-            <span class="${cls}-order-count">已選 ${count} 筆</span>
+        <div class="ec-order-cancel-bar">
+          <div class="ec-order-pwd-row">
+            <span class="ec-order-pwd-label">交易密碼</span>
+            <input type="password" value="${orderState.pwd.replace(/"/g,'&quot;')}" oninput="setOrderPwd(this.value)" autocomplete="off">
+            <span class="ec-order-count">已選 ${count} 筆</span>
           </div>
-          <div class="${cls}-order-actions">
-            <button class="${cls}-order-btn" onclick="clearOrderSelection()">清除</button>
-            <button class="${cls}-order-btn primary" onclick="submitOrderCancel()" ${count === 0 ? 'disabled' : ''}>取消委託</button>
+          <div class="ec-order-actions">
+            <button class="ec-order-btn" onclick="clearOrderSelection()">清除</button>
+            <button class="ec-order-btn primary" onclick="submitOrderCancel()" ${count === 0 ? 'disabled' : ''}>取消委託</button>
           </div>
         </div>`;
     }
     function renderOrderViews() {
-      const listRoot = document.getElementById('ovl-order-root');
-      if (listRoot) listRoot.innerHTML = renderOrderPanel('ovl');
       const ecRoot = document.getElementById('ec-order-root');
-      if (ecRoot) ecRoot.innerHTML = renderOrderPanel('ec');
+      if (ecRoot) ecRoot.innerHTML = renderOrderPanel();
+    }
+
+    function parseEcDate(value) {
+      return new Date(String(value).replaceAll('/', '-') + 'T00:00:00');
+    }
+    function profitDateRange() {
+      const end = parseEcDate(DETAIL_TODAY);
+      if (profitState.period === 'custom') {
+        return { start: parseEcDate(profitState.customStart), end: parseEcDate(profitState.customEnd) };
+      }
+      const start = new Date(end);
+      const months = profitState.period === '3M' ? 3 : profitState.period === '1Y' ? 12 : 6;
+      start.setMonth(start.getMonth() - months);
+      return { start, end };
+    }
+    function setProfitPeriod(period) {
+      profitState.period = period;
+      renderProfitViews();
+    }
+    function setProfitCurrency(ccy) {
+      profitState.ccy = ccy;
+      renderProfitViews();
+    }
+    function setProfitDate(which, value) {
+      profitState.period = 'custom';
+      profitState[which] = value;
+      renderProfitViews();
+    }
+    function getVisibleProfitRows() {
+      const { start, end } = profitDateRange();
+      return MOCK_REALIZED_PROFITS.filter(item => {
+        const d = parseEcDate(item.redeemDate);
+        const ccyMatch = profitState.ccy === 'all' || item.ccy === profitState.ccy;
+        return ccyMatch && d >= start && d <= end;
+      });
+    }
+    function fmtProfitAmount(value) {
+      return Number(value || 0).toLocaleString('en-US');
+    }
+    function fmtProfitSigned(value) {
+      const n = Number(value || 0);
+      return `${n < 0 ? '-' : ''}${Math.abs(n).toLocaleString('en-US')}`;
+    }
+    function fmtProfitRate(value) {
+      const n = Number(value || 0);
+      return `${n < 0 ? '-' : ''}${Math.abs(n).toFixed(2)}%`;
+    }
+    function profitTone(value) {
+      const n = Number(value || 0);
+      if (n > 0) return 'ecov-up';
+      if (n < 0) return 'ecov-down';
+      return '';
+    }
+    function profitSummaryRows(rows) {
+      const groups = ['TWD', 'USD'].map(ccy => {
+        const list = rows.filter(item => item.ccy === ccy);
+        const cost = list.reduce((sum, item) => sum + item.cost, 0);
+        const redeem = list.reduce((sum, item) => sum + item.redeemAmount, 0);
+        const paid = list.reduce((sum, item) => sum + item.totalPaid, 0);
+        const profit = list.reduce((sum, item) => sum + item.profit, 0);
+        const rate = cost ? (profit / cost) * 100 : 0;
+        return { ccy, count:list.length, cost, redeem, paid, profit, rate };
+      }).filter(row => row.count > 0);
+      if (!groups.length) return `<tr><td colspan="6">查無資料</td></tr>`;
+      return groups.map(row => `
+        <tr>
+          <td>${orderCurrencyText(row.ccy)}</td>
+          <td>${fmtProfitAmount(row.paid)}</td>
+          <td>${fmtProfitAmount(row.redeem)}</td>
+          <td>${fmtProfitAmount(row.cost)}</td>
+          <td class="${profitTone(row.profit)}">${fmtProfitSigned(row.profit)}</td>
+          <td class="${profitTone(row.rate)}">${fmtProfitRate(row.rate)}</td>
+        </tr>`).join('');
+    }
+    function profitFundTitle(item) {
+      return `${htmlEscape(item.code)} ${htmlEscape(item.fund)}`;
+    }
+    function showProfitFormula(id) {
+      const item = MOCK_REALIZED_PROFITS.find(row => row.id === id);
+      if (!item) return;
+      alert(`贖回金額試算\n\n單位數 ${item.unit} x 淨值 ${item.nav} x 匯率 ${item.exRate} = ${fmtProfitAmount(item.redeemAmount)}`);
+    }
+    function renderProfitRows(items) {
+      return items.map(item => `
+        <tr>
+          <td class="cell-fund">
+            <div class="ec-profit-code">${htmlEscape(item.code)}</div>
+            <div class="ec-profit-name">${htmlEscape(item.fund)}</div>
+            <div class="ec-profit-sub">${htmlEscape(item.alias)} ｜ ${htmlEscape(item.fpNo)}</div>
+          </td>
+          <td class="cell-date">${htmlEscape(item.redeemDate)}</td>
+          <td class="cell-currency">${orderCurrencyText(item.ccy)}</td>
+          <td class="cell-amount">${fmtProfitAmount(item.totalPaid)}</td>
+          <td class="cell-pay"><div>${htmlEscape(item.paySetting)}</div><div class="ec-profit-sub">${htmlEscape(item.threshold)}</div></td>
+          <td class="cell-amount">${fmtProfitAmount(item.cost)}</td>
+          <td class="cell-amount">
+            ${fmtProfitAmount(item.redeemAmount)}
+            <button class="ec-profit-info" type="button" onclick="showProfitFormula('${item.id}')" title="贖回金額試算"><i class="bi bi-info-circle"></i></button>
+          </td>
+          <td class="cell-amount ${profitTone(item.profit)}">${fmtProfitSigned(item.profit)}</td>
+          <td class="${profitTone(item.returnRate)}">${fmtProfitRate(item.returnRate)}</td>
+          <td>${htmlEscape(item.status)}</td>
+        </tr>`).join('');
+    }
+    function renderProfitSections(rows) {
+      if (!rows.length) return `<div class="ecov-empty">查無已實現損益資料</div>`;
+      const groups = [];
+      rows.forEach(item => {
+        let group = groups.find(g => g.code === item.code && g.fund === item.fund);
+        if (!group) {
+          group = { code:item.code, fund:item.fund, rows:[] };
+          groups.push(group);
+        }
+        group.rows.push(item);
+      });
+      return groups.map(group => `
+        <section class="ec-profit-section">
+          <div class="ec-profit-section-head">
+            <div class="ec-profit-section-title">${profitFundTitle(group.rows[0])}</div>
+            <div class="ec-profit-count">${group.rows.length} 筆</div>
+          </div>
+          <table class="ec-profit-table">
+            <thead><tr>
+              <th class="cell-fund">基金名稱</th>
+              <th class="cell-date">贖回日</th>
+              <th class="cell-currency">交易幣別</th>
+              <th class="cell-amount">已Pay金額</th>
+              <th class="cell-pay">Pay設定</th>
+              <th class="cell-amount">原始投入</th>
+              <th class="cell-amount">贖回金額</th>
+              <th class="cell-amount">已實現損益<br>（含Pay）</th>
+              <th>含Pay報酬率</th>
+              <th>結果</th>
+            </tr></thead>
+            <tbody>${renderProfitRows(group.rows)}</tbody>
+          </table>
+        </section>`).join('');
+    }
+    function renderProfitPanel() {
+      const rows = getVisibleProfitRows();
+      const periodChips = [['3M','近三個月'], ['6M','近六個月'], ['1Y','近一年'], ['custom','自訂區間']]
+        .map(([key, label]) => `<button class="ec-order-chip${profitState.period===key?' on':''}" onclick="setProfitPeriod('${key}')">${label}</button>`).join('');
+      const ccyChips = [['all','全部'], ['TWD','台幣'], ['USD','美元']]
+        .map(([key, label]) => `<button class="ec-order-chip${profitState.ccy===key?' on':''}" onclick="setProfitCurrency('${key}')">${label}</button>`).join('');
+      const customRange = profitState.period === 'custom'
+        ? `<div class="ec-profit-date-range">
+            <input class="ec-profit-date-input" type="date" value="${htmlEscape(profitState.customStart)}" onchange="setProfitDate('customStart', this.value)">
+            <span class="ec-profit-date-sep">至</span>
+            <input class="ec-profit-date-input" type="date" value="${htmlEscape(profitState.customEnd)}" onchange="setProfitDate('customEnd', this.value)">
+          </div>`
+        : '';
+      return `
+        <div class="ec-profit-filter">
+          <div class="ec-profit-filter-row">
+            <div class="ec-profit-filter-label">資料期間</div>
+            <div class="ec-order-chip-row">${periodChips}</div>
+            ${customRange}
+          </div>
+          <div class="ec-profit-filter-row">
+            <div class="ec-profit-filter-label">交易幣別</div>
+            <div class="ec-order-chip-row">${ccyChips}</div>
+          </div>
+        </div>
+        <table class="ecov-summary">
+          <thead><tr><th>幣別</th><th>已Pay金額</th><th>贖回金額</th><th>原始投入</th><th>已實現損益<br>（含Pay）</th><th>含Pay報酬率</th></tr></thead>
+          <tbody>${profitSummaryRows(rows)}</tbody>
+        </table>
+        ${renderProfitSections(rows)}
+        <div class="ec-profit-note">說明：已實現損益為資料期間內已完成交易程序者，計算方式為贖回金額加計已 Pay 金額後，扣除原始投入成本。資料若有不符，仍以交易平台與集保紀錄為準。</div>`;
+    }
+    function renderProfitViews() {
+      const root = document.getElementById('ec-profit-root');
+      if (root) root.innerHTML = renderProfitPanel();
     }
 
     const TX_PAGE_SIZE = 6;
@@ -3874,7 +3069,7 @@
     function renderDetailFpLine(fpNo) {
       const info = DETAIL_TX_FUND_INFO[fpNo] || { planName:'' };
       const alias = info.planName || '';
-      const aliasHtml = alias ? ` ｜ <span id="detail-fp-alias-text">${htmlEscape(alias)}</span>` : ` ｜ <span id="detail-fp-alias-text"></span>`;
+      const aliasHtml = ` ｜ <span id="detail-fp-alias-text">${alias ? htmlEscape(alias) : ''}</span>`;
       const fpNoEl = document.getElementById('detail-fp-no');
       fpNoEl.textContent = fpNo;
       fpNoEl.classList.remove('editable');
@@ -4051,6 +3246,7 @@
       document.getElementById('ecov-panel-order').style.display = tab === 'order' ? '' : 'none';
       document.getElementById('ecov-panel-profit').style.display = tab === 'profit' ? '' : 'none';
       if (tab === 'order') renderOrderViews();
+      if (tab === 'profit') renderProfitViews();
     }
 
     function editAlias(fpNo) {
@@ -4080,19 +3276,8 @@
     }
 
     // ── Overview Mode ──
-    function showOverviewList() {
-      document.getElementById('page-overview-list').style.display = 'block';
-      document.getElementById('page-overview-ec').style.display = 'none';
-      document.querySelector('.page-body').style.display = 'none';
-      document.getElementById('action-bar').style.display = 'none';
-      document.querySelector('.top-nav').style.display = 'none';
-      document.getElementById('progress-container').style.display = 'none';
-      collapseOverviewListGroups();
-      renderDemoBar();
-    }
     function showOverviewEc() {
       document.getElementById('page-overview-ec').style.display = 'block';
-      document.getElementById('page-overview-list').style.display = 'none';
       document.querySelector('.page-body').style.display = 'none';
       document.getElementById('action-bar').style.display = 'none';
       document.querySelector('.top-nav').style.display = 'none';
@@ -4100,30 +3285,21 @@
       switchEcTab('overview');
       renderEcOverview();
       renderOrderViews();
+      renderProfitViews();
       renderDemoBar();
     }
     function exitOverview() {
-      document.getElementById('page-overview-list').style.display = 'none';
       document.getElementById('page-overview-ec').style.display = 'none';
       document.querySelector('.page-body').style.display = '';
       document.querySelector('.top-nav').style.display = '';
       document.getElementById('progress-container').style.display = '';
       renderDemoBar();
     }
-    function switchOvTab(tab) {
-      const page = document.getElementById('page-overview');
-      page.querySelectorAll('.ov-tab').forEach(el => {
-        el.classList.toggle('active', el.dataset.tab === tab);
-      });
-      page.querySelectorAll('.ov-tab-panel').forEach(el => el.classList.remove('active'));
-      const panel = document.getElementById('ov-panel-' + tab);
-      if (panel) panel.classList.add('active');
-    }
-
     // ── Init ──
     loadScenario(2); // 預設情境 3：境外・既有多筆＋申購在途
     renderEcOverview();
     renderOrderViews();
+    renderProfitViews();
   </script>
 </body>
 </html>
