@@ -249,8 +249,6 @@
       background: transparent;
       cursor: pointer;
       vertical-align: middle;
-      --mdc-switch-selected-track-color: var(--color-action-primary);
-      --mdc-switch-selected-handle-color: #fff;
     }
     .toggle-wrap .mdc-switch__track {
       position: absolute;
@@ -559,9 +557,9 @@
 
     /* ─── Page Layout ─── */
     .page-body {
-      max-width: 1040px;
+      width: min(800px, 100%);
       margin: 0 auto;
-      padding: 24px 24px 80px;
+      padding: 24px 0 80px;
     }
     @media (max-width: 767px) {
       .page-body { padding: 0 0 80px; }
@@ -594,14 +592,13 @@
         margin: 0 15px 8px;
       }
     }
-    .mobile-fund-bar-name { font-size: 14px; font-weight: 700; color: var(--color-text-heading); line-height: 1.4; margin-bottom: 6px; }
+    .mobile-fund-bar-name { font-size: 14px; font-weight: 700; color: var(--color-text-heading); line-height: 1.4; }
 
     .sidebar-fund-card {
       background: var(--color-bg-base);
       border: 1px solid var(--color-border-default);
       border-radius: 14px;
       padding: 16px;
-      margin-bottom: 4px;
       display: flex;
       align-items: center;
       gap: 12px;
@@ -717,12 +714,10 @@
       border: 1px solid var(--color-border-default);
       border-radius: 16px;
       padding: 16px;
-      margin-bottom: 16px;
     }
     @media (max-width: 767px) {
       .block {
         border-radius: 12px;
-        margin: 0 15px 12px;
         padding: 18px 16px;
       }
     }
@@ -1285,6 +1280,18 @@
       border-radius: 8px;
       border-left: 3px solid var(--color-border-strong);
     }
+    .redeem-summary-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+    @media (max-width: 767px) { .redeem-summary-grid { grid-template-columns: 1fr; } }
+    .redeem-notice-list {
+      margin: 0;
+      padding-left: 1.25em;
+    }
+    .redeem-notice-list li { margin-bottom: 8px; }
+    .redeem-notice-list li:last-child { margin-bottom: 0; }
 
     /* ─── Agree Row ─── */
     .agree-label {
@@ -1488,6 +1495,7 @@
     .ecov-summary th { color: #808080; }
     .ecov-summary tbody tr:nth-child(even) { background: #f8f8f8; }
     .ecov-up { color: #f5222d !important; }
+    .ecov-down { color: #389E0D !important; }
     .ecov-detail-head { background: #f2f2f2; border-bottom: 2px solid #ccc; display: grid; grid-template-columns: 300px 1fr; gap: 20px; padding: 12px 0; align-items: center; }
     .ecov-head-name { padding-left: 20px; color: #808080; font-size: 16px; }
     .ecov-metric-grid, .ecov-contract-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); align-items: center; }
@@ -1701,7 +1709,6 @@
     #page-overview-ec .ec-order-btn:hover:not(:disabled) { background: #f8f8f8; color: #1a1a1a; }
     #page-overview-ec .ec-order-btn.primary,
     #page-overview-ec .ec-order-btn.primary:hover:not(:disabled) { border-color: #f04d29; background: #f04d29; color: #fff; }
-    .ecov-down { color: #00a05a !important; }
     #page-overview-ec .ec-profit-root { display: flex; flex-direction: column; gap: 40px; width: 100%; }
     #page-overview-ec .ec-profit-filter { display: flex; flex-direction: column; gap: 12px; padding: 20px; border: 1px solid #ccc; border-radius: 8px; background: #fff; }
     #page-overview-ec .ec-profit-filter-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
@@ -1948,7 +1955,6 @@
       <main class="main-content">
         <!-- 手機版基金名稱（桌機由 sidebar 顯示） -->
         <div class="mobile-fund-bar">
-          <i class="bi bi-globe-americas" id="mobile-fund-icon"></i>
           <div class="mobile-fund-bar-name" id="mobile-fund-name">施羅德環球收益基金 A (Acc.)</div>
         </div>
 
@@ -2024,24 +2030,24 @@
           <div class="block">
             <div class="success-wrap">
               <div class="success-ring"><i class="bi bi-check-circle-fill"></i></div>
-              <div class="success-h">委託已成功送出</div>
-              <div class="success-p">
+              <div class="success-h" id="done-title">委託已成功送出</div>
+              <div class="success-p" id="done-message">
                 您的自由 Pay 申購委託已送出。<br>
                 預計 3–4 個營業日後申購確認書入帳，<br>
                 首次 Pay 將於設定基準日（每月 <span id="done-date">15</span> 日）前後執行。
               </div>
-              <div class="order-box">
+              <div class="order-box" id="done-order-box">
                 <div class="order-box-label">委託摘要</div>
                 <div class="sum-row"><span class="sum-label">委託時間</span><span class="sum-val txt">2026/04/17 09:41</span></div>
                 <div class="sum-row"><span class="sum-label">基金</span><span class="sum-val txt">施羅德環球收益基金</span></div>
                 <div class="sum-row"><span class="sum-label">申購金額</span><span class="sum-val hl" id="done-amount">USD 5,000.00</span></div>
                 <div class="sum-row" style="border-bottom:none"><span class="sum-label">每月 Pay</span><span class="sum-val hl" id="done-pay">USD 45.00</span></div>
               </div>
-              <div class="info-box" style="max-width:440px;text-align:left">
+              <div class="info-box" id="done-info" style="max-width:440px;text-align:left">
                 <i class="bi bi-bell-fill"></i>
                 <span>申購確認後將自動建立此筆自由 Pay，設定值與本次申購一致，可在持有查詢頁隨時調整。</span>
               </div>
-              <div class="done-actions" style="margin-top:24px">
+              <div class="done-actions" id="done-actions" style="margin-top:24px">
                 <button class="btn-outline mdc-button mdc-button--outlined" onclick="jumpTo(getActiveScreens()[0])"><span class="mdc-button__ripple"></span><span class="mdc-button__label">再次申購</span></button>
                 <button class="btn-next mdc-button mdc-button--raised" onclick="alert('導回帳戶總覽 /trade/stock')">
                   <span class="mdc-button__ripple"></span><span class="mdc-button__label"><i class="bi bi-briefcase"></i> 查看持有</span>
@@ -2087,12 +2093,12 @@
             <thead>
               <tr class="mdc-data-table__header-row">
                 <th class="mdc-data-table__header-cell">交易幣別</th>
+                <th class="mdc-data-table__header-cell">月Pay金額</th>
+                <th class="mdc-data-table__header-cell">已Pay金額</th>
                 <th class="mdc-data-table__header-cell">約當市值</th>
-                <th class="mdc-data-table__header-cell">含Pay<br>參考報酬率</th>
                 <th class="mdc-data-table__header-cell">投入成本</th>
                 <th class="mdc-data-table__header-cell">持有損益</th>
-                <th class="mdc-data-table__header-cell">月Pay設定</th>
-                <th class="mdc-data-table__header-cell">已Pay金額</th>
+                <th class="mdc-data-table__header-cell">含Pay<br>參考報酬率</th>
               </tr>
             </thead>
             <tbody id="ecov-summary-body"></tbody>
@@ -2104,7 +2110,7 @@
           <div class="ecov-detail-head">
             <div class="ecov-head-name">基金名稱</div>
             <div class="ecov-metric-grid">
-              <div class="ecov-metric-head"><span>計價幣別</span><span class="ecov-line"></span><span>交易幣別</span></div>
+              <div class="ecov-metric-head"><span>交易幣別</span><span class="ecov-line"></span><span>計價幣別</span></div>
               <div class="ecov-metric-head"><span>月Pay金額</span><span class="ecov-line"></span><span>已Pay金額</span></div>
               <div class="ecov-metric-head"><span>約當市值</span><span class="ecov-line"></span><span>投入成本</span></div>
               <div class="ecov-metric-head"><span>持有損益</span><span class="ecov-line"></span><span>含Pay報酬率</span></div>
@@ -2175,6 +2181,7 @@
       { label:'3 境外・既有多筆＋申購在途', fundID:'AS778899', fundName:'貝萊德全球股票收益基金 A2 USD', tscd:'境外', fundCcyDesc:'美元', rr:'RR4', entryMode:'buy'    },
       { label:'4 境外・無既有交易',         fundID:'AS123456', fundName:'貝萊德世界科技基金 USD',        tscd:'境外', fundCcyDesc:'美元', rr:'RR4', entryMode:'buy'    },
       { label:'5 交易異動',                 fundID:'AS778899', fundName:'貝萊德全球股票收益基金 A2 USD', tscd:'境外', fundCcyDesc:'美元', rr:'RR4', entryMode:'modify' },
+      { label:'6 贖回',                     fundID:'AS778899', fundName:'貝萊德全球股票收益基金 A2 USD', tscd:'境外', fundCcyDesc:'美元', rr:'RR4', entryMode:'redeem', redeemFpNo:'FP2024002' },
     ];
 
     const MOCK_CONTRACTS = {
@@ -2190,6 +2197,27 @@
       'AS123456': [],
     };
     function getPlanName(c) { return c ? (c.planName || c.fpNo) : ''; }
+
+    const REDEEM_MOCK = {
+      FP2024001: {
+        fpNo:'FP2024001', planName:'20240315', fundID:'AS778899', fundName:'貝萊德全球股票收益基金 A2 USD',
+        ccy:'TWD', fdCcy:'USD', availableUnit:'9,920.3378', shortUnit:'120.5000',
+        nav:'26.3890', navDate:'2026/05/06', exRate:'32.1050', amount:318000,
+        bank:'華南銀行 數位分行', acc:'***-***-**5678', receiveCcy:'TWD'
+      },
+      FP2024002: {
+        fpNo:'FP2024002', planName:'20240315', fundID:'AS778899', fundName:'貝萊德全球股票收益基金 A2 USD',
+        ccy:'USD', fdCcy:'USD', availableUnit:'100.0000', shortUnit:'0.0000',
+        nav:'84.2000', navDate:'2026/05/06', exRate:'-', amount:8420,
+        bank:'華南銀行 外幣帳戶', acc:'***-***-**9012', receiveCcy:'USD'
+      },
+      FP2025002: {
+        fpNo:'FP2025002', planName:'20250101', fundID:'TA123456', fundName:'統一大滿貫台灣平衡基金',
+        ccy:'TWD', fdCcy:'TWD', availableUnit:'8,053.2812', shortUnit:'0.0000',
+        nav:'20.1175', navDate:'2026/05/06', exRate:'-', amount:162000,
+        bank:'華南銀行 數位分行', acc:'***-***-**2468', receiveCcy:'TWD'
+      }
+    };
 
     const MOCK_ORDERS = {
       alt: [
@@ -2250,14 +2278,16 @@
     // ── App State ──
     let cur = 0;
     let scenario = SCENARIOS[2];
-    let state = { ccy:'TWD', contract:'new', payMode:'amt', date:15, threshold:'none', payActive:true };
+    let state = { ccy:'TWD', contract:'new', payMode:'amt', date:15, threshold:'none', payActive:true, redeemPwd:'' };
 
     // ── Scenario Helpers ──
     function shouldSkipStep1() {
+      if (scenario.entryMode === 'redeem') return true;
       if (scenario.entryMode === 'modify') return true;
       return (MOCK_CONTRACTS[scenario.fundID] || []).length === 0;
     }
     function getActiveScreens() {
+      if (scenario.entryMode === 'redeem') return ['s-settings', 's-done'];
       return shouldSkipStep1()
         ? ['s-settings', 's-confirm', 's-done']
         : ['s-ccy', 's-settings', 's-confirm', 's-done'];
@@ -2268,8 +2298,9 @@
       const screens = getActiveScreens();
       const idx = screens.indexOf(id);
       const m = scenario.entryMode === 'modify';
+      const r = scenario.entryMode === 'redeem';
       const labels = shouldSkipStep1()
-        ? (m ? ['異動設定', '確認變更'] : ['申購設定', '確認送出'])
+        ? (r ? ['贖回確認'] : m ? ['異動設定', '確認變更'] : ['申購設定', '確認送出'])
         : ['幣別／各筆', '申購設定', '確認送出'];
       const stepper = labels.map((l, i) => {
         const stateClass = i < idx ? ' done' : i === idx ? ' current' : '';
@@ -2325,6 +2356,19 @@
     function getMinAmt(isAddOn) {
       if (isAddOn) return state.ccy === 'USD' ? 100 : 3000;
       return state.ccy === 'USD' ? 3500 : 100000;
+    }
+    function getRedeemData(fpNo) {
+      return REDEEM_MOCK[fpNo] || REDEEM_MOCK[scenario.redeemFpNo] || REDEEM_MOCK.FP2024002;
+    }
+    function fmtRedeemAmount(item) {
+      return `${item.receiveCcy || item.ccy} ${fmtN(item.amount)}`;
+    }
+    function setRedeemPwd(value) {
+      state.redeemPwd = value;
+      const field = document.getElementById('redeem-pwd')?.closest('.mdc-text-field');
+      const err = document.getElementById('redeem-pwd-err');
+      if (value && field) field.classList.remove('err');
+      if (value && err) err.style.display = 'none';
     }
     function fmtN(n)     { return Number(n).toLocaleString('en-US'); }
     function fmtD(n)     { return Number(n).toLocaleString('en-US', { minimumFractionDigits:2, maximumFractionDigits:2 }); }
@@ -2639,7 +2683,11 @@
       const ccys = getAvailableCurrencies();
       const defaultCcy = ccys[0];
       const defaultContract = pickDefaultContract(scenario.fundID, defaultCcy);
-      state = { ccy: defaultCcy, contract: defaultContract, payMode: 'amt', date: 15, threshold: 'none' };
+      state = { ccy: defaultCcy, contract: defaultContract, payMode: 'amt', date: 15, threshold: 'none', payActive:true, redeemPwd:'' };
+      if (scenario.entryMode === 'redeem') {
+        const rdm = getRedeemData(scenario.redeemFpNo);
+        Object.assign(state, { ccy: rdm.ccy, contract: rdm.fpNo });
+      }
       if (scenario.entryMode === 'modify') {
         const c = (MOCK_CONTRACTS[scenario.fundID] || [])[0];
         if (c) Object.assign(state, {
@@ -2814,6 +2862,64 @@
       </span>`;
 
       let html = '';
+
+      if (scenario.entryMode === 'redeem') {
+        const rdm = getRedeemData(state.contract);
+        const shortHtml = Number(String(rdm.shortUnit).replace(/,/g, '')) > 0
+          ? `<div class="sum-row"><span class="sum-label">短線單位數</span><span class="sum-val hl">${htmlEscape(rdm.shortUnit)}</span></div>`
+          : `<div class="sum-row"><span class="sum-label">短線單位數</span><span class="sum-val">無</span></div>`;
+        document.getElementById('s-settings').innerHTML = `
+          <div class="block">
+            <div class="block-header">
+              <div class="block-title">贖回確認</div>
+            </div>
+            <div class="redeem-summary-grid">
+              <div>
+                <div class="sum-table">
+                  <div class="sum-row"><span class="sum-label">基金名稱</span><span class="sum-val txt">${htmlEscape(rdm.fundName)}</span></div>
+                  <div class="sum-row"><span class="sum-label">名稱</span><span class="sum-val txt">${htmlEscape(rdm.planName)}</span></div>
+                  <div class="sum-row"><span class="sum-label">交易編號</span><span class="sum-val">${htmlEscape(rdm.fpNo)}</span></div>
+                  <div class="sum-row"><span class="sum-label">交易 / 計價幣別</span><span class="sum-val">${orderCurrencyText(rdm.ccy)} / ${orderCurrencyText(rdm.fdCcy)}</span></div>
+                  <div class="sum-row"><span class="sum-label">可贖回單位數</span><span class="sum-val hl">${htmlEscape(rdm.availableUnit)}</span></div>
+                  ${shortHtml}
+                </div>
+              </div>
+              <div>
+                <div class="sum-table">
+                  <div class="sum-row"><span class="sum-label">參考淨值</span><span class="sum-val">${htmlEscape(rdm.nav)}</span></div>
+                  <div class="sum-row"><span class="sum-label">參考淨值日期</span><span class="sum-val">${htmlEscape(rdm.navDate)}</span></div>
+                  <div class="sum-row"><span class="sum-label">參考匯率</span><span class="sum-val">${htmlEscape(rdm.exRate)}</span></div>
+                  <div class="sum-row"><span class="sum-label">贖回參考金額</span><span class="sum-val hl">${htmlEscape(fmtRedeemAmount(rdm))}</span></div>
+                  <div class="sum-row" style="border-bottom:none"><span class="sum-label">收款帳號</span><span class="sum-val txt">${htmlEscape(rdm.bank)}<br>${htmlEscape(rdm.acc)}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="block">
+            <div class="block-header">
+              <div class="block-title">交易密碼</div>
+            </div>
+            ${mdcTextFieldHTML({ id:'redeem-pwd', type:'password', label:'請輸入交易密碼 *', value:state.redeemPwd, attrs:'oninput="setRedeemPwd(this.value)" autocomplete="off"' })}
+            <div class="helper-err" id="redeem-pwd-err" style="display:none"><i class="bi bi-exclamation-circle"></i> 請輸入交易密碼</div>
+          </div>
+          <div class="block">
+            <div class="block-header" style="margin-bottom:12px">
+              <div class="block-title">注意事項</div>
+            </div>
+            <div class="risk-box">
+              <ol class="redeem-notice-list">
+                <li>贖回申請下單截止時間為每營業日下午 14:00 前截止；逾時則順延至次一營業日辦理，實際日期以基金公司回覆為準。</li>
+                <li>實際贖回單位數依客戶基金帳上餘額為限，部分贖回單位數可能因未達交割日而導致交易失敗。</li>
+                <li>若贖回單位數過小，或本次贖回後剩餘庫存單位數過低，可能依各基金公司規定導致交易失敗或款項不足匯出。</li>
+                <li>贖回款項約 3-10 個工作天入帳於集保結算所留存之約定贖回帳戶，匯款相關費用得自款項中扣除。</li>
+                <li>自然人每日於本公司網路交易系統進行贖回及轉換，總額以新台幣 3,000 萬元或等值外幣為上限，確切金額依各銀行規定為準。</li>
+                <li>參考淨值由 Lipper 提供，不代表實際交易淨值，實際交易淨值將以基金公司公告為準。</li>
+              </ol>
+            </div>
+          </div>`;
+        initMdcInstances(document.getElementById('s-settings'));
+        return;
+      }
 
       if (!isAddOn && !isModify && getAvailableCurrencies().length > 1) {
         const ccyNameMap = { TWD:'新台幣', USD:'美元', JPY:'日圓', EUR:'歐元', ZAR:'南非幣', AUD:'澳幣', CNY:'人民幣' };
@@ -3000,11 +3106,12 @@
     // ── Show Screen ──
     function getStepLabels() {
       const m = scenario.entryMode === 'modify';
+      const r = scenario.entryMode === 'redeem';
       return {
         's-ccy':      { nav: '自由 Pay 申購', next: '下一步' },
-        's-settings': { nav: m ? '修改設定' : '申購設定',       next: '下一步' },
+        's-settings': { nav: r ? '贖回確認' : m ? '修改設定' : '申購設定', next: r ? '送出' : '下一步' },
         's-confirm':  { nav: m ? '確認修改' : '確認申購',       next: m ? '儲存設定' : '送出' },
-        's-done':     { nav: m ? '修改完成' : '申購完成',       next: '' },
+        's-done':     { nav: r ? '贖回完成' : m ? '修改完成' : '申購完成', next: '' },
       };
     }
 
@@ -3038,8 +3145,10 @@
       }
 
       const m = scenario.entryMode === 'modify';
+      const r = scenario.entryMode === 'redeem';
       const stepCfg = shouldSkipStep1()
-        ? (m ? [{ id:'s-settings', label:'異動設定', sub:'Pay 設定、門檻'    },
+        ? (r ? [{ id:'s-settings', label:'贖回確認', sub:'確認明細並送出'    }]
+             : m ? [{ id:'s-settings', label:'異動設定', sub:'Pay 設定、門檻'    },
                 { id:'s-confirm',  label:'確認變更', sub:'確認後儲存生效'    }]
              : [{ id:'s-settings', label:'申購設定', sub:'金額、Pay 設定、門檻' },
                 { id:'s-confirm',  label:'確認送出', sub:'確認摘要並送出'    }])
@@ -3079,6 +3188,7 @@
       if (grid) grid.style.gridTemplateColumns = isLast ? '1fr' : '';
 
       if (id === 's-confirm') syncConfirm();
+      if (id === 's-done') syncDone();
     }
 
     function validateAmtInline() {
@@ -3130,9 +3240,26 @@
       return true;
     }
 
+    function validateRedeem() {
+      if (scenario.entryMode !== 'redeem') return true;
+      const pwdEl = document.getElementById('redeem-pwd');
+      const field = pwdEl?.closest('.mdc-text-field');
+      const errEl = document.getElementById('redeem-pwd-err');
+      if (!pwdEl || String(pwdEl.value || '').trim()) {
+        if (field) field.classList.remove('err');
+        if (errEl) errEl.style.display = 'none';
+        return true;
+      }
+      if (field) field.classList.add('err');
+      if (errEl) errEl.style.display = 'flex';
+      pwdEl.focus();
+      return false;
+    }
+
     function nextScreen() {
       const S = getActiveScreens();
       if (cur >= S.length - 1) return;
+      if (scenario.entryMode === 'redeem' && S[cur] === 's-settings' && !validateRedeem()) return;
       if (S[cur] === 's-settings' && !validateAmt()) return;
       showScreen(S[cur + 1]);
     }
@@ -3460,9 +3587,67 @@
       const thMap = { none:'不設門檻', protect:'市值守護 −'+pv+'%', unlock:'增值啟動 +'+uv+'%' };
       document.getElementById('c-threshold').textContent = thMap[state.threshold] || '不設門檻';
 
-      document.getElementById('done-amount').textContent = ccy + ' ' + fmtD(a);
-      document.getElementById('done-pay').textContent    = ccy + ' ' + fmtD(p);
-      document.getElementById('done-date').textContent   = state.date;
+      const doneAmountEl = document.getElementById('done-amount');
+      const donePayEl = document.getElementById('done-pay');
+      const doneDateEl = document.getElementById('done-date');
+      if (doneAmountEl) doneAmountEl.textContent = ccy + ' ' + fmtD(a);
+      if (donePayEl) donePayEl.textContent = ccy + ' ' + fmtD(p);
+      if (doneDateEl) doneDateEl.textContent = state.date;
+    }
+
+    function syncDone() {
+      const title = document.getElementById('done-title');
+      const message = document.getElementById('done-message');
+      const box = document.getElementById('done-order-box');
+      const info = document.getElementById('done-info');
+      const actions = document.getElementById('done-actions');
+      if (!title || !message || !box || !info || !actions) return;
+
+      if (scenario.entryMode === 'redeem') {
+        const rdm = getRedeemData(state.contract);
+        title.textContent = '贖回委託已成功送出';
+        message.innerHTML = `您的自由 Pay 贖回委託已送出。<br>若超過本營業日 14:00，將視為下一營業日之交易。`;
+        box.innerHTML = `
+          <div class="order-box-label">委託摘要</div>
+          <div class="sum-row"><span class="sum-label">委託時間</span><span class="sum-val txt">2026/05/08 13:42</span></div>
+          <div class="sum-row"><span class="sum-label">基金</span><span class="sum-val txt">${htmlEscape(rdm.fundName)}</span></div>
+          <div class="sum-row"><span class="sum-label">名稱</span><span class="sum-val txt">${htmlEscape(rdm.planName)}</span></div>
+          <div class="sum-row"><span class="sum-label">交易幣別</span><span class="sum-val">${orderCurrencyText(rdm.ccy)}</span></div>
+          <div class="sum-row"><span class="sum-label">贖回單位數</span><span class="sum-val hl">${htmlEscape(rdm.availableUnit)}</span></div>
+          <div class="sum-row"><span class="sum-label">贖回參考金額</span><span class="sum-val hl">${htmlEscape(fmtRedeemAmount(rdm))}</span></div>
+          <div class="sum-row" style="border-bottom:none"><span class="sum-label">收款帳號</span><span class="sum-val txt">${htmlEscape(rdm.bank)}<br>${htmlEscape(rdm.acc)}</span></div>`;
+        info.innerHTML = `<i class="bi bi-bell-fill"></i><span>您可至委託查詢/取消確認此筆贖回委託狀態，實際入帳金額與日期仍以基金公司及集保紀錄為準。</span>`;
+        actions.innerHTML = `
+          <button class="btn-outline mdc-button mdc-button--outlined" onclick="showOverviewEc(); switchEcTab('order'); setOrderFilter('rdm')"><span class="mdc-button__ripple"></span><span class="mdc-button__label">委託查詢/取消</span></button>
+          <button class="btn-next mdc-button mdc-button--raised" onclick="showOverviewEc()"><span class="mdc-button__ripple"></span><span class="mdc-button__label"><i class="bi bi-briefcase"></i> 帳戶總覽</span></button>`;
+        initMdcInstances(actions);
+        return;
+      }
+
+      const isModify = scenario.entryMode === 'modify';
+      const isAddOn = scenario.entryMode === 'buy' && state.contract !== 'new';
+      const ccy = state.ccy;
+      const a = parseFloat(document.getElementById('inp-amount')?.value) || 0;
+      const p = parseFloat(document.getElementById('inp-pay')?.value) || 0;
+      title.textContent = isModify ? '設定異動已成功送出' : '委託已成功送出';
+      message.innerHTML = isModify
+        ? `您的自由 Pay 異動設定已送出。<br>設定將依交易平台處理結果生效。`
+        : `您的自由 Pay 申購委託已送出。<br>預計 3-4 個營業日後申購確認書入帳，<br>首次 Pay 將於設定基準日（每月 ${state.date} 日）前後執行。`;
+      box.innerHTML = isModify
+        ? `<div class="order-box-label">委託摘要</div>
+          <div class="sum-row"><span class="sum-label">委託時間</span><span class="sum-val txt">2026/05/08 09:41</span></div>
+          <div class="sum-row"><span class="sum-label">基金</span><span class="sum-val txt">${htmlEscape(scenario.fundName)}</span></div>
+          <div class="sum-row" style="border-bottom:none"><span class="sum-label">生效設定</span><span class="sum-val txt">Pay 設定與門檻更新</span></div>`
+        : `<div class="order-box-label">委託摘要</div>
+          <div class="sum-row"><span class="sum-label">委託時間</span><span class="sum-val txt">2026/05/08 09:41</span></div>
+          <div class="sum-row"><span class="sum-label">基金</span><span class="sum-val txt">${htmlEscape(scenario.fundName)}</span></div>
+          <div class="sum-row"><span class="sum-label">申購金額</span><span class="sum-val hl" id="done-amount">${ccy} ${fmtD(a)}</span></div>
+          <div class="sum-row" style="border-bottom:none"><span class="sum-label">每月 Pay</span><span class="sum-val hl" id="done-pay">${isAddOn ? '維持原設定' : `${ccy} ${fmtD(p)}`}</span></div>`;
+      info.innerHTML = `<i class="bi bi-bell-fill"></i><span>${isModify ? '可在帳戶總覽確認最新設定與後續異動紀錄。' : '申購確認後將自動建立此筆自由 Pay，設定值與本次申購一致，可在持有查詢頁隨時調整。'}</span>`;
+      actions.innerHTML = `
+        <button class="btn-outline mdc-button mdc-button--outlined" onclick="jumpTo(getActiveScreens()[0])"><span class="mdc-button__ripple"></span><span class="mdc-button__label">${isModify ? '再次異動' : '再次申購'}</span></button>
+        <button class="btn-next mdc-button mdc-button--raised" onclick="showOverviewEc()"><span class="mdc-button__ripple"></span><span class="mdc-button__label"><i class="bi bi-briefcase"></i> 查看持有</span></button>`;
+      initMdcInstances(actions);
     }
 
     function orderCurrencyText(ccy) {
@@ -3737,7 +3922,7 @@
           <td class="mdc-data-table__cell">${fmtProfitAmount(row.paid)}</td>
           <td class="mdc-data-table__cell">${fmtProfitAmount(row.redeem)}</td>
           <td class="mdc-data-table__cell">${fmtProfitAmount(row.cost)}</td>
-          <td class="mdc-data-table__cell ${profitTone(row.profit)}">${fmtProfitSigned(row.profit)}</td>
+          <td class="mdc-data-table__cell">${fmtProfitSigned(row.profit)}</td>
           <td class="mdc-data-table__cell ${profitTone(row.rate)}">${fmtProfitRate(row.rate)}</td>
         </tr>`).join('');
     }
@@ -3766,7 +3951,7 @@
             ${fmtProfitAmount(item.redeemAmount)}
             <button class="ec-profit-info mdc-icon-button" type="button" onclick="showProfitFormula('${item.id}')" title="贖回金額試算"><span class="mdc-icon-button__ripple"></span><i class="bi bi-info-circle"></i></button>
           </td>
-          <td class="mdc-data-table__cell cell-amount ${profitTone(item.profit)}">${fmtProfitSigned(item.profit)}</td>
+          <td class="mdc-data-table__cell cell-amount">${fmtProfitSigned(item.profit)}</td>
           <td class="mdc-data-table__cell ${profitTone(item.returnRate)}">${fmtProfitRate(item.returnRate)}</td>
           <td class="mdc-data-table__cell">${htmlEscape(item.status)}</td>
         </tr>`).join('');
@@ -4140,6 +4325,13 @@
     function ecText(value) {
       return htmlEscape(normalizeCurrencyText(stripPositiveSign(value)));
     }
+    function ecRateClass(value) {
+      const text = String(value ?? '').trim();
+      if (!text || text === '-' || text === '—') return '';
+      const num = Number(text.replace(/[,%]/g, ''));
+      if (!Number.isFinite(num) || num === 0) return '';
+      return num > 0 ? 'ecov-up' : 'ecov-down';
+    }
     function ecPair(top, bottom, a='', b='') {
       return `<div class="ecov-metric"><span class="${a}">${ecText(top)}</span><span class="ecov-line"></span><span class="${b}">${ecText(bottom)}</span></div>`;
     }
@@ -4149,7 +4341,7 @@
     function renderEcOverview() {
       const summary = document.getElementById('ecov-summary-body');
       if (summary) summary.innerHTML = EC_OVERVIEW_MOCK.summaries.map(r => `
-        <tr class="mdc-data-table__row"><td class="mdc-data-table__cell">${ecText(r.ccy)}</td><td class="mdc-data-table__cell">${ecText(r.market)}</td><td class="mdc-data-table__cell ecov-up">${ecText(r.ret)}</td><td class="mdc-data-table__cell">${ecText(r.cost)}</td><td class="mdc-data-table__cell ecov-up">${ecText(r.profit)}</td><td class="mdc-data-table__cell">${ecText(r.pay)}</td><td class="mdc-data-table__cell">${ecText(r.paid)}</td></tr>`).join('');
+        <tr class="mdc-data-table__row"><td class="mdc-data-table__cell">${ecText(r.ccy)}</td><td class="mdc-data-table__cell">${ecText(r.pay)}</td><td class="mdc-data-table__cell">${ecText(r.paid)}</td><td class="mdc-data-table__cell">${ecText(r.market)}</td><td class="mdc-data-table__cell">${ecText(r.cost)}</td><td class="mdc-data-table__cell">${ecText(r.profit)}</td><td class="mdc-data-table__cell ${ecRateClass(r.ret)}">${ecText(r.ret)}</td></tr>`).join('');
       const list = document.getElementById('ecov-fund-list');
       if (!list) return;
       list.innerHTML = EC_OVERVIEW_MOCK.funds.map(f => `
@@ -4160,7 +4352,7 @@
               ${ecPair(f.txCcy, f.buyCcy)}
               ${ecPair(f.pay, f.paid)}
               ${ecPair(f.market, f.cost)}
-              ${ecPair(f.profit, f.ret, 'ecov-up', 'ecov-up')}
+              ${ecPair(f.profit, f.ret, '', ecRateClass(f.ret))}
             </div>
           </div>
           <div class="ecov-toggle-btn">
@@ -4169,10 +4361,10 @@
               <div class="ecov-contract-head">
                 <div class="ecov-contract-name">交易明細</div>
                 <div class="ecov-contract-grid">
+                  <div class="ecov-metric-head"><span>Pay設定</span><span class="ecov-line"></span><span>觸發門檻</span></div>
                   <div class="ecov-metric-head"><span>月Pay金額</span><span class="ecov-line"></span><span>已Pay金額</span></div>
                   <div class="ecov-metric-head"><span>約當市值</span><span class="ecov-line"></span><span>投入成本</span></div>
                   <div class="ecov-metric-head"><span>持有損益</span><span class="ecov-line"></span><span>含Pay報酬率</span></div>
-                  <div class="ecov-metric-head"><span>Pay設定</span><span class="ecov-line"></span><span>觸發門檻</span></div>
                 </div>
                 <div></div>
               </div>
@@ -4183,14 +4375,14 @@
                     <span class="ecov-contract-code">${htmlEscape(c.fpNo)}<button class="ecov-file-btn mdc-icon-button" type="button" onclick="openDetailModal('${c.fpNo}')" title="交易明細"><span class="mdc-icon-button__ripple"></span><i class="bi bi-file-text"></i></button></span>
                   </div>
                   <div class="ecov-contract-grid">
+                    ${ecContractPair(c.setting, c.threshold)}
                     ${ecContractPair(c.pay, c.paid)}
                     ${ecContractPair(c.market, c.cost)}
-                    ${ecContractPair(c.profit, c.ret, 'ecov-up', 'ecov-up')}
-                    ${ecContractPair(c.setting, c.threshold)}
+                    ${ecContractPair(c.profit, c.ret, '', ecRateClass(c.ret))}
                   </div>
                   <div class="ecov-actions">
                     ${mdcButton('異動', 'outlined', '', 'ecov-action')}
-                    ${mdcButton('贖回', 'outlined', '', 'ecov-action')}
+                    ${mdcButton('贖回', 'outlined', REDEEM_MOCK[c.fpNo] ? `type="button" onclick="startRedeem('${c.fpNo}')"` : 'type="button" disabled title="申購在途，暫不可贖回"', 'ecov-action')}
                     ${mdcButton('加碼', 'filled', '', 'ecov-action primary')}
                   </div>
                 </div>`).join('')}
@@ -4245,6 +4437,23 @@
         if (e.key === 'Enter') { e.preventDefault(); finish(true); }
         if (e.key === 'Escape') finish(false);
       });
+    }
+
+    function startRedeem(fpNo='FP2024002') {
+      const idx = SCENARIOS.findIndex(s => s.entryMode === 'redeem');
+      exitFundSearch(false);
+      exitOverview();
+      loadScenario(idx >= 0 ? idx : SCENARIOS.length - 1);
+      const rdm = getRedeemData(fpNo);
+      if (rdm) {
+        state.contract = rdm.fpNo;
+        state.ccy = rdm.ccy;
+        state.redeemPwd = '';
+        renderSidebar();
+        renderSettingsScreen();
+        showScreen('s-settings');
+      }
+      renderDemoBar();
     }
 
     // ── Fund Search / Overview Mode ──
