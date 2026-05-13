@@ -1,0 +1,35 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: products/FreePay/projects/5.0/angular-demo/package-lock.json
+
+      - name: Install dependencies
+        working-directory: products/FreePay/projects/5.0/angular-demo
+        run: npm ci
+
+      - name: Build
+        working-directory: products/FreePay/projects/5.0/angular-demo
+        run: npm run build
+
+      - name: Deploy to gh-pages
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          folder: products/FreePay/projects/5.0/angular-demo/dist/freepay-5-angular-demo
+          branch: gh-pages
+          clean: true
