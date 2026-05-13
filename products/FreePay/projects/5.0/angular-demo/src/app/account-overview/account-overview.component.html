@@ -347,10 +347,10 @@
         <div class="ov-filter-row">
           <span class="ov-filter-label">資料期間</span>
           <mat-button-toggle-group class="mode-toggle" [(ngModel)]="profitPeriod" aria-label="資料期間">
+            <mat-button-toggle value="ALL">全部</mat-button-toggle>
             <mat-button-toggle value="3M">近3個月</mat-button-toggle>
             <mat-button-toggle value="6M">近6個月</mat-button-toggle>
             <mat-button-toggle value="1Y">近1年</mat-button-toggle>
-            <mat-button-toggle value="ALL">全部</mat-button-toggle>
           </mat-button-toggle-group>
         </div>
         <div class="ov-filter-row">
@@ -405,37 +405,58 @@
           <table class="ov-table ov-profit-table">
             <thead>
               <tr>
-                <th class="col-fund">基金名稱</th>
+                <th class="col-fund">交易明細</th>
                 <th class="col-date">贖回日</th>
                 <th>交易幣別</th>
-                <th>已Pay金額</th>
-                <th>Pay設定</th>
-                <th>原始投入</th>
-                <th>贖回金額</th>
-                <th>已實現損益（含Pay）</th>
-                <th>含Pay報酬率</th>
-                <th>結果</th>
+                <th>
+                  <div class="ov-metric-head">
+                    <span>Pay設定</span><span class="ov-line"></span><span>已Pay金額</span>
+                  </div>
+                </th>
+                <th>
+                  <div class="ov-metric-head">
+                    <span>原始投入</span><span class="ov-line"></span><span>贖回金額</span>
+                  </div>
+                </th>
+                <th>
+                  <div class="ov-metric-head">
+                    <span>已實現損益</span><span class="ov-line"></span><span>含Pay報酬率</span>
+                  </div>
+                </th>
+                <th class="col-result">結果</th>
               </tr>
             </thead>
             <tbody>
               <tr *ngFor="let item of group.rows; trackBy: trackById">
                 <td class="col-fund">
-                  <div class="ov-cell-code">{{ item.code }}</div>
-                  <div class="ov-cell-name">{{ item.fund }}</div>
-                  <div class="ov-cell-sub">{{ item.alias }} ｜ {{ item.fpNo }}</div>
+                  <div>{{ item.fpNo }}</div>
+                  <div class="ov-cell-sub">{{ item.alias }}</div>
                 </td>
                 <td class="col-date">{{ item.redeemDate }}</td>
                 <td>{{ ccyText(item.ccy) }}</td>
-                <td>{{ fmtN(item.totalPaid) }}</td>
                 <td>
-                  <div>{{ item.paySetting }}</div>
-                  <div class="ov-cell-sub">{{ item.threshold }}</div>
+                  <div class="ov-metric">
+                    <span>{{ item.paySetting }}</span>
+                    <span class="ov-cell-sub">{{ item.threshold }}</span>
+                    <span class="ov-line"></span>
+                    <span>{{ fmtN(item.totalPaid) }}</span>
+                  </div>
                 </td>
-                <td>{{ fmtN(item.cost) }}</td>
-                <td>{{ fmtN(item.redeemAmount) }}</td>
-                <td [class]="numClass(item.profit)">{{ fmtSigned(item.profit) }}</td>
-                <td [class]="numClass(item.returnRate)">{{ fmtRate(item.returnRate) }}</td>
-                <td>{{ item.status }}</td>
+                <td>
+                  <div class="ov-metric">
+                    <span>{{ fmtN(item.cost) }}</span>
+                    <span class="ov-line"></span>
+                    <span>{{ fmtN(item.redeemAmount) }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="ov-metric">
+                    <span [class]="numClass(item.profit)">{{ fmtSigned(item.profit) }}</span>
+                    <span class="ov-line"></span>
+                    <span [class]="numClass(item.returnRate)">{{ fmtRate(item.returnRate) }}</span>
+                  </div>
+                </td>
+                <td class="col-result">{{ item.status }}</td>
               </tr>
             </tbody>
           </table>
@@ -486,10 +507,10 @@
           </mat-button-toggle-group>
           <span class="ov-filter-label">資料期間</span>
           <mat-button-toggle-group class="mode-toggle" [(ngModel)]="detailTimeType" aria-label="資料期間">
+            <mat-button-toggle value="ALL">全部</mat-button-toggle>
             <mat-button-toggle value="3M">近3個月</mat-button-toggle>
             <mat-button-toggle value="6M">近6個月</mat-button-toggle>
             <mat-button-toggle value="1Y">近1年</mat-button-toggle>
-            <mat-button-toggle value="ALL">全部</mat-button-toggle>
           </mat-button-toggle-group>
         </div>
         <div class="ov-table-wrap">
