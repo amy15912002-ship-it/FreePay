@@ -1,0 +1,457 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$freepay-primary-palette: (
+  50: #FFF0EC,
+  100: #FCCFBE,
+  200: #F9A98F,
+  300: #F47355,
+  400: #F04D29,
+  500: #F04D29,
+  600: #C23B1A,
+  700: #C23B1A,
+  800: #8C240D,
+  900: #8C240D,
+  A100: #FCCFBE,
+  A200: #F9A98F,
+  A400: #F04D29,
+  A700: #C23B1A,
+  contrast: (
+    50: #333333,
+    100: #333333,
+    200: #333333,
+    300: #FFFFFF,
+    400: #FFFFFF,
+    500: #FFFFFF,
+    600: #FFFFFF,
+    700: #FFFFFF,
+    800: #FFFFFF,
+    900: #FFFFFF,
+    A100: #333333,
+    A200: #333333,
+    A400: #FFFFFF,
+    A700: #FFFFFF
+  )
+);
+
+$freepay-accent-palette: (
+  50: #E8F8F9,
+  100: #A8E4E8,
+  200: #70D4DA,
+  300: #3EC2CF,
+  400: #2A9BAA,
+  500: #2A9BAA,
+  600: #1E7480,
+  700: #1E7480,
+  800: #124D55,
+  900: #124D55,
+  A100: #A8E4E8,
+  A200: #70D4DA,
+  A400: #2A9BAA,
+  A700: #1E7480,
+  contrast: (
+    50: #333333,
+    100: #333333,
+    200: #333333,
+    300: #333333,
+    400: #FFFFFF,
+    500: #FFFFFF,
+    600: #FFFFFF,
+    700: #FFFFFF,
+    800: #FFFFFF,
+    900: #FFFFFF,
+    A100: #333333,
+    A200: #333333,
+    A400: #FFFFFF,
+    A700: #FFFFFF
+  )
+);
+
+$freepay-warn-palette: (
+  50: #FFF0EC,
+  100: #FCCFBE,
+  200: #F9A98F,
+  300: #F47355,
+  400: #F04D29,
+  500: #F04D29,
+  600: #C23B1A,
+  700: #C23B1A,
+  800: #8C240D,
+  900: #8C240D,
+  A100: #FCCFBE,
+  A200: #F9A98F,
+  A400: #F04D29,
+  A700: #C23B1A,
+  contrast: (
+    50: #333333,
+    100: #333333,
+    200: #333333,
+    300: #FFFFFF,
+    400: #FFFFFF,
+    500: #FFFFFF,
+    600: #FFFFFF,
+    700: #FFFFFF,
+    800: #FFFFFF,
+    900: #FFFFFF,
+    A100: #333333,
+    A200: #333333,
+    A400: #FFFFFF,
+    A700: #FFFFFF
+  )
+);
+
+$freepay-primary: mat.define-palette($freepay-primary-palette, 500, 600, 800);
+$freepay-accent: mat.define-palette($freepay-accent-palette, 300, 100, 700);
+$freepay-warn: mat.define-palette($freepay-warn-palette, 500, 600, 800);
+
+$freepay-theme: mat.define-light-theme((
+  color: (
+    primary: $freepay-primary,
+    accent: $freepay-accent,
+    warn: $freepay-warn
+  ),
+  typography: mat.define-typography-config(
+    $font-family: '"Noto Sans TC", sans-serif'
+  ),
+  density: 0
+));
+
+@include mat.core-theme($freepay-theme);
+@include mat.button-theme($freepay-theme);
+@include mat.button-toggle-theme($freepay-theme);
+@include mat.checkbox-theme($freepay-theme);
+@include mat.form-field-theme($freepay-theme);
+@include mat.input-theme($freepay-theme);
+@include mat.slide-toggle-theme($freepay-theme);
+@include mat.slider-theme($freepay-theme);
+@include mat.stepper-theme($freepay-theme);
+@include mat.tabs-theme($freepay-theme);
+
+:root {
+  --font-primary: 'Noto Sans TC', sans-serif;
+  --color-brand-primary-50: #FFF0EC;
+  --color-brand-primary-400: #F04D29;
+  --color-brand-primary-600: #C23B1A;
+  --color-brand-primary-800: #8C240D;
+  --color-brand-secondary-50: #FFF8EE;
+  --color-brand-secondary-100: #FDDFA6;
+  --color-brand-secondary-200: #FCC974;
+  --color-brand-secondary-300: #FBB754;
+  --color-brand-secondary-400: #FAA634;
+  --color-brand-secondary-600: #C87F1A;
+  --color-brand-secondary-800: #7A4A08;
+  --color-brand-tertiary-50: #E8F8F9;
+  --color-brand-tertiary-100: #A8E4E8;
+  --color-brand-tertiary-200: #70D4DA;
+  --color-brand-tertiary-300: #3EC2CF;
+  --color-brand-tertiary-400: #2A9BAA;
+  --color-brand-tertiary-600: #1E7480;
+  --color-brand-tertiary-800: #124D55;
+  --color-neutral-0: #FFFFFF;
+  --color-neutral-50: #F8F8F8;
+  --color-neutral-100: #F2F2F2;
+  --color-neutral-150: #E6E6E6;
+  --color-neutral-200: #D9D9D9;
+  --color-neutral-250: #CCCCCC;
+  --color-neutral-300: #B3B3B3;
+  --color-neutral-400: #999999;
+  --color-neutral-500: #808080;
+  --color-neutral-600: #666666;
+  --color-neutral-700: #4D4D4D;
+  --color-neutral-800: #333333;
+  --color-neutral-850: #262626;
+  --color-neutral-900: #1A1A1A;
+  --color-neutral-950: #0D0D0D;
+  --color-neutral-1000: #000000;
+  --color-price-up: #CF1322;
+  --color-price-down: #389E0D;
+  --color-bg-base: var(--color-neutral-0);
+  --color-bg-subtle: var(--color-neutral-50);
+  --color-bg-muted: var(--color-neutral-100);
+  --color-bg-brand-subtle: var(--color-brand-primary-50);
+  --color-bg-info-subtle: var(--color-brand-tertiary-50);
+  --color-text-heading: var(--color-neutral-850);
+  --color-text-primary: var(--color-neutral-800);
+  --color-text-secondary: var(--color-neutral-600);
+  --color-text-tertiary: var(--color-neutral-400);
+  --color-text-on-brand: var(--color-neutral-0);
+  --color-border-default: var(--color-neutral-150);
+  --color-border-strong: var(--color-neutral-200);
+  --color-border-info: var(--color-brand-tertiary-100);
+  --color-action-primary: var(--color-brand-primary-400);
+  --color-input-bg: var(--color-neutral-0);
+  --color-input-bg-disabled: var(--color-neutral-100);
+  --color-input-border-default: var(--color-neutral-200);
+  --color-input-border-hover: var(--color-neutral-300);
+  --color-input-border-focus: var(--color-brand-tertiary-300);
+  --color-input-border-error: var(--color-brand-primary-400);
+  --color-input-border-disabled: var(--color-neutral-150);
+  --color-input-text: var(--color-neutral-800);
+  --color-input-placeholder: var(--color-neutral-400);
+  --color-input-text-disabled: var(--color-neutral-250);
+  --color-input-label: var(--color-neutral-600);
+  --color-input-label-error: var(--color-brand-primary-600);
+  --color-input-label-disabled: var(--color-neutral-250);
+  --color-input-helper: var(--color-neutral-400);
+  --color-input-helper-error: var(--color-brand-primary-600);
+  --color-input-shadow-focus: 0 0 0 3px var(--color-brand-tertiary-50);
+  --color-input-shadow-error: 0 0 0 3px var(--color-brand-primary-50);
+  --color-input-radio-border: var(--color-neutral-400);
+  --color-input-radio-checked: var(--color-brand-primary-400);
+  --color-input-radio-ripple: var(--color-brand-primary-50);
+  --color-input-checkbox-border: var(--color-neutral-400);
+  --color-input-checkbox-checked: var(--color-brand-primary-400);
+  --color-input-checkbox-ripple: var(--color-brand-primary-50);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-primary);
+  font-size: 16px;
+  line-height: normal;
+  color: var(--color-text-primary);
+  background: var(--color-bg-base);
+}
+
+button,
+input,
+select,
+textarea {
+  font-family: inherit;
+}
+
+.mat-button,
+.mat-raised-button,
+.mat-stroked-button,
+.mat-flat-button {
+  border-radius: 8px;
+  letter-spacing: 0;
+}
+
+.mat-raised-button.mat-primary,
+.mat-flat-button.mat-primary {
+  background-color: var(--color-brand-primary-400);
+  color: var(--color-neutral-0);
+}
+
+.mat-raised-button.mat-primary:hover,
+.mat-flat-button.mat-primary:hover {
+  background-color: var(--color-brand-primary-600);
+}
+
+.mat-raised-button.mat-primary:active,
+.mat-flat-button.mat-primary:active {
+  background-color: var(--color-brand-primary-800);
+}
+
+.mat-stroked-button.mat-primary {
+  border-color: var(--color-brand-primary-400);
+  color: var(--color-brand-primary-400);
+}
+
+.mat-form-field {
+  font-family: var(--font-primary);
+}
+
+.mat-form-field-appearance-fill .mat-form-field-underline {
+  background-color: var(--color-input-border-default);
+}
+
+.mat-form-field-appearance-fill:not(.mat-form-field-disabled):hover .mat-form-field-underline {
+  background-color: var(--color-input-border-hover);
+}
+
+.mat-form-field-appearance-fill.mat-focused .mat-form-field-ripple {
+  background-color: var(--color-input-border-focus);
+}
+
+.mat-form-field-appearance-fill.mat-form-field-invalid .mat-form-field-ripple {
+  background-color: var(--color-input-border-error);
+}
+
+.mat-form-field-label {
+  color: var(--color-input-label);
+}
+
+.mat-form-field.mat-form-field-invalid .mat-form-field-label {
+  color: var(--color-input-label-error);
+}
+
+.mat-input-element {
+  color: var(--color-input-text);
+}
+
+.mat-hint {
+  color: var(--color-input-helper);
+}
+
+.mat-error {
+  color: var(--color-input-helper-error);
+}
+
+.mat-checkbox-checked.mat-primary .mat-checkbox-background,
+.mat-checkbox-indeterminate.mat-primary .mat-checkbox-background {
+  background-color: var(--color-input-checkbox-checked);
+}
+
+// ── Shared demo chrome (used across all demo components) ─────────────────
+
+.demo-bar {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 8px 20px;
+  border-bottom: 1px solid var(--color-brand-tertiary-300);
+  background: var(--color-bg-info-subtle);
+  overflow-x: auto;
+
+  > span {
+    flex: 0 0 auto;
+    color: var(--color-brand-tertiary-800);
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: .04em;
+  }
+}
+
+.demo-button {
+  flex: 0 0 auto;
+  height: 28px;
+  min-width: 0;
+  padding: 0 14px;
+  border: 1px solid var(--color-brand-tertiary-300);
+  border-radius: 8px;
+  color: var(--color-brand-tertiary-800);
+  background: var(--color-bg-base);
+  font-size: 14px;
+  line-height: 28px;
+  white-space: nowrap;
+  text-decoration: none;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.demo-button.is-active {
+  border-color: var(--color-brand-tertiary-300);
+  background: var(--color-brand-tertiary-300);
+  color: var(--color-text-on-brand);
+  font-weight: 700;
+}
+
+// ── Shared design-language utilities (used across all demo components) ────
+
+// H4 block/section title (design system §4.2)
+.block-title {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.45;
+}
+
+@media (max-width: 480px) {
+  .block-title { font-size: 16px; }
+}
+
+// Section header row: title on left, action/count on right
+.block-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+// Inside a card (.block), the header needs bottom spacing before body content
+.block .block-header {
+  margin-bottom: 16px;
+}
+
+// Price direction — always use design-system tokens, never action-primary
+.val-up   { color: var(--color-price-up); }
+.val-down { color: var(--color-price-down); }
+
+// mat-button-toggle-group colour tokens (design system override)
+// .mode-toggle        — colours only; width is determined by context
+// .mode-toggle-fill   — adds full-width stretch (for form settings blocks)
+.mode-toggle .mat-button-toggle {
+  border-color: var(--color-neutral-200);
+  color: var(--color-neutral-600);
+  font-size: 14px;
+}
+
+.mode-toggle .mat-button-toggle:hover {
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-800);
+  background: var(--color-neutral-0);
+}
+
+.mode-toggle .mat-button-toggle-checked {
+  background: var(--color-bg-brand-subtle);
+  color: var(--color-action-primary);
+  font-weight: 700;
+}
+
+.mode-toggle .mat-button-toggle-checked:hover {
+  background: var(--color-bg-brand-subtle);
+  color: var(--color-action-primary);
+}
+
+.mode-toggle-fill {
+  width: 100%;
+  max-width: 100%;
+}
+
+.mode-toggle-fill .mat-button-toggle {
+  flex: 1 1 0;
+}
+
+// Notes / disclaimer block (注意事項)
+.notes-block {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.75;
+}
+
+.notes-title {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 4px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+
+  i { color: var(--color-text-tertiary); }
+}
+
+.notes-list {
+  margin: 0;
+  padding-left: 0;
+  list-style: none;
+  counter-reset: notes;
+
+  li {
+    counter-increment: notes;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 4px;
+
+    &::before { content: counter(notes) '、'; }
+  }
+
+  li + li { margin-top: 2px; }
+}

@@ -1,0 +1,801 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  padding-bottom: 96px;
+  color: var(--color-text-primary);
+  background: var(--color-bg-base);
+}
+
+// .demo-bar / .demo-button — defined globally in styles.scss
+
+.material-flow-stepper {
+  width: min(800px, 100%);
+  margin: 0 auto;
+  padding: 20px 0 18px;
+  background: transparent;
+
+  ::ng-deep .mat-horizontal-stepper-wrapper,
+  ::ng-deep .mat-stepper-horizontal {
+    background: transparent;
+  }
+
+  ::ng-deep .mat-horizontal-stepper-header {
+    overflow: visible;
+  }
+
+  ::ng-deep .mat-step-header:hover,
+  ::ng-deep .mat-step-header.cdk-keyboard-focused,
+  ::ng-deep .mat-step-header.cdk-program-focused {
+    background: transparent;
+  }
+
+  // 未到達的步驟不可點擊：icon 沒有 selected / edit / done 任何一個狀態
+  ::ng-deep .mat-horizontal-stepper-header:has(
+    .mat-step-icon:not(.mat-step-icon-selected):not(.mat-step-icon-state-edit):not(.mat-step-icon-state-done)
+  ) {
+    cursor: default;
+    pointer-events: none;
+  }
+
+  ::ng-deep .mat-step-icon {
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    border: 2px solid var(--color-border-strong);
+    background: var(--color-bg-base);
+    color: var(--color-text-tertiary);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  ::ng-deep .mat-step-icon-selected,
+  ::ng-deep .mat-step-icon-state-edit,
+  ::ng-deep .mat-step-icon-state-done {
+    border-color: var(--color-brand-tertiary-400);
+    background: var(--color-brand-tertiary-400);
+    color: var(--color-text-on-brand);
+  }
+
+  ::ng-deep .mat-step-label {
+    color: var(--color-text-tertiary);
+    font-family: var(--font-primary);
+    font-size: 14px;
+    font-weight: 500;
+    line-height: 1.4;
+  }
+
+  ::ng-deep .mat-step-label-selected {
+    color: var(--color-brand-tertiary-400);
+    font-weight: 700;
+  }
+
+  ::ng-deep .mat-stepper-horizontal-line {
+    border-top-color: var(--color-border-strong);
+    top: 38px; // icon 28px, padding-top 24px → center at 38px
+  }
+
+  ::ng-deep .mat-horizontal-stepper-header::before,
+  ::ng-deep .mat-horizontal-stepper-header::after {
+    top: 38px;
+  }
+
+  ::ng-deep .mat-horizontal-content-container {
+    display: none;
+  }
+}
+
+.page-body {
+  width: min(800px, 100%);
+  margin: 0 auto;
+  padding: 0 0 80px;
+}
+
+.fund-card {
+  width: 100%;
+  padding: 20px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-base);
+}
+
+.fund-name {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-text-heading);
+  font-size: 18px;
+  font-weight: 500;
+  line-height: 1.55;
+}
+
+.fund-code {
+  flex: 0 0 auto;
+  margin-right: 6px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.sidebar-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+
+  span {
+    padding: 6px 10px;
+    border-radius: 4px;
+    background: var(--color-bg-muted);
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    line-height: 1.2;
+  }
+}
+
+.main-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  min-width: 0;
+}
+
+.block {
+  width: 100%;
+  padding: 16px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-base);
+}
+
+// .block-header — defined globally in styles.scss
+// .block .block-header adds margin-bottom: 16px via global rule
+
+// .block-title — defined globally in styles.scss
+
+.block-subtitle {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.info-box,
+.pay-paused-box {
+  display: flex;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.full-field {
+  width: 100%;
+}
+
+.form-group,
+.date-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.threshold-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.date-section {
+  margin-top: 16px;
+}
+
+.form-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--color-input-label);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.hint-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 16px;
+  width: 16px;
+  height: 16px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.hint-icon:hover,
+.hint-icon:focus-visible {
+  color: var(--color-brand-tertiary-400);
+  outline: none;
+}
+
+.hint-icon i {
+  pointer-events: none;
+  display: block;
+  width: 16px;
+  height: 16px;
+  line-height: 16px;
+}
+
+.hint-panel {
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0 12px;
+  background: var(--color-neutral-50);
+  border: 1px solid var(--color-neutral-150);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.75;
+  opacity: 0;
+  transform: translateY(-4px);
+  transform-origin: top;
+  transition:
+    max-height .22s ease,
+    margin .22s ease,
+    padding .22s ease,
+    opacity .16s ease,
+    transform .22s ease;
+}
+
+.hint-panel.is-open {
+  max-height: 240px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  opacity: 1;
+  transform: translateY(0);
+}
+
+// .mode-toggle — defined globally in styles.scss
+
+.ccy-selector {
+  margin-bottom: 16px;
+}
+
+.pay-mode-panel {
+  margin-top: 16px;
+}
+
+.ratio-slider {
+  padding: 12px 0 0;
+}
+
+.ratio-slider mat-slider {
+  width: 100%;
+}
+
+.ratio-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ratio-value {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.slider-hint {
+  color: var(--color-input-helper);
+  font-size: 14px;
+}
+
+.date-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(36px, 1fr));
+  gap: 6px;
+}
+
+.date-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  background: var(--color-bg-base);
+  color: var(--color-text-secondary);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: all .1s;
+}
+
+.date-btn:hover {
+  background: var(--color-bg-muted);
+}
+
+.date-btn.on {
+  border-color: var(--color-action-primary);
+  background: var(--color-action-primary);
+  color: var(--color-text-on-brand);
+  font-weight: 700;
+}
+
+.date-btn.long-month {
+  border-style: dashed;
+  color: var(--color-neutral-400);
+}
+
+.date-btn.long-month.on {
+  border-style: solid;
+  color: var(--color-text-on-brand);
+}
+
+.helper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--color-input-helper);
+  font-size: 14px;
+}
+
+.threshold-head {
+  align-items: flex-start;
+}
+
+.threshold-selector-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  padding: 14px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-subtle);
+}
+
+// .threshold-mode-toggle 繼承 .mode-toggle 全域樣式，此處只補 focus 修正
+.threshold-mode-toggle {
+  ::ng-deep .mat-button-toggle-button,
+  ::ng-deep .mat-button-toggle-button:focus,
+  ::ng-deep .mat-button-toggle-button:focus-visible {
+    color: inherit;
+    outline: none;
+  }
+}
+
+.threshold-copy p {
+  margin: 4px 0 0;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.threshold-title {
+  color: var(--color-text-heading);
+  font-size: 16px;
+  font-weight: 500;
+}
+
+.threshold-slider-control {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+
+  mat-slider {
+    width: 100%;
+  }
+}
+
+.threshold-slider-labels {
+  display: flex;
+  justify-content: space-between;
+  color: var(--color-input-helper);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.confirm-block {
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.confirm-addon-note {
+  margin-top: 16px;
+}
+
+.sum-table {
+  display: flex;
+  flex-direction: column;
+}
+
+.sum-row:last-child {
+  border-bottom: none;
+}
+
+.sum-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-default);
+  align-items: center;
+
+  span {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  strong {
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  .hl {
+    color: var(--color-action-primary);
+  }
+}
+
+.agree-label {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 16px;
+
+  ::ng-deep .mat-checkbox-layout {
+    white-space: normal;
+    align-items: flex-start;
+  }
+
+  ::ng-deep .mat-checkbox-label {
+    white-space: normal;
+    line-height: 1.6;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+  }
+
+  ::ng-deep .mat-checkbox-inner-container {
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+}
+
+.doc-list {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2px 4px;
+}
+
+.doc-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  text-decoration: none;
+  transition: background .1s;
+
+  i {
+    font-size: 14px;
+    color: var(--color-text-tertiary);
+    flex: 0 0 14px;
+  }
+
+  &:hover {
+    background: var(--color-bg-muted);
+    color: var(--color-text-primary);
+  }
+}
+
+.terms-content {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.75;
+
+  p {
+    margin: 0 0 10px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+// .notes-block / .notes-title / .notes-list — defined globally in styles.scss
+// Done-page context: add positioning margin via success-block descendant selector
+.success-block .notes-block {
+  width: 100%;
+  margin-top: 32px;
+  text-align: left;
+}
+
+.success-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.success-ring {
+  color: var(--color-brand-secondary-400);
+  font-size: 48px;
+  line-height: 1;
+}
+
+.success-block h2 {
+  margin: 14px 0 8px;
+  color: var(--color-text-heading);
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.order-box {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-subtle);
+  text-align: left;
+}
+
+
+
+.done-actions {
+  display: flex;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+.contract-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.contract-card {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1px solid var(--color-border-strong);
+  border-radius: 8px;
+  background: var(--color-bg-base);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .15s, background .15s;
+
+  &:hover {
+    border-color: var(--color-action-primary);
+    background: var(--color-bg-brand-subtle);
+  }
+
+  &.is-selected {
+    border-color: var(--color-action-primary);
+    background: var(--color-bg-brand-subtle);
+  }
+}
+
+.contract-card-check {
+  flex: 0 0 20px;
+  padding-top: 2px;
+  color: var(--color-text-tertiary);
+  font-size: 18px;
+  line-height: 1;
+
+  .contract-card.is-selected & {
+    color: var(--color-action-primary);
+  }
+}
+
+.contract-card-body {
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.contract-name {
+  color: var(--color-text-heading);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.contract-meta {
+  margin-top: 2px;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.contract-pay,
+.contract-value {
+  margin-top: 4px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.contract-card-action {
+  flex: 0 0 auto;
+  padding-top: 2px;
+}
+
+.badge-addon {
+  display: inline-block;
+  padding: 2px 10px;
+  border-radius: 12px;
+  background: var(--color-action-primary);
+  color: var(--color-text-on-brand);
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.6;
+}
+
+.ccy-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 14px 0;
+  color: var(--color-text-tertiary);
+  font-size: 14px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    border-top: 1px solid var(--color-border-default);
+  }
+}
+
+.action-bar {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 20;
+  border-top: 1px solid var(--color-border-default);
+  background: var(--color-bg-base);
+}
+
+.action-inner {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  width: min(800px, 100%);
+  margin: 0 auto;
+  padding: 14px 0;
+}
+
+@media (max-width: 767px) {
+  :host {
+    padding-bottom: 84px;
+  }
+
+  .success-block h2 {
+    font-size: 22px;
+  }
+
+  .material-flow-stepper {
+    width: 100%;
+    padding: 10px 15px 12px;
+
+    ::ng-deep .mat-horizontal-stepper-header {
+      padding: 0 4px;
+    }
+
+    ::ng-deep .mat-step-icon {
+      width: 24px;
+      height: 24px;
+      font-size: 12px;
+    }
+
+    ::ng-deep .mat-step-label {
+      font-size: 12px;
+    }
+
+    ::ng-deep .mat-stepper-horizontal-line {
+      top: 12px; // icon 24px, padding-top 0 → center at 12px
+    }
+
+    ::ng-deep .mat-horizontal-stepper-header::before,
+    ::ng-deep .mat-horizontal-stepper-header::after {
+      top: 12px;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .material-flow-stepper {
+    padding: 10px 15px 20px;
+
+    ::ng-deep .mat-horizontal-stepper-header {
+      padding: 0 2px;
+    }
+
+    ::ng-deep .mat-step-icon {
+      width: 20px;
+      height: 20px;
+      font-size: 12px;
+    }
+
+    ::ng-deep .mat-step-label {
+      min-width: 0;
+    }
+
+    ::ng-deep .mat-stepper-horizontal-line {
+      top: 10px; // icon 20px, padding-top 0 → center at 10px
+    }
+
+    ::ng-deep .mat-horizontal-stepper-header::before,
+    ::ng-deep .mat-horizontal-stepper-header::after {
+      top: 10px;
+    }
+  }
+
+  .page-body {
+    width: 100%;
+    padding: 0 15px 80px;
+  }
+
+  .block {
+    border-radius: 8px;
+    padding: 18px 16px;
+  }
+
+  // .block-title font-size: 16px — defined globally in styles.scss @media (max-width: 480px)
+
+  .ratio-summary {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 4px;
+  }
+
+  .sum-row {
+    grid-template-columns: 96px minmax(0, 1fr);
+  }
+
+  .action-inner {
+    padding: 12px 15px;
+  }
+
+  .doc-list {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .done-actions {
+    width: 100%;
+    justify-content: stretch;
+
+    button {
+      flex: 1;
+    }
+  }
+
+}

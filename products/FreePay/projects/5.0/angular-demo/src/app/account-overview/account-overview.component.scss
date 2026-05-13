@@ -1,0 +1,593 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  padding-bottom: 80px;
+}
+
+// .demo-bar / .demo-button — defined globally in styles.scss
+
+// ── Shell ──────────────────────────────────────────────
+
+.ov-shell {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 0 0 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+// ── Tab nav bar ─────────────────────────────────────────────
+
+.ov-nav-row {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-border-default);
+
+  ::ng-deep .mat-tab-nav-bar {
+    flex: 1;
+    min-width: 0;
+    border-bottom: none;
+  }
+
+  // Material 內部 class — 需 ::ng-deep 穿透 view encapsulation
+  ::ng-deep .mat-tab-link {
+    height: 64px;
+    min-width: 0;
+    padding: 0 32px;
+    font-family: var(--font-primary);
+    font-size: 20px;
+    opacity: 1;
+
+    &.mat-tab-label-active {
+      color: var(--color-action-primary);
+      font-weight: 700;
+    }
+  }
+
+  button[mat-raised-button] {
+    align-self: center;
+    flex: 0 0 auto;
+  }
+}
+
+.ov-tab-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+// ── Section ──────────────────────────────────────────────
+
+.ov-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// .ov-title replaced by global .block-title (18px/500, design system H4)
+
+// ── Table shared ──────────────────────────────────────────
+
+.ov-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.ov-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 16px;
+
+  th {
+    height: 60px;
+    padding: 12px 8px;
+    background: var(--color-bg-muted);
+    border-bottom: 2px solid var(--color-border-default);
+    color: var(--color-text-secondary);
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 400;
+    line-height: 1.45;
+  }
+
+  td {
+    height: 60px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--color-border-default);
+    text-align: center;
+    vertical-align: middle;
+    font-weight: 400;
+    line-height: 1.45;
+    word-break: break-word;
+  }
+
+  tbody tr:nth-child(even) td {
+    background: var(--color-bg-subtle);
+  }
+}
+
+// .val-up / .val-down — defined globally in styles.scss (uses --color-price-up / --color-price-down)
+
+// ── Fund table wrapper ────────────────────────────────────
+
+.ov-fund-table {
+  display: flex;
+  flex-direction: column;
+}
+
+// ── Fund detail grid ──────────────────────────────────────
+
+.ov-detail-head {
+  display: grid;
+  grid-template-columns: 280px 1fr 88px;
+  gap: 20px;
+  padding: 12px 0;
+  background: var(--color-bg-muted);
+  border-bottom: 2px solid var(--color-border-default);
+  align-items: center;
+}
+
+.ov-head-name {
+  padding-left: 20px;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+}
+
+.ov-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+}
+
+.ov-metric-head,
+.ov-metric,
+.ov-ct-metric {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  text-align: center;
+  font-size: 16px;
+  line-height: normal;
+  min-width: 0;
+}
+
+.ov-metric-head {
+  color: var(--color-text-secondary);
+}
+
+.ov-line {
+  width: 100%;
+  height: 1px;
+  background: var(--color-border-default);
+}
+
+// ── Fund row ──────────────────────────────────────────────
+
+.ov-fund {
+  display: flex;
+  flex-direction: column;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.ov-fund-main {
+  display: grid;
+  grid-template-columns: 280px 1fr 88px;
+  gap: 20px;
+  padding: 24px 0;
+  align-items: center;
+  cursor: pointer;
+  transition: background .12s;
+
+  &:hover {
+    background: var(--color-bg-subtle);
+  }
+}
+
+.ov-fund-toggle {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 6px;
+  padding-right: 20px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ov-fund-name {
+  padding-left: 20px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+  min-width: 0;
+
+  strong {
+    display: block;
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 400;
+  }
+}
+
+.ov-fund-code {
+  display: block;
+  font-size: 14px;
+  color: var(--color-text-secondary);
+}
+
+// ── Contract rows ──────────────────────────────────────────
+
+.ov-contracts {
+  text-align: left;
+  background: var(--color-bg-subtle);
+  border-top: 2px solid var(--color-border-default);
+  border-left: 3px solid var(--color-border-info);
+}
+
+.ov-ct-head,
+.ov-ct-row {
+  display: grid;
+  grid-template-columns: 212px minmax(0, 1fr) 210px;
+  gap: 20px;
+  align-items: center;
+}
+
+.ov-ct-head {
+  padding: 14px 0;
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+}
+
+.ov-ct-row {
+  min-height: 100px;
+  padding: 20px 0;
+  border-top: 1px solid var(--color-border-default);
+
+  &:nth-child(odd) {
+    background: var(--color-bg-subtle);
+  }
+}
+
+.ov-ct-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-items: center;
+}
+
+.ov-ct-name {
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-size: 16px;
+  line-height: 1.4;
+}
+
+.ov-ct-alias { color: var(--color-text-primary); }
+.ov-ct-fpno  { color: var(--color-text-secondary); font-size: 14px; display: flex; align-items: center; gap: 6px; }
+
+.ov-ct-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding-right: 20px;
+
+  // compact inline action buttons
+  [mat-stroked-button],
+  [mat-raised-button] {
+    line-height: 28px;
+    padding: 0 10px;
+    min-width: 52px;
+    font-size: 14px;
+  }
+}
+
+// ── Filter bar ──────────────────────────────────────────
+
+.ov-filter-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 20px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-base);
+}
+
+.ov-profit-filter {
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 10px;
+}
+
+.ov-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ov-filter-label {
+  flex: 0 0 auto;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+// ── Order section ──────────────────────────────────────────
+
+.ov-order-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// .ov-order-head replaced by global .block-header
+
+// .ov-order-title replaced by global .block-title
+
+.ov-order-count {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.ov-order-table {
+  th.col-check, td.col-check { width: 64px; }
+  th.col-fund,  td.col-fund  { width: 240px; text-align: left; }
+  th.col-time,  td.col-time  { width: 180px; }
+  th.col-amount,td.col-amount{ width: 140px; }
+  th.col-status,td.col-status{ width: 90px; }
+}
+
+// ── Order cell helpers ─────────────────────────────────────
+
+.ov-cell-code { color: var(--color-text-secondary); font-size: 14px; }
+.ov-cell-name { color: var(--color-text-primary); font-size: 16px; }
+.ov-cell-sub  { color: var(--color-text-secondary); font-size: 14px; margin-top: 4px; }
+.ov-cell-old  { color: var(--color-text-secondary); text-decoration: line-through; font-size: 14px; }
+.ov-cell-changed { color: var(--color-action-primary); }
+
+// ── Cancel bar ────────────────────────────────────────────
+
+.ov-cancel-bar {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  gap: 20px;
+  align-items: center;
+  padding: 16px 20px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-base);
+}
+
+.ov-cancel-info {
+  color: var(--color-text-primary);
+  font-size: 16px;
+  white-space: nowrap;
+}
+
+.ov-cancel-pwd-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.ov-cancel-label {
+  color: var(--color-input-label);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.ov-cancel-pwd-field {
+  flex: 1;
+  min-width: 200px;
+}
+
+.ov-cancel-actions {
+  display: flex;
+  gap: 8px;
+}
+
+// ── Profit section ─────────────────────────────────────────
+
+.ov-profit-section {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.ov-profit-table {
+  th.col-fund, td.col-fund { width: 200px; text-align: left; }
+  th.col-date, td.col-date { width: 100px; }
+}
+
+.ov-profit-note {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.75;
+  margin: 0;
+}
+
+// .ov-notes / .ov-notes-title / .ov-notes-list — replaced by global .notes-block / .notes-title / .notes-list
+
+// ── Detail icon button ────────────────────────────────────────
+
+.detail-icon-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2px 4px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: 15px;
+  line-height: 1;
+
+  &:hover { color: var(--color-text-primary); }
+}
+
+// ── Detail modal overlay ──────────────────────────────────────
+
+.detail-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 900;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.detail-panel {
+  background: var(--color-bg-base);
+  border-radius: 12px;
+  width: min(960px, 100%);
+  height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.18);
+}
+
+.detail-panel-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--color-border-default);
+  flex-shrink: 0;
+}
+
+.detail-panel-title {
+  font-size: 18px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
+.detail-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--color-text-secondary);
+  font-size: 18px;
+
+  &:hover { color: var(--color-text-primary); }
+}
+
+.detail-filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 16px 24px 12px;
+  flex-shrink: 0;
+}
+
+::ng-deep .detail-panel {
+  .mat-tab-group {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .mat-tab-body-wrapper {
+    flex: 1;
+    overflow-y: auto;
+  }
+  .mat-tab-body-content {
+    display: flex;
+    flex-direction: column;
+  }
+}
+
+.detail-tx-table {
+  th:nth-child(1), td:nth-child(1) { width: 150px; }
+  th:nth-child(2), td:nth-child(2) { width: 90px; }
+  th:nth-child(3), td:nth-child(3) { width: 100px; }
+  th:nth-child(4), td:nth-child(4) { width: 120px; }
+  th:nth-child(5), td:nth-child(5) { width: 90px; }
+  th:nth-child(6), td:nth-child(6) { width: 120px; }
+  th:nth-child(7), td:nth-child(7) { width: 80px; }
+  th:nth-child(8), td:nth-child(8) { width: 110px; }
+}
+
+.detail-chg-table {
+  th:nth-child(1), td:nth-child(1) { width: 155px; }
+  th:nth-child(2), td:nth-child(2) { width: 100px; }
+  th:nth-child(3), td:nth-child(3) { width: 120px; }
+  th:nth-child(4), td:nth-child(4) { width: 120px; }
+  th:nth-child(5), td:nth-child(5) { width: 100px; }
+  th:nth-child(6), td:nth-child(6) { width: 80px; }
+}
+
+// ── Empty state ─────────────────────────────────────────────
+
+.ov-empty {
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  text-align: center;
+  padding: 40px 0;
+}
+
+// ── RWD ─────────────────────────────────────────────────────
+
+@media (max-width: 1024px) {
+  .ov-detail-head { grid-template-columns: 200px 1fr 88px; }
+  .ov-fund-main   { grid-template-columns: 200px 1fr 88px; }
+
+  .ov-ct-head,
+  .ov-ct-row {
+    grid-template-columns: 180px minmax(0, 1fr) 210px;
+  }
+}
+
+@media (max-width: 767px) {
+  .ov-shell {
+    padding: 0 15px 60px;
+    gap: 24px;
+  }
+
+  .ov-nav-row {
+    ::ng-deep .mat-tab-link {
+      padding: 0 16px;
+      height: 48px;
+      font-size: 16px;
+    }
+  }
+
+  .ov-detail-head,
+  .ov-fund-main {
+    grid-template-columns: 1fr;
+  }
+
+  .ov-head-name { padding-left: 12px; }
+  .ov-fund-name { padding-left: 12px; }
+
+  .ov-metric-grid { grid-template-columns: repeat(2, 1fr); gap: 16px; }
+
+  .ov-ct-head,
+  .ov-ct-row {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+
+  .ov-ct-grid { grid-template-columns: repeat(2, 1fr); }
+
+  .ov-cancel-bar {
+    grid-template-columns: 1fr;
+  }
+}

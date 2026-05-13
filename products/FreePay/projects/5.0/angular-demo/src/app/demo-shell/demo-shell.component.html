@@ -1,0 +1,480 @@
+<div class="demo-bar">
+  <span>DEMO 情境</span>
+  <a routerLink="/demo/overview" class="demo-button">帳戶總覽</a>
+  <a
+    *ngFor="let s of scenarios"
+    [routerLink]="['/demo', s.id]"
+    class="demo-button"
+    [class.is-active]="scenario?.id === s.id"
+  >
+    {{ s.label }}
+  </a>
+</div>
+
+<mat-horizontal-stepper
+  class="material-flow-stepper"
+  labelPosition="bottom"
+  [linear]="false"
+  [selectedIndex]="stepIndex"
+  (selectionChange)="onStepperSelectionChange($event.selectedIndex)"
+>
+  <ng-template matStepperIcon="number" let-index="index">
+    <span *ngIf="index < lastStepIndex">{{ index + 1 }}</span>
+    <i *ngIf="index === lastStepIndex" class="bi bi-flag-fill"></i>
+  </ng-template>
+  <ng-template matStepperIcon="edit" let-index="index">
+    <i *ngIf="index < lastStepIndex" class="bi bi-check"></i>
+    <i *ngIf="index === lastStepIndex" class="bi bi-flag-fill"></i>
+  </ng-template>
+  <ng-template matStepperIcon="done" let-index="index">
+    <i *ngIf="index < lastStepIndex" class="bi bi-check"></i>
+    <i *ngIf="index === lastStepIndex" class="bi bi-flag-fill"></i>
+  </ng-template>
+
+  <mat-step *ngFor="let step of steps; let i = index; trackBy: trackStep" [completed]="i < stepIndex">
+    <ng-template matStepLabel>{{ step.label }}</ng-template>
+  </mat-step>
+</mat-horizontal-stepper>
+
+<div class="page-body">
+  <main class="main-content">
+    <section class="fund-card" aria-label="基金資訊" *ngIf="activeStep !== 'done'">
+      <div class="fund-name">
+        <span class="fund-code">{{ scenario?.fundId }}</span>{{ scenario?.fundName }}
+      </div>
+      <div class="sidebar-tags">
+        <span>{{ scenario?.tscd }}</span>
+        <span>{{ selectedCurrency?.currency }}計價</span>
+        <span>{{ scenario?.risk }}</span>
+      </div>
+    </section>
+
+    <!-- s-ccy：交易選擇 -->
+    <section class="screen" *ngIf="activeStep === 'ccy'">
+      <section class="block">
+        <div class="block-header">
+          <h2 class="block-title">選擇交易方式</h2>
+        </div>
+
+        <!-- 多幣別：幣別切換 -->
+        <mat-button-toggle-group
+          *ngIf="isMultiCurrency"
+          class="mode-toggle mode-toggle-fill ccy-selector"
+          [value]="selectedCurrency?.currencyCode"
+          (change)="selectCurrency($event.value)"
+          aria-label="申購幣別"
+        >
+          <mat-button-toggle
+            *ngFor="let c of scenario?.availableCurrencies"
+            [value]="c.currencyCode"
+          >{{ c.currency }}（{{ c.currencyCode }}）</mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <!-- 此幣別有既有合約 -->
+        <ng-container *ngIf="contractsForSelectedCurrency.length > 0">
+          <div class="contract-list">
+            <button
+              *ngFor="let contract of contractsForSelectedCurrency"
+              class="contract-card"
+              [class.is-selected]="selectedContract?.fpNo === contract.fpNo"
+              type="button"
+              (click)="selectContract(contract)"
+            >
+              <div class="contract-card-check">
+                <i class="bi" [class.bi-record-circle-fill]="selectedContract?.fpNo === contract.fpNo" [class.bi-circle]="selectedContract?.fpNo !== contract.fpNo"></i>
+              </div>
+              <div class="contract-card-body">
+                <div class="contract-name">{{ contract.name }}</div>
+                <div class="contract-meta">{{ selectedCurrency?.currencyCode }} ・ 成立 {{ contract.startDate }}</div>
+                <div class="contract-pay">每月 Pay NT$ {{ contract.monthlyPay.toLocaleString() }}（年化 {{ contract.annualRate }}%）・ {{ contract.threshold }}</div>
+                <div class="contract-value">約當市值 NT$ {{ contract.marketValue.toLocaleString() }}</div>
+              </div>
+              <div class="contract-card-action">
+                <span class="badge-addon">加碼</span>
+              </div>
+            </button>
+          </div>
+
+          <div class="ccy-divider"><span>或</span></div>
+
+          <button
+            class="contract-card"
+            [class.is-selected]="purchaseMode === 'new'"
+            type="button"
+            (click)="selectNewPurchase()"
+          >
+            <div class="contract-card-check">
+              <i class="bi" [class.bi-record-circle-fill]="purchaseMode === 'new'" [class.bi-circle]="purchaseMode !== 'new'"></i>
+            </div>
+            <div class="contract-card-body">
+              <div class="contract-name">建立新申購</div>
+              <div class="contract-meta">不加碼至現有交易，可重新設定 Pay 金額與基準日</div>
+            </div>
+          </button>
+        </ng-container>
+
+        <!-- 此幣別無既有合約 -->
+        <div class="info-box" *ngIf="contractsForSelectedCurrency.length === 0">
+          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+          <span>{{ selectedCurrency?.currency }}（{{ selectedCurrency?.currencyCode }}）尚無既有交易，本次將建立新申購。</span>
+        </div>
+      </section>
+    </section>
+
+    <!-- s-settings：申購設定 -->
+    <form [formGroup]="form" class="screen" *ngIf="activeStep === 'settings'" novalidate>
+
+      <section class="block">
+        <div class="block-header">
+          <h2 class="block-title">{{ amountSectionTitle }}</h2>
+        </div>
+        <!-- 多幣別・新申購：幣別選擇與金額同塊 -->
+        <mat-button-toggle-group
+          *ngIf="isMultiCurrency && !isAddOnMode"
+          class="mode-toggle mode-toggle-fill ccy-selector"
+          [value]="selectedCurrency?.currencyCode"
+          (change)="selectCurrency($event.value)"
+          aria-label="申購幣別"
+        >
+          <mat-button-toggle
+            *ngFor="let c of scenario?.availableCurrencies"
+            [value]="c.currencyCode"
+          >{{ c.currency }}（{{ c.currencyCode }}）</mat-button-toggle>
+        </mat-button-toggle-group>
+        <mat-form-field appearance="fill" color="accent" class="full-field">
+          <mat-label>金額</mat-label>
+          <input matInput type="text" inputmode="numeric" formControlName="amount" required>
+          <mat-hint>{{ minAmountHint }}</mat-hint>
+          <mat-error *ngIf="form.controls.amount.hasError('required')">請輸入金額</mat-error>
+          <mat-error *ngIf="form.controls.amount.hasError('min')">{{ minAmountErrorMsg }}</mat-error>
+        </mat-form-field>
+      </section>
+
+      <!-- 加碼模式：Pay 設定維持既有，顯示說明 -->
+      <div class="info-box" *ngIf="isAddOnMode">
+        <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+        <span>加碼至既有交易時，Pay 設定維持原本不變。如需修改，請至持有查詢頁面使用異動設定功能。</span>
+      </div>
+
+      <!-- 新申購模式：Pay 出設定 -->
+      <section class="block" id="pay-settings-block" *ngIf="!isAddOnMode">
+        <div class="block-header">
+          <h2 class="block-title">Pay 出設定</h2>
+          <mat-slide-toggle
+            color="primary"
+            [checked]="payActive"
+            (change)="togglePayActive($event.checked)"
+          >
+            {{ payActive ? '啟用中' : '未啟用' }}
+          </mat-slide-toggle>
+        </div>
+
+        <div class="form-group">
+          <div class="form-label">
+            Pay 出方式
+            <button
+              class="hint-icon"
+              type="button"
+              aria-label="Pay 出方式說明"
+              [attr.aria-expanded]="payModeHintOpen"
+              (click)="toggleHint('payMode')"
+            >
+              <i class="bi bi-info-circle"></i>
+            </button>
+          </div>
+          <div class="hint-panel" [class.is-open]="payModeHintOpen">
+            <strong>依金額</strong>：每月固定提領設定之金額。<br>
+            <strong>依比例</strong>：每月固定按最新市值之年化自由 Pay 率（上限 15%）提領。<br><br>
+            提領單位數以贖回前一日的最新淨值估算，實際金額將依交易淨值而定，可能與設定金額有差異。
+          </div>
+          <mat-button-toggle-group class="mode-toggle mode-toggle-fill" [value]="payMode" (change)="setPayMode($event.value)" aria-label="Pay 方式">
+            <mat-button-toggle value="amount">依金額</mat-button-toggle>
+            <mat-button-toggle value="ratio">依比例</mat-button-toggle>
+          </mat-button-toggle-group>
+        </div>
+
+        <div *ngIf="payMode === 'amount'" class="pay-mode-panel">
+          <mat-form-field appearance="fill" color="accent" class="full-field">
+            <mat-label>每月 Pay 金額</mat-label>
+            <input matInput type="text" inputmode="numeric" formControlName="monthlyPay" required>
+            <mat-hint *ngIf="hasPayInput && annualRate <= 15">年化約 {{ formatRate(annualRate) }}</mat-hint>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('required')">請輸入每月 Pay 金額</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('min')">每月 Pay 金額需大於 0</mat-error>
+            <mat-error *ngIf="hasPayInput && annualRate > 15">年化提領率不可超過 15%，請降低每月 Pay 金額。</mat-error>
+          </mat-form-field>
+        </div>
+
+        <div *ngIf="payMode === 'ratio'" class="pay-mode-panel">
+          <div class="ratio-slider">
+            <div class="ratio-summary">
+              <div class="ratio-value">年化 Pay 比例 {{ form.controls.ratio.value || 0 }}%</div>
+              <div class="slider-hint" *ngIf="hasPayInput">試算每月 Pay {{ formatMoney(monthlyPay) }}</div>
+            </div>
+            <mat-slider min="1" max="15" step="1" thumbLabel tickInterval="1" formControlName="ratio"></mat-slider>
+          </div>
+        </div>
+
+        <div class="date-section">
+          <div class="form-label">
+            自由 Pay 基準日
+            <button
+              class="hint-icon"
+              type="button"
+              aria-label="自由 Pay 基準日說明"
+              [attr.aria-expanded]="dateHintOpen"
+              (click)="toggleHint('date')"
+            >
+              <i class="bi bi-info-circle"></i>
+            </button>
+          </div>
+          <div class="hint-panel" [class.is-open]="dateHintOpen">
+            自由 Pay 基準日為贖回申請日，實際入帳時間視基金公司付款作業而定，一般而言平均約 7～10 個營業日入帳。<br><br>
+            變更設定於營業日 14:00 前下單視為當日申請；14:00 以後下單則視為次一營業日申請。設定自由 Pay 基準日若距首次申購日不足 30 個日曆日時，將於屆滿 30 日後之最近一次自由 Pay 基準日開始執行。<br><br>
+            若當月無設定之基準日（如 29、30、31 日），則遞延至下個營業日申請。
+          </div>
+          <div class="date-grid">
+            <button
+              *ngFor="let day of dateOptions"
+              class="date-btn"
+              type="button"
+              [class.on]="selectedDay === day"
+              [class.long-month]="day >= 29"
+              (click)="pickDate(day)"
+            >
+              {{ day }}
+            </button>
+          </div>
+          <div class="helper date-long-hint" *ngIf="showLongDateHint">
+            <span>{{ longDateHintText }}</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- 觸發門檻（新申購且 Pay 啟用時才顯示） -->
+      <section class="block" *ngIf="!isAddOnMode && payActive">
+        <div class="block-header threshold-head">
+          <div>
+            <h2 class="block-title">觸發門檻</h2>
+          </div>
+          <mat-slide-toggle
+            color="primary"
+            [checked]="thresholdEnabled"
+            [disabled]="!payActive"
+            (change)="toggleThreshold($event.checked)"
+          >
+            {{ thresholdEnabled ? '啟用中' : '未啟用' }}
+          </mat-slide-toggle>
+        </div>
+
+        <div class="pay-paused-box" *ngIf="!thresholdEnabled">
+          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+          <span>每月按設定基準日正常執行 Pay 出，不設觸發條件。</span>
+        </div>
+
+        <div *ngIf="thresholdEnabled" class="threshold-body">
+          <mat-button-toggle-group
+            class="mode-toggle mode-toggle-fill threshold-mode-toggle"
+            [value]="thresholdMode"
+            (change)="setThresholdMode($event.value)"
+            aria-label="觸發門檻類型"
+          >
+            <mat-button-toggle value="protect">市值守護</mat-button-toggle>
+            <mat-button-toggle value="unlock">增值啟動</mat-button-toggle>
+          </mat-button-toggle-group>
+
+          <div class="threshold-selector-panel">
+            <div class="threshold-copy">
+              <div class="threshold-title">{{ thresholdTitle }}</div>
+              <p *ngIf="thresholdDescription">{{ thresholdDescription }}</p>
+            </div>
+
+            <div class="threshold-slider-control" [class.is-unlock]="thresholdMode === 'unlock'">
+              <div class="threshold-slider-labels" *ngIf="thresholdMode === 'protect'">
+                <span>跌 20%</span>
+                <span>跌 5%</span>
+              </div>
+              <mat-slider
+                *ngIf="thresholdMode === 'protect'"
+                min="-20"
+                max="-5"
+                step="5"
+                thumbLabel
+                tickInterval="5"
+                [ngModel]="thresholdValue"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="setThresholdValue($event)"
+              ></mat-slider>
+
+              <div class="threshold-slider-labels" *ngIf="thresholdMode === 'unlock'">
+                <span>漲 5%</span>
+                <span>漲 100%</span>
+              </div>
+              <mat-slider
+                *ngIf="thresholdMode === 'unlock'"
+                min="5"
+                max="100"
+                step="5"
+                thumbLabel
+                tickInterval="5"
+                [ngModel]="thresholdValue"
+                [ngModelOptions]="{ standalone: true }"
+                (ngModelChange)="setThresholdValue($event)"
+              ></mat-slider>
+            </div>
+          </div>
+        </div>
+      </section>
+    </form>
+
+    <!-- s-confirm：確認送出 -->
+    <section class="screen" *ngIf="activeStep === 'confirm'">
+
+      <!-- 確認明細：合併申購摘要與 Pay 設定 -->
+      <section class="block confirm-block">
+        <div class="block-header">
+          <h2 class="block-title">確認明細</h2>
+        </div>
+        <div class="sum-table">
+          <div class="sum-row"><span>申購類型</span><strong>{{ isAddOnMode ? '加碼' : '新申購' }}</strong></div>
+          <div class="sum-row" *ngIf="isAddOnMode && selectedContract">
+            <span>加碼至</span><strong>{{ selectedContract.name }}</strong>
+          </div>
+          <div class="sum-row"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
+          <ng-container *ngIf="!isAddOnMode">
+            <div class="sum-row" *ngIf="payMode === 'amount'">
+              <span>每月 Pay 金額</span>
+              <strong class="hl">{{ formatMoney(monthlyPay) }}</strong>
+            </div>
+            <div class="sum-row" *ngIf="payMode === 'ratio'">
+              <span>每月 Pay 比例</span>
+              <strong class="hl">年化 {{ form.controls.ratio.value }}%</strong>
+            </div>
+            <div class="sum-row"><span>Pay 基準日</span><strong>每月 {{ form.controls.day.value }} 日</strong></div>
+            <div class="sum-row"><span>停 Pay 門檻</span><strong>{{ thresholdText }}</strong></div>
+          </ng-container>
+        </div>
+        <div class="info-box confirm-addon-note" *ngIf="isAddOnMode">
+          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+          <span>加碼後 Pay 設定維持既有交易不變。</span>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-header">
+          <h2 class="block-title">相關文件</h2>
+        </div>
+        <div class="doc-list">
+          <a class="doc-item" href="#" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>簡式公開說明書</span>
+          </a>
+          <a class="doc-item" href="#" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>公開說明書</span>
+          </a>
+          <a class="doc-item" href="#" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>投資人須知（一般）</span>
+          </a>
+          <a class="doc-item" href="#" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>投資人須知（專屬）</span>
+          </a>
+          <a class="doc-item" href="#" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>風險預告</span>
+          </a>
+          <a class="doc-item" href="#" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>通路報酬資訊</span>
+          </a>
+          <a class="doc-item" href="#" target="_blank">
+            <i class="bi bi-file-earmark-pdf-fill"></i>
+            <span>近五年費用率及報酬率</span>
+          </a>
+        </div>
+      </section>
+
+      <section class="block">
+        <div class="block-header">
+          <h2 class="block-title">自由 Pay 理財服務條款</h2>
+        </div>
+        <div class="terms-content">
+          <p>當您同意開始使用鉅亨自由Pay功能(下稱本服務)或本服務之一部或全部功能，即視為您已詳細閱讀並同意遵守本條款。如果您經過考慮後不同意本條款的內容，請您不要使用或立即停止本服務。基於以上之充分認知，您同意使用本服務，並遵守以下之約定：</p>
+          <p><strong>一、 本服務之內容</strong><br>
+          二、 免責聲明</p>
+          <p><strong>一、 本服務之內容</strong></p>
+          <p>1. 本服務是由本公司向您提供基金定期贖回之功能，非基金配息，每月之贖回金額係以基金最近一日淨值估算贖回單位數，故實際贖回金額可能與設定金額不同。舉例說明:若設定A基金每月於基準日贖回金額1,000元，本公司將於基準日前一日取得A基金最近一日淨值(假設淨值為10)，估算需贖回100個單位數(1,000/10)，假設實際贖回淨值為10.2，實際贖回金額將為1,020(100*10.2)；若設定B基金每月贖回比例15%/年，本公司將於基準日前一日取得最近一日淨值(假設淨值為10)推估約當台幣市值並計算預計贖回金額為12,500(假設市值為100萬元，100萬*15%/12)，估算需贖回單位數1250單位數(1,000,000*15%/12/10)，假設實際贖回淨值為10.2，實際贖回金額將為12,750(1,250*10.2)。</p>
+          <p>2. 定期贖回基準日以設定贖回日為基準日，贖回款項入帳日依各基金公司贖回規則而定，一般約於設定贖回日後7-10個營業日入帳。首次申購、加碼申購於營業日13:00前下單，視為當日申請，於13:00以後下單，則視為次一營業日申請。定期贖回設定或其餘變更設定於營業日14:00前設定視為當日申請，於14:00以後設定則視為次一營業日申請。</p>
+          <p>3. 本服務限制:<br>
+          A. 本服務可彈性選擇是否開啟投資本金80%下檔停扣機制。若開啟，基金於贖回基準日前一日約當市值低於總投入成本80%時將不執行本服務，當市值回升或計入加碼金額計算市值高於80%時始繼續執行本服務；若關閉，自動提領機制將自動執行至庫存單位數為0。當次提領後剩餘基金庫存單位數不足1個單位時，剩餘基金單位數將自動於當次併同贖回。<br>
+          B. 設定贖回基準日若距首次申購不足30個日曆日、加碼申購並調整贖回金額致首次申購剩餘之單位數不足最近一次設定贖回所需單位數(即含加碼申購)或因市值低於總投入成本80%所為之加碼申購而使市值高於80%時，均可能因相關異動距贖回基準日過短，贖回程序將無法立即被執行或可能暫停交易乙次，需俟屆滿30日後之最近一次贖回基準日方開始執行定期贖回服務。</p>
+          <p><strong>二、 免責聲明</strong></p>
+          <p>1. 您瞭解本公司不保證本服務絕不發生中斷及錯誤等情況，您應確認並擔保係由您本人進行本服務相關功能之操作。所有您於本服務上執行之操作均由系統即時接收，並依相關指令即時或批次進行處理。</p>
+          <p>2. 於發生下列情形之一時，本公司有權立即停止或中斷本服務，或被迫停止或中斷本服務之提供：<br>
+          (1)對本公司之電子設備進行必要之保養及施工時。<br>
+          (2)發生突發性設備或系統故障時。<br>
+          (3)由於天災、戰爭等不可抗力或其他非可歸責本公司之因素致使本公司無法提供服務時。</p>
+          <p>3. 本公司以目前一般認為合理之方式及技術維護本服務系統之正常運作，您應瞭解並同意，本公司可能因公司、其他協力廠商或資訊來源提供方之系統軟硬體設備之故障或失靈、或人為操作上之疏失而全部或一部中斷、暫時無法使用、遲延、或造成資料傳輸或儲存上之錯誤或資訊顯示不正確、或因其他類似事由致本服務無法正常提供，您不得因此而要求任何補償或賠償。</p>
+          <p>4. 如因法令或其他特殊情事發生，包括但不限於本公司經營策略之調整、依法律、法令、法院或政府機關之命令，或本服務發生無法繼續或無法預期之技術或安全因素或問題等情況，本公司有權經通知後逕行終止，於前述情形，本公司對您或任何第三人均不負擔任何責任。</p>
+        </div>
+        <mat-checkbox color="primary" class="agree-label" [(ngModel)]="agreedTerms">
+          本人已於交易前詳閱並同意以上相關文件及服務條款，且已閱讀及了解基金通路報酬揭露及風險預告，經充分評估符合投資需求。
+        </mat-checkbox>
+      </section>
+
+      <section class="block">
+        <div class="block-header">
+          <h2 class="block-title">交易密碼</h2>
+        </div>
+        <mat-form-field appearance="fill" color="accent" class="full-field">
+          <mat-label>請輸入交易密碼</mat-label>
+          <input matInput [type]="pwdVisible ? 'text' : 'password'" [(ngModel)]="pwd" autocomplete="off">
+          <button mat-icon-button matSuffix type="button" (click)="pwdVisible = !pwdVisible" [attr.aria-label]="pwdVisible ? '隱藏密碼' : '顯示密碼'">
+            <i class="bi" [class.bi-eye]="!pwdVisible" [class.bi-eye-slash]="pwdVisible"></i>
+          </button>
+        </mat-form-field>
+      </section>
+    </section>
+
+    <!-- s-done：完成 -->
+    <section class="screen" *ngIf="activeStep === 'done'">
+      <section class="success-block">
+        <div class="success-ring"><i class="bi bi-check-circle-fill"></i></div>
+        <h2>委託已成功送出</h2>
+        <div class="order-box">
+          <div class="sum-row"><span>委託時間</span><strong>2026/05/12 14:30</strong></div>
+          <div class="sum-row"><span>基金</span><strong><span class="fund-code">{{ scenario?.fundId }}</span>{{ scenario?.fundName }}</strong></div>
+          <div class="sum-row"><span>申購類型</span><strong>{{ isAddOnMode ? '加碼' : '新申購' }}</strong></div>
+          <div class="sum-row"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
+          <div class="sum-row" *ngIf="!isAddOnMode && payMode === 'amount'"><span>每月 Pay 金額</span><strong class="hl">{{ formatMoney(monthlyPay) }}</strong></div>
+          <div class="sum-row" *ngIf="!isAddOnMode && payMode === 'ratio'"><span>每月 Pay 比例</span><strong class="hl">年化 {{ form.controls.ratio.value }}%</strong></div>
+          <div class="sum-row" *ngIf="!isAddOnMode"><span>首次基準生效日</span><strong>{{ scenario?.firstRdmDate }}</strong></div>
+          <div class="sum-row"><span>扣款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
+        </div>
+        <div class="done-actions">
+          <button mat-stroked-button type="button" (click)="QryTrade()">委託查詢</button>
+          <button mat-raised-button color="primary" type="button" (click)="reset()">繼續申購</button>
+        </div>
+        <div class="notes-block">
+          <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
+          <ol class="notes-list">
+            <li *ngIf="!isAddOnMode">您的自由 Pay 申購委託已送出。預計 3-4 個營業日後申購確認書入帳，首次 Pay 將於設定基準日（每月 {{ form.controls.day.value }} 日）執行；若距申購確認日不足 30 日，將順延至屆滿後的第一個基準日。</li>
+            <li *ngIf="isAddOnMode">您的加碼委託已送出。申購確認後金額將計入既有交易，Pay 設定維持既有交易不變。預計 3-4 個營業日後申購確認書入帳。</li>
+            <li>若超過本營業日交易時間 13:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。若您有任何疑問，請洽客服專線 02-27208126。</li>
+          </ol>
+        </div>
+      </section>
+    </section>
+  </main>
+</div>
+
+<div class="action-bar" *ngIf="activeStep !== 'done'">
+  <div class="action-inner">
+    <button mat-stroked-button type="button" [disabled]="activeStep === 'ccy' || (activeStep === 'settings' && !shouldShowSccy)" (click)="previous()">上一步</button>
+    <button mat-raised-button color="primary" type="button" [disabled]="activeStep === 'confirm' && submitDisabled" (click)="next()">
+      {{ activeStep === 'confirm' ? '確認送出' : '下一步' }}
+      <i class="bi" [class.bi-check-lg]="activeStep === 'confirm'" [class.bi-arrow-right]="activeStep !== 'confirm'"></i>
+    </button>
+  </div>
+</div>
