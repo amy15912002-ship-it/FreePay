@@ -2,17 +2,16 @@ import { Component } from '@angular/core';
 import { SCENARIOS } from '../mock-data/scenarios';
 import {
   OV_SUMMARIES, OV_FUNDS, MOCK_ALT_ORDERS, MOCK_CHG_ORDERS, MOCK_RDM_ORDERS, MOCK_PROFITS,
-  AltOrder, ProfitRecord, DetailTxRecord, DetailChgRecord, DETAIL_TX_DETAIL, DETAIL_TX_CHANGE
+  OvSummary, AltOrder, ProfitRecord, DetailTxRecord, DetailChgRecord, DETAIL_TX_DETAIL, DETAIL_TX_CHANGE
 } from '../mock-data/overview';
 
 type OvTab = 'overview' | 'order' | 'profit';
 type OrderFilter = 'all' | 'alt' | 'chg' | 'rdm';
-type ProfitPeriod = '3M' | '6M' | '1Y' | 'ALL';
+type ProfitPeriod = '3M' | '6M' | '1Y' | 'ALL' | 'CUSTOM';
 type ProfitCcy = 'all' | 'TWD' | 'USD';
-type DetailTab = 'tx' | 'chg';
-type DetailTxType = 'all' | 'A' | 'R';
+type DetailTxType = 'all' | 'A' | 'R' | 'RDM';
 type DetailChgType = 'all' | 'TAP' | 'AL' | 'P' | 'D' | 'DL';
-type DetailTimeType = '3M' | '6M' | '1Y' | 'ALL';
+type DetailTimeType = '3M' | '6M' | '1Y' | 'ALL' | 'CUSTOM';
 
 const REFERENCE_DATE = new Date('2026-05-12T00:00:00');
 
@@ -30,10 +29,24 @@ export class AccountOverviewComponent {
   readonly rdmOrders = MOCK_RDM_ORDERS;
   readonly allProfits = MOCK_PROFITS;
 
+  sumCardIndex = 0;
+  summaryDemoMode: 'multi' | 'single' = 'multi';
+
+  get displaySummaries(): OvSummary[] {
+    return this.summaryDemoMode === 'single' ? this.summaries.slice(0, 1) : this.summaries;
+  }
+
+  onSumScroll(el: HTMLElement): void {
+    const index = Math.round(el.scrollLeft / el.clientWidth);
+    this.sumCardIndex = Math.min(index, this.displaySummaries.length - 1);
+  }
+
   activeTab: OvTab = 'overview';
   orderFilter: OrderFilter = 'all';
   profitPeriod: ProfitPeriod = '6M';
   profitCcy: ProfitCcy = 'all';
+  profitCustomStart = '';
+  profitCustomEnd = '';
 
   expandedFunds = new Set<string>();
   selectedOrders = new Set<string>();
@@ -41,10 +54,15 @@ export class AccountOverviewComponent {
   cancelPwdVisible = false;
 
   detailFpNo: string | null = null;
-  detailTab: DetailTab = 'tx';
+  detailAlias = '';
+  detailIsEditingTitle = false;
+  detailTitleDraft = '';
   detailTxType: DetailTxType = 'all';
   detailChgType: DetailChgType = 'all';
-  detailTimeType: DetailTimeType = '6M';
+  detailTimeType: DetailTimeType = 'ALL';
+  detailCustomStart = '';
+  detailCustomEnd = '';
+  private aliasOverrides = new Map<string, string>();
 
   // ── Fund expand/collapse ──
 
@@ -83,12 +101,18 @@ export class AccountOverviewComponent {
   // ── Profit filters ──
 
   get filteredProfits(): ProfitRecord[] {
-    const end = REFERENCE_DATE;
-    const start = new Date(end);
-    if (this.profitPeriod === '3M') start.setMonth(start.getMonth() - 3);
-    else if (this.profitPeriod === '6M') start.setMonth(start.getMonth() - 6);
-    else if (this.profitPeriod === '1Y') start.setFullYear(start.getFullYear() - 1);
-    else start.setFullYear(2000);
+    let start: Date, end: Date;
+    if (this.profitPeriod === 'CUSTOM') {
+      start = this.profitCustomStart ? new Date(this.profitCustomStart + 'T00:00:00') : new Date(2000, 0, 1);
+      end   = this.profitCustomEnd   ? new Date(this.profitCustomEnd   + 'T23:59:59') : REFERENCE_DATE;
+    } else {
+      end = REFERENCE_DATE;
+      start = new Date(end);
+      if (this.profitPeriod === '3M') start.setMonth(start.getMonth() - 3);
+      else if (this.profitPeriod === '6M') start.setMonth(start.getMonth() - 6);
+      else if (this.profitPeriod === '1Y') start.setFullYear(start.getFullYear() - 1);
+      else start.setFullYear(2000);
+    }
 
     return this.allProfits.filter(item => {
       const d = new Date(item.redeemDate.replace(/\//g, '-') + 'T00:00:00');
@@ -122,6 +146,12 @@ export class AccountOverviewComponent {
   }
 
   // ── Helpers ──
+
+  ccyAccent(ccy: string): string {
+    if (ccy === '台幣') return 'ccy-accent--primary';
+    if (ccy === '美元') return 'ccy-accent--secondary';
+    return 'ccy-accent--tertiary';
+  }
 
   rateClass(val: string): string {
     const n = parseFloat(String(val || '').replace(/[,%]/g, ''));
@@ -168,31 +198,53 @@ export class AccountOverviewComponent {
 
   // ── Detail modal ──
 
-  openDetail(fpNo: string): void {
+  openDetail(fpNo: string, alias: string): void {
     this.detailFpNo = fpNo;
-    this.detailTab = 'tx';
+    this.detailAlias = this.aliasOverrides.get(fpNo) ?? alias;
+    this.detailIsEditingTitle = false;
+    this.detailTitleDraft = '';
     this.detailTxType = 'all';
     this.detailChgType = 'all';
-    this.detailTimeType = '6M';
+    this.detailTimeType = 'ALL';
+    this.detailCustomStart = '';
+    this.detailCustomEnd = '';
   }
 
   closeDetail(): void {
     this.detailFpNo = null;
   }
 
-  onDetailTabChange(index: number): void {
-    this.detailTab = index === 0 ? 'tx' : 'chg';
+  startEditTitle(): void {
+    this.detailTitleDraft = this.detailAlias;
+    this.detailIsEditingTitle = true;
+  }
+
+  saveTitle(): void {
+    const trimmed = this.detailTitleDraft.trim().slice(0, 12);
+    this.detailAlias = trimmed;
+    if (this.detailFpNo) this.aliasOverrides.set(this.detailFpNo, trimmed);
+    this.detailIsEditingTitle = false;
+  }
+
+  cancelEditTitle(): void {
+    this.detailIsEditingTitle = false;
   }
 
   get detailTxRecords(): DetailTxRecord[] {
     if (!this.detailFpNo) return [];
     const all = DETAIL_TX_DETAIL[this.detailFpNo] ?? [];
-    const end = REFERENCE_DATE;
-    const start = new Date(end);
-    if (this.detailTimeType === '3M') start.setMonth(start.getMonth() - 3);
-    else if (this.detailTimeType === '6M') start.setMonth(start.getMonth() - 6);
-    else if (this.detailTimeType === '1Y') start.setFullYear(start.getFullYear() - 1);
-    else start.setFullYear(2000);
+    let start: Date, end: Date;
+    if (this.detailTimeType === 'CUSTOM') {
+      start = this.detailCustomStart ? new Date(this.detailCustomStart + 'T00:00:00') : new Date(2000, 0, 1);
+      end   = this.detailCustomEnd   ? new Date(this.detailCustomEnd   + 'T23:59:59') : REFERENCE_DATE;
+    } else {
+      end = REFERENCE_DATE;
+      start = new Date(end);
+      if (this.detailTimeType === '3M') start.setMonth(start.getMonth() - 3);
+      else if (this.detailTimeType === '6M') start.setMonth(start.getMonth() - 6);
+      else if (this.detailTimeType === '1Y') start.setFullYear(start.getFullYear() - 1);
+      else start.setFullYear(2000);
+    }
     return all.filter(r => {
       const d = new Date(r.orderDate + 'T00:00:00');
       const typeOk = this.detailTxType === 'all' || r.tradeType === this.detailTxType;
@@ -215,7 +267,7 @@ export class AccountOverviewComponent {
   }
 
   txTypeText(t: string): string {
-    return t === 'A' ? '申購' : t === 'R' ? '自由Pay' : t;
+    return t === 'A' ? '申購' : t === 'R' ? '自由Pay' : t === 'RDM' ? '贖回' : t;
   }
 
   chgTypeText(t: string): string {

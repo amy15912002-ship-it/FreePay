@@ -121,6 +121,7 @@ $freepay-theme: mat.define-light-theme((
 @include mat.button-theme($freepay-theme);
 @include mat.button-toggle-theme($freepay-theme);
 @include mat.checkbox-theme($freepay-theme);
+@include mat.chips-theme($freepay-theme);
 @include mat.form-field-theme($freepay-theme);
 @include mat.input-theme($freepay-theme);
 @include mat.slide-toggle-theme($freepay-theme);
@@ -203,6 +204,10 @@ $freepay-theme: mat.define-light-theme((
   --color-input-checkbox-border: var(--color-neutral-400);
   --color-input-checkbox-checked: var(--color-brand-primary-400);
   --color-input-checkbox-ripple: var(--color-brand-primary-50);
+  --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.12);
+  --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.18);
+  --color-overlay-scrim: rgba(0, 0, 0, 0.45);
 }
 
 * {
@@ -380,6 +385,9 @@ textarea {
   margin-bottom: 16px;
 }
 
+// Table header — design system §4.2: table headers use Body SM (14px)
+table th { font-size: 14px; }
+
 // Price direction — always use design-system tokens, never action-primary
 .val-up   { color: var(--color-price-up); }
 .val-down { color: var(--color-price-down); }
@@ -388,9 +396,28 @@ textarea {
 // .mode-toggle        — colours only; width is determined by context
 // .mode-toggle-fill   — adds full-width stretch (for form settings blocks)
 .mode-toggle .mat-button-toggle {
+  height: 36px;
   border-color: var(--color-neutral-200);
   color: var(--color-neutral-600);
   font-size: 14px;
+}
+
+.mode-toggle .mat-button-toggle-button,
+.mode-toggle .mat-button-toggle-label-content {
+  height: 36px;
+  line-height: 36px;
+}
+
+.mode-toggle.mat-button-toggle-group {
+  border-radius: 8px;
+}
+
+.mode-toggle .mat-button-toggle:first-child {
+  border-radius: 8px 0 0 8px;
+}
+
+.mode-toggle .mat-button-toggle:last-child {
+  border-radius: 0 8px 8px 0;
 }
 
 .mode-toggle .mat-button-toggle:hover {
@@ -417,6 +444,42 @@ textarea {
 
 .mode-toggle-fill .mat-button-toggle {
   flex: 1 1 0;
+}
+
+// mat-chip used as a single-select filter control (design system §3.6 選取類 pill)
+.filter-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filter-chips .mat-chip.mat-standard-chip {
+  min-height: 32px;
+  padding: 6px 14px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 8px;
+  background: var(--color-neutral-0);
+  color: var(--color-neutral-600);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+// 移除 Material chip 預設 hover/focus ::after 疊加層，避免點擊後 focus 殘留；
+// hover 回饋改由下方自訂 :hover 樣式提供
+.filter-chips .mat-chip.mat-standard-chip::after {
+  display: none;
+}
+
+.filter-chips .mat-chip.mat-standard-chip:hover {
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-800);
+}
+
+.filter-chips .mat-chip.mat-standard-chip.mat-chip-selected {
+  background: var(--color-bg-brand-subtle);
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
+  font-weight: 700;
 }
 
 // Notes / disclaimer block (注意事項)

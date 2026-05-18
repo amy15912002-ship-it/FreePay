@@ -62,8 +62,9 @@ export interface DetailChgRecord {
 }
 
 export const OV_SUMMARIES: OvSummary[] = [
-  { ccy: '台幣', pay: '5,040', paid: '30,000', market: '680,000', cost: '650,000', profit: '30,000', ret: '5.30%' },
-  { ccy: '美元', pay: '80',    paid: '240',    market: '8,420',   cost: '8,000',   profit: '420',    ret: '8.25%' },
+  { ccy: '台幣', pay: '5,040', paid: '30,000', market: '680,000', cost: '650,000', profit: '30,000',  ret: '5.30%'  },
+  { ccy: '美元', pay: '80',    paid: '240',    market: '8,420',   cost: '8,000',   profit: '420',     ret: '8.25%'  },
+  { ccy: '歐元', pay: '60',    paid: '120',    market: '6,180',   cost: '6,300',   profit: '-120',    ret: '-1.90%' },
 ];
 
 export const OV_FUNDS: OvFund[] = [
@@ -87,9 +88,9 @@ export const OV_FUNDS: OvFund[] = [
   {
     id: 'ta123456-tw', code: 'TA123456', name: '統一大滿貫台灣平衡基金',
     txCcy: '台幣', buyCcy: '台幣',
-    pay: '≈810', paid: '18,000', market: '162,000', cost: '150,000', profit: '12,000', ret: '13.40%',
+    pay: '810', paid: '18,000', market: '162,000', cost: '150,000', profit: '12,000', ret: '13.40%',
     contracts: [
-      { fpNo: 'FP2025002', alias: '20250101', ccy: '台幣', setting: '依比例・6%・5日', threshold: '不設門檻', pay: '≈810', paid: '18,000', market: '162,000', cost: '150,000', profit: '12,000', ret: '13.40%' },
+      { fpNo: 'FP2025002', alias: '20250101', ccy: '台幣', setting: '依比例・6%・5日', threshold: '不設門檻', pay: '810', paid: '18,000', market: '162,000', cost: '150,000', profit: '12,000', ret: '13.40%' },
     ]
   },
 ];
@@ -100,7 +101,7 @@ export const MOCK_ALT_ORDERS: AltOrder[] = [
 ];
 
 export const MOCK_CHG_ORDERS: ChgOrder[] = [
-  { id: 'C20260505001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', ccy: 'USD', oldPay: 'USD 80', newPay: 'USD 100', oldDay: '15', newDay: '15', oldLimit: '增值啟動・漲50%', newLimit: '增值啟動・漲30%', effectDate: '2026/05/06', date: '2026/05/05', time: '11:20:18', status: '成功' },
+  { id: 'C20260505001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', ccy: 'USD', oldPay: '美元 80', newPay: '美元 100', oldDay: '15', newDay: '15', oldLimit: '增值啟動・漲50%', newLimit: '增值啟動・漲30%', effectDate: '2026/05/06', date: '2026/05/05', time: '11:20:18', status: '成功' },
 ];
 
 export const MOCK_RDM_ORDERS: RdmOrder[] = [
@@ -117,10 +118,11 @@ export const MOCK_PROFITS: ProfitRecord[] = [
 
 export const DETAIL_TX_DETAIL: Record<string, DetailTxRecord[]> = {
   FP2024001: [
-    { orderDate: '2026-04-15', orderTime: '09:00:12', tDate: '2026-04-17', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.8500', unitDesc: '168.7763', exRateDesc: '32.1050', amount: 2000 },
-    { orderDate: '2026-03-15', orderTime: '09:00:07', tDate: '2026-03-17', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.7200', unitDesc: '170.6485', exRateDesc: '32.0800', amount: 2000 },
-    { orderDate: '2026-02-15', orderTime: '09:00:05', tDate: '2026-02-17', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.5800', unitDesc: '172.7115', exRateDesc: '31.9800', amount: 2000 },
-    { orderDate: '2024-03-15', orderTime: '14:20:33', tDate: '2024-03-19', tradeType: 'A', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '10.5000', unitDesc: '28,571.4286', exRateDesc: '31.4500', amount: 300000 },
+    { orderDate: '2026-04-15', orderTime: '09:00:12', tDate: '2026-04-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.8500', unitDesc: '168.7763',    exRateDesc: '32.1050', amount: 2000 },
+    { orderDate: '2026-03-15', orderTime: '09:00:07', tDate: '2026-03-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.7200', unitDesc: '170.6485',    exRateDesc: '32.0800', amount: 2000 },
+    { orderDate: '2026-02-15', orderTime: '09:00:05', tDate: '2026-02-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.5800', unitDesc: '172.7115',    exRateDesc: '31.9800', amount: 2000 },
+    { orderDate: '2026-01-10', orderTime: '11:42:05', tDate: '2026-01-14', tradeType: 'RDM', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.2300', unitDesc: '1,200.0000', exRateDesc: '31.8500', amount: 42800 },
+    { orderDate: '2024-03-15', orderTime: '14:20:33', tDate: '2024-03-19', tradeType: 'A',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '10.5000', unitDesc: '28,571.4286', exRateDesc: '31.4500', amount: 300000 },
   ],
   FP2024002: [
     { orderDate: '2026-04-15', orderTime: '09:05:42', tDate: '2026-04-17', tradeType: 'R', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '11.8500', unitDesc: '6.7511',    exRateDesc: '-', amount: 80 },

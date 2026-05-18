@@ -70,53 +70,79 @@
           >{{ c.currency }}（{{ c.currencyCode }}）</mat-button-toggle>
         </mat-button-toggle-group>
 
-        <!-- 此幣別有既有合約 -->
-        <ng-container *ngIf="contractsForSelectedCurrency.length > 0">
-          <div class="contract-list">
-            <button
-              *ngFor="let contract of contractsForSelectedCurrency"
-              class="contract-card"
-              [class.is-selected]="selectedContract?.fpNo === contract.fpNo"
-              type="button"
-              (click)="selectContract(contract)"
-            >
-              <div class="contract-card-check">
-                <i class="bi" [class.bi-record-circle-fill]="selectedContract?.fpNo === contract.fpNo" [class.bi-circle]="selectedContract?.fpNo !== contract.fpNo"></i>
-              </div>
-              <div class="contract-card-body">
-                <div class="contract-name">{{ contract.name }}</div>
-                <div class="contract-meta">{{ selectedCurrency?.currencyCode }} ・ 成立 {{ contract.startDate }}</div>
-                <div class="contract-pay">每月 Pay NT$ {{ contract.monthlyPay.toLocaleString() }}（年化 {{ contract.annualRate }}%）・ {{ contract.threshold }}</div>
-                <div class="contract-value">約當市值 NT$ {{ contract.marketValue.toLocaleString() }}</div>
-              </div>
-              <div class="contract-card-action">
-                <span class="badge-addon">加碼</span>
-              </div>
-            </button>
-          </div>
-
-          <div class="ccy-divider"><span>或</span></div>
+        <div *ngIf="hasContractsForSelectedCurrency" class="decision-grid" role="radiogroup" aria-label="交易方式">
+          <button
+            class="decision-card"
+            type="button"
+            role="radio"
+            [class.is-selected]="purchaseMode === 'addOn'"
+            [disabled]="!hasContractsForSelectedCurrency"
+            [attr.aria-checked]="purchaseMode === 'addOn'"
+            (click)="setPurchaseMode('addOn')"
+          >
+            <span class="decision-copy">
+              <span class="decision-title-row">
+                <span class="decision-icon">
+                  <i class="bi" [class.bi-record-circle-fill]="purchaseMode === 'addOn'" [class.bi-circle]="purchaseMode !== 'addOn'"></i>
+                </span>
+                <strong>加碼</strong>
+                <em>設定不變</em>
+              </span>
+              <span>沿用已成立的交易。</span>
+            </span>
+          </button>
 
           <button
-            class="contract-card"
-            [class.is-selected]="purchaseMode === 'new'"
+            class="decision-card"
             type="button"
+            role="radio"
+            [class.is-selected]="purchaseMode === 'new'"
+            [attr.aria-checked]="purchaseMode === 'new'"
             (click)="selectNewPurchase()"
           >
-            <div class="contract-card-check">
-              <i class="bi" [class.bi-record-circle-fill]="purchaseMode === 'new'" [class.bi-circle]="purchaseMode !== 'new'"></i>
-            </div>
-            <div class="contract-card-body">
-              <div class="contract-name">建立新申購</div>
-              <div class="contract-meta">不加碼至現有交易，可重新設定 Pay 金額與基準日</div>
-            </div>
+            <span class="decision-copy">
+              <span class="decision-title-row">
+                <span class="decision-icon">
+                  <i class="bi" [class.bi-record-circle-fill]="purchaseMode === 'new'" [class.bi-circle]="purchaseMode !== 'new'"></i>
+                </span>
+                <strong>新申購</strong>
+                <em>可重新設定</em>
+              </span>
+              <span>重新設定Pay出方式、基準日與觸發門檻。</span>
+            </span>
           </button>
-        </ng-container>
+        </div>
 
         <!-- 此幣別無既有合約 -->
-        <div class="info-box" *ngIf="contractsForSelectedCurrency.length === 0">
+        <div class="info-box" *ngIf="!hasContractsForSelectedCurrency">
           <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
           <span>{{ selectedCurrency?.currency }}（{{ selectedCurrency?.currencyCode }}）尚無既有交易，本次將建立新申購。</span>
+        </div>
+      </section>
+
+      <!-- 選擇加碼：第二層選擇既有交易 -->
+      <section class="block" *ngIf="purchaseMode === 'addOn' && hasContractsForSelectedCurrency">
+        <div class="block-header">
+          <h2 class="block-title">要加碼的交易</h2>
+        </div>
+        <div class="contract-list">
+          <button
+            *ngFor="let contract of contractsForSelectedCurrency"
+            class="contract-card"
+            [class.is-selected]="selectedContract?.fpNo === contract.fpNo"
+            type="button"
+            (click)="selectContract(contract)"
+          >
+            <div class="contract-card-check">
+              <i class="bi" [class.bi-record-circle-fill]="selectedContract?.fpNo === contract.fpNo" [class.bi-circle]="selectedContract?.fpNo !== contract.fpNo"></i>
+            </div>
+            <div class="contract-card-body">
+              <div class="contract-name">{{ contract.name }}</div>
+              <div class="contract-meta">{{ selectedCurrency?.currencyCode }} ・ 成立 {{ contract.startDate }}</div>
+              <div class="contract-pay">每月 Pay {{ formatMoney(contract.monthlyPay, contract.currencyCode) }}（年化 {{ contract.annualRate }}%）・ {{ contract.threshold }}</div>
+              <div class="contract-value">約當市值 {{ formatMoney(contract.marketValue, contract.currencyCode) }}</div>
+            </div>
+          </button>
         </div>
       </section>
     </section>
@@ -146,7 +172,8 @@
           <input matInput type="text" inputmode="numeric" formControlName="amount" required>
           <mat-hint>{{ minAmountHint }}</mat-hint>
           <mat-error *ngIf="form.controls.amount.hasError('required')">請輸入金額</mat-error>
-          <mat-error *ngIf="form.controls.amount.hasError('min')">{{ minAmountErrorMsg }}</mat-error>
+          <mat-error *ngIf="form.controls.amount.hasError('pattern')">請輸入數字</mat-error>
+          <mat-error *ngIf="form.controls.amount.hasError('min') && !form.controls.amount.hasError('pattern')">{{ minAmountErrorMsg }}</mat-error>
         </mat-form-field>
       </section>
 
@@ -165,10 +192,16 @@
             [checked]="payActive"
             (change)="togglePayActive($event.checked)"
           >
-            {{ payActive ? '啟用中' : '未啟用' }}
+            {{ payActive ? '啟用' : '停用' }}
           </mat-slide-toggle>
         </div>
 
+        <div class="pay-paused-box" *ngIf="!payActive">
+          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+          <span>已設定為暫停 Pay 出，申購後不執行自動提領。可在持有查詢頁隨時恢復。</span>
+        </div>
+
+        <ng-container *ngIf="payActive">
         <div class="form-group">
           <div class="form-label">
             Pay 出方式
@@ -199,8 +232,9 @@
             <input matInput type="text" inputmode="numeric" formControlName="monthlyPay" required>
             <mat-hint *ngIf="hasPayInput && annualRate <= 15">年化約 {{ formatRate(annualRate) }}</mat-hint>
             <mat-error *ngIf="form.controls.monthlyPay.hasError('required')">請輸入每月 Pay 金額</mat-error>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('min')">每月 Pay 金額需大於 0</mat-error>
-            <mat-error *ngIf="hasPayInput && annualRate > 15">年化提領率不可超過 15%，請降低每月 Pay 金額。</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('pattern')">請輸入數字</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('min') && !form.controls.monthlyPay.hasError('pattern')">每月 Pay 金額需大於 0</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('annualRateExceeded') && !form.controls.monthlyPay.hasError('pattern')">年化提領率不可超過 15%，請降低每月 Pay 金額。</mat-error>
           </mat-form-field>
         </div>
 
@@ -248,6 +282,7 @@
             <span>{{ longDateHintText }}</span>
           </div>
         </div>
+        </ng-container>
       </section>
 
       <!-- 觸發門檻（新申購且 Pay 啟用時才顯示） -->
@@ -262,7 +297,7 @@
             [disabled]="!payActive"
             (change)="toggleThreshold($event.checked)"
           >
-            {{ thresholdEnabled ? '啟用中' : '未啟用' }}
+            {{ thresholdEnabled ? '啟用' : '停用' }}
           </mat-slide-toggle>
         </div>
 
@@ -271,7 +306,12 @@
           <span>每月按設定基準日正常執行 Pay 出，不設觸發條件。</span>
         </div>
 
-        <div *ngIf="thresholdEnabled" class="threshold-body">
+        <div
+          *ngIf="thresholdEnabled"
+          class="threshold-body"
+          [class.is-protect]="thresholdMode === 'protect'"
+          [class.is-unlock]="thresholdMode === 'unlock'"
+        >
           <mat-button-toggle-group
             class="mode-toggle mode-toggle-fill threshold-mode-toggle"
             [value]="thresholdMode"
@@ -283,43 +323,80 @@
           </mat-button-toggle-group>
 
           <div class="threshold-selector-panel">
-            <div class="threshold-copy">
-              <div class="threshold-title">{{ thresholdTitle }}</div>
-              <p *ngIf="thresholdDescription">{{ thresholdDescription }}</p>
+            <div class="threshold-preview" *ngIf="showThresholdPreview">
+              <div>
+                <div class="threshold-preview-label">
+                  {{ thresholdPreviewPrefix }}
+                  <span class="threshold-preview-amount">{{ formatMoney(thresholdPreviewAmount) }}</span>
+                  {{ thresholdPreviewSuffix }}
+                </div>
+                <div class="threshold-preview-hint">{{ thresholdPreviewHint }}</div>
+              </div>
             </div>
 
-            <div class="threshold-slider-control" [class.is-unlock]="thresholdMode === 'unlock'">
-              <div class="threshold-slider-labels" *ngIf="thresholdMode === 'protect'">
-                <span>跌 20%</span>
-                <span>跌 5%</span>
+            <div class="threshold-option-area">
+              <div class="threshold-option-grid" *ngIf="thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
+                <button
+                  *ngFor="let value of protectThresholdOptions"
+                  mat-stroked-button
+                  class="threshold-option"
+                  type="button"
+                  role="radio"
+                  [class.is-active]="thresholdValue === value"
+                  [attr.aria-checked]="thresholdValue === value"
+                  (click)="setThresholdValue(value)"
+                >
+                  {{ value }}%
+                </button>
               </div>
-              <mat-slider
-                *ngIf="thresholdMode === 'protect'"
-                min="-20"
-                max="-5"
-                step="5"
-                thumbLabel
-                tickInterval="5"
-                [ngModel]="thresholdValue"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="setThresholdValue($event)"
-              ></mat-slider>
 
-              <div class="threshold-slider-labels" *ngIf="thresholdMode === 'unlock'">
-                <span>漲 5%</span>
-                <span>漲 100%</span>
+              <div class="threshold-option-grid" *ngIf="thresholdMode === 'unlock'" role="radiogroup" aria-label="增值啟動門檻">
+                <button
+                  *ngFor="let value of unlockPresetThresholdOptions"
+                  mat-stroked-button
+                  class="threshold-option"
+                  type="button"
+                  role="radio"
+                  [class.is-active]="!thresholdCustomActive && thresholdValue === value"
+                  [attr.aria-checked]="!thresholdCustomActive && thresholdValue === value"
+                  (click)="setThresholdValue(value)"
+                >
+                  +{{ value }}%
+                </button>
+                <button
+                  mat-stroked-button
+                  class="threshold-option"
+                  type="button"
+                  role="radio"
+                  [class.is-active]="thresholdCustomActive"
+                  [attr.aria-checked]="thresholdCustomActive"
+                  (click)="selectCustomThreshold()"
+                >
+                  自訂
+                </button>
+
+                <mat-form-field
+                  *ngIf="thresholdCustomActive"
+                  appearance="fill"
+                  color="accent"
+                  class="threshold-custom-field"
+                >
+                  <mat-label>自訂增值比例</mat-label>
+                  <input
+                    matInput
+                    type="text"
+                    inputmode="numeric"
+                    formControlName="thresholdCustom"
+                    required
+                    (input)="setCustomUnlockValue($any($event.target).value)"
+                  >
+                  <span matSuffix>%</span>
+                  <mat-hint>可輸入 1–100 的整數</mat-hint>
+                  <mat-error *ngIf="form.controls.thresholdCustom.hasError('required')">請輸入自訂比例</mat-error>
+                  <mat-error *ngIf="form.controls.thresholdCustom.hasError('pattern')">請輸入整數</mat-error>
+                  <mat-error *ngIf="form.controls.thresholdCustom.hasError('min') || form.controls.thresholdCustom.hasError('max')">請輸入 1–100 的數值</mat-error>
+                </mat-form-field>
               </div>
-              <mat-slider
-                *ngIf="thresholdMode === 'unlock'"
-                min="5"
-                max="100"
-                step="5"
-                thumbLabel
-                tickInterval="5"
-                [ngModel]="thresholdValue"
-                [ngModelOptions]="{ standalone: true }"
-                (ngModelChange)="setThresholdValue($event)"
-              ></mat-slider>
             </div>
           </div>
         </div>
@@ -390,7 +467,7 @@
           </a>
           <a class="doc-item" href="#" target="_blank">
             <i class="bi bi-file-earmark-pdf-fill"></i>
-            <span>近五年費用率及報酬率</span>
+            <span>近5年費用率及報酬率</span>
           </a>
         </div>
       </section>
@@ -453,7 +530,7 @@
           <div class="sum-row"><span>扣款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
         </div>
         <div class="done-actions">
-          <button mat-stroked-button type="button" (click)="QryTrade()">委託查詢</button>
+          <button mat-stroked-button type="button" (click)="queryTrade()">委託查詢</button>
           <button mat-raised-button color="primary" type="button" (click)="reset()">繼續申購</button>
         </div>
         <div class="notes-block">

@@ -15,7 +15,7 @@ Demo 專案應以 Angular 專案作為主要維護來源，並以目前線上的
 - `npm run start`：啟動本機開發伺服器，用來自己預覽與檢查畫面。執行後會提供本機網址，例如 `http://127.0.0.1:4200`。
 - `npm run build`：產出可部署的靜態檔，用來放到 GitHub Pages 或交付分享位置。它不會啟動網站，也不會提供預覽網址。
 
-後續維護流程會變成：
+後續日常維護流程會變成：
 
 ```bash
 # 進入要維護的 Angular 專案
@@ -24,21 +24,20 @@ cd products/{ProductName}/projects/{Version}/angular-demo
 # 本機預覽畫面，確認調整是否正確
 npm run start
 
-# 畫面確認後，產出可分享的靜態檔
-npm run build
-
-# 提交原始碼與必要的 build 結果
+# 畫面確認後，提交 Angular 原始碼
 git add 要提交的檔案
 git commit -m "這次修改說明"
 git push origin main
 ```
+
+push 到 `main` 後，由 GitHub Actions 自動執行部署用 build，並更新 GitHub Pages。日常維護時不需要手動提交 `dist/`。
 
 此做法的目的：
 
 - 讓 demo 不只是畫面示意，而是接近正式工程可理解的結構。
 - 讓設計調整集中在 Angular component、SCSS 與 mock data 中維護。
 - 讓工程師能清楚對應 Angular component、Angular Material v14 元件與 icon 使用方式。
-- 讓對外分享的畫面可透過 build 結果穩定更新。
+- 讓對外分享的畫面可透過自動化 build 結果穩定更新。
 
 ## 參考來源
 
@@ -96,9 +95,11 @@ Angular 專案的樣式必須嚴格分層，職責不重疊：
 |---|---|---|
 | 設計語言層 | `styles.scss` | Token、全域 class、Material theme override |
 | 結構層 | `component.scss` | 該 component 獨有的版面、格線、間距 |
-| 消費層 | `component.html` | 引用全域 class，不自創視覺語義 |
+| 消費層 | `component.html` | 引用全域 class 與局部結構 class，不自創設計語言 |
 
 任何在兩個以上 component 出現的視覺模式，屬於設計語言，寫入 `styles.scss`；component SCSS 只處理該頁面獨有的版面。
+
+component HTML 可以使用局部結構 class，例如某頁專用的排列容器或區塊控制；但不得在局部 class 中自行定義品牌色、狀態色、字級、圓角等設計語言。若需要新的視覺規則，應先回到設計系統確認。
 
 ### 專案啟動時必先建立
 
@@ -107,6 +108,8 @@ Angular 專案的樣式必須嚴格分層，職責不重疊：
 1. **設計系統 token** → CSS custom property。任何 component 禁止出現 hardcode HEX。
 2. **Material theme `@include`** → 集中定義，不分散到各 component。
 3. **跨 component 共用 class** → 導覽列、區塊標題、注意事項等視覺模式。
+
+Material 元件狀態覆蓋應集中在 `styles.scss` 或明確的共用 class 下；避免在多個 component 重複覆蓋同一個 Material internal selector，造成樣式權重疊加與狀態色不一致。
 
 ### Material 元件顏色屬性規則
 
@@ -119,7 +122,7 @@ Angular 專案的樣式必須嚴格分層，職責不重疊：
 | `mat-checkbox` | `color="primary"` |
 | `mat-slide-toggle` | `color="primary"` |
 | `mat-form-field` | `appearance="fill" color="accent"` |
-| `mat-button-toggle-group` | 加全域覆蓋 class，顏色由 `styles.scss` 的 `.mode-toggle` 決定 |
+| `mat-button-toggle-group` | 加明確 class，狀態色由該 class 統一控制；不得使用 Material 預設藍色 |
 
 ### Token 語義不得混用
 
@@ -136,6 +139,12 @@ Angular 專案的樣式必須嚴格分層，職責不重疊：
 **視覺與佈局必須拆分**：若同一個 class 在不同 context 需要不同佈局行為，拆成 base class + modifier。範例：`.mode-toggle`（顏色）+ `.mode-toggle-fill`（滿版佈局）。
 
 **全域化判斷**：同一視覺模式出現在兩個以上 component，就移入 `styles.scss`。
+
+若遇到設計系統未定義的顏色、字級、間距、元件狀態或互動規則，不得直接補成正式規則；需先標記為專案暫用或提出確認，再決定是否回寫設計系統。
+
+### 修改前的一致性對齊原則
+
+修改或新增任何 UI 元素前，必須先讀取同頁面語意最接近的現有實作，對齊其用詞、排列、間距、色彩與元件選擇，不得自行判斷。找不到對應實作時，明確說明並請用戶確認。
 
 ### 一致性驗收標準
 
@@ -168,63 +177,74 @@ Angular 專案的樣式必須嚴格分層，職責不重疊：
 7. 整理共用 component、mock data 與 icon 使用方式。
 8. 建立 build 與 GitHub Pages 分享流程。
 
-## GitHub 分享流程
+## GitHub 分享與部署
 
-Angular 原始碼需要 build 後才能成為可瀏覽的靜態頁面。
+原則上每個產品各自開一個獨立的 GitHub repo，Angular 專案的原始碼推到該 repo 的 `main` branch。
 
-本機預覽與對外分享是兩個步驟：
+不同產品的部署彼此獨立。若 FreePay 已能正常部署，下一次建立或部署其他產品（例如超底王）時，只需要處理該產品自己的 Angular 專案、repo、Workflow 與 GitHub Pages 設定，不需要回頭修改 FreePay。既有專案只有在部署壞掉、要統一新標準，或要整理共用架構時，才需要回頭調整。
 
-| 指令 | 用途 | 是否提供網址 | 產出結果 |
-|---|---|---|---|
-| `npm run start` | 本機預覽與調整畫面 | 會，通常是 `http://127.0.0.1:4200` | 不產出 GitHub Pages 可用檔案 |
-| `npm run build` | 產出可部署靜態檔 | 不會 | 產生 `dist/` build 結果 |
+若未來改採多產品共用同一個 repo，Workflow 必須明確指定該產品的 `working-directory`、dependency cache path 與部署 `folder`，避免不同產品互相影響。
 
-### 自動部署（推薦）
+Angular 原始碼無法直接瀏覽，必須先 build 成靜態檔才能上線。建議透過 GitHub Actions 自動化這個步驟，設定完成後日常只需 push 原始碼即可。
 
-透過 GitHub Actions，每次 push 到 `main` 後自動 build 並部署至 GitHub Pages，不需手動 build。
+- `npm run start`：啟動本機預覽（`http://127.0.0.1:4200`），只有自己看得到，不影響線上版本。
+- `npm run build`：一般 production build，用來確認專案是否能正常打包。
+- `npm run build:pages`：GitHub Pages 部署專用 build，需帶上 `--base-href /repo-name/`，由 CI 自動執行，日常不需要手動跑。
 
-日常維護流程：
+### 第一次設定（每個新 repo 做一次）
+
+**Step 1 — 設定 `package.json` build script**
+
+建議將一般 build 與 GitHub Pages build 分開：
+
+```json
+"build": "ng build --configuration production",
+"build:pages": "ng build --configuration production --base-href /repo-name/"
+```
+
+`/repo-name/` 對應 GitHub repo 名稱，例如 FreePay repo 填 `/FreePay/`。
+
+拆成兩個 script 的原因：
+
+- `build`：一般用途，不綁 GitHub Pages 路徑，適合本機或 CI 檢查 production build 是否正常。
+- `build:pages`：部署用途，專門給 GitHub Pages 使用。若缺少 `--base-href /repo-name/`，部署後頁面可能因找不到 JS / CSS 而空白。
+
+已經能正常部署的既有專案，不需要因為這條規則立刻回頭修改。新專案建立時優先採用此寫法；既有專案可在下次整理部署流程或需要一致化時再調整。
+
+**Step 2 — 建立 Workflow 設定檔**
+
+從現有 repo 複製 `.github/workflows/deploy.yml` 到新 repo 的相同位置，修改以下三處路徑為新專案的實際路徑：
+
+- `cache-dependency-path`
+- `working-directory`（Install 與 Build 兩個 step）
+- `folder`（Deploy step）
+
+每次 push 到 `main` 時自動觸發部署用 build，並推送至 `gh-pages` branch。若 `package.json` 有 `build:pages`，Workflow 的 Build step 應執行：
 
 ```bash
-# 本機預覽確認畫面
+npm run build:pages
+```
+
+若既有專案目前是透過 `npm run build` 部署，且 `build` script 已包含正確的 `--base-href`，可以先維持現況，不影響其他新專案部署。
+
+**Step 3 — 在 GitHub 開啟 Pages**
+
+進入 GitHub repo → Settings → Pages，將 Source 設為 `gh-pages` branch（root）。設定完成後無需再調整。
+
+### 日常維護流程
+
+```bash
+# 1. 本機預覽，確認畫面正確
 npm run start
 
-# 確認後提交原始碼
+# 2. 確認後提交原始碼
 git add 要提交的檔案
 git commit -m "這次修改說明"
 git push origin main
-# → GitHub Actions 自動 build 並更新 GitHub Pages
+# → GitHub Actions 自動 build 並在約 1–2 分鐘內更新 GitHub Pages
 ```
 
-Workflow 設定檔位置：`.github/workflows/deploy.yml`（repo 根目錄）。
-
-Build 結果由 GitHub Actions 自動推送至 `gh-pages` branch，`main` branch 只保留原始碼，不提交編譯後的檔案。
-
-**首次設定**：需至 GitHub repo → Settings → Pages，將 Source 設為 `gh-pages` branch（root），之後無需再調整。
-
-### `--base-href` 注意事項
-
-部署至 GitHub Pages 時，`ng build` 必須加上 `--base-href /repo-name/`（依實際 repo 路徑調整），否則靜態資源路徑會錯誤導致頁面空白。此參數應直接寫入 `package.json` 的 `build` script，避免每次手動帶入：
-
-```json
-"build": "ng build --configuration production --base-href /FreePay/"
-```
-
-若同一個儲存庫中有多個 Angular 專案，各自的 `package.json` 須分別設定對應的 `--base-href`。
-
-## 後續維護方式
-
-Angular 專案建立完成後，後續只維護 Angular 原始碼。
-
-維護流程：
-
-1. 進入指定 Angular 專案資料夾。
-2. 修改 Angular component、SCSS 或 mock data。
-3. 執行 `npm run start`，本機啟動專案確認畫面與互動。
-4. 確認後提交 Angular 原始碼，push 到 GitHub 的 `main`。
-5. GitHub Actions 自動 build 並部署至 GitHub Pages（約 1–2 分鐘）。
-
-> 不需要手動執行 `npm run build`，也不需要提交 `dist/` 資料夾。
+`main` branch 只存放原始碼，`dist/` 資料夾不需提交。
 
 若發現設計規範需要補充，應更新設計系統文件；若發現流程或交付方式需要調整，應更新本文件。
 
@@ -233,4 +253,3 @@ Angular 專案建立完成後，後續只維護 Angular 原始碼。
 - 每次實作前都要確認目前線上的正式版。
 - 不要把設計規範、Angular 執行準則與單一專案規格混在同一份文件。
 - 若專案需要對外分享，需先確認 GitHub Pages 指向位置與 build 輸出位置一致。
-- 若未來其他專案也採用相同流程，可將本文件移到更高層級作為共用準則。
