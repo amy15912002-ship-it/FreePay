@@ -48,17 +48,18 @@
       font-weight: 700;
     }
   }
-
-  button[mat-raised-button] {
-    align-self: center;
-    flex: 0 0 auto;
-  }
 }
 
 .ov-tab-panel {
   display: flex;
   flex-direction: column;
   gap: 40px;
+}
+
+.ov-tab-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
 // ── Section / Scroll wrap：垂直容器，gap 12 ────────────────────
@@ -340,7 +341,7 @@
 
 .ov-detail-head {
   display: grid;
-  grid-template-columns: 280px 1fr 88px;
+  grid-template-columns: 280px 1fr 100px;
   gap: 20px;
   padding: 12px 0;
   background: var(--color-bg-muted);
@@ -398,7 +399,7 @@
 
 .ov-fund-main {
   display: grid;
-  grid-template-columns: 280px 1fr 88px;
+  grid-template-columns: 280px 1fr 100px;
   gap: 20px;
   padding: 24px 0;
   align-items: center;
@@ -413,9 +414,8 @@
 .ov-fund-toggle {
   display: flex;
   align-items: center;
-  justify-content: flex-end;
+  justify-content: center;
   gap: 6px;
-  padding-right: 20px;
   color: var(--color-text-secondary);
   font-size: 14px;
   white-space: nowrap;
@@ -457,7 +457,7 @@
 .ov-ct-head,
 .ov-ct-row {
   display: grid;
-  grid-template-columns: 212px minmax(0, 1fr) 210px;
+  grid-template-columns: 280px minmax(0, 1fr) 100px;
   gap: 20px;
   align-items: center;
 }
@@ -501,35 +501,9 @@
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding-right: 20px;
-
-  // compact inline action buttons
-  [mat-stroked-button],
-  [mat-raised-button] {
-    line-height: 28px;
-    padding: 0 10px;
-    min-width: 52px;
-    font-size: 14px;
-  }
 }
 
 // ── Filter bar ──────────────────────────────────────────
-
-.ov-filter-bar {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 16px 20px;
-  border: 1px solid var(--color-border-default);
-  border-radius: 8px;
-  background: var(--color-bg-base);
-}
-
-.ov-profit-filter {
-  flex-direction: column;
-  align-items: flex-start;
-  gap: 10px;
-}
 
 .ov-filter-row,
 .ov-cancel-pwd-row {
@@ -543,6 +517,14 @@
   color: var(--color-text-secondary);
   font-size: 14px;
   white-space: nowrap;
+}
+
+.ov-mobile-only-cell {
+  display: none !important;
+}
+
+.ov-profit-mobile-tools {
+  display: none;
 }
 
 // ── Order section ──────────────────────────────────────────
@@ -606,6 +588,12 @@
   th.col-fund,   td.col-fund   { width: 160px; text-align: left; padding-left: 20px; }
   th.col-date,   td.col-date   { width: 110px; white-space: nowrap; }
   th.col-result, td.col-result { width: 80px; padding-right: 20px; }
+}
+
+.ov-profit-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
 .ov-profit-note {
@@ -725,28 +713,22 @@
   &:hover { color: var(--color-text-primary); }
 }
 
-.detail-filters {
+.ov-filters {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  padding: 16px 0 12px;
+  padding: 0;
   flex-shrink: 0;
 }
 
-.date-range-input {
-  height: 36px;
-  padding: 0 10px;
-  border: 1px solid var(--color-border-default);
-  border-radius: 4px;
-  background: var(--color-bg-base);
-  color: var(--color-text-primary);
-  font-size: 14px;
-  font-family: var(--font-primary);
+.detail-panel .ov-filters {
+  margin-top: 16px;
+  margin-bottom: 12px;
 }
 
-.date-range-sep {
-  color: var(--color-text-secondary);
-  font-size: 14px;
+.date-range-field {
+  width: 260px;
+  max-width: 100%;
 }
 
 ::ng-deep .detail-panel {
@@ -807,12 +789,12 @@
 // ── RWD ─────────────────────────────────────────────────────
 
 @media (max-width: 1024px) {
-  .ov-detail-head { grid-template-columns: 200px 1fr 88px; }
-  .ov-fund-main   { grid-template-columns: 200px 1fr 88px; }
+  .ov-detail-head { grid-template-columns: 200px 1fr 100px; }
+  .ov-fund-main   { grid-template-columns: 200px 1fr 100px; }
 
   .ov-ct-head,
   .ov-ct-row {
-    grid-template-columns: 180px minmax(0, 1fr) 210px;
+    grid-template-columns: 200px minmax(0, 1fr) 100px;
   }
 }
 
@@ -822,26 +804,12 @@
     gap: 24px;
   }
 
-  // ── Nav：立即申購 button 移至 Tab 列上方，獨佔一行 ────────
+  // ── Nav：手機版 tab 尺寸縮減 ────────
   .ov-nav-row {
-    flex-wrap: wrap;
-    gap: 0;
-
-    ::ng-deep .mat-tab-nav-bar {
-      order: 2;
-      flex: 0 0 100%;
-    }
-
     ::ng-deep .mat-tab-link {
       padding: 0 14px;
       height: 48px;
       font-size: 14px;
-    }
-
-    button[mat-raised-button] {
-      order: 1;
-      width: calc(100% - 32px);
-      margin: 12px 16px 0;
     }
   }
 
@@ -1044,38 +1012,51 @@
       text-align: right;
     }
 
-    td.col-fund,
-    td.col-time {
-      display: grid;
-      grid-template-columns: auto minmax(0, 1fr);
-      column-gap: 12px;
-      align-items: start;
+    td.ov-desktop-only-cell {
+      display: none;
+    }
+
+    td.ov-mobile-only-cell {
+      display: flex !important;
+    }
+
+    td.ov-profit-toggle-cell {
+      justify-content: center;
+      align-items: center;
+      padding-top: 4px;
+      padding-bottom: 4px;
 
       &::before {
-        grid-row: 1 / span 2;
+        content: none;
       }
 
-      > * {
-        grid-column: 2;
-        text-align: right;
+      button {
+        width: 32px;
+        height: 32px;
+        line-height: 32px;
+        color: var(--color-text-secondary);
+      }
+
+      .bi {
+        font-size: 14px;
       }
     }
   }
 
-  .ov-profit-table {
-    td .ov-metric {
-      display: flex;
-      flex-direction: column;
-      align-items: flex-end;
-      gap: 4px;
-      font-size: 16px;
-      text-align: right;
+  .ov-profit-mobile-tools {
+    display: flex;
+    justify-content: flex-end;
+
+    button {
+      min-width: 0;
+      padding: 0 4px;
+      color: var(--color-text-secondary);
+      font-size: 14px;
     }
 
-    td .ov-metric .ov-line {
-      display: block;
-      width: 100%;
-      min-width: 88px;
+    .bi {
+      margin-left: 4px;
+      font-size: 14px;
     }
   }
 
@@ -1095,13 +1076,11 @@
     }
   }
 
-  // ── 篩選列：允許 toggle group 換行 ──────────────────────────
-  .ov-filter-bar {
-    padding: 12px 16px;
-    flex-wrap: wrap;
-  }
-
   .ov-filter-row { flex-wrap: wrap; }
+
+  .date-range-field {
+    width: 100%;
+  }
 
   // ── 取消委託 bar：單欄疊排 ──────────────────────────────────
   .ov-cancel-bar {

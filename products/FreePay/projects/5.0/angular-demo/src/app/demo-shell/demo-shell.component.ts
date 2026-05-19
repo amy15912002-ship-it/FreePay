@@ -1,7 +1,7 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
-import { Subscription } from 'rxjs';
+import { combineLatest, Subscription } from 'rxjs';
 import { Contract, CurrencyOption, SCENARIOS, ScenarioData } from '../mock-data/scenarios';
 
 type DemoStep = 'ccy' | 'settings' | 'confirm' | 'done';
@@ -51,9 +51,10 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   selectedContract: Contract | null = null;
   selectedCurrency: CurrencyOption | null = null;
   thresholdCustomActive = false;
+  private addOnDirect = false;
 
   readonly dateOptions = Array.from({ length: 31 }, (_, i) => i + 1);
-  readonly scenarios = SCENARIOS;
+  readonly scenarios = SCENARIOS.filter(s => !s.entryOnly);
   readonly protectThresholdOptions = [-5, -10, -15, -20];
   readonly unlockPresetThresholdOptions = [5, 10, 20];
 
@@ -84,9 +85,9 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.routeSub = this.route.paramMap.subscribe(params => {
+    this.routeSub = combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, query]) => {
       const id = Number(params.get('scenarioId'));
-      this.loadScenario(id);
+      this.loadScenario(id, query.get('addon'));
     });
   }
 
@@ -95,10 +96,22 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.amountSub?.unsubscribe();
   }
 
-  private loadScenario(id: number): void {
+  private loadScenario(id: number, addonFpNo: string | null = null): void {
     this.scenario = SCENARIOS.find(s => s.id === id) ?? SCENARIOS[0];
+    const addonContract = addonFpNo
+      ? this.scenario.contracts.find(c => c.fpNo === addonFpNo) ?? null
+      : null;
+    this.addOnDirect = addonContract !== null;
     this.selectedCurrency = this.scenario.availableCurrencies[0] ?? null;
-    if (this.shouldShowSccy) {
+
+    if (this.addOnDirect && addonContract) {
+      // 帳戶總覽「加碼」直入：跳過 s-ccy，鎖定該筆交易，直接進加碼設定頁
+      this.selectedContract = addonContract;
+      this.selectedCurrency = this.scenario.availableCurrencies
+        .find(c => c.currencyCode === addonContract.currencyCode) ?? this.selectedCurrency;
+      this.purchaseMode = 'addOn';
+      this.activeStep = 'settings';
+    } else if (this.shouldShowSccy) {
       this.activeStep = 'ccy';
       this.selectedContract = null;
       this.syncPurchaseModeForSelectedCurrency();
@@ -112,7 +125,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get shouldShowSccy(): boolean {
-    return this.scenario?.hasExistingContracts ?? false;
+    return !this.addOnDirect && (this.scenario?.hasExistingContracts ?? false);
   }
 
   get isAddOnMode(): boolean {
@@ -426,7 +439,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     }
     this.form.controls.amount.updateValueAndValidity({ emitEvent: false });
 
-    if (this.isAddOnMode) {
+    if (this.isAddOnMode || !this.payActive) {
       this.form.controls.monthlyPay.clearValidators();
       this.form.controls.ratio.clearValidators();
       this.form.controls.monthlyPay.updateValueAndValidity({ emitEvent: false });

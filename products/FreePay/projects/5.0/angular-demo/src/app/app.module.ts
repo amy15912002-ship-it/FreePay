@@ -6,8 +6,11 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MatChipsModule } from '@angular/material/chips';
+import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
+import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatMenuModule } from '@angular/material/menu';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -34,12 +37,18 @@ import { AccountOverviewComponent } from './account-overview/account-overview.co
     MatButtonToggleModule,
     MatCheckboxModule,
     MatChipsModule,
+    MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
+    MatMenuModule,
+    MatNativeDateModule,
     MatSliderModule,
     MatSlideToggleModule,
     MatStepperModule,
     MatTabsModule
+  ],
+  providers: [
+    { provide: MAT_DATE_LOCALE, useValue: 'zh-TW' }
   ],
   bootstrap: [AppComponent]
 })

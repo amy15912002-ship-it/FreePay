@@ -122,8 +122,10 @@ $freepay-theme: mat.define-light-theme((
 @include mat.button-toggle-theme($freepay-theme);
 @include mat.checkbox-theme($freepay-theme);
 @include mat.chips-theme($freepay-theme);
+@include mat.datepicker-theme($freepay-theme);
 @include mat.form-field-theme($freepay-theme);
 @include mat.input-theme($freepay-theme);
+@include mat.menu-theme($freepay-theme);
 @include mat.slide-toggle-theme($freepay-theme);
 @include mat.slider-theme($freepay-theme);
 @include mat.stepper-theme($freepay-theme);
@@ -268,19 +270,19 @@ textarea {
   font-family: var(--font-primary);
 }
 
-.mat-form-field-appearance-fill .mat-form-field-underline {
+.mat-form-field-appearance-standard .mat-form-field-underline {
   background-color: var(--color-input-border-default);
 }
 
-.mat-form-field-appearance-fill:not(.mat-form-field-disabled):hover .mat-form-field-underline {
+.mat-form-field-appearance-standard:not(.mat-form-field-disabled):hover .mat-form-field-underline {
   background-color: var(--color-input-border-hover);
 }
 
-.mat-form-field-appearance-fill.mat-focused .mat-form-field-ripple {
+.mat-form-field-appearance-standard.mat-focused .mat-form-field-ripple {
   background-color: var(--color-input-border-focus);
 }
 
-.mat-form-field-appearance-fill.mat-form-field-invalid .mat-form-field-ripple {
+.mat-form-field-appearance-standard.mat-form-field-invalid .mat-form-field-ripple {
   background-color: var(--color-input-border-error);
 }
 
@@ -480,6 +482,42 @@ table th { font-size: 14px; }
   border-color: var(--color-action-primary);
   color: var(--color-action-primary);
   font-weight: 700;
+}
+
+// 圓形操作按鈕 — 平台通用 pattern（列表內聯操作；詳 DesignSystem §3.7）
+.circle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 50%;
+  background: var(--color-neutral-0);
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  cursor: pointer;
+  transition: border-color .12s, background .12s, color .12s;
+}
+
+.circle-btn:hover {
+  border-color: var(--color-neutral-300);
+  color: var(--color-text-primary);
+}
+
+.circle-btn--buy {
+  border-color: var(--color-brand-primary-400);
+  background: var(--color-brand-primary-400);
+  color: var(--color-text-on-brand);
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.circle-btn--buy:hover {
+  border-color: var(--color-brand-primary-600);
+  background: var(--color-brand-primary-600);
+  color: var(--color-text-on-brand);
 }
 
 // Notes / disclaimer block (注意事項)

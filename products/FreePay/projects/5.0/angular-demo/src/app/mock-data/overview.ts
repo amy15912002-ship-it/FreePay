@@ -1,18 +1,19 @@
 export interface OvSummary {
-  ccy: string; pay: string; paid: string;
-  market: string; cost: string; profit: string; ret: string;
+  ccy: string; pay: number; paid: number;
+  market: number; cost: number; profit: number; ret: number;
 }
 
 export interface OvContract {
   fpNo: string; alias: string; ccy: string;
   setting: string; threshold: string;
-  pay: string; paid: string; market: string; cost: string; profit: string; ret: string;
+  pay: number; paid: number; market: number; cost: number; profit: number; ret: number;
 }
 
 export interface OvFund {
   id: string; code: string; name: string;
+  scenarioId: number;
   txCcy: string; buyCcy: string;
-  pay: string; paid: string; market: string; cost: string; profit: string; ret: string;
+  pay: number; paid: number; market: number; cost: number; profit: number; ret: number;
   contracts: OvContract[];
 }
 
@@ -61,36 +62,39 @@ export interface DetailChgRecord {
   limitMode: string; limitVal: number | null;
 }
 
-export const OV_SUMMARIES: OvSummary[] = [
-  { ccy: '台幣', pay: '5,040', paid: '30,000', market: '680,000', cost: '650,000', profit: '30,000',  ret: '5.30%'  },
-  { ccy: '美元', pay: '80',    paid: '240',    market: '8,420',   cost: '8,000',   profit: '420',     ret: '8.25%'  },
-  { ccy: '歐元', pay: '60',    paid: '120',    market: '6,180',   cost: '6,300',   profit: '-120',    ret: '-1.90%' },
-];
-
 export const OV_FUNDS: OvFund[] = [
   {
-    id: 'as778899-tw', code: 'AS778899', name: '貝萊德全球股票收益基金 A2',
-    txCcy: '美元', buyCcy: '台幣',
-    pay: '3,500', paid: '12,000', market: '518,000', cost: '500,000', profit: '18,000', ret: '10.03%',
-    contracts: [
-      { fpNo: 'FP2024001', alias: '20240315', ccy: '台幣', setting: '依金額・15日', threshold: '市值守護・跌20%',  pay: '2,000', paid: '12,000', market: '318,000', cost: '300,000', profit: '18,000', ret: '10.03%' },
-      { fpNo: 'FP2024003', alias: '20240315-2', ccy: '台幣', setting: '依金額・20日', threshold: '不設門檻',       pay: '1,500', paid: '0',      market: '200,000', cost: '200,000', profit: '-',      ret: '-'      },
-    ]
-  },
-  {
-    id: 'as778899-us', code: 'AS778899', name: '貝萊德全球股票收益基金 A2',
-    txCcy: '美元', buyCcy: '美元',
-    pay: '80', paid: '240', market: '8,420', cost: '8,000', profit: '420', ret: '8.25%',
-    contracts: [
-      { fpNo: 'FP2024002', alias: '20240315', ccy: '美元', setting: '依金額・15日', threshold: '增值啟動・漲30%', pay: '80', paid: '240', market: '8,420', cost: '8,000', profit: '420', ret: '8.25%' },
-    ]
-  },
-  {
-    id: 'ta123456-tw', code: 'TA123456', name: '統一大滿貫台灣平衡基金',
+    id: 'ta123456-tw', code: 'TA123456', name: '統一大滿貫多重資產平衡證券投資信託基金 A 類型 台幣 不配息', scenarioId: 2,
     txCcy: '台幣', buyCcy: '台幣',
-    pay: '810', paid: '18,000', market: '162,000', cost: '150,000', profit: '12,000', ret: '13.40%',
+    pay: 5000, paid: 70000, market: 138000, cost: 120000, profit: 18000, ret: 15.00,
     contracts: [
-      { fpNo: 'FP2025002', alias: '20250101', ccy: '台幣', setting: '依比例・6%・5日', threshold: '不設門檻', pay: '810', paid: '18,000', market: '162,000', cost: '150,000', profit: '12,000', ret: '13.40%' },
+      { fpNo: 'FP20240101', alias: '20240101', ccy: '台幣', setting: '依金額・15日', threshold: '不設門檻', pay: 5000, paid: 70000, market: 138000, cost: 120000, profit: 18000, ret: 15.00 },
+    ]
+  },
+  {
+    id: 'ta654321-tw', code: 'TA654321', name: '統一全球多元資產基金', scenarioId: 5,
+    txCcy: '台幣', buyCcy: '美元',
+    pay: 14000, paid: 204000, market: 475000, cost: 416000, profit: 59000, ret: 14.18,
+    contracts: [
+      { fpNo: 'FP20230901', alias: '20230901', ccy: '台幣', setting: '依金額・10日', threshold: '不設門檻',      pay: 10000, paid: 180000, market: 380000, cost: 320000, profit: 60000, ret: 18.75 },
+      { fpNo: 'FP20241201', alias: '20241201', ccy: '台幣', setting: '依金額・5日',  threshold: '市值守護・跌20%', pay: 4000,  paid: 24000,  market: 95000,  cost: 96000,  profit: -1000, ret: -1.04 },
+    ]
+  },
+  {
+    id: 'ta654321-us', code: 'TA654321', name: '統一全球多元資產基金', scenarioId: 5,
+    txCcy: '美元', buyCcy: '美元',
+    pay: 300, paid: 3300, market: 5900, cost: 5200, profit: 700, ret: 13.46,
+    contracts: [
+      { fpNo: 'FP20240601', alias: '20240601', ccy: '美元', setting: '依金額・15日',   threshold: '不設門檻',      pay: 200, paid: 2400, market: 3800, cost: 3200, profit: 600, ret: 18.75 },
+      { fpNo: 'FP20250301', alias: '20250301', ccy: '美元', setting: '依比例・4%・10日', threshold: '增值啟動・漲20%', pay: 100, paid: 900,  market: 2100, cost: 2000, profit: 100, ret: 5.00 },
+    ]
+  },
+  {
+    id: 'ta987654-jp', code: 'TA987654', name: '統一日本動力基金', scenarioId: 6,
+    txCcy: '日幣', buyCcy: '日幣',
+    pay: 5000, paid: 45000, market: 560000, cost: 500000, profit: 60000, ret: 12.00,
+    contracts: [
+      { fpNo: 'FP20240801', alias: '20240801', ccy: '日幣', setting: '依金額・20日', threshold: '不設門檻', pay: 5000, paid: 45000, market: 560000, cost: 500000, profit: 60000, ret: 12.00 },
     ]
   },
 ];

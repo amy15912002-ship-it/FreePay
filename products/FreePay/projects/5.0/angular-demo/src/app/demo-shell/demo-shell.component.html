@@ -86,7 +86,6 @@
                   <i class="bi" [class.bi-record-circle-fill]="purchaseMode === 'addOn'" [class.bi-circle]="purchaseMode !== 'addOn'"></i>
                 </span>
                 <strong>加碼</strong>
-                <em>設定不變</em>
               </span>
               <span>沿用已成立的交易。</span>
             </span>
@@ -106,7 +105,6 @@
                   <i class="bi" [class.bi-record-circle-fill]="purchaseMode === 'new'" [class.bi-circle]="purchaseMode !== 'new'"></i>
                 </span>
                 <strong>新申購</strong>
-                <em>可重新設定</em>
               </span>
               <span>重新設定Pay出方式、基準日與觸發門檻。</span>
             </span>
@@ -167,7 +165,7 @@
             [value]="c.currencyCode"
           >{{ c.currency }}（{{ c.currencyCode }}）</mat-button-toggle>
         </mat-button-toggle-group>
-        <mat-form-field appearance="fill" color="accent" class="full-field">
+        <mat-form-field appearance="standard" color="accent" class="full-field">
           <mat-label>金額</mat-label>
           <input matInput type="text" inputmode="numeric" formControlName="amount" required>
           <mat-hint>{{ minAmountHint }}</mat-hint>
@@ -227,7 +225,7 @@
         </div>
 
         <div *ngIf="payMode === 'amount'" class="pay-mode-panel">
-          <mat-form-field appearance="fill" color="accent" class="full-field">
+          <mat-form-field appearance="standard" color="accent" class="full-field">
             <mat-label>每月 Pay 金額</mat-label>
             <input matInput type="text" inputmode="numeric" formControlName="monthlyPay" required>
             <mat-hint *ngIf="hasPayInput && annualRate <= 15">年化約 {{ formatRate(annualRate) }}</mat-hint>
@@ -377,7 +375,7 @@
 
                 <mat-form-field
                   *ngIf="thresholdCustomActive"
-                  appearance="fill"
+                  appearance="standard"
                   color="accent"
                   class="threshold-custom-field"
                 >
@@ -504,7 +502,7 @@
         <div class="block-header">
           <h2 class="block-title">交易密碼</h2>
         </div>
-        <mat-form-field appearance="fill" color="accent" class="full-field">
+        <mat-form-field appearance="standard" color="accent" class="full-field">
           <mat-label>請輸入交易密碼</mat-label>
           <input matInput [type]="pwdVisible ? 'text' : 'password'" [(ngModel)]="pwd" autocomplete="off">
           <button mat-icon-button matSuffix type="button" (click)="pwdVisible = !pwdVisible" [attr.aria-label]="pwdVisible ? '隱藏密碼' : '顯示密碼'">

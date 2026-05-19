@@ -28,6 +28,8 @@ export interface ScenarioData {
   risk: string;
   hasExistingContracts: boolean;
   contracts: Contract[];
+  // entryOnly：僅作為帳戶總覽加碼等入口的路由目標，不列入 demo 情境列
+  entryOnly?: boolean;
   // 完成頁靜態 mock 資料
   firstRdmDate: string;
   bank: string;
@@ -39,7 +41,7 @@ export const SCENARIOS: ScenarioData[] = [
     id: 1,
     label: '1 單幣別・無既有',
     fundId: 'TA123456',
-    fundName: '統一大滿貫台灣平衡基金',
+    fundName: '統一大滿貫多重資產平衡證券投資信託基金 A 類型 台幣 不配息',
     tscd: '境內',
     availableCurrencies: [{ currency: '台幣', currencyCode: 'TWD' }],
     risk: 'RR3',
@@ -53,7 +55,7 @@ export const SCENARIOS: ScenarioData[] = [
     id: 2,
     label: '2 單幣別・有既有',
     fundId: 'TA123456',
-    fundName: '統一大滿貫台灣平衡基金',
+    fundName: '統一大滿貫多重資產平衡證券投資信託基金 A 類型 台幣 不配息',
     tscd: '境內',
     availableCurrencies: [{ currency: '台幣', currencyCode: 'TWD' }],
     risk: 'RR3',
@@ -207,6 +209,34 @@ export const SCENARIOS: ScenarioData[] = [
         threshold: '增值啟動・漲20% 啟動',
         marketValue: 2100,
         costBasis: 2000
+      }
+    ],
+    firstRdmDate: '2026/06/15',
+    bank: '台灣銀行',
+    acc: '0123456789012'
+  },
+  {
+    id: 6,
+    label: '6 日幣・有既有',
+    fundId: 'TA987654',
+    fundName: '統一日本動力基金',
+    tscd: '境外',
+    availableCurrencies: [{ currency: '日幣', currencyCode: 'JPY' }],
+    risk: 'RR4',
+    hasExistingContracts: true,
+    entryOnly: true,
+    contracts: [
+      {
+        fpNo: 'FP20240801',
+        name: '20240801',
+        currencyCode: 'JPY',
+        startDate: '2024/08/01',
+        monthlyPay: 5000,
+        payMode: 'amount',
+        annualRate: 12,
+        threshold: '不設門檻',
+        marketValue: 560000,
+        costBasis: 500000
       }
     ],
     firstRdmDate: '2026/06/15',
