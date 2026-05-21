@@ -271,15 +271,39 @@ textarea {
 }
 
 .mat-form-field-appearance-standard .mat-form-field-underline {
+  height: 2px;
+  background-color: transparent;
+}
+
+.mat-form-field-appearance-standard .mat-form-field-underline::before {
+  content: '';
+  position: absolute;
+  inset: 0;
   background-color: var(--color-input-border-default);
 }
 
+.mat-form-field-appearance-standard .mat-form-field-ripple {
+  height: 2px;
+}
+
 .mat-form-field-appearance-standard:not(.mat-form-field-disabled):hover .mat-form-field-underline {
+  background-color: transparent;
+}
+
+.mat-form-field-appearance-standard:not(.mat-form-field-disabled):hover .mat-form-field-underline::before {
   background-color: var(--color-input-border-hover);
+}
+
+.mat-form-field-appearance-standard.mat-focused .mat-form-field-underline::before {
+  background-color: var(--color-input-border-focus);
 }
 
 .mat-form-field-appearance-standard.mat-focused .mat-form-field-ripple {
   background-color: var(--color-input-border-focus);
+}
+
+.mat-form-field-appearance-standard.mat-form-field-invalid .mat-form-field-underline::before {
+  background-color: var(--color-input-border-error);
 }
 
 .mat-form-field-appearance-standard.mat-form-field-invalid .mat-form-field-ripple {
@@ -522,16 +546,19 @@ table th { font-size: 14px; }
 
 // Notes / disclaimer block (注意事項)
 .notes-block {
+  width: 100%;
+  margin-top: 80px;
   color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.75;
+  text-align: left;
 }
 
 .notes-title {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin: 0 0 4px;
+  margin: 0 0 8px;
   color: var(--color-text-secondary);
   font-size: 14px;
   font-weight: 500;
@@ -541,18 +568,12 @@ table th { font-size: 14px; }
 
 .notes-list {
   margin: 0;
-  padding-left: 0;
-  list-style: none;
-  counter-reset: notes;
+  padding-left: 20px;
+  list-style: disc;
 
   li {
-    counter-increment: notes;
-    display: grid;
-    grid-template-columns: auto 1fr;
-    gap: 4px;
-
-    &::before { content: counter(notes) '、'; }
+    display: list-item;
   }
 
-  li + li { margin-top: 2px; }
+  li + li { margin-top: 4px; }
 }

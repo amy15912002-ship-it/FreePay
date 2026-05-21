@@ -1,13 +1,23 @@
 import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
-import { ActivatedRoute } from '@angular/router';
-import { combineLatest, Subscription } from 'rxjs';
-import { Contract, CurrencyOption, SCENARIOS, ScenarioData } from '../mock-data/scenarios';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
+import { Contract, CurrencyOption, DEMO_SCENARIOS, ScenarioData } from '../mock-data/scenarios';
+import { findFund, Fund } from '../mock-data/funds';
+import { HoldingContract, holdingsOfFund } from '../mock-data/holdings';
+import { FlowContext, isEntryMode } from '../mock-data/flow-context';
 
 type DemoStep = 'ccy' | 'settings' | 'confirm' | 'done';
 type PayMode = 'amount' | 'ratio';
 type ThresholdMode = 'protect' | 'unlock';
 type PurchaseMode = 'addOn' | 'new' | null;
+
+const DEFAULT_DEMO_SCENARIO = DEMO_SCENARIOS[0];
+const FUND_CURRENCY_CODE_MAP: Record<string, string> = {
+  '台幣': 'TWD',
+  '美元': 'USD',
+  '日幣': 'JPY'
+};
 
 // 金額門檻表（spec.md §升級一）
 //   new   = 首次申購最低（FreePay 特規）
@@ -52,9 +62,9 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   selectedCurrency: CurrencyOption | null = null;
   thresholdCustomActive = false;
   private addOnDirect = false;
+  private flowContext: FlowContext = { mode: 'new', fundId: DEFAULT_DEMO_SCENARIO.fundId };
 
   readonly dateOptions = Array.from({ length: 31 }, (_, i) => i + 1);
-  readonly scenarios = SCENARIOS.filter(s => !s.entryOnly);
   readonly protectThresholdOptions = [-5, -10, -15, -20];
   readonly unlockPresetThresholdOptions = [5, 10, 20];
 
@@ -76,7 +86,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   constructor(
     private readonly fb: FormBuilder,
-    private readonly route: ActivatedRoute
+    private readonly route: ActivatedRoute,
+    private readonly router: Router
   ) {
     this.applyPayModeValidators();
     this.amountSub = this.form.controls.amount.valueChanges.subscribe(() => {
@@ -85,9 +96,16 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
-    this.routeSub = combineLatest([this.route.paramMap, this.route.queryParamMap]).subscribe(([params, query]) => {
-      const id = Number(params.get('scenarioId'));
-      this.loadScenario(id, query.get('addon'));
+    this.routeSub = this.route.queryParamMap.subscribe(query => {
+      const modeParam = query.get('mode');
+      const fundIdParam = query.get('fundId');
+      const fpNoParam = query.get('fpNo') ?? query.get('contractFpNo') ?? undefined;
+      const ctx: FlowContext = {
+        mode: isEntryMode(modeParam) ? modeParam : 'new',
+        fundId: fundIdParam || DEFAULT_DEMO_SCENARIO.fundId,
+        contractFpNo: fpNoParam
+      };
+      this.loadFlow(ctx);
     });
   }
 
@@ -96,12 +114,16 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.amountSub?.unsubscribe();
   }
 
-  private loadScenario(id: number, addonFpNo: string | null = null): void {
-    this.scenario = SCENARIOS.find(s => s.id === id) ?? SCENARIOS[0];
-    const addonContract = addonFpNo
-      ? this.scenario.contracts.find(c => c.fpNo === addonFpNo) ?? null
+  private loadFlow(ctx: FlowContext): void {
+    const fund = findFund(ctx.fundId) ?? findFund(DEFAULT_DEMO_SCENARIO.fundId);
+    if (!fund) return;
+
+    this.flowContext = ctx;
+    this.scenario = this.buildScenarioFromContext(ctx, fund, holdingsOfFund(fund.fundId));
+    const addonContract = ctx.contractFpNo
+      ? this.scenario.contracts.find(c => c.fpNo === ctx.contractFpNo) ?? null
       : null;
-    this.addOnDirect = addonContract !== null;
+    this.addOnDirect = (ctx.mode === 'addOn' || ctx.mode === 'modify' || ctx.mode === 'redeem') && addonContract !== null;
     this.selectedCurrency = this.scenario.availableCurrencies[0] ?? null;
 
     if (this.addOnDirect && addonContract) {
@@ -109,7 +131,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       this.selectedContract = addonContract;
       this.selectedCurrency = this.scenario.availableCurrencies
         .find(c => c.currencyCode === addonContract.currencyCode) ?? this.selectedCurrency;
-      this.purchaseMode = 'addOn';
+      this.purchaseMode = ctx.mode === 'addOn' ? 'addOn' : 'new';
       this.activeStep = 'settings';
     } else if (this.shouldShowSccy) {
       this.activeStep = 'ccy';
@@ -124,12 +146,66 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.applySettingsForMode();
   }
 
+  private buildScenarioFromContext(ctx: FlowContext, fund: Fund, holdings: HoldingContract[]): ScenarioData {
+    const link = DEMO_SCENARIOS.find(item => item.mode === ctx.mode && item.fundId === fund.fundId)
+      ?? DEMO_SCENARIOS.find(item => item.fundId === fund.fundId)
+      ?? DEFAULT_DEMO_SCENARIO;
+    return {
+      id: link.id,
+      label: link.label,
+      fundId: fund.fundId,
+      fundName: fund.name,
+      tscd: fund.domicile,
+      fundCurrency: fund.pricingCurrency,
+      fundCurrencyCode: FUND_CURRENCY_CODE_MAP[fund.pricingCurrency] ?? 'TWD',
+      availableCurrencies: fund.currencies.map(c => ({ currency: c.currency, currencyCode: c.currencyCode })),
+      risk: fund.risk,
+      hasExistingContracts: holdings.length > 0,
+      contracts: holdings.map(c => this.toScenarioContract(c)),
+      firstRdmDate: '2026/06/15',
+      bank: '台新銀行',
+      acc: '0123456789012'
+    };
+  }
+
+  private toScenarioContract(c: HoldingContract): Contract {
+    return {
+      fpNo: c.fpNo,
+      name: c.alias,
+      currencyCode: c.currencyCode,
+      startDate: c.startDate,
+      monthlyPay: c.monthlyPay,
+      payMode: c.payMode,
+      annualRate: c.annualRate || (c.costBasis ? Math.round((c.monthlyPay * 12 / c.costBasis) * 100) : 0),
+      payDay: c.payDay,
+      thresholdMode: c.thresholdMode,
+      thresholdValue: c.thresholdValue,
+      threshold: this.contractThresholdText(c),
+      marketValue: c.marketValue,
+      costBasis: c.costBasis
+    };
+  }
+
+  private contractThresholdText(c: HoldingContract): string {
+    if (c.thresholdMode === 'protect') return `市值守護・跌${Math.abs(c.thresholdValue)}%`;
+    if (c.thresholdMode === 'unlock') return `增值啟動・漲${c.thresholdValue}%`;
+    return '不設門檻';
+  }
+
   get shouldShowSccy(): boolean {
     return !this.addOnDirect && (this.scenario?.hasExistingContracts ?? false);
   }
 
   get isAddOnMode(): boolean {
     return this.purchaseMode === 'addOn';
+  }
+
+  get isModifyMode(): boolean {
+    return this.flowContext.mode === 'modify';
+  }
+
+  get isRedeemMode(): boolean {
+    return this.flowContext.mode === 'redeem';
   }
 
   get isMultiCurrency(): boolean {
@@ -145,6 +221,12 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get steps(): Array<{ key: DemoStep; label: string; description: string }> {
+    if (this.isRedeemMode) {
+      return [
+        { key: 'settings', label: '贖回設定', description: '確認單位與金額' },
+        { key: 'done', label: '完成', description: '委託完成' }
+      ];
+    }
     const base: Array<{ key: DemoStep; label: string; description: string }> = [
       { key: 'settings', label: '申購設定', description: '金額、Pay 設定' },
       { key: 'confirm', label: '確認送出', description: '確認摘要並送出' },
@@ -166,6 +248,12 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   get amountSectionTitle(): string {
     return this.isAddOnMode ? '加碼金額' : '單筆申購金額';
+  }
+
+  get transactionTypeLabel(): string {
+    if (this.isRedeemMode) return '贖回';
+    if (this.isModifyMode) return '異動設定';
+    return this.isAddOnMode ? '加碼' : '新申購';
   }
 
   get minAmount(): number {
@@ -254,6 +342,62 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return !this.agreedTerms || this.pwd.trim() === '';
   }
 
+  get redeemNav(): number {
+    const fundCode = this.scenario?.fundCurrencyCode ?? 'TWD';
+    if (fundCode === 'USD') return 11.85;
+    if (fundCode === 'JPY') return 16850;
+    return 16.2045;
+  }
+
+  get redeemExchangeRate(): number {
+    const fundCode = this.scenario?.fundCurrencyCode ?? 'TWD';
+    const tradeCode = this.selectedContract?.currencyCode ?? this.selectedCurrency?.currencyCode ?? 'TWD';
+    if (fundCode === tradeCode) return 1;
+    if (fundCode === 'USD' && tradeCode === 'TWD') return 32.105;
+    if (fundCode === 'JPY' && tradeCode === 'TWD') return 0.215;
+    return 1;
+  }
+
+  get redeemStockUnits(): number {
+    const marketValue = this.selectedContract?.marketValue ?? 0;
+    const unitPrice = this.redeemNav * this.redeemExchangeRate;
+    return unitPrice > 0 ? marketValue / unitPrice : 0;
+  }
+
+  get redeemOrderingUnits(): number {
+    return this.selectedContract?.fpNo === 'FP20241201' ? 12.3456 : 0;
+  }
+
+  get redeemUnits(): number {
+    return Math.max(this.redeemStockUnits - this.redeemOrderingUnits, 0);
+  }
+
+  get redeemReferenceAmount(): number {
+    const stockUnits = this.redeemStockUnits;
+    const marketValue = this.selectedContract?.marketValue ?? 0;
+    return stockUnits > 0 ? Math.round((this.redeemUnits / stockUnits) * marketValue) : marketValue;
+  }
+
+  get redeemNavDate(): string {
+    return '2026/05/12';
+  }
+
+  get actionDisabled(): boolean {
+    if (this.activeStep === 'confirm') return this.submitDisabled;
+    if (this.isRedeemMode && this.activeStep === 'settings') return this.pwd.trim() === '' || !this.selectedContract;
+    return false;
+  }
+
+  get primaryActionLabel(): string {
+    return this.activeStep === 'confirm' || (this.isRedeemMode && this.activeStep === 'settings')
+      ? '確認送出'
+      : '下一步';
+  }
+
+  get primaryActionIsSubmit(): boolean {
+    return this.activeStep === 'confirm' || (this.isRedeemMode && this.activeStep === 'settings');
+  }
+
   setStep(step: DemoStep): void {
     const targetIndex = this.steps.findIndex(item => item.key === step);
     if (targetIndex <= this.stepIndex || this.activeStep === 'done') {
@@ -323,6 +467,12 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       return;
     }
     if (this.activeStep === 'settings') {
+      if (this.isRedeemMode) {
+        if (this.pwd.trim() === '' || !this.selectedContract) return;
+        this.pwd = '';
+        this.activeStep = 'done';
+        return;
+      }
       this.form.markAllAsTouched();
       if (this.form.invalid) return;
       this.activeStep = 'confirm';
@@ -335,7 +485,9 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   previous(): void {
-    if (this.activeStep === 'confirm') {
+    if (this.isRedeemMode && this.activeStep === 'settings') {
+      this.goOverview();
+    } else if (this.activeStep === 'confirm') {
       this.activeStep = 'settings';
     } else if (this.activeStep === 'settings' && this.shouldShowSccy) {
       this.activeStep = 'ccy';
@@ -343,12 +495,15 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   queryTrade(): void {
-    // demo：導至委託查詢（正式版為 /trade/order）
-    alert('委託查詢（Demo 示意）');
+    this.router.navigate(['/demo/overview'], { queryParams: { tab: 'order', order: this.isRedeemMode ? 'rdm' : 'all' } });
+  }
+
+  goOverview(): void {
+    this.router.navigate(['/demo/overview']);
   }
 
   reset(): void {
-    this.loadScenario(this.scenario?.id ?? 1);
+    this.loadFlow(this.flowContext);
   }
 
   pickDate(day: number): void {
@@ -418,6 +573,14 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return `${Number(value || 0).toFixed(2)}%`;
   }
 
+  formatUnits(value: number): string {
+    return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+  }
+
+  formatNav(value: number): string {
+    return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+  }
+
   trackStep(_: number, step: { key: DemoStep }): DemoStep {
     return step.key;
   }
@@ -446,6 +609,10 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       this.form.controls.ratio.updateValueAndValidity({ emitEvent: false });
     } else {
       this.applyPayModeValidators();
+    }
+
+    if (this.isModifyMode && this.selectedContract) {
+      this.applyContractSettings(this.selectedContract);
     }
   }
 
@@ -501,6 +668,28 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.resetThresholdState();
     this.payModeHintOpen = false;
     this.dateHintOpen = false;
+    this.applyPayModeValidators();
+  }
+
+  private applyContractSettings(contract: Contract): void {
+    this.payActive = true;
+    this.payMode = contract.payMode;
+    this.form.controls.amount.clearValidators();
+    this.form.controls.amount.setValue(contract.costBasis, { emitEvent: false });
+    this.form.controls.amount.updateValueAndValidity({ emitEvent: false });
+    this.form.controls.monthlyPay.setValue(contract.payMode === 'amount' ? contract.monthlyPay : null, { emitEvent: false });
+    this.form.controls.ratio.setValue(contract.payMode === 'ratio' ? contract.annualRate : null, { emitEvent: false });
+    this.form.controls.day.setValue(contract.payDay, { emitEvent: false });
+
+    this.thresholdEnabled = contract.thresholdMode !== 'none';
+    this.thresholdMode = contract.thresholdMode === 'unlock' ? 'unlock' : 'protect';
+    this.thresholdValue = contract.thresholdMode === 'none' ? -20 : contract.thresholdValue;
+    this.thresholdCustomActive = contract.thresholdMode === 'unlock'
+      && !this.unlockPresetThresholdOptions.includes(contract.thresholdValue);
+    this.form.controls.thresholdCustom.setValue(
+      this.thresholdCustomActive ? contract.thresholdValue : 20,
+      { emitEvent: false }
+    );
     this.applyPayModeValidators();
   }
 

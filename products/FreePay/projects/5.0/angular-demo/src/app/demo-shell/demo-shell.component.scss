@@ -6,8 +6,6 @@
   background: var(--color-bg-base);
 }
 
-// .demo-bar / .demo-button — defined globally in styles.scss
-
 .material-flow-stepper {
   width: min(800px, 100%);
   margin: 0 auto;
@@ -154,11 +152,6 @@
   background: var(--color-bg-base);
 }
 
-// .block-header — defined globally in styles.scss
-// .block .block-header adds margin-bottom: 16px via global rule
-
-// .block-title — defined globally in styles.scss
-
 .info-box,
 .pay-paused-box {
   display: flex;
@@ -182,15 +175,32 @@
   gap: 10px;
 }
 
+.pay-setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pay-setting-group + .pay-setting-group {
+  margin-top: 16px;
+}
+
+.pay-setting-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
 .threshold-body {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-.date-section {
-  margin-top: 16px;
-}
+.date-section { margin-top: 0; }
 
 .form-label {
   display: inline-flex;
@@ -263,15 +273,11 @@
   transform: translateY(0);
 }
 
-// .mode-toggle — defined globally in styles.scss
-
 .ccy-selector {
   margin-bottom: 16px;
 }
 
-.pay-mode-panel {
-  margin-top: 16px;
-}
+.pay-mode-panel { margin-top: 6px; }
 
 .ratio-slider {
   padding: 12px 0 0;
@@ -359,10 +365,7 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 18px;
-  border: 0;
-  border-radius: 8px;
-  background: var(--color-bg-subtle);
+  padding: 0;
 }
 
 // .threshold-mode-toggle 繼承 .mode-toggle 全域樣式，此處只補 focus 修正
@@ -442,6 +445,8 @@
 .threshold-option {
   min-width: 86px;
   height: 36px;
+  border-color: var(--color-border-strong);
+  background: var(--color-bg-base);
   color: var(--color-text-secondary);
   font-size: 14px;
   font-weight: 500;
@@ -604,14 +609,6 @@
       margin-bottom: 0;
     }
   }
-}
-
-// .notes-block / .notes-title / .notes-list — defined globally in styles.scss
-// Done-page context: add positioning margin via success-block descendant selector
-.success-block .notes-block {
-  width: 100%;
-  margin-top: 56px;
-  text-align: left;
 }
 
 .success-block {
@@ -902,8 +899,6 @@
     border-radius: 8px;
     padding: 18px 16px;
   }
-
-  // .block-title font-size: 16px — defined globally in styles.scss @media (max-width: 480px)
 
   .ratio-summary {
     align-items: flex-start;

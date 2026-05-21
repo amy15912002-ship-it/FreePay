@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { Router } from '@angular/router';
-import { SCENARIOS } from '../mock-data/scenarios';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import {
   OV_FUNDS, MOCK_ALT_ORDERS, MOCK_CHG_ORDERS, MOCK_RDM_ORDERS, MOCK_PROFITS,
   OvSummary, AltOrder, ProfitRecord, DetailTxRecord, DetailChgRecord, DETAIL_TX_DETAIL, DETAIL_TX_CHANGE
@@ -20,8 +20,7 @@ const REFERENCE_DATE = new Date('2026-05-12T00:00:00');
   templateUrl: './account-overview.component.html',
   styleUrls: ['./account-overview.component.scss']
 })
-export class AccountOverviewComponent {
-  readonly scenarios = SCENARIOS.filter(s => !s.entryOnly);
+export class AccountOverviewComponent implements OnInit, OnDestroy {
   readonly funds = OV_FUNDS;
   readonly altOrders = MOCK_ALT_ORDERS;
   readonly chgOrders = MOCK_CHG_ORDERS;
@@ -31,7 +30,29 @@ export class AccountOverviewComponent {
   sumCardIndex = 0;
   summaryDemoMode: 'multi' | 'single' = 'multi';
 
-  constructor(private readonly router: Router) {}
+  private routeSub?: Subscription;
+
+  constructor(
+    private readonly router: Router,
+    private readonly route: ActivatedRoute
+  ) {}
+
+  ngOnInit(): void {
+    this.routeSub = this.route.queryParamMap.subscribe(query => {
+      const tab = query.get('tab');
+      if (tab === 'overview' || tab === 'order' || tab === 'profit') {
+        this.activeTab = tab;
+      }
+      const order = query.get('order');
+      if (order === 'all' || order === 'alt' || order === 'chg' || order === 'rdm') {
+        this.orderFilter = order;
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.routeSub?.unsubscribe();
+  }
 
   // 總覽摘要：由持有明細（funds）依交易幣別即時彙總，不另存一份
   get summaries(): OvSummary[] {
@@ -74,6 +95,7 @@ export class AccountOverviewComponent {
   selectedOrders = new Set<string>();
   cancelPwd = '';
   cancelPwdVisible = false;
+  openActionFpNo: string | null = null;
 
   detailFpNo: string | null = null;
   detailAlias = '';
@@ -212,16 +234,13 @@ export class AccountOverviewComponent {
   }
 
   ccyText(code: string): string {
-    return code === 'TWD' ? '台幣' : code === 'USD' ? '美元' : code;
-  }
-
-  fmtOrderMoney(ccy: string, amount: number): string {
-    return `${this.ccyText(ccy)} ${Number(amount || 0).toLocaleString('en-US')}`;
+    const names: Record<string, string> = { TWD: '台幣', USD: '美元', JPY: '日幣' };
+    return names[code] ?? code;
   }
 
   fmtOrderPaySetting(item: AltOrder): string {
     if (item.payType === 'P') return `依比例・${item.payRate}%・${item.rdmDay}日`;
-    return `依金額・${this.fmtOrderMoney(item.ccy, item.rdmAmt)}・${item.rdmDay}日`;
+    return `依金額・${Number(item.rdmAmt || 0).toLocaleString('en-US')}・${item.rdmDay}日`;
   }
 
   fmtLimitMode(limitMode: string, limitVal: number | null): string {
@@ -231,14 +250,34 @@ export class AccountOverviewComponent {
   }
 
   onAction(action: string, fpNo: string): void {
-    if (action === '加碼') {
+    const mode = action === '加碼' ? 'addOn' : action === '異動' ? 'modify' : action === '贖回' ? 'redeem' : null;
+    if (mode) {
       const fund = this.funds.find(f => f.contracts.some(c => c.fpNo === fpNo));
       if (fund) {
-        this.router.navigate(['/demo', fund.scenarioId], { queryParams: { addon: fpNo } });
+        this.router.navigate(['/demo/flow'], { queryParams: { mode, fundId: fund.code, fpNo } });
         return;
       }
     }
     alert(`${action}（${fpNo}）Demo 示意`);
+  }
+
+  toggleActionMenu(event: MouseEvent, fpNo: string): void {
+    event.stopPropagation();
+    this.openActionFpNo = this.openActionFpNo === fpNo ? null : fpNo;
+  }
+
+  isActionMenuOpen(fpNo: string): boolean {
+    return this.openActionFpNo === fpNo;
+  }
+
+  onPopoverAction(action: string, fpNo: string): void {
+    this.openActionFpNo = null;
+    this.onAction(action, fpNo);
+  }
+
+  @HostListener('document:click')
+  closeActionMenu(): void {
+    this.openActionFpNo = null;
   }
 
   // ── Detail modal ──
@@ -318,10 +357,6 @@ export class AccountOverviewComponent {
     const d = new Date(date);
     d.setHours(23, 59, 59, 999);
     return d;
-  }
-
-  fmtDetailAmt(ccy: string, amount: number): string {
-    return `${ccy} ${Number(amount).toLocaleString('en-US')}`;
   }
 
   txTypeText(t: string): string {

@@ -1,0 +1,291 @@
+:host {
+  display: block;
+  min-height: 100vh;
+  background: var(--color-bg-base);
+  color: var(--color-text-primary);
+  padding-bottom: 80px;
+}
+
+.fs-shell {
+  width: min(1200px, 100%);
+  margin: 0 auto;
+  padding: 24px 0 60px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.fs-title {
+  text-align: center;
+  font-size: 22px;
+}
+
+// ── 已篩條件 ─────────────────────────────────────────────
+.fs-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+
+  strong {
+    color: var(--color-brand-primary-400);
+    font-weight: 700;
+  }
+}
+
+.fs-clear {
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--color-brand-tertiary-600);
+  font-size: 14px;
+  cursor: pointer;
+
+  &:hover { color: var(--color-brand-tertiary-400); }
+}
+
+// ── 篩選列 ──────────────────────────────────────────────
+.fs-filters {
+  display: flex;
+  flex-direction: column;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-base);
+}
+
+.fs-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 20px;
+  border-bottom: 1px solid var(--color-border-default);
+
+  &:last-child { border-bottom: none; }
+}
+
+.fs-filter-label {
+  flex: 0 0 72px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
+.fs-keyword {
+  flex: 1;
+  min-width: 0;
+}
+
+// ── 績效 tabs ───────────────────────────────────────────
+.fs-tabs {
+  display: flex;
+  gap: 24px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.fs-tab {
+  padding: 10px 4px;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color .12s, border-color .12s;
+
+  &:hover { color: var(--color-text-primary); }
+
+  &.is-active {
+    color: var(--color-action-primary);
+    border-bottom-color: var(--color-action-primary);
+    font-weight: 700;
+  }
+}
+
+// ── 表格 ────────────────────────────────────────────────
+.fs-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.fs-table {
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  font-size: 14px;
+
+  th {
+    height: 56px;
+    padding: 12px 8px;
+    background: var(--color-bg-muted);
+    border-bottom: 2px solid var(--color-border-default);
+    color: var(--color-text-secondary);
+    text-align: center;
+    font-weight: 400;
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+
+    &:hover { color: var(--color-text-primary); }
+
+    &.col-code { width: 110px; }
+    &.col-name { width: 320px; text-align: left; }
+    &.col-buy { width: 80px; cursor: default; &:hover { color: var(--color-text-secondary); } }
+  }
+
+  td {
+    height: 56px;
+    padding: 12px 8px;
+    border-bottom: 1px solid var(--color-border-default);
+    text-align: center;
+    font-size: 16px;
+
+    &.col-code { color: var(--color-text-secondary); font-size: 14px; }
+    &.col-name { text-align: left; word-break: break-word; }
+    &.col-buy { width: 80px; }
+  }
+
+  tbody tr:nth-child(even) td {
+    background: var(--color-bg-subtle);
+  }
+}
+
+.fs-sort {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  color: var(--color-text-tertiary);
+  font-size: 12px;
+  line-height: 1;
+  vertical-align: -1px;
+}
+
+.fs-table th:hover .fs-sort,
+.fs-sort.is-active {
+  color: var(--color-text-secondary);
+}
+
+.fs-empty {
+  padding: 40px 0;
+  text-align: center;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+}
+
+// ── 分頁 ────────────────────────────────────────────────
+.fs-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.fs-page-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 36px;
+  height: 36px;
+  padding: 0 10px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 8px;
+  background: var(--color-neutral-0);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+  transition: border-color .12s, color .12s, background .12s;
+
+  &:hover:not(:disabled):not(.is-active) {
+    border-color: var(--color-neutral-300);
+    color: var(--color-text-primary);
+  }
+
+  &.is-active {
+    border-color: var(--color-action-primary);
+    background: var(--color-bg-brand-subtle);
+    color: var(--color-action-primary);
+    font-weight: 700;
+  }
+
+  &:disabled {
+    color: var(--color-neutral-250);
+    cursor: not-allowed;
+  }
+}
+
+// ── RWD ─────────────────────────────────────────────────
+@media (max-width: 767px) {
+  .fs-shell {
+    padding: 16px 15px 80px;
+  }
+
+  .fs-title { font-size: 18px; }
+
+  .fs-summary { flex-wrap: wrap; }
+
+  .fs-filter-row {
+    flex-wrap: wrap;
+    padding: 10px 12px;
+  }
+
+  .fs-filter-label { flex: 0 0 100%; }
+
+  .fs-keyword { flex: 1 1 100%; }
+
+  // ── 表格 → 卡片（同委託查詢做法）─────────
+  .fs-table {
+    display: block;
+
+    thead { display: none; }
+
+    tbody {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    tr {
+      display: block;
+      border: 1px solid var(--color-border-default);
+      border-radius: 8px;
+      background: var(--color-bg-base);
+      overflow: hidden;
+    }
+
+    td {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      width: auto;
+      height: auto;
+      margin: 0 12px;
+      padding: 9px 4px;
+      border-bottom: 1px solid var(--color-border-default);
+      background: var(--color-bg-base);
+      text-align: right;
+      font-size: 14px;
+
+      &::before {
+        content: attr(data-label);
+        flex: 0 0 auto;
+        max-width: 44%;
+        padding-right: 8px;
+        color: var(--color-text-secondary);
+        font-size: 14px;
+        text-align: left;
+      }
+
+      &:last-child { border-bottom: none; }
+      &.col-name { text-align: right; }
+      &.col-buy { justify-content: space-between; }
+    }
+
+    tbody tr:nth-child(even) td {
+      background: var(--color-bg-base);
+    }
+  }
+}

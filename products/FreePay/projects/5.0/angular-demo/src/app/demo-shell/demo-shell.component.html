@@ -1,14 +1,7 @@
 <div class="demo-bar">
   <span>DEMO 情境</span>
   <a routerLink="/demo/overview" class="demo-button">帳戶總覽</a>
-  <a
-    *ngFor="let s of scenarios"
-    [routerLink]="['/demo', s.id]"
-    class="demo-button"
-    [class.is-active]="scenario?.id === s.id"
-  >
-    {{ s.label }}
-  </a>
+  <a routerLink="/demo/search" class="demo-button">選擇基金</a>
 </div>
 
 <mat-horizontal-stepper
@@ -51,7 +44,7 @@
 
     <!-- s-ccy：交易選擇 -->
     <section class="screen" *ngIf="activeStep === 'ccy'">
-      <section class="block">
+      <section class="block" *ngIf="!isModifyMode">
         <div class="block-header">
           <h2 class="block-title">選擇交易方式</h2>
         </div>
@@ -148,7 +141,67 @@
     <!-- s-settings：申購設定 -->
     <form [formGroup]="form" class="screen" *ngIf="activeStep === 'settings'" novalidate>
 
-      <section class="block">
+      <ng-container *ngIf="isRedeemMode; else purchaseSettings">
+        <section class="block">
+          <div class="block-header">
+            <h2 class="block-title">贖回設定</h2>
+          </div>
+          <div class="sum-table">
+            <div class="sum-row"><span>交易名稱</span><strong>{{ selectedContract?.name || '-' }}</strong></div>
+            <div class="sum-row"><span>交易幣別</span><strong>{{ selectedCurrency?.currency }}（{{ selectedContract?.currencyCode }}）</strong></div>
+            <div class="sum-row">
+              <span>可贖回單位數</span>
+              <strong>
+                {{ formatUnits(redeemUnits) }}
+                <button
+                  *ngIf="redeemOrderingUnits > 0"
+                  class="hint-icon redeem-inline-hint"
+                  type="button"
+                  aria-label="可贖回單位數說明"
+                  (click)="payModeHintOpen = !payModeHintOpen"
+                >
+                  <i class="bi bi-info-circle"></i>
+                </button>
+              </strong>
+            </div>
+            <div class="hint-panel" [class.is-open]="payModeHintOpen">
+              已扣除在途中之單位數 {{ formatUnits(redeemOrderingUnits) }}。
+            </div>
+            <div class="sum-row"><span>參考淨值</span><strong>{{ scenario?.fundCurrencyCode }} {{ formatNav(redeemNav) }}</strong></div>
+            <div class="sum-row"><span>參考淨值日期</span><strong>{{ redeemNavDate }}</strong></div>
+            <div class="sum-row"><span>參考匯率</span><strong>{{ redeemExchangeRate === 1 ? '-' : formatNav(redeemExchangeRate) }}</strong></div>
+            <div class="sum-row"><span>贖回參考金額</span><strong class="hl">{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
+            <div class="sum-row"><span>收款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
+          </div>
+        </section>
+
+        <section class="block">
+          <div class="block-header">
+            <h2 class="block-title">交易密碼</h2>
+          </div>
+          <mat-form-field appearance="standard" color="accent" class="full-field">
+            <mat-label>請輸入交易密碼</mat-label>
+            <input matInput [type]="pwdVisible ? 'text' : 'password'" [(ngModel)]="pwd" [ngModelOptions]="{ standalone: true }" autocomplete="off">
+            <button mat-icon-button matSuffix type="button" (click)="pwdVisible = !pwdVisible" [attr.aria-label]="pwdVisible ? '隱藏密碼' : '顯示密碼'">
+              <i class="bi" [class.bi-eye]="!pwdVisible" [class.bi-eye-slash]="pwdVisible"></i>
+            </button>
+          </mat-form-field>
+        </section>
+
+        <div class="notes-block">
+          <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
+          <ul class="notes-list">
+            <li>贖回申請下單截止時間為每營業日下午 14:00 前截止，如逾時，則順延至次一營業日辦理；若遇基金為非營業日或非報價日，交易日將依基金公司規定順延。</li>
+            <li>實際贖回單位數依客戶基金帳上餘額為限，部分贖回單位數可能因未達交割日而導致交易失敗，請以基金最新公開說明書或投資人須知為準。</li>
+            <li>若贖回單位數過小，或本次贖回後剩餘庫存單位數過低，可能依各基金公司規定導致交易失敗或金額不足匯出。</li>
+            <li>贖回款項約 3-10 個工作天入帳於集保結算所留存之約定贖回帳戶，實際入帳時間仍依基金公司與集保作業為準。</li>
+            <li>參考淨值與參考匯率僅供試算，不代表實際交易淨值與匯率，實際金額將以基金公司回覆為準。</li>
+          </ul>
+        </div>
+      </ng-container>
+
+      <ng-template #purchaseSettings>
+      <section class="block" *ngIf="!isModifyMode">
         <div class="block-header">
           <h2 class="block-title">{{ amountSectionTitle }}</h2>
         </div>
@@ -200,7 +253,7 @@
         </div>
 
         <ng-container *ngIf="payActive">
-        <div class="form-group">
+        <div class="pay-setting-group">
           <div class="form-label">
             Pay 出方式
             <button
@@ -218,6 +271,8 @@
             <strong>依比例</strong>：每月固定按最新市值之年化自由 Pay 率（上限 15%）提領。<br><br>
             提領單位數以贖回前一日的最新淨值估算，實際金額將依交易淨值而定，可能與設定金額有差異。
           </div>
+          <div class="pay-setting-panel pay-setting-panel--mode">
+          <div class="form-group">
           <mat-button-toggle-group class="mode-toggle mode-toggle-fill" [value]="payMode" (change)="setPayMode($event.value)" aria-label="Pay 方式">
             <mat-button-toggle value="amount">依金額</mat-button-toggle>
             <mat-button-toggle value="ratio">依比例</mat-button-toggle>
@@ -245,8 +300,10 @@
             <mat-slider min="1" max="15" step="1" thumbLabel tickInterval="1" formControlName="ratio"></mat-slider>
           </div>
         </div>
+        </div>
+        </div>
 
-        <div class="date-section">
+        <div class="pay-setting-group">
           <div class="form-label">
             自由 Pay 基準日
             <button
@@ -264,6 +321,7 @@
             變更設定於營業日 14:00 前下單視為當日申請；14:00 以後下單則視為次一營業日申請。設定自由 Pay 基準日若距首次申購日不足 30 個日曆日時，將於屆滿 30 日後之最近一次自由 Pay 基準日開始執行。<br><br>
             若當月無設定之基準日（如 29、30、31 日），則遞延至下個營業日申請。
           </div>
+          <div class="pay-setting-panel pay-setting-panel--date date-section">
           <div class="date-grid">
             <button
               *ngFor="let day of dateOptions"
@@ -278,6 +336,7 @@
           </div>
           <div class="helper date-long-hint" *ngIf="showLongDateHint">
             <span>{{ longDateHintText }}</span>
+          </div>
           </div>
         </div>
         </ng-container>
@@ -386,7 +445,7 @@
                     inputmode="numeric"
                     formControlName="thresholdCustom"
                     required
-                    (input)="setCustomUnlockValue($any($event.target).value)"
+                    (input)="setCustomUnlockValue(form.controls.thresholdCustom.value)"
                   >
                   <span matSuffix>%</span>
                   <mat-hint>可輸入 1–100 的整數</mat-hint>
@@ -399,6 +458,7 @@
           </div>
         </div>
       </section>
+      </ng-template>
     </form>
 
     <!-- s-confirm：確認送出 -->
@@ -410,11 +470,14 @@
           <h2 class="block-title">確認明細</h2>
         </div>
         <div class="sum-table">
-          <div class="sum-row"><span>申購類型</span><strong>{{ isAddOnMode ? '加碼' : '新申購' }}</strong></div>
+          <div class="sum-row"><span>交易類型</span><strong>{{ transactionTypeLabel }}</strong></div>
           <div class="sum-row" *ngIf="isAddOnMode && selectedContract">
             <span>加碼至</span><strong>{{ selectedContract.name }}</strong>
           </div>
-          <div class="sum-row"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
+          <div class="sum-row" *ngIf="isModifyMode && selectedContract">
+            <span>異動交易</span><strong>{{ selectedContract.name }}</strong>
+          </div>
+          <div class="sum-row" *ngIf="!isModifyMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
           <ng-container *ngIf="!isAddOnMode">
             <div class="sum-row" *ngIf="payMode === 'amount'">
               <span>每月 Pay 金額</span>
@@ -520,24 +583,31 @@
         <div class="order-box">
           <div class="sum-row"><span>委託時間</span><strong>2026/05/12 14:30</strong></div>
           <div class="sum-row"><span>基金</span><strong><span class="fund-code">{{ scenario?.fundId }}</span>{{ scenario?.fundName }}</strong></div>
-          <div class="sum-row"><span>申購類型</span><strong>{{ isAddOnMode ? '加碼' : '新申購' }}</strong></div>
-          <div class="sum-row"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
-          <div class="sum-row" *ngIf="!isAddOnMode && payMode === 'amount'"><span>每月 Pay 金額</span><strong class="hl">{{ formatMoney(monthlyPay) }}</strong></div>
-          <div class="sum-row" *ngIf="!isAddOnMode && payMode === 'ratio'"><span>每月 Pay 比例</span><strong class="hl">年化 {{ form.controls.ratio.value }}%</strong></div>
-          <div class="sum-row" *ngIf="!isAddOnMode"><span>首次基準生效日</span><strong>{{ scenario?.firstRdmDate }}</strong></div>
-          <div class="sum-row"><span>扣款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
+          <div class="sum-row"><span>交易類型</span><strong>{{ transactionTypeLabel }}</strong></div>
+          <div class="sum-row" *ngIf="isModifyMode && selectedContract"><span>異動交易</span><strong>{{ selectedContract.name }}</strong></div>
+          <div class="sum-row" *ngIf="isRedeemMode && selectedContract"><span>贖回交易</span><strong>{{ selectedContract.name }}</strong></div>
+          <div class="sum-row" *ngIf="isRedeemMode"><span>贖回單位數</span><strong>{{ formatUnits(redeemUnits) }}</strong></div>
+          <div class="sum-row" *ngIf="isRedeemMode"><span>贖回參考金額</span><strong class="hl">{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
+          <div class="sum-row" *ngIf="!isModifyMode && !isRedeemMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
+          <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode && payMode === 'amount'"><span>每月 Pay 金額</span><strong class="hl">{{ formatMoney(monthlyPay) }}</strong></div>
+          <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode && payMode === 'ratio'"><span>每月 Pay 比例</span><strong class="hl">年化 {{ form.controls.ratio.value }}%</strong></div>
+          <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode"><span>{{ isModifyMode ? '自由 Pay 基準日' : '首次基準生效日' }}</span><strong>{{ isModifyMode ? ('每月 ' + form.controls.day.value + ' 日') : scenario?.firstRdmDate }}</strong></div>
+          <div class="sum-row"><span>{{ isRedeemMode ? '收款帳號' : '扣款帳號' }}</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
         </div>
         <div class="done-actions">
           <button mat-stroked-button type="button" (click)="queryTrade()">委託查詢</button>
-          <button mat-raised-button color="primary" type="button" (click)="reset()">繼續申購</button>
+          <button *ngIf="!isRedeemMode" mat-raised-button color="primary" type="button" (click)="reset()">繼續申購</button>
+          <button *ngIf="isRedeemMode" mat-raised-button color="primary" type="button" (click)="goOverview()">帳戶總覽</button>
         </div>
         <div class="notes-block">
           <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
-          <ol class="notes-list">
-            <li *ngIf="!isAddOnMode">您的自由 Pay 申購委託已送出。預計 3-4 個營業日後申購確認書入帳，首次 Pay 將於設定基準日（每月 {{ form.controls.day.value }} 日）執行；若距申購確認日不足 30 日，將順延至屆滿後的第一個基準日。</li>
+          <ul class="notes-list">
+            <li *ngIf="isModifyMode">您的自由 Pay 異動委託已送出。設定將依委託查詢狀態生效。</li>
+            <li *ngIf="isRedeemMode">您的贖回委託已送出。若超過本營業日交易時間 14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。</li>
+            <li *ngIf="!isAddOnMode && !isModifyMode && !isRedeemMode">您的自由 Pay 申購委託已送出。預計 3-4 個營業日後申購確認書入帳，首次 Pay 將於設定基準日（每月 {{ form.controls.day.value }} 日）執行；若距申購確認日不足 30 日，將順延至屆滿後的第一個基準日。</li>
             <li *ngIf="isAddOnMode">您的加碼委託已送出。申購確認後金額將計入既有交易，Pay 設定維持既有交易不變。預計 3-4 個營業日後申購確認書入帳。</li>
-            <li>若超過本營業日交易時間 13:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。若您有任何疑問，請洽客服專線 02-27208126。</li>
-          </ol>
+            <li *ngIf="!isRedeemMode">若超過本營業日交易時間 13:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。若您有任何疑問，請洽客服專線 02-27208126。</li>
+          </ul>
         </div>
       </section>
     </section>
@@ -546,10 +616,10 @@
 
 <div class="action-bar" *ngIf="activeStep !== 'done'">
   <div class="action-inner">
-    <button mat-stroked-button type="button" [disabled]="activeStep === 'ccy' || (activeStep === 'settings' && !shouldShowSccy)" (click)="previous()">上一步</button>
-    <button mat-raised-button color="primary" type="button" [disabled]="activeStep === 'confirm' && submitDisabled" (click)="next()">
-      {{ activeStep === 'confirm' ? '確認送出' : '下一步' }}
-      <i class="bi" [class.bi-check-lg]="activeStep === 'confirm'" [class.bi-arrow-right]="activeStep !== 'confirm'"></i>
+    <button mat-stroked-button type="button" [disabled]="activeStep === 'ccy' || (activeStep === 'settings' && !shouldShowSccy && !isRedeemMode)" (click)="previous()">上一步</button>
+    <button mat-raised-button color="primary" type="button" [disabled]="actionDisabled" (click)="next()">
+      {{ primaryActionLabel }}
+      <i class="bi" [class.bi-check-lg]="primaryActionIsSubmit" [class.bi-arrow-right]="!primaryActionIsSubmit"></i>
     </button>
   </div>
 </div>

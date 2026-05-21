@@ -20,12 +20,14 @@ import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DemoShellComponent } from './demo-shell/demo-shell.component';
 import { AccountOverviewComponent } from './account-overview/account-overview.component';
+import { FundSelectComponent } from './fund-select/fund-select.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DemoShellComponent,
-    AccountOverviewComponent
+    AccountOverviewComponent,
+    FundSelectComponent
   ],
   imports: [
     BrowserModule,

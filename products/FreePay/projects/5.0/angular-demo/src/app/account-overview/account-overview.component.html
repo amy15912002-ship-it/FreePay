@@ -1,14 +1,11 @@
-<!-- demo-bar -->
 <div class="demo-bar">
   <span>DEMO 情境</span>
   <a routerLink="/demo/overview" class="demo-button is-active">帳戶總覽</a>
-  <a *ngFor="let s of scenarios" [routerLink]="['/demo', s.id]" class="demo-button">{{ s.label }}</a>
+  <a routerLink="/demo/search" class="demo-button">選擇基金</a>
 </div>
 
-<!-- page shell -->
 <div class="ov-shell">
 
-  <!-- tab nav bar -->
   <div class="ov-nav-row">
     <nav mat-tab-nav-bar [tabPanel]="tabPanel" color="primary">
       <a mat-tab-link [active]="activeTab === 'overview'" (click)="activeTab = 'overview'">帳戶總覽</a>
@@ -19,12 +16,8 @@
 
   <mat-tab-nav-panel #tabPanel class="ov-tab-panel">
 
-    <!-- ════════════════════════════════════════
-         Tab 1：帳戶總覽
-    ════════════════════════════════════════ -->
     <ng-container *ngIf="activeTab === 'overview'">
 
-      <!-- 總覽匯總表 -->
       <section class="ov-section" aria-labelledby="ov-summary-title">
         <div class="ov-sum-title-row">
           <h2 class="block-title" id="ov-summary-title">總覽</h2>
@@ -84,7 +77,7 @@
       <section class="ov-section" aria-labelledby="ov-detail-title">
         <div class="block-header">
           <h2 class="block-title" id="ov-detail-title">明細</h2>
-          <button mat-stroked-button color="primary" type="button" (click)="onAction('立即申購','')">立即申購</button>
+          <a mat-stroked-button color="primary" routerLink="/demo/search">立即申購</a>
         </div>
 
         <div class="ov-fund-table">
@@ -100,7 +93,6 @@
           </div>
 
           <article class="ov-fund" *ngFor="let f of funds; trackBy: trackByFund">
-          <!-- fund summary row -->
           <div class="ov-fund-main" (click)="toggleFund(f.id)">
             <div class="ov-fund-name">
               <span class="ov-fund-code">{{ f.code }}</span>
@@ -134,7 +126,6 @@
             </div>
           </div>
 
-          <!-- 合約展開區 -->
           <div class="ov-contracts" *ngIf="isFundExpanded(f.id)">
             <div class="ov-ct-head">
               <div class="ov-ct-name">交易明細</div>
@@ -179,14 +170,29 @@
                 </div>
               </div>
               <div class="ov-ct-actions">
-                <button class="circle-btn" type="button" [matMenuTriggerFor]="ctMenu" aria-label="更多操作">
+                <button
+                  class="circle-btn"
+                  type="button"
+                  [class.is-active]="isActionMenuOpen(c.fpNo)"
+                  [attr.aria-expanded]="isActionMenuOpen(c.fpNo)"
+                  (click)="toggleActionMenu($event, c.fpNo)"
+                  aria-label="更多操作"
+                >
                   <i class="bi bi-three-dots"></i>
                 </button>
                 <button class="circle-btn circle-btn--buy" type="button" (click)="onAction('加碼', c.fpNo)">BUY</button>
-                <mat-menu #ctMenu="matMenu">
-                  <button mat-menu-item type="button" (click)="onAction('異動', c.fpNo)">異動</button>
-                  <button mat-menu-item type="button" (click)="onAction('贖回', c.fpNo)">贖回</button>
-                </mat-menu>
+                <div class="ct-action-popover" *ngIf="isActionMenuOpen(c.fpNo)" (click)="$event.stopPropagation()">
+                  <button
+                    class="ct-action-item"
+                    type="button"
+                    (click)="onPopoverAction('異動', c.fpNo)"
+                  >異動</button>
+                  <button
+                    class="ct-action-item"
+                    type="button"
+                    (click)="onPopoverAction('贖回', c.fpNo)"
+                  >贖回</button>
+                </div>
               </div>
             </div>
           </div>
@@ -196,18 +202,15 @@
         <!-- 注意事項 -->
         <div class="notes-block">
           <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
-          <ol class="notes-list">
+          <ul class="notes-list">
             <li>當您於本網進行基金交易，系統將保留您所有的基金交易確認單歷史紀錄以供查詢之用。若交易未結帳完成前之相關記錄，可以透過在途交易查詢。</li>
             <li>上述投資組合損益，為資料期間內已完成交易程序者，資料若有不符，應以臺灣集中保管結算所電腦記錄為準，歡迎您至集保網站查詢（www.tdcc.com.tw）。</li>
-          </ol>
+          </ul>
         </div>
       </section>
 
     </ng-container>
 
-    <!-- ════════════════════════════════════════
-         Tab 2：委託查詢/取消
-    ════════════════════════════════════════ -->
     <ng-container *ngIf="activeTab === 'order'">
 
       <div class="ov-tab-stack">
@@ -223,7 +226,6 @@
         </div>
       </div>
 
-      <!-- 申購 -->
       <section class="ov-order-section" *ngIf="showAlt" aria-label="申購委託">
         <div class="block-header">
           <h3 class="block-title">申購</h3>
@@ -256,12 +258,12 @@
                 <td class="ov-mobile-only-cell" data-label="基金名稱">{{ item.fund }}</td>
                 <td class="col-time ov-desktop-only-cell" data-label="委託 / 生效日">
                   <div class="ov-order-date">{{ item.date }} {{ item.time }}</div>
-                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-label">生效日 </span>{{ item.effectDate }}</div>
+                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-label">生效日 </span><span class="ov-order-effect-value">{{ item.effectDate }}</span></div>
                 </td>
-                <td class="ov-mobile-only-cell" data-label="委託日">{{ item.date }} {{ item.time }}</td>
-                <td class="ov-mobile-only-cell" data-label="生效日">{{ item.effectDate }}</td>
+                <td class="ov-mobile-only-cell ov-order-date-mobile" data-label="委託日">{{ item.date }} {{ item.time }}</td>
+                <td class="ov-mobile-only-cell ov-order-effect-mobile" data-label="生效日">{{ item.effectDate }}</td>
                 <td data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
-                <td class="col-amount" data-label="申購金額">{{ fmtOrderMoney(item.ccy, item.amount) }}</td>
+                <td class="col-amount" data-label="申購金額">{{ fmtN(item.amount) }}</td>
                 <td data-label="Pay設定">{{ fmtOrderPaySetting(item) }}</td>
                 <td data-label="觸發門檻">{{ fmtLimitMode(item.limitMode, item.limitVal) }}</td>
                 <td class="col-status" data-label="委託結果">{{ item.status }}</td>
@@ -271,7 +273,6 @@
         </div>
       </section>
 
-      <!-- 異動 -->
       <section class="ov-order-section" *ngIf="showChg" aria-label="異動委託">
         <div class="block-header">
           <h3 class="block-title">異動</h3>
@@ -303,10 +304,10 @@
                 <td class="ov-mobile-only-cell" data-label="基金名稱">{{ item.fund }}</td>
                 <td class="col-time ov-desktop-only-cell" data-label="委託 / 生效日">
                   <div class="ov-order-date">{{ item.date }} {{ item.time }}</div>
-                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-label">生效日 </span>{{ item.effectDate }}</div>
+                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-label">生效日 </span><span class="ov-order-effect-value">{{ item.effectDate }}</span></div>
                 </td>
-                <td class="ov-mobile-only-cell" data-label="委託日">{{ item.date }} {{ item.time }}</td>
-                <td class="ov-mobile-only-cell" data-label="生效日">{{ item.effectDate }}</td>
+                <td class="ov-mobile-only-cell ov-order-date-mobile" data-label="委託日">{{ item.date }} {{ item.time }}</td>
+                <td class="ov-mobile-only-cell ov-order-effect-mobile" data-label="生效日">{{ item.effectDate }}</td>
                 <td data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
                 <td data-label="Pay設定">
                   <div class="ov-card-value">
@@ -327,7 +328,6 @@
         </div>
       </section>
 
-      <!-- 贖回 -->
       <section class="ov-order-section" *ngIf="showRdm" aria-label="贖回委託">
         <div class="block-header">
           <h3 class="block-title">贖回</h3>
@@ -359,13 +359,13 @@
                 <td class="ov-mobile-only-cell" data-label="基金名稱">{{ item.fund }}</td>
                 <td class="col-time ov-desktop-only-cell" data-label="委託 / 生效日">
                   <div class="ov-order-date">{{ item.date }} {{ item.time }}</div>
-                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-label">生效日 </span>{{ item.effectDate }}</div>
+                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-label">生效日 </span><span class="ov-order-effect-value">{{ item.effectDate }}</span></div>
                 </td>
-                <td class="ov-mobile-only-cell" data-label="委託日">{{ item.date }} {{ item.time }}</td>
-                <td class="ov-mobile-only-cell" data-label="生效日">{{ item.effectDate }}</td>
+                <td class="ov-mobile-only-cell ov-order-date-mobile" data-label="委託日">{{ item.date }} {{ item.time }}</td>
+                <td class="ov-mobile-only-cell ov-order-effect-mobile" data-label="生效日">{{ item.effectDate }}</td>
                 <td data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
                 <td data-label="贖回單位數">{{ item.unit }}</td>
-                <td class="col-amount" data-label="贖回參考金額">{{ fmtOrderMoney(item.ccy, item.amount) }}</td>
+                <td class="col-amount" data-label="贖回參考金額">{{ fmtN(item.amount) }}</td>
                 <td class="col-status" data-label="委託結果">{{ item.status }}</td>
               </tr>
             </tbody>
@@ -394,19 +394,16 @@
       <!-- 注意事項 -->
       <div class="notes-block">
         <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
-        <ol class="notes-list">
+        <ul class="notes-list">
           <li>當日申請之申購（含加碼）委託可於13:00前取消，若逾時則無法取消，將於次一營業日生效。</li>
           <li>當日申請之異動/贖回委託可於14:00前取消，若逾時則無法取消，將於次一營業日生效。</li>
           <li>交易相關問題請洽客服專線 02-27208126。</li>
-        </ol>
+        </ul>
       </div>
       </div>
 
     </ng-container>
 
-    <!-- ════════════════════════════════════════
-         Tab 3：已實現損益
-    ════════════════════════════════════════ -->
     <ng-container *ngIf="activeTab === 'profit'">
 
       <div class="ov-tab-stack">
@@ -435,7 +432,6 @@
         </div>
       </div>
 
-      <!-- 匯總表 -->
       <div class="ov-table-wrap ov-mobile-card-wrap">
         <table class="ov-table ov-profit-summary-table">
           <thead>
@@ -464,7 +460,6 @@
         </table>
       </div>
 
-      <!-- 各基金明細 -->
       <div class="ov-profit-list" *ngIf="profitGroupedByFund.length > 0">
         <div class="ov-profit-mobile-tools">
           <button
@@ -491,9 +486,9 @@
           <table class="ov-table ov-profit-table">
             <thead>
               <tr>
-                <th class="col-fund">交易明細</th>
                 <th class="col-date">贖回日</th>
-                <th>交易幣別</th>
+                <th class="col-fund">交易明細</th>
+                <th class="col-currency">交易幣別</th>
                 <th>
                   <div class="ov-metric-head">
                     <span>Pay設定</span><span class="ov-line"></span><span>已Pay金額</span>
@@ -514,13 +509,13 @@
             </thead>
             <tbody>
               <tr *ngFor="let item of group.rows; trackBy: trackById">
+                <td class="col-date" data-label="贖回日">{{ item.redeemDate }}</td>
                 <td class="col-fund ov-desktop-only-cell" data-label="交易明細">
                   <div>{{ item.fpNo }}</div>
                   <div class="ov-cell-sub">{{ item.alias }}</div>
                 </td>
-                <td class="ov-mobile-only-cell" data-label="名稱">{{ item.alias }}</td>
-                <td class="col-date" data-label="贖回日">{{ item.redeemDate }}</td>
-                <td class="ov-desktop-only-cell" data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
+                <td class="ov-mobile-only-cell" data-label="交易明細">{{ item.alias }}</td>
+                <td class="col-currency ov-desktop-only-cell" data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
                 <td class="ov-desktop-only-cell" data-label="Pay設定 / 已Pay金額">
                   <div class="ov-metric">
                     <span>{{ item.paySetting }}</span>
@@ -578,10 +573,10 @@
       <!-- 注意事項 -->
       <div class="notes-block">
         <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
-        <ol class="notes-list">
+        <ul class="notes-list">
           <li>上述損益數據為估算值，實際以交易確認書為準。</li>
           <li>匯率損益未納入計算，外幣交易實際損益請參照匯兌盈虧。</li>
-        </ol>
+        </ul>
       </div>
       </div>
 
@@ -590,7 +585,6 @@
   </mat-tab-nav-panel>
 </div>
 
-<!-- ── Detail modal overlay ─────────────────────────────────── -->
 <div class="detail-overlay" *ngIf="detailFpNo" (click)="closeDetail()">
   <div class="detail-panel" (click)="$event.stopPropagation()">
 
@@ -673,14 +667,14 @@
             </thead>
             <tbody>
               <tr *ngFor="let r of detailTxRecords">
-                <td>{{ fmtDate(r.orderDate) }}<br><span class="ov-cell-sub">{{ r.orderTime }}</span></td>
-                <td>{{ txTypeText(r.tradeType) }}</td>
-                <td>{{ fmtDate(r.tDate) }}</td>
-                <td>{{ r.trCcyDesc }}/{{ r.fdCcyDesc }}</td>
-                <td>{{ r.navDesc }}</td>
-                <td>{{ r.unitDesc }}</td>
-                <td>{{ r.exRateDesc }}</td>
-                <td>{{ fmtDetailAmt(r.trCcyDesc, r.amount) }}</td>
+                <td data-label="委託日期/時間">{{ fmtDate(r.orderDate) }}<br><span class="ov-cell-sub">{{ r.orderTime }}</span></td>
+                <td data-label="交易類型">{{ txTypeText(r.tradeType) }}</td>
+                <td data-label="成交日期">{{ fmtDate(r.tDate) }}</td>
+                <td data-label="幣別">{{ r.trCcyDesc }}/{{ r.fdCcyDesc }}</td>
+                <td data-label="淨值">{{ r.navDesc }}</td>
+                <td data-label="單位數">{{ r.unitDesc }}</td>
+                <td data-label="匯率">{{ r.exRateDesc }}</td>
+                <td data-label="金額">{{ fmtN(r.amount) }}</td>
               </tr>
               <tr *ngIf="detailTxRecords.length === 0">
                 <td colspan="8" class="ov-empty">查無資料</td>
@@ -719,12 +713,12 @@
             </thead>
             <tbody>
               <tr *ngFor="let r of detailChgRecords">
-                <td>{{ fmtDate(r.orderDate) }}<br><span class="ov-cell-sub">{{ r.orderTime }}</span></td>
-                <td>{{ chgTypeText(r.tradeType) }}</td>
-                <td>{{ fmtChgBefore(r) }}</td>
-                <td>{{ fmtChgAfter(r) }}</td>
-                <td>{{ fmtDate(r.tDate) }}</td>
-                <td>{{ r.status }}</td>
+                <td data-label="異動日期/時間">{{ fmtDate(r.orderDate) }}<br><span class="ov-cell-sub">{{ r.orderTime }}</span></td>
+                <td data-label="異動項目">{{ chgTypeText(r.tradeType) }}</td>
+                <td data-label="異動前">{{ fmtChgBefore(r) }}</td>
+                <td data-label="異動後">{{ fmtChgAfter(r) }}</td>
+                <td data-label="生效日">{{ fmtDate(r.tDate) }}</td>
+                <td data-label="狀態">{{ r.status }}</td>
               </tr>
               <tr *ngIf="detailChgRecords.length === 0">
                 <td colspan="6" class="ov-empty">查無資料</td>

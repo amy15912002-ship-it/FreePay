@@ -6,8 +6,6 @@
   padding-bottom: 80px;
 }
 
-// .demo-bar / .demo-button — defined globally in styles.scss
-
 // ── Shell ──────────────────────────────────────────────
 
 .ov-shell {
@@ -128,8 +126,8 @@
     scroll-behavior: smooth;
     gap: 12px;
     padding-bottom: 4px;
-    // 隱藏捲軸
     scrollbar-width: none;
+
     &::-webkit-scrollbar { display: none; }
   }
 
@@ -138,7 +136,6 @@
     scroll-snap-align: start;
   }
 
-  // 單幣別：滿版、不需 peek 邊距；內部維持直式
   .ov-sum-card:only-child {
     flex-basis: 100%;
   }
@@ -241,53 +238,54 @@
 }
 
 @media (min-width: 768px) {
-  .ov-sum-cards { align-items: flex-start; }
+  .ov-sum-cards {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
 
-  .ov-sum-card { flex: 1; min-width: 240px; }
+  .ov-sum-card {
+    display: grid;
+    grid-template-columns: minmax(260px, 1.7fr) minmax(180px, 1fr) repeat(3, minmax(150px, 1fr));
+    gap: 12px;
+    align-items: center;
+    width: 100%;
+  }
+
+  .ov-sum-identity {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .ov-sum-head {
+    justify-content: flex-start;
+    gap: 6px;
+  }
 
   .ov-sum-market { font-size: 28px; }
 
-  // ── 單幣別：滿版橫式佈局（左欄幣別市值 + 右側 4 tile）──────────
-  .ov-sum-card:only-child {
-    display: grid;
-    grid-template-columns: minmax(260px, 1.7fr) repeat(4, minmax(0, 1fr));
-    gap: 12px;
-    align-items: center;
+  .ov-sum-card > .ov-sum-tiles {
+    display: contents;
+  }
 
-    // 橫式左欄：幣別、市值同一列水平排列
-    .ov-sum-identity {
-      display: flex;
-      flex-direction: row;
-      align-items: center;
-      gap: 16px;
-    }
+  .ov-sum-card > .ov-sum-change {
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 4px;
+    padding: 10px 12px;
+    border-bottom: none;
+    background: var(--color-bg-muted);
+    border-radius: 8px;
 
-    // 市值：標籤與數字同列，不被 space-between 推散
-    .ov-sum-head {
-      justify-content: flex-start;
-      gap: 6px;
-    }
-
-    > .ov-sum-tiles { display: contents; }
-
-    // 持有損益：橫式時改為 tile 樣式，與其餘 3 格一致
-    > .ov-sum-change {
-      flex-direction: column;
-      justify-content: center;
-      align-items: flex-start;
-      gap: 4px;
-      padding: 10px 12px;
-      border-bottom: none;
-      background: var(--color-bg-muted);
-      border-radius: 8px;
-
-      > span:first-child { font-size: 14px; }
-      > span:last-child  { font-size: 16px; font-weight: 500; }
-    }
+    > span:first-child { font-size: 14px; }
+    > span:last-child  { font-size: 16px; font-weight: 500; }
   }
 }
 
-// ── Table shared ──────────────────────────────────────────
+// Table shared
 
 .ov-table-wrap {
   width: 100%;
@@ -327,8 +325,6 @@
     background: var(--color-bg-subtle);
   }
 }
-
-// .val-up / .val-down — defined globally in styles.scss (uses --color-price-up / --color-price-down)
 
 // ── Fund table wrapper ────────────────────────────────────
 
@@ -450,7 +446,7 @@
   border: 1px solid var(--color-border-default);
   border-radius: 12px;
   margin-top: 4px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: var(--shadow-md);
 }
 
@@ -497,10 +493,45 @@
 .ov-ct-fpno  { color: var(--color-text-secondary); font-size: 14px; display: flex; align-items: center; gap: 6px; }
 
 .ov-ct-actions {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
+}
+
+.ct-action-popover {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 8px;
+  z-index: 20;
+  min-width: 96px;
+  padding: 4px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-base);
+  box-shadow: var(--shadow-md);
+}
+
+.ct-action-item {
+  display: block;
+  width: 100%;
+  min-height: 36px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  text-align: left;
+  cursor: pointer;
+}
+
+.ct-action-item:hover,
+.ct-action-item:focus-visible {
+  background: var(--color-bg-muted);
+  outline: none;
 }
 
 // ── Filter bar ──────────────────────────────────────────
@@ -546,6 +577,16 @@
 .ov-cell-name { color: var(--color-text-primary); font-size: 16px; }
 .ov-cell-sub  { color: var(--color-text-secondary); font-size: 14px; margin-top: 4px; }
 .ov-cell-old  { color: var(--color-text-secondary); text-decoration: line-through; font-size: 14px; }
+.ov-order-date,
+.ov-order-date-mobile {
+  white-space: nowrap;
+  font-size: 13px;
+}
+.ov-order-effect-date .ov-order-effect-value,
+.ov-order-effect-mobile {
+  color: var(--color-brand-secondary-600);
+  font-weight: 500;
+}
 
 // ── Cancel bar ────────────────────────────────────────────
 
@@ -585,9 +626,11 @@
 // ── Profit section ─────────────────────────────────────────
 
 .ov-profit-table {
-  th.col-fund,   td.col-fund   { width: 160px; text-align: left; padding-left: 20px; }
-  th.col-date,   td.col-date   { width: 110px; white-space: nowrap; }
-  th.col-result, td.col-result { width: 80px; padding-right: 20px; }
+  th.col-date,   td.col-date,
+  th.col-fund,   td.col-fund   { width: 130px; text-align: center; }
+  th.col-date,   td.col-date   { white-space: nowrap; }
+  th.col-currency, td.col-currency { width: 90px; }
+  th.col-result, td.col-result { width: 90px; }
 }
 
 .ov-profit-list {
@@ -602,10 +645,6 @@
   line-height: 1.75;
   margin: 0;
 }
-
-// .ov-notes / .ov-notes-title / .ov-notes-list — replaced by global .notes-block / .notes-title / .notes-list
-
-.notes-block { margin-top: 56px; }
 
 // ── Detail icon button ────────────────────────────────────────
 
@@ -937,7 +976,9 @@
 
   .ov-order-table,
   .ov-profit-summary-table,
-  .ov-profit-table {
+  .ov-profit-table,
+  .detail-tx-table,
+  .detail-chg-table {
     display: block;
     table-layout: auto;
 
@@ -1076,7 +1117,47 @@
     }
   }
 
+  .detail-panel .ov-table-wrap {
+    overflow-x: visible;
+  }
+
+  .detail-tx-table,
+  .detail-chg-table {
+    td {
+      text-align: right;
+    }
+
+    td:first-child {
+      background: var(--color-bg-muted);
+      font-weight: 500;
+    }
+
+    .ov-empty {
+      display: block;
+      margin: 0;
+      border-bottom: none;
+      text-align: center;
+
+      &::before {
+        content: none;
+      }
+    }
+  }
+
   .ov-filter-row { flex-wrap: wrap; }
+
+  .detail-panel .ov-filter-row {
+    align-items: flex-start;
+    gap: 6px;
+  }
+
+  .detail-panel .ov-filter-label {
+    flex: 0 0 100%;
+  }
+
+  .detail-panel .filter-chips {
+    width: 100%;
+  }
 
   .date-range-field {
     width: 100%;

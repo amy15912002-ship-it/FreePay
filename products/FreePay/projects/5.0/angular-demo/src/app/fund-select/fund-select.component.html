@@ -1,0 +1,146 @@
+<!-- demo-bar -->
+<div class="demo-bar">
+  <span>DEMO 情境</span>
+  <a routerLink="/demo/overview" class="demo-button">帳戶總覽</a>
+  <a routerLink="/demo/search" class="demo-button is-active">選擇基金</a>
+</div>
+
+<!-- page shell -->
+<div class="fs-shell">
+  <h1 class="block-title fs-title">鉅亨自由 Pay — 基金搜尋</h1>
+
+  <!-- 已篩條件 + 清除 -->
+  <div class="fs-summary">
+    <span>已篩條件　【相關結果共有 <strong>{{ filteredFunds.length }}</strong> 檔】</span>
+    <button type="button" class="fs-clear" (click)="clearFilters()">清除條件</button>
+  </div>
+
+  <!-- 篩選列 -->
+  <div class="fs-filters">
+    <div class="fs-filter-row">
+      <span class="fs-filter-label">基金搜尋</span>
+      <mat-form-field class="fs-keyword" appearance="standard" color="accent">
+        <input matInput [(ngModel)]="keyword" (input)="onFilterChange()" placeholder="請輸入基金代碼或名稱關鍵字" autocomplete="off">
+      </mat-form-field>
+    </div>
+
+    <div class="fs-filter-row">
+      <span class="fs-filter-label">境內境外</span>
+      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="境內境外篩選">
+        <mat-chip [selectable]="true" [selected]="domicileFilters.length===0" (click)="clearFilterGroup('domicile')">全部</mat-chip>
+        <mat-chip *ngFor="let item of domiciles" [selectable]="true" [selected]="domicileFilters.includes(item)" (click)="toggleDomicileFilter(item)">{{ item }}</mat-chip>
+      </mat-chip-list>
+    </div>
+
+    <div class="fs-filter-row">
+      <span class="fs-filter-label">基金類型</span>
+      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="基金類型篩選">
+        <mat-chip [selectable]="true" [selected]="categoryFilters.length===0" (click)="clearFilterGroup('category')">全部</mat-chip>
+        <mat-chip *ngFor="let c of categories" [selectable]="true" [selected]="categoryFilters.includes(c)" (click)="toggleCategoryFilter(c)">{{ c }}</mat-chip>
+      </mat-chip-list>
+    </div>
+
+    <div class="fs-filter-row">
+      <span class="fs-filter-label">計價幣別</span>
+      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="計價幣別篩選">
+        <mat-chip [selectable]="true" [selected]="pricingCcyFilters.length===0" (click)="clearFilterGroup('pricingCcy')">全部</mat-chip>
+        <mat-chip *ngFor="let ccy of pricingCurrencies" [selectable]="true" [selected]="pricingCcyFilters.includes(ccy)" (click)="togglePricingCcyFilter(ccy)">{{ ccy }}</mat-chip>
+      </mat-chip-list>
+    </div>
+
+    <div class="fs-filter-row">
+      <span class="fs-filter-label">基金品牌</span>
+      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="基金品牌篩選">
+        <mat-chip [selectable]="true" [selected]="brandFilters.length===0" (click)="clearFilterGroup('brand')">全部</mat-chip>
+        <mat-chip *ngFor="let b of brands" [selectable]="true" [selected]="brandFilters.includes(b)" (click)="toggleBrandFilter(b)">{{ b }}</mat-chip>
+      </mat-chip-list>
+    </div>
+
+    <div class="fs-filter-row">
+      <span class="fs-filter-label">投資區域</span>
+      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="投資區域篩選">
+        <mat-chip [selectable]="true" [selected]="regionFilters.length===0" (click)="clearFilterGroup('region')">全部</mat-chip>
+        <mat-chip *ngFor="let r of regions" [selectable]="true" [selected]="regionFilters.includes(r)" (click)="toggleRegionFilter(r)">{{ r }}</mat-chip>
+      </mat-chip-list>
+    </div>
+  </div>
+
+  <!-- 績效 tabs -->
+  <div class="fs-tabs" role="tablist">
+    <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='perf'" (click)="setTab('perf')">績效表現</button>
+    <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='roi'" (click)="setTab('roi')">年度報酬率</button>
+    <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
+  </div>
+
+  <!-- 表格 -->
+  <div class="fs-table-wrap">
+    <table class="fs-table">
+      <thead>
+        <tr>
+          <th class="col-code" (click)="setSort('fundId')">基金代碼<i class="bi fs-sort" [ngClass]="sortIconClass('fundId')" [class.is-active]="isSortActive('fundId')"></i></th>
+          <th class="col-name" (click)="setSort('name')">基金名稱<i class="bi fs-sort" [ngClass]="sortIconClass('name')" [class.is-active]="isSortActive('name')"></i></th>
+
+          <ng-container *ngIf="activeTab==='perf'">
+            <th (click)="setSort('perf.m6')">6個月<i class="bi fs-sort" [ngClass]="sortIconClass('perf.m6')" [class.is-active]="isSortActive('perf.m6')"></i></th>
+            <th (click)="setSort('perf.y1')">1年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y1')" [class.is-active]="isSortActive('perf.y1')"></i></th>
+            <th (click)="setSort('perf.y2')">2年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y2')" [class.is-active]="isSortActive('perf.y2')"></i></th>
+            <th (click)="setSort('perf.y3')">3年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y3')" [class.is-active]="isSortActive('perf.y3')"></i></th>
+            <th (click)="setSort('perf.y5')">5年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y5')" [class.is-active]="isSortActive('perf.y5')"></i></th>
+            <th (click)="setSort('stdDev')">年化標準差<i class="bi fs-sort" [ngClass]="sortIconClass('stdDev')" [class.is-active]="isSortActive('stdDev')"></i></th>
+          </ng-container>
+
+          <ng-container *ngIf="activeTab==='roi'">
+            <th *ngFor="let y of years; let i = index" (click)="setSort(roiSortKey(i))">{{ y }}<i class="bi fs-sort" [ngClass]="sortIconClass(roiSortKey(i))" [class.is-active]="isSortActive(roiSortKey(i))"></i></th>
+          </ng-container>
+
+          <ng-container *ngIf="activeTab==='drop'">
+            <th *ngFor="let y of years; let i = index" (click)="setSort(dropSortKey(i))">{{ y }}<i class="bi fs-sort" [ngClass]="sortIconClass(dropSortKey(i))" [class.is-active]="isSortActive(dropSortKey(i))"></i></th>
+          </ng-container>
+
+          <th class="col-buy">申購</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let f of pagedFunds; trackBy: trackByFundId">
+          <td class="col-code" data-label="基金代碼">{{ f.fundId }}</td>
+          <td class="col-name" data-label="基金名稱">{{ f.name }}</td>
+
+          <ng-container *ngIf="activeTab==='perf'">
+            <td data-label="6個月" [class]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</td>
+            <td data-label="1年" [class]="numClass(f.perf.y1)">{{ fmtPct(f.perf.y1) }}</td>
+            <td data-label="2年" [class]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</td>
+            <td data-label="3年" [class]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</td>
+            <td data-label="5年" [class]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</td>
+            <td data-label="年化標準差">{{ f.stdDev.toFixed(2) }}</td>
+          </ng-container>
+
+          <ng-container *ngIf="activeTab==='roi'">
+            <td *ngFor="let v of f.yearRoi; let i = index" [attr.data-label]="years[i]" [class]="numClass(v)">{{ fmtPct(v) }}</td>
+          </ng-container>
+
+          <ng-container *ngIf="activeTab==='drop'">
+            <td *ngFor="let v of f.yearMaxDrop; let i = index" [attr.data-label]="years[i]" [class]="numClass(v)">{{ fmtPct(v) }}</td>
+          </ng-container>
+
+          <td class="col-buy" data-label="申購">
+            <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">BUY</button>
+          </td>
+        </tr>
+        <tr *ngIf="pagedFunds.length === 0">
+          <td colspan="99" class="fs-empty">查無符合條件的基金</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- 分頁 -->
+  <div class="fs-pagination" *ngIf="totalPages > 1">
+    <button class="fs-page-btn" type="button" [disabled]="page<=1" (click)="goPage(page-1)" aria-label="上一頁">
+      <i class="bi bi-chevron-left"></i>
+    </button>
+    <button class="fs-page-btn" type="button" *ngFor="let p of pages" [class.is-active]="page===p" (click)="goPage(p)">{{ p }}</button>
+    <button class="fs-page-btn" type="button" [disabled]="page>=totalPages" (click)="goPage(page+1)" aria-label="下一頁">
+      <i class="bi bi-chevron-right"></i>
+    </button>
+  </div>
+</div>
