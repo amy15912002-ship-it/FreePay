@@ -463,6 +463,7 @@
   background: none;
   color: var(--color-brand-tertiary-600);
   border-bottom: 2px solid var(--color-border-default);
+  border-radius: 12px 12px 0 0;
 
   .ov-metric-head { color: var(--color-brand-tertiary-600); }
 }
@@ -471,6 +472,7 @@
   min-height: 100px;
   padding: 20px 0;
   border-top: 1px solid var(--color-border-default);
+  border-radius: 8px;
   background: var(--color-bg-base);
 }
 
@@ -577,6 +579,7 @@
 .ov-cell-name { color: var(--color-text-primary); font-size: 16px; }
 .ov-cell-sub  { color: var(--color-text-secondary); font-size: 14px; margin-top: 4px; }
 .ov-cell-old  { color: var(--color-text-secondary); text-decoration: line-through; font-size: 14px; }
+.ov-cell-new  { color: var(--color-action-primary); font-weight: 500; }
 .ov-order-date,
 .ov-order-date-mobile {
   white-space: nowrap;
@@ -584,7 +587,7 @@
 }
 .ov-order-effect-date .ov-order-effect-value,
 .ov-order-effect-mobile {
-  color: var(--color-brand-secondary-600);
+  color: var(--color-action-primary);
   font-weight: 500;
 }
 
@@ -914,6 +917,17 @@
   }
 
   // ── 合約列：名稱 + 操作按鈕同行，指標往下 ────────────────────
+  .ov-contracts {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 8px 0 16px;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    background: transparent;
+  }
+
   .ov-ct-row {
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto;
@@ -922,6 +936,12 @@
       "ctmetrics ctmetrics";
     padding: 12px;
     gap: 12px 8px;
+    border: 1px solid var(--color-border-default);
+    border-radius: 12px;
+    background: var(--color-bg-base);
+    background-clip: padding-box;
+    box-shadow: var(--shadow-md);
+    overflow: hidden;
   }
 
   .ov-ct-name {
@@ -1118,17 +1138,39 @@
   }
 
   .detail-panel .ov-table-wrap {
+    width: 100%;
     overflow-x: visible;
   }
 
   .detail-tx-table,
   .detail-chg-table {
+    width: 100%;
+
+    tr {
+      width: 100%;
+      border: 1px solid var(--color-border-default);
+      border-radius: 8px;
+      background: var(--color-bg-base);
+      box-shadow: none;
+      overflow: hidden;
+    }
+
     td {
+      width: auto !important;
+      margin: 0 12px;
+      padding: 9px 4px;
       text-align: right;
+      word-break: keep-all;
+      overflow-wrap: normal;
+
+      &::before {
+        flex: 0 0 112px;
+        max-width: 112px;
+      }
     }
 
     td:first-child {
-      background: var(--color-bg-muted);
+      background: var(--color-bg-base);
       font-weight: 500;
     }
 

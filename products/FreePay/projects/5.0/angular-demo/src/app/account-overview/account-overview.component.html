@@ -312,13 +312,13 @@
                 <td data-label="Pay設定">
                   <div class="ov-card-value">
                     <span class="ov-cell-old">{{ item.oldPay }}・{{ item.oldDay }}日</span>
-                    <br>{{ item.newPay }}・{{ item.newDay }}日
+                    <br><span class="ov-cell-new">{{ item.newPay }}・{{ item.newDay }}日</span>
                   </div>
                 </td>
                 <td data-label="觸發門檻">
                   <div class="ov-card-value">
                     <span class="ov-cell-old">{{ item.oldLimit }}</span>
-                    <br>{{ item.newLimit }}
+                    <br><span class="ov-cell-new">{{ item.newLimit }}</span>
                   </div>
                 </td>
                 <td class="col-status" data-label="委託結果">{{ item.status }}</td>
@@ -342,7 +342,7 @@
                 <th class="col-time">委託 / 生效日</th>
                 <th>交易幣別</th>
                 <th>贖回單位數</th>
-                <th class="col-amount">贖回參考金額</th>
+                <th class="col-amount">參考金額</th>
                 <th class="col-status">委託結果</th>
               </tr>
             </thead>
@@ -365,7 +365,7 @@
                 <td class="ov-mobile-only-cell ov-order-effect-mobile" data-label="生效日">{{ item.effectDate }}</td>
                 <td data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
                 <td data-label="贖回單位數">{{ item.unit }}</td>
-                <td class="col-amount" data-label="贖回參考金額">{{ fmtN(item.amount) }}</td>
+                <td class="col-amount" data-label="參考金額">{{ fmtN(item.amount) }}</td>
                 <td class="col-status" data-label="委託結果">{{ item.status }}</td>
               </tr>
             </tbody>
@@ -397,6 +397,7 @@
         <ul class="notes-list">
           <li>當日申請之申購（含加碼）委託可於13:00前取消，若逾時則無法取消，將於次一營業日生效。</li>
           <li>當日申請之異動/贖回委託可於14:00前取消，若逾時則無法取消，將於次一營業日生效。</li>
+          <li>參考金額係依最新淨值估算，非實際金額；實際金額將以基金公司回覆為準。</li>
           <li>交易相關問題請洽客服專線 02-27208126。</li>
         </ul>
       </div>
@@ -716,8 +717,8 @@
                 <td data-label="異動日期/時間">{{ fmtDate(r.orderDate) }}<br><span class="ov-cell-sub">{{ r.orderTime }}</span></td>
                 <td data-label="異動項目">{{ chgTypeText(r.tradeType) }}</td>
                 <td data-label="異動前">{{ fmtChgBefore(r) }}</td>
-                <td data-label="異動後">{{ fmtChgAfter(r) }}</td>
-                <td data-label="生效日">{{ fmtDate(r.tDate) }}</td>
+                <td data-label="異動後" class="ov-cell-new">{{ fmtChgAfter(r) }}</td>
+                <td data-label="生效日" class="ov-cell-new">{{ fmtDate(r.tDate) }}</td>
                 <td data-label="狀態">{{ r.status }}</td>
               </tr>
               <tr *ngIf="detailChgRecords.length === 0">

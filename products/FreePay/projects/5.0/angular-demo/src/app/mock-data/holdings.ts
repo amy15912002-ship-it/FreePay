@@ -50,6 +50,13 @@ export const HOLDINGS: HoldingContract[] = [
     costBasis: 3200, marketValue: 3800, paidTotal: 2400, status: 'Y',
   },
   {
+    // 同基金、同幣別、同委託日的第二筆 → alias 自動附加 -2 後綴（spec §預設名稱規則）
+    fpNo: 'FP20240601B', fundId: 'TA654321', currencyCode: 'USD', alias: '20240601-2',
+    startDate: '2024/06/01', payMode: 'ratio', monthlyPay: 80, annualRate: 5, payDay: 20,
+    thresholdMode: 'protect', thresholdValue: -15,
+    costBasis: 1800, marketValue: 2050, paidTotal: 720, status: 'Y',
+  },
+  {
     fpNo: 'FP20250301', fundId: 'TA654321', currencyCode: 'USD', alias: '20250301',
     startDate: '2025/03/01', payMode: 'ratio', monthlyPay: 100, annualRate: 4, payDay: 10,
     thresholdMode: 'unlock', thresholdValue: 20,

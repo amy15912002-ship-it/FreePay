@@ -50,38 +50,129 @@
 .fs-filters {
   display: flex;
   flex-direction: column;
-  border: 1px solid var(--color-border-default);
-  border-radius: 8px;
+  border-top: 1px solid var(--color-border-default);
   background: var(--color-bg-base);
 }
 
 .fs-filter-row {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-  padding: 12px 20px;
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 8px;
+  padding: 8px 0;
   border-bottom: 1px solid var(--color-border-default);
-
-  &:last-child { border-bottom: none; }
 }
 
 .fs-filter-label {
-  flex: 0 0 72px;
-  color: var(--color-text-secondary);
-  font-size: 14px;
+  padding-top: 7px;
+  color: var(--color-text-primary);
+  font-size: 16px;
   white-space: nowrap;
 }
 
 .fs-keyword {
-  flex: 1;
+  grid-column: 2 / -1;
+  min-width: 0;
+  height: 36px;
+  padding: 0;
+  border: none;
+  border-bottom: 2px solid var(--color-input-border-default);
+  border-radius: 0;
+  background: transparent;
+  color: var(--color-input-text);
+  font-family: var(--font-primary);
+  font-size: 16px;
+  outline: none;
+
+  &::placeholder {
+    color: var(--color-text-tertiary);
+  }
+
+  &:focus {
+    border-bottom-color: var(--color-input-border-focus);
+  }
+}
+
+.fs-brand-search-toggle,
+.fs-filter-more {
+  height: 32px;
+  padding: 0 10px;
+  border: 1px solid var(--color-neutral-200);
+  border-radius: 8px;
+  background: var(--color-neutral-0);
+  color: var(--color-text-secondary);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  cursor: pointer;
+
+  .bi {
+    margin-right: 4px;
+  }
+}
+
+.fs-brand-filter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-start;
   min-width: 0;
 }
 
+.fs-filter-actions {
+  display: flex;
+  gap: 8px;
+  justify-self: end;
+  white-space: nowrap;
+}
+
+.fs-brand-search-row {
+  flex: 0 0 100%;
+}
+
+.fs-brand-keyword {
+  width: min(520px, 100%);
+  height: 36px;
+  padding: 0 16px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 18px;
+  background: var(--color-neutral-0);
+  color: var(--color-input-text);
+  font-family: var(--font-primary);
+  font-size: 16px;
+  outline: none;
+
+  &::placeholder {
+    color: var(--color-text-secondary);
+  }
+
+  &:focus {
+    border-color: var(--color-input-border-focus);
+  }
+}
+
+.fs-filter-options {
+  min-width: 0;
+}
+
+.fs-filter-more {
+  color: var(--color-brand-tertiary-400);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
 // ── 績效 tabs ───────────────────────────────────────────
+.fs-tabs-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 12px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
 .fs-tabs {
   display: flex;
   gap: 24px;
-  border-bottom: 1px solid var(--color-border-default);
+  flex: 1;
+  min-width: 0;
 }
 
 .fs-tab {
@@ -104,6 +195,14 @@
   }
 }
 
+.fs-sort-trigger {
+  display: none;
+}
+
+.fs-sort-overlay {
+  display: none;
+}
+
 // ── 表格 ────────────────────────────────────────────────
 .fs-table-wrap {
   width: 100%;
@@ -112,6 +211,7 @@
 
 .fs-table {
   width: 100%;
+  min-width: 960px;
   border-collapse: collapse;
   table-layout: fixed;
   font-size: 14px;
@@ -227,17 +327,162 @@
   .fs-summary { flex-wrap: wrap; }
 
   .fs-filter-row {
-    flex-wrap: wrap;
-    padding: 10px 12px;
+    grid-template-columns: minmax(0, 1fr) 52px;
+    gap: 6px 8px;
+    padding: 10px 0;
   }
 
-  .fs-filter-label { flex: 0 0 100%; }
+  .fs-filter-label {
+    padding-top: 4px;
+    font-size: 15px;
+  }
 
-  .fs-keyword { flex: 1 1 100%; }
+  .fs-keyword,
+  .fs-brand-filter,
+  .fs-filter-options,
+  .fs-filter-more,
+  .fs-filter-actions {
+    grid-column: 1 / -1;
+  }
+
+  .fs-filter-more {
+    justify-self: start;
+  }
+
+  .fs-filter-actions {
+    justify-self: start;
+    flex-wrap: wrap;
+  }
+
+  .fs-brand-keyword {
+    flex-basis: 100%;
+    height: 34px;
+    font-size: 15px;
+  }
+
+  .filter-chips {
+    gap: 6px;
+  }
+
+  .fs-tabs-row {
+    align-items: stretch;
+  }
+
+  .fs-tabs {
+    overflow-x: auto;
+    gap: 16px;
+  }
+
+  .fs-sort-trigger {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    flex: 0 0 auto;
+    min-width: 76px;
+    padding: 0 10px;
+    border: none;
+    border-bottom: 2px solid transparent;
+    background: transparent;
+    color: var(--color-action-primary);
+    font-family: var(--font-primary);
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .fs-sort-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    display: flex;
+    align-items: flex-end;
+    background: var(--color-overlay-scrim);
+  }
+
+  .fs-sort-panel {
+    width: 100%;
+    max-height: 72vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px 12px 0 0;
+    background: var(--color-bg-base);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  .fs-sort-panel-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--color-border-default);
+
+    h2 {
+      margin: 0;
+      color: var(--color-text-primary);
+      font-size: 18px;
+      font-weight: 500;
+    }
+  }
+
+  .fs-sort-close {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-secondary);
+    font-size: 16px;
+  }
+
+  .fs-sort-panel-body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+  }
+
+  .fs-sort-panel-label {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  .fs-sort-panel-actions {
+    display: flex;
+    justify-content: stretch;
+    gap: 8px;
+    padding: 12px 18px 18px;
+    border-top: 1px solid var(--color-border-default);
+    background: var(--color-bg-base);
+
+    button {
+      width: 100%;
+    }
+  }
+
+  .fs-sort-dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 32px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 16px;
+    background: var(--color-neutral-0);
+    color: var(--color-action-primary);
+    font-family: var(--font-primary);
+    font-size: 14px;
+    font-weight: 500;
+  }
 
   // ── 表格 → 卡片（同委託查詢做法）─────────
   .fs-table {
     display: block;
+    min-width: 0;
 
     thead { display: none; }
 
@@ -281,7 +526,14 @@
 
       &:last-child { border-bottom: none; }
       &.col-name { text-align: right; }
-      &.col-buy { justify-content: space-between; }
+      &.col-buy {
+        width: auto;
+        justify-content: space-between;
+      }
+
+      &.col-buy .circle-btn {
+        margin-left: auto;
+      }
     }
 
     tbody tr:nth-child(even) td {

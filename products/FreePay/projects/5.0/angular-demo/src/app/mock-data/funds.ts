@@ -38,6 +38,9 @@ export interface Fund {
 const MIN_TWD = 100000;
 const MIN_USD = 3500;
 const MIN_JPY = 500000;
+const MIN_EUR = 3000;
+const MIN_ZAR = 50000;
+const MIN_CNY = 30000;
 
 export const FUNDS: Fund[] = [
   {
@@ -193,6 +196,61 @@ export const FUNDS: Fund[] = [
     yearRoi: [1.2, 1.0, 1.4, 1.5, 1.6],
     yearMaxDrop: [-0.4, -0.6, -0.3, -0.2, -0.2],
   },
+  {
+    fundId: 'BR300001',
+    name: '貝萊德歐洲價值型基金 A2 歐元',
+    domicile: '境外', pricingCurrency: '歐元', risk: 'RR4',
+    currencies: [
+      { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
+      { currency: '歐元', currencyCode: 'EUR', minPurchase: MIN_EUR },
+    ],
+    category: '股票型', region: '全球', brand: '貝萊德',
+    perf: { m6: 7.20, y1: 13.60, y2: 22.40, y3: 32.80, y5: 48.60 },
+    stdDev: 14.20,
+    yearRoi: [14.6, -9.8, 16.4, 12.8, 13.6],
+    yearMaxDrop: [-12.8, -18.4, -10.2, -8.6, -7.4],
+  },
+  {
+    fundId: 'AL300002',
+    name: '安聯南非黃金與礦業基金 A 南非幣',
+    domicile: '境外', pricingCurrency: '南非幣', risk: 'RR5',
+    currencies: [
+      { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
+      { currency: '南非幣', currencyCode: 'ZAR', minPurchase: MIN_ZAR },
+    ],
+    category: '股票型', region: '中東非洲', brand: '安聯',
+    perf: { m6: 16.40, y1: 28.60, y2: 42.80, y3: 38.60, y5: 62.40 },
+    stdDev: 24.60,
+    yearRoi: [32.4, -22.8, 18.6, -8.4, 28.6],
+    yearMaxDrop: [-24.8, -32.4, -18.6, -16.4, -14.2],
+  },
+  {
+    fundId: 'JP300003',
+    name: '摩根人民幣高收益債券基金 A 人民幣',
+    domicile: '境外', pricingCurrency: '人民幣', risk: 'RR3',
+    currencies: [
+      { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
+      { currency: '人民幣', currencyCode: 'CNY', minPurchase: MIN_CNY },
+    ],
+    category: '債券型', region: '亞洲', brand: '摩根',
+    perf: { m6: 4.20, y1: 7.80, y2: 12.40, y3: 16.80, y5: 22.40 },
+    stdDev: 6.40,
+    yearRoi: [6.2, -3.4, 6.8, 5.4, 7.8],
+    yearMaxDrop: [-5.6, -7.4, -3.8, -3.2, -2.6],
+  },
+  {
+    fundId: 'TA300004',
+    name: '統一台灣美元優選基金 A 美元',
+    domicile: '境內', pricingCurrency: '美元', risk: 'RR3',
+    currencies: [
+      { currency: '美元', currencyCode: 'USD', minPurchase: MIN_USD },
+    ],
+    category: '債券型', region: '台灣', brand: '統一',
+    perf: { m6: 3.80, y1: 6.80, y2: 11.40, y3: 14.80, y5: 20.60 },
+    stdDev: 5.80,
+    yearRoi: [5.4, -2.8, 6.2, 4.8, 6.8],
+    yearMaxDrop: [-4.6, -6.8, -3.2, -2.6, -2.2],
+  },
 ];
 
 export function findFund(fundId: string): Fund | undefined {
@@ -202,6 +260,30 @@ export function findFund(fundId: string): Fund | undefined {
 // 篩選選項常數（用於選擇基金頁的篩選列）
 export const FUND_CATEGORIES: FundCategory[] = ['股票型', '平衡型', '債券型', '貨幣型', '其他'];
 export const FUND_REGIONS: FundRegion[] = ['台灣', '亞洲', '北美洲', '中東非洲', '大洋洲', '全球'];
-export const FUND_BRANDS = ['統一', '安聯', '貝萊德', '摩根', '高盛', '聯博', '野村'];
-// 計價幣別（5.0 spec §基金選擇頁新增；境內/境外的選項稍有不同）
-export const FUND_PRICING_CCY = ['台幣', '美元', '日幣'];
+export const FUND_BRANDS = [
+  '安聯', '貝萊德', '摩根', '高盛', '聯博', '富達', '富蘭克林坦伯頓', '野村', '摩根士丹利',
+  '中國信託', '復華', 'DWS', 'GAM', 'GAM Star', 'KBI', 'M&G', 'MFS全盛', 'PGIM', 'PIMCO品浩',
+  '大華銀', '元大', '天利', '木星', '台中銀', '台新', '永豐', '玉山', '兆豐', '先機',
+  '合庫', '安本', '安盛', '百達', '宏利', '尚渤', '東方匯理', '法巴', '法盛', '威廉博萊',
+  '施羅德', '柏瑞', '美盛', '首源', '晉達', '紐約梅隆', '國泰', '第一金', '統一', '荷寶',
+  '凱基', '凱敏雅克', '富邦', '富蘭克林華美', '惠理基金', '普徠仕', '景順', '華南永昌',
+  '街口', '愛德蒙(法國)', '新加坡大華', '瑞士隆奧', '瑞萬通博', '瑞銀', '瑞聯UBAM',
+  '群益', '資本', '路博邁', '歐義銳榮', '聯邦投信', '駿利亨德森', '瀚亞', '羅素', '匯豐'
+];
+// 計價幣別（5.0 spec §基金選擇頁新增）
+// 境內與境外的可選計價幣別不同，需依「境別篩選的當前狀態」動態切換選項。
+// 當境別篩選為「全部」（或同時勾選境內＋境外）時，合併呈現所有選項。
+export const PRICING_CCY_DOMESTIC = ['台幣', '美元'];
+export const PRICING_CCY_FOREIGN = ['台幣', '美元', '日幣', '歐元', '南非幣', '人民幣'];
+
+export function pricingCurrenciesByDomiciles(domiciles: Array<'境內' | '境外'>): string[] {
+  const showDomestic = domiciles.length === 0 || domiciles.includes('境內');
+  const showForeign = domiciles.length === 0 || domiciles.includes('境外');
+  const merged: string[] = [];
+  if (showDomestic) PRICING_CCY_DOMESTIC.forEach(c => merged.includes(c) || merged.push(c));
+  if (showForeign) PRICING_CCY_FOREIGN.forEach(c => merged.includes(c) || merged.push(c));
+  return merged;
+}
+
+// 向後相容：合併版（不分境別）— 預留給其他模組需要全清單時使用
+export const FUND_PRICING_CCY = pricingCurrenciesByDomiciles([]);

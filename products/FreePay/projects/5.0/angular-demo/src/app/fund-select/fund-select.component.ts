@@ -3,11 +3,13 @@ import { Router } from '@angular/router';
 import {
   FUNDS, Fund, FundCategory, FundRegion,
   FUND_CATEGORIES, FUND_REGIONS, FUND_BRANDS,
+  pricingCurrenciesByDomiciles,
 } from '../mock-data/funds';
 
 type DomicileOption = Fund['domicile'];
-type PricingCcyOption = '台幣' | '美元' | '日幣';
+type PricingCcyOption = string;
 type FundTab = 'perf' | 'roi' | 'drop';
+type CollapsibleFilter = 'brand';
 
 type SortKey =
   | 'fundId' | 'name'
@@ -15,6 +17,7 @@ type SortKey =
   | 'roi.0' | 'roi.1' | 'roi.2' | 'roi.3' | 'roi.4'
   | 'drop.0' | 'drop.1' | 'drop.2' | 'drop.3' | 'drop.4';
 type PerfKey = keyof Fund['perf'];
+type SortOption = { key: SortKey; label: string };
 
 @Component({
   selector: 'fp-fund-select',
@@ -27,11 +30,45 @@ export class FundSelectComponent {
   readonly regions = FUND_REGIONS;
   readonly brands = FUND_BRANDS;
   readonly domiciles: DomicileOption[] = ['境內', '境外'];
-  readonly pricingCurrencies: PricingCcyOption[] = ['台幣', '美元', '日幣'];
   readonly years = [2021, 2022, 2023, 2024, 2025];
   readonly pageSize = 10;
+  readonly perfSortOptions: SortOption[] = [
+    { key: 'perf.m6', label: '6個月' },
+    { key: 'perf.y1', label: '1年' },
+    { key: 'perf.y2', label: '2年' },
+    { key: 'perf.y3', label: '3年' },
+    { key: 'perf.y5', label: '5年' },
+    { key: 'stdDev', label: '標準差' },
+    { key: 'fundId', label: '代碼' },
+    { key: 'name', label: '名稱' }
+  ];
+  readonly roiSortOptions: SortOption[] = [
+    { key: 'roi.0', label: '2021' },
+    { key: 'roi.1', label: '2022' },
+    { key: 'roi.2', label: '2023' },
+    { key: 'roi.3', label: '2024' },
+    { key: 'roi.4', label: '2025' }
+  ];
+  readonly dropSortOptions: SortOption[] = [
+    { key: 'drop.0', label: '2021' },
+    { key: 'drop.1', label: '2022' },
+    { key: 'drop.2', label: '2023' },
+    { key: 'drop.3', label: '2024' },
+    { key: 'drop.4', label: '2025' }
+  ];
+
+  // 計價幣別選項依「境別篩選的當前狀態」動態切換（spec 升級三 §基金選擇頁）
+  // 境內：台幣/美元；境外：台幣/美元/日幣/歐元/南非幣/人民幣；境別「全部」：合併呈現
+  get pricingCurrencies(): PricingCcyOption[] {
+    return pricingCurrenciesByDomiciles(this.domicileFilters);
+  }
 
   keyword = '';
+  brandKeyword = '';
+  brandSearchOpen = false;
+  expandedFilters: Record<CollapsibleFilter, boolean> = {
+    brand: false
+  };
   domicileFilters: DomicileOption[] = [];
   categoryFilters: FundCategory[] = [];
   pricingCcyFilters: PricingCcyOption[] = [];
@@ -42,6 +79,7 @@ export class FundSelectComponent {
   sortKey: SortKey = 'perf.m6';
   sortDesc = true;
   page = 1;
+  sortPanelOpen = false;
 
   constructor(private readonly router: Router) {}
 
@@ -83,6 +121,40 @@ export class FundSelectComponent {
     return this.sortedFunds.slice(start, start + this.pageSize);
   }
 
+  get mobileSortOptions(): SortOption[] {
+    if (this.activeTab === 'perf') return this.perfSortOptions;
+    if (this.activeTab === 'roi') return this.roiSortOptions;
+    return this.dropSortOptions;
+  }
+
+  get filteredBrands(): string[] {
+    const kw = this.brandKeyword.trim().toLowerCase();
+    if (!kw) return this.brands;
+    return this.brands.filter(brand => brand.toLowerCase().includes(kw));
+  }
+
+  get visibleCategories(): FundCategory[] {
+    return this.categories;
+  }
+
+  get visiblePricingCurrencies(): PricingCcyOption[] {
+    return this.pricingCurrencies;
+  }
+
+  get visibleBrands(): string[] {
+    return this.visibleOptions(this.filteredBrands, this.brandFilters, this.expandedFilters.brand || this.brandKeyword.trim() !== '', 10);
+  }
+
+  get emptyStateMessage(): string {
+    return this.brandFilters.length
+      ? '所選品牌目前沒有符合條件的基金'
+      : '查無符合條件的基金';
+  }
+
+  get visibleRegions(): FundRegion[] {
+    return this.regions;
+  }
+
   private fieldValue(f: Fund, key: SortKey): number | string {
     if (key === 'fundId') return f.fundId;
     if (key === 'name') return f.name;
@@ -96,6 +168,11 @@ export class FundSelectComponent {
   setSort(key: SortKey): void {
     if (this.sortKey === key) this.sortDesc = !this.sortDesc;
     else { this.sortKey = key; this.sortDesc = true; }
+    this.page = 1;
+  }
+
+  toggleSortDirection(): void {
+    this.sortDesc = !this.sortDesc;
     this.page = 1;
   }
 
@@ -118,6 +195,9 @@ export class FundSelectComponent {
 
   toggleDomicileFilter(value: DomicileOption): void {
     this.domicileFilters = this.toggleFilterValue(this.domicileFilters, value);
+    // 切換境別後，可選的計價幣別範圍會改變；已選但已不在新範圍內的幣別自動移除
+    const allowed = this.pricingCurrencies;
+    this.pricingCcyFilters = this.pricingCcyFilters.filter(c => allowed.includes(c));
     this.onFilterChange();
   }
 
@@ -152,12 +232,33 @@ export class FundSelectComponent {
 
   clearFilters(): void {
     this.keyword = '';
+    this.brandKeyword = '';
+    this.brandSearchOpen = false;
+    this.expandedFilters = {
+      brand: false
+    };
     this.domicileFilters = [];
     this.categoryFilters = [];
     this.pricingCcyFilters = [];
     this.brandFilters = [];
     this.regionFilters = [];
     this.page = 1;
+  }
+
+  closeSortPanel(): void {
+    this.sortPanelOpen = false;
+  }
+
+  toggleFilterExpanded(group: CollapsibleFilter): void {
+    this.expandedFilters[group] = !this.expandedFilters[group];
+  }
+
+  isFilterExpanded(group: CollapsibleFilter): boolean {
+    return this.expandedFilters[group];
+  }
+
+  hasHiddenOptions(group: CollapsibleFilter): boolean {
+    return group === 'brand' && this.filteredBrands.length > this.visibleBrands.length;
   }
 
   onFilterChange(): void {
@@ -184,7 +285,7 @@ export class FundSelectComponent {
   }
 
   sortIconClass(key: SortKey): string {
-    return this.sortKey === key && !this.sortDesc ? 'bi-chevron-up' : 'bi-chevron-down';
+    return this.sortKey === key && !this.sortDesc ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
   }
 
   isSortActive(key: SortKey): boolean {
@@ -193,6 +294,23 @@ export class FundSelectComponent {
 
   trackByFundId(_: number, f: Fund): string {
     return f.fundId;
+  }
+
+  trackBySortKey(_: number, option: SortOption): SortKey {
+    return option.key;
+  }
+
+  trackByValue(_: number, value: string): string {
+    return value;
+  }
+
+  private visibleOptions<T extends string>(options: T[], selected: T[], expanded: boolean, limit: number): T[] {
+    if (expanded || options.length <= limit) return options;
+    const visible = options.slice(0, limit);
+    for (const value of selected) {
+      if (options.includes(value) && !visible.includes(value)) visible.push(value);
+    }
+    return visible;
   }
 
   private toggleFilterValue<T>(values: T[], value: T): T[] {

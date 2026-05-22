@@ -15,18 +15,15 @@
     <button type="button" class="fs-clear" (click)="clearFilters()">清除條件</button>
   </div>
 
-  <!-- 篩選列 -->
-  <div class="fs-filters">
+  <ng-template #filterControls>
     <div class="fs-filter-row">
       <span class="fs-filter-label">基金搜尋</span>
-      <mat-form-field class="fs-keyword" appearance="standard" color="accent">
-        <input matInput [(ngModel)]="keyword" (input)="onFilterChange()" placeholder="請輸入基金代碼或名稱關鍵字" autocomplete="off">
-      </mat-form-field>
+      <input class="fs-keyword" [(ngModel)]="keyword" (input)="onFilterChange()" placeholder="請輸入基金代碼或名稱關鍵字" autocomplete="off">
     </div>
 
     <div class="fs-filter-row">
       <span class="fs-filter-label">境內境外</span>
-      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="境內境外篩選">
+      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="境內境外篩選">
         <mat-chip [selectable]="true" [selected]="domicileFilters.length===0" (click)="clearFilterGroup('domicile')">全部</mat-chip>
         <mat-chip *ngFor="let item of domiciles" [selectable]="true" [selected]="domicileFilters.includes(item)" (click)="toggleDomicileFilter(item)">{{ item }}</mat-chip>
       </mat-chip-list>
@@ -34,42 +31,103 @@
 
     <div class="fs-filter-row">
       <span class="fs-filter-label">基金類型</span>
-      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="基金類型篩選">
+      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金類型篩選">
         <mat-chip [selectable]="true" [selected]="categoryFilters.length===0" (click)="clearFilterGroup('category')">全部</mat-chip>
-        <mat-chip *ngFor="let c of categories" [selectable]="true" [selected]="categoryFilters.includes(c)" (click)="toggleCategoryFilter(c)">{{ c }}</mat-chip>
+        <mat-chip *ngFor="let c of visibleCategories; trackBy: trackByValue" [selectable]="true" [selected]="categoryFilters.includes(c)" (click)="toggleCategoryFilter(c)">{{ c }}</mat-chip>
       </mat-chip-list>
     </div>
 
     <div class="fs-filter-row">
       <span class="fs-filter-label">計價幣別</span>
-      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="計價幣別篩選">
+      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="計價幣別篩選">
         <mat-chip [selectable]="true" [selected]="pricingCcyFilters.length===0" (click)="clearFilterGroup('pricingCcy')">全部</mat-chip>
-        <mat-chip *ngFor="let ccy of pricingCurrencies" [selectable]="true" [selected]="pricingCcyFilters.includes(ccy)" (click)="togglePricingCcyFilter(ccy)">{{ ccy }}</mat-chip>
+        <mat-chip *ngFor="let ccy of visiblePricingCurrencies; trackBy: trackByValue" [selectable]="true" [selected]="pricingCcyFilters.includes(ccy)" (click)="togglePricingCcyFilter(ccy)">{{ ccy }}</mat-chip>
       </mat-chip-list>
     </div>
 
     <div class="fs-filter-row">
       <span class="fs-filter-label">基金品牌</span>
-      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="基金品牌篩選">
-        <mat-chip [selectable]="true" [selected]="brandFilters.length===0" (click)="clearFilterGroup('brand')">全部</mat-chip>
-        <mat-chip *ngFor="let b of brands" [selectable]="true" [selected]="brandFilters.includes(b)" (click)="toggleBrandFilter(b)">{{ b }}</mat-chip>
-      </mat-chip-list>
+      <div class="fs-brand-filter">
+        <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金品牌篩選">
+          <mat-chip [selectable]="true" [selected]="brandFilters.length===0" (click)="clearFilterGroup('brand')">全部</mat-chip>
+          <mat-chip
+            *ngFor="let b of visibleBrands; trackBy: trackByValue"
+            [selectable]="true"
+            [selected]="brandFilters.includes(b)"
+            (click)="toggleBrandFilter(b)"
+          >{{ b }}</mat-chip>
+        </mat-chip-list>
+        <div class="fs-brand-search-row" *ngIf="brandSearchOpen">
+          <input class="fs-brand-keyword" [(ngModel)]="brandKeyword" placeholder="輸入品牌關鍵字快速搜尋" autocomplete="off">
+        </div>
+      </div>
+      <div class="fs-filter-actions">
+        <button class="fs-brand-search-toggle" type="button" (click)="brandSearchOpen = !brandSearchOpen">
+          <i class="bi bi-search"></i>
+          搜尋品牌
+        </button>
+        <button class="fs-filter-more" type="button" *ngIf="hasHiddenOptions('brand') || isFilterExpanded('brand')" (click)="toggleFilterExpanded('brand')">
+          {{ isFilterExpanded('brand') ? '收合' : '更多' }}
+          <i class="bi" [class.bi-chevron-up]="isFilterExpanded('brand')" [class.bi-chevron-down]="!isFilterExpanded('brand')"></i>
+        </button>
+      </div>
     </div>
 
     <div class="fs-filter-row">
       <span class="fs-filter-label">投資區域</span>
-      <mat-chip-list class="filter-chips" [multiple]="true" aria-label="投資區域篩選">
+      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="投資區域篩選">
         <mat-chip [selectable]="true" [selected]="regionFilters.length===0" (click)="clearFilterGroup('region')">全部</mat-chip>
-        <mat-chip *ngFor="let r of regions" [selectable]="true" [selected]="regionFilters.includes(r)" (click)="toggleRegionFilter(r)">{{ r }}</mat-chip>
+        <mat-chip *ngFor="let r of visibleRegions; trackBy: trackByValue" [selectable]="true" [selected]="regionFilters.includes(r)" (click)="toggleRegionFilter(r)">{{ r }}</mat-chip>
       </mat-chip-list>
     </div>
+  </ng-template>
+
+  <!-- 篩選列 -->
+  <div class="fs-filters">
+    <ng-container *ngTemplateOutlet="filterControls"></ng-container>
   </div>
 
   <!-- 績效 tabs -->
-  <div class="fs-tabs" role="tablist">
-    <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='perf'" (click)="setTab('perf')">績效表現</button>
-    <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='roi'" (click)="setTab('roi')">年度報酬率</button>
-    <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
+  <div class="fs-tabs-row">
+    <div class="fs-tabs" role="tablist">
+      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='perf'" (click)="setTab('perf')">績效表現</button>
+      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='roi'" (click)="setTab('roi')">年度報酬率</button>
+      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
+    </div>
+    <button class="fs-sort-trigger" type="button" (click)="sortPanelOpen = true" aria-label="開啟排序">
+      <i class="bi bi-sort-down"></i>
+      排序
+    </button>
+  </div>
+
+  <div class="fs-sort-overlay" *ngIf="sortPanelOpen" (click)="closeSortPanel()">
+    <section class="fs-sort-panel" (click)="$event.stopPropagation()" aria-label="排序設定">
+      <div class="fs-sort-panel-head">
+        <h2>排序</h2>
+        <button class="fs-sort-close" type="button" (click)="closeSortPanel()" aria-label="關閉排序">
+          <i class="bi bi-x-lg"></i>
+        </button>
+      </div>
+      <div class="fs-sort-panel-body">
+        <span class="fs-sort-panel-label">排序欄位</span>
+        <mat-chip-list class="filter-chips fs-sort-chips" aria-label="排序欄位">
+          <mat-chip
+            *ngFor="let opt of mobileSortOptions; trackBy: trackBySortKey"
+            [selectable]="false"
+            [selected]="isSortActive(opt.key)"
+            (click)="setSort(opt.key)"
+          >{{ opt.label }}</mat-chip>
+        </mat-chip-list>
+        <span class="fs-sort-panel-label">排序方向</span>
+        <button class="fs-sort-dir" type="button" (click)="toggleSortDirection()">
+          <i class="bi" [class.bi-caret-down-fill]="sortDesc" [class.bi-caret-up-fill]="!sortDesc"></i>
+          {{ sortDesc ? '高到低' : '低到高' }}
+        </button>
+      </div>
+      <div class="fs-sort-panel-actions">
+        <button mat-raised-button color="primary" type="button" (click)="closeSortPanel()">套用排序</button>
+      </div>
+    </section>
   </div>
 
   <!-- 表格 -->
@@ -127,7 +185,7 @@
           </td>
         </tr>
         <tr *ngIf="pagedFunds.length === 0">
-          <td colspan="99" class="fs-empty">查無符合條件的基金</td>
+          <td colspan="99" class="fs-empty">{{ emptyStateMessage }}</td>
         </tr>
       </tbody>
     </table>

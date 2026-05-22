@@ -22,6 +22,7 @@ export interface Contract {
   threshold: string;
   marketValue: number;
   costBasis: number;
+  paidTotal: number;
 }
 
 export interface ScenarioData {

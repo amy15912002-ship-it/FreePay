@@ -144,9 +144,21 @@
       <ng-container *ngIf="isRedeemMode; else purchaseSettings">
         <section class="block">
           <div class="block-header">
-            <h2 class="block-title">贖回設定</h2>
+            <h2 class="block-title">贖回試算</h2>
           </div>
-          <div class="sum-table">
+          <div class="redeem-panel">
+            <div class="redeem-result">
+              <span class="redeem-result-label">參考金額</span>
+              <strong>{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong>
+              <small>最新淨值估算，非實際金額</small>
+            </div>
+            <div class="redeem-result redeem-rate">
+              <span class="redeem-result-label">參考報酬率</span>
+              <strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatSignedRate(redeemReferenceReturnRate) }}</strong>
+              <small>含已 Pay 估算</small>
+            </div>
+          </div>
+          <div class="sum-table redeem-sum-table">
             <div class="sum-row"><span>交易名稱</span><strong>{{ selectedContract?.name || '-' }}</strong></div>
             <div class="sum-row"><span>交易幣別</span><strong>{{ selectedCurrency?.currency }}（{{ selectedContract?.currencyCode }}）</strong></div>
             <div class="sum-row">
@@ -170,7 +182,6 @@
             <div class="sum-row"><span>參考淨值</span><strong>{{ scenario?.fundCurrencyCode }} {{ formatNav(redeemNav) }}</strong></div>
             <div class="sum-row"><span>參考淨值日期</span><strong>{{ redeemNavDate }}</strong></div>
             <div class="sum-row"><span>參考匯率</span><strong>{{ redeemExchangeRate === 1 ? '-' : formatNav(redeemExchangeRate) }}</strong></div>
-            <div class="sum-row"><span>贖回參考金額</span><strong class="hl">{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
             <div class="sum-row"><span>收款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
           </div>
         </section>
@@ -195,7 +206,7 @@
             <li>實際贖回單位數依客戶基金帳上餘額為限，部分贖回單位數可能因未達交割日而導致交易失敗，請以基金最新公開說明書或投資人須知為準。</li>
             <li>若贖回單位數過小，或本次贖回後剩餘庫存單位數過低，可能依各基金公司規定導致交易失敗或金額不足匯出。</li>
             <li>贖回款項約 3-10 個工作天入帳於集保結算所留存之約定贖回帳戶，實際入帳時間仍依基金公司與集保作業為準。</li>
-            <li>參考淨值與參考匯率僅供試算，不代表實際交易淨值與匯率，實際金額將以基金公司回覆為準。</li>
+            <li>參考金額係依最新淨值與參考匯率估算，非實際金額；實際金額將以基金公司回覆為準。</li>
           </ul>
         </div>
       </ng-container>
@@ -587,7 +598,8 @@
           <div class="sum-row" *ngIf="isModifyMode && selectedContract"><span>異動交易</span><strong>{{ selectedContract.name }}</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode && selectedContract"><span>贖回交易</span><strong>{{ selectedContract.name }}</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode"><span>贖回單位數</span><strong>{{ formatUnits(redeemUnits) }}</strong></div>
-          <div class="sum-row" *ngIf="isRedeemMode"><span>贖回參考金額</span><strong class="hl">{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
+          <div class="sum-row" *ngIf="isRedeemMode"><span>參考金額</span><strong class="hl">{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
+          <div class="sum-row" *ngIf="isRedeemMode"><span>參考報酬率</span><strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatSignedRate(redeemReferenceReturnRate) }}</strong></div>
           <div class="sum-row" *ngIf="!isModifyMode && !isRedeemMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
           <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode && payMode === 'amount'"><span>每月 Pay 金額</span><strong class="hl">{{ formatMoney(monthlyPay) }}</strong></div>
           <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode && payMode === 'ratio'"><span>每月 Pay 比例</span><strong class="hl">年化 {{ form.controls.ratio.value }}%</strong></div>

@@ -182,7 +182,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       thresholdValue: c.thresholdValue,
       threshold: this.contractThresholdText(c),
       marketValue: c.marketValue,
-      costBasis: c.costBasis
+      costBasis: c.costBasis,
+      paidTotal: c.paidTotal
     };
   }
 
@@ -223,7 +224,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   get steps(): Array<{ key: DemoStep; label: string; description: string }> {
     if (this.isRedeemMode) {
       return [
-        { key: 'settings', label: '贖回設定', description: '確認單位與金額' },
+        { key: 'settings', label: '贖回確認', description: '確認單位與金額' },
         { key: 'done', label: '完成', description: '委託完成' }
       ];
     }
@@ -376,6 +377,13 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     const stockUnits = this.redeemStockUnits;
     const marketValue = this.selectedContract?.marketValue ?? 0;
     return stockUnits > 0 ? Math.round((this.redeemUnits / stockUnits) * marketValue) : marketValue;
+  }
+
+  get redeemReferenceReturnRate(): number {
+    const costBasis = this.selectedContract?.costBasis ?? 0;
+    if (costBasis <= 0) return 0;
+    const paidTotal = this.selectedContract?.paidTotal ?? 0;
+    return ((this.redeemReferenceAmount + paidTotal - costBasis) / costBasis) * 100;
   }
 
   get redeemNavDate(): string {
@@ -571,6 +579,19 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   formatRate(value: number): string {
     return `${Number(value || 0).toFixed(2)}%`;
+  }
+
+  formatSignedRate(value: number): string {
+    const num = Number(value || 0);
+    const sign = num > 0 ? '+' : '';
+    return `${sign}${num.toFixed(2)}%`;
+  }
+
+  rateClass(value: number): string {
+    const num = Number(value || 0);
+    if (num > 0) return 'val-up';
+    if (num < 0) return 'val-down';
+    return '';
   }
 
   formatUnits(value: number): string {
