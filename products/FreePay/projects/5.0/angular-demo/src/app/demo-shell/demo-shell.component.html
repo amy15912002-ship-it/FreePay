@@ -142,7 +142,106 @@
     <form [formGroup]="form" class="screen" *ngIf="activeStep === 'settings'" novalidate>
 
       <ng-container *ngIf="isRedeemMode; else purchaseSettings">
+        <!-- 升級四：兩層贖回 UI 第一層 — 贖回方式決策 -->
         <section class="block">
+          <div class="block-header">
+            <h2 class="block-title">贖回方式</h2>
+          </div>
+          <div class="info-box redeem-scope-note">
+            <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+            <span>您正在贖回 <strong>{{ selectedContract?.name }}</strong> 底下的批次，若要贖回其他契約請返回帳戶總覽。</span>
+          </div>
+          <div class="decision-grid redeem-decision-grid" role="radiogroup" aria-label="贖回方式">
+            <button
+              class="decision-card"
+              type="button"
+              role="radio"
+              [class.is-selected]="redeemMode === 'all'"
+              [attr.aria-checked]="redeemMode === 'all'"
+              (click)="setRedeemMode('all')"
+            >
+              <span class="decision-copy">
+                <span class="decision-title-row">
+                  <span class="decision-icon">
+                    <i class="bi" [class.bi-record-circle-fill]="redeemMode === 'all'" [class.bi-circle]="redeemMode !== 'all'"></i>
+                  </span>
+                  <strong>全部贖回</strong>
+                </span>
+                <span>一次贖回此契約所有未贖回的部位。</span>
+              </span>
+            </button>
+            <button
+              class="decision-card"
+              type="button"
+              role="radio"
+              [class.is-selected]="redeemMode === 'batch'"
+              [disabled]="!hasSelectableBatch"
+              [attr.aria-checked]="redeemMode === 'batch'"
+              (click)="setRedeemMode('batch')"
+            >
+              <span class="decision-copy">
+                <span class="decision-title-row">
+                  <span class="decision-icon">
+                    <i class="bi" [class.bi-record-circle-fill]="redeemMode === 'batch'" [class.bi-circle]="redeemMode !== 'batch'"></i>
+                  </span>
+                  <strong>指定贖回</strong>
+                </span>
+                <span *ngIf="hasSelectableBatch">挑選此契約底下尚未開始被 Pay 的單筆或多筆申購／加碼。</span>
+                <span *ngIf="!hasSelectableBatch">此契約所有批次都已開始被 Pay 觸及，無法指定贖回。</span>
+              </span>
+            </button>
+          </div>
+        </section>
+
+        <!-- 升級四：兩層贖回 UI 第二層 — 批次清單（僅指定贖回顯示） -->
+        <section class="block" *ngIf="redeemMode === 'batch'">
+          <div class="block-header">
+            <h2 class="block-title">要贖回的批次</h2>
+            <button
+              mat-button
+              type="button"
+              class="batch-select-all"
+              (click)="toggleAllSelectableBatches()"
+              [disabled]="!hasSelectableBatch"
+            >
+              {{ allSelectableSelected ? '取消全選' : '全選可選批次' }}
+            </button>
+          </div>
+          <div class="batch-list">
+            <button
+              *ngFor="let batch of batches"
+              type="button"
+              class="batch-card"
+              [class.is-selected]="isBatchSelected(batch.batchId)"
+              [class.is-disabled]="batch.isPayTouched"
+              [disabled]="batch.isPayTouched"
+              (click)="toggleBatch(batch)"
+            >
+              <div class="batch-card-check">
+                <i class="bi"
+                  [class.bi-check-square-fill]="isBatchSelected(batch.batchId)"
+                  [class.bi-square]="!isBatchSelected(batch.batchId)"
+                ></i>
+              </div>
+              <div class="batch-card-body">
+                <div class="batch-row batch-row--main">
+                  <span class="batch-date">{{ batch.batchDate }}</span>
+                  <span class="batch-amount">{{ formatMoney(batch.amount, selectedContract?.currencyCode) }}</span>
+                </div>
+                <div class="batch-row batch-row--sub">
+                  <span>申購單位 {{ formatUnits(batch.units) }}</span>
+                  <span *ngIf="!batch.isPayTouched">・剩餘可贖回 {{ formatUnits(batch.remainUnits) }}</span>
+                </div>
+                <div class="batch-disabled-reason" *ngIf="batch.isPayTouched">
+                  <i class="bi bi-info-circle"></i>
+                  此批次已開始被 Pay 觸及，無法單獨贖回
+                </div>
+              </div>
+            </button>
+          </div>
+        </section>
+
+        <section class="block" *ngIf="redeemMode">
           <div class="block-header">
             <h2 class="block-title">贖回試算</h2>
           </div>
@@ -155,7 +254,7 @@
             <div class="redeem-result redeem-rate">
               <span class="redeem-result-label">參考報酬率</span>
               <strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatSignedRate(redeemReferenceReturnRate) }}</strong>
-              <small>含已 Pay 估算</small>
+              <small>{{ redeemMode === 'batch' ? '已選批次估算' : '含已 Pay 估算' }}</small>
             </div>
           </div>
           <div class="sum-table redeem-sum-table">
@@ -186,7 +285,7 @@
           </div>
         </section>
 
-        <section class="block">
+        <section class="block" *ngIf="redeemMode">
           <div class="block-header">
             <h2 class="block-title">交易密碼</h2>
           </div>

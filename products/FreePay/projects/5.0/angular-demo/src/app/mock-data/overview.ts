@@ -1,5 +1,5 @@
 import { findFund } from './funds';
-import { HOLDINGS, HoldingContract } from './holdings';
+import { HOLDINGS, HoldingContract, PurchaseBatch } from './holdings';
 
 export interface OvSummary {
   ccy: string; pay: number; paid: number;
@@ -152,40 +152,65 @@ export const MOCK_PROFITS: ProfitRecord[] = [
   { id: 'hp-005', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2023008', alias: '20231201',   ccy: 'TWD', redeemDate: '2025/10/06', totalPaid:  6000, paySetting: '依金額・20日',    threshold: '不設門檻',         cost: 200000, redeemAmount: 188000, profit:  -6000, returnRate:  -3.00, status: '已完成' },
 ];
 
-export const DETAIL_TX_DETAIL: Record<string, DetailTxRecord[]> = {
+// 自由 Pay (R) 與贖回 (RDM) 紀錄 — 手動 mock；申購 (A) 紀錄從 holdings.purchaseBatches 自動衍生
+// 設計理由（單一資料源）：A 紀錄本質就是申購批次，避免兩處 mock 不同步
+const HAND_MOCK_PAY_REDEEM: Record<string, DetailTxRecord[]> = {
   FP20230901: [
     { orderDate: '2026-04-15', orderTime: '09:00:12', tDate: '2026-04-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.8500', unitDesc: '168.7763',    exRateDesc: '32.1050', amount: 2000 },
     { orderDate: '2026-03-15', orderTime: '09:00:07', tDate: '2026-03-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.7200', unitDesc: '170.6485',    exRateDesc: '32.0800', amount: 2000 },
     { orderDate: '2026-02-15', orderTime: '09:00:05', tDate: '2026-02-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.5800', unitDesc: '172.7115',    exRateDesc: '31.9800', amount: 2000 },
     { orderDate: '2026-01-10', orderTime: '11:42:05', tDate: '2026-01-14', tradeType: 'RDM', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.2300', unitDesc: '1,200.0000', exRateDesc: '31.8500', amount: 42800 },
-    { orderDate: '2024-03-15', orderTime: '14:20:33', tDate: '2024-03-19', tradeType: 'A',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '10.5000', unitDesc: '28,571.4286', exRateDesc: '31.4500', amount: 300000 },
   ],
   FP20240601: [
-    { orderDate: '2026-04-15', orderTime: '09:05:42', tDate: '2026-04-17', tradeType: 'R', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '11.8500', unitDesc: '6.7511',    exRateDesc: '-', amount: 80 },
-    { orderDate: '2026-03-15', orderTime: '09:04:18', tDate: '2026-03-17', tradeType: 'R', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '11.7200', unitDesc: '6.8259',    exRateDesc: '-', amount: 80 },
-    { orderDate: '2024-03-15', orderTime: '14:22:10', tDate: '2024-03-19', tradeType: 'A', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '10.5000', unitDesc: '761.9048',  exRateDesc: '-', amount: 8000 },
-  ],
-  FP20241201: [
-    { orderDate: '2026-05-02', orderTime: '10:18:03', tDate: '2026-05-06', tradeType: 'A', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '-', unitDesc: '-', exRateDesc: '-', amount: 200000 },
+    { orderDate: '2026-04-15', orderTime: '09:05:42', tDate: '2026-04-17', tradeType: 'R', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '11.8500', unitDesc: '6.7511', exRateDesc: '-', amount: 80 },
+    { orderDate: '2026-03-15', orderTime: '09:04:18', tDate: '2026-03-17', tradeType: 'R', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '11.7200', unitDesc: '6.8259', exRateDesc: '-', amount: 80 },
   ],
   FP20240101: [
-    { orderDate: '2026-04-05', orderTime: '09:00:02', tDate: '2026-04-07', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '16.2045', unitDesc: '49.9861',     exRateDesc: '-', amount: 810 },
-    { orderDate: '2026-03-05', orderTime: '09:00:02', tDate: '2026-03-07', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '16.1032', unitDesc: '50.3006',     exRateDesc: '-', amount: 810 },
-    { orderDate: '2025-01-01', orderTime: '13:25:00', tDate: '2025-01-03', tradeType: 'A', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '15.0000', unitDesc: '26,800.0000', exRateDesc: '-', amount: 402000 },
+    { orderDate: '2026-04-05', orderTime: '09:00:02', tDate: '2026-04-07', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '16.2045', unitDesc: '49.9861', exRateDesc: '-', amount: 810 },
+    { orderDate: '2026-03-05', orderTime: '09:00:02', tDate: '2026-03-07', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '16.1032', unitDesc: '50.3006', exRateDesc: '-', amount: 810 },
   ],
   FP20250301: [
     { orderDate: '2026-04-10', orderTime: '09:03:22', tDate: '2026-04-14', tradeType: 'R', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '13.4200', unitDesc: '7.4516', exRateDesc: '-', amount: 100 },
-    { orderDate: '2025-03-01', orderTime: '13:10:08', tDate: '2025-03-05', tradeType: 'A', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '12.8800', unitDesc: '155.2795', exRateDesc: '-', amount: 2000 },
   ],
   FP20250601: [
     { orderDate: '2026-04-15', orderTime: '09:02:18', tDate: '2026-04-17', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '18.2500', unitDesc: '328.7671', exRateDesc: '-', amount: 6000 },
-    { orderDate: '2025-06-01', orderTime: '10:30:00', tDate: '2025-06-04', tradeType: 'A', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '17.8000', unitDesc: '10,112.3596', exRateDesc: '-', amount: 180000 },
   ],
   FP20240801: [
     { orderDate: '2026-04-20', orderTime: '09:06:42', tDate: '2026-04-22', tradeType: 'R', trCcyDesc: '日幣', fdCcyDesc: '日幣', navDesc: '102.5400', unitDesc: '48.7615', exRateDesc: '-', amount: 5000 },
-    { orderDate: '2024-08-01', orderTime: '11:18:29', tDate: '2024-08-05', tradeType: 'A', trCcyDesc: '日幣', fdCcyDesc: '日幣', navDesc: '98.1500', unitDesc: '5,094.2435', exRateDesc: '-', amount: 500000 },
   ],
 };
+
+// 把申購批次轉成「申購（A）」交易明細紀錄
+function batchToTxRecord(c: HoldingContract, b: PurchaseBatch): DetailTxRecord {
+  const fund = findFund(c.fundId);
+  const trCcyDesc = CCY_NAME[c.currencyCode] ?? c.currencyCode;
+  const fdCcyDesc = fund?.pricingCurrency ?? trCcyDesc;
+  const exRate = trCcyDesc !== fdCcyDesc ? '32.0500' : '-'; // 跨幣別才有匯率（mock 簡化用固定值）
+  return {
+    orderDate: b.batchDate.replace(/\//g, '-'),
+    orderTime: b.orderTime,
+    tDate: b.tDate.replace(/\//g, '-'),
+    tradeType: 'A',
+    trCcyDesc,
+    fdCcyDesc,
+    navDesc: b.nav.toFixed(4),
+    unitDesc: b.units.toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 }),
+    exRateDesc: exRate,
+    amount: b.amount,
+  };
+}
+
+// 合併「自由 Pay/贖回手動 mock」+「申購批次自動衍生」→ 依日期倒序輸出
+export const DETAIL_TX_DETAIL: Record<string, DetailTxRecord[]> = (() => {
+  const result: Record<string, DetailTxRecord[]> = {};
+  for (const c of HOLDINGS) {
+    const aFromBatches = c.purchaseBatches.map(b => batchToTxRecord(c, b));
+    const others = HAND_MOCK_PAY_REDEEM[c.fpNo] ?? [];
+    result[c.fpNo] = [...others, ...aFromBatches]
+      .sort((a, b) => b.orderDate.localeCompare(a.orderDate));
+  }
+  return result;
+})();
 
 export const DETAIL_TX_CHANGE: Record<string, DetailChgRecord[]> = {
   FP20230901: [

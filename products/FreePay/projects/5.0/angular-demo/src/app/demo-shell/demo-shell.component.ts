@@ -4,13 +4,15 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import { Contract, CurrencyOption, DEMO_SCENARIOS, ScenarioData } from '../mock-data/scenarios';
 import { findFund, Fund } from '../mock-data/funds';
-import { HoldingContract, holdingsOfFund } from '../mock-data/holdings';
+import { HoldingContract, holdingsOfFund, PurchaseBatch, batchesOf } from '../mock-data/holdings';
 import { FlowContext, isEntryMode } from '../mock-data/flow-context';
 
 type DemoStep = 'ccy' | 'settings' | 'confirm' | 'done';
 type PayMode = 'amount' | 'ratio';
 type ThresholdMode = 'protect' | 'unlock';
 type PurchaseMode = 'addOn' | 'new' | null;
+// 升級四：贖回方式（兩層 UI 第一層）
+type RedeemMode = 'all' | 'batch' | null;
 
 const DEFAULT_DEMO_SCENARIO = DEMO_SCENARIOS[0];
 const FUND_CURRENCY_CODE_MAP: Record<string, string> = {
@@ -61,6 +63,9 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   selectedContract: Contract | null = null;
   selectedCurrency: CurrencyOption | null = null;
   thresholdCustomActive = false;
+  // 升級四：贖回兩層 UI 狀態
+  redeemMode: RedeemMode = null;
+  selectedBatchIds = new Set<string>();
   private addOnDirect = false;
   private flowContext: FlowContext = { mode: 'new', fundId: DEFAULT_DEMO_SCENARIO.fundId };
 
@@ -369,21 +374,91 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.selectedContract?.fpNo === 'FP20241201' ? 12.3456 : 0;
   }
 
+  // 升級四：依贖回模式切換單位數計算
+  // all 模式 → 沿用契約整體可贖單位
+  // batch 模式 → 已選批次的 remainUnits 合計
   get redeemUnits(): number {
+    if (this.redeemMode === 'batch') {
+      return this.selectedBatches.reduce((s, b) => s + b.remainUnits, 0);
+    }
     return Math.max(this.redeemStockUnits - this.redeemOrderingUnits, 0);
   }
 
+  // 升級四：依贖回模式切換參考金額計算
+  // batch 模式直接用 remainUnits × 淨值 × 匯率（精確對應批次）
   get redeemReferenceAmount(): number {
+    if (this.redeemMode === 'batch') {
+      return Math.round(this.redeemUnits * this.redeemNav * this.redeemExchangeRate);
+    }
     const stockUnits = this.redeemStockUnits;
     const marketValue = this.selectedContract?.marketValue ?? 0;
     return stockUnits > 0 ? Math.round((this.redeemUnits / stockUnits) * marketValue) : marketValue;
   }
 
+  // 升級四：依贖回模式切換報酬率分母（all 用契約成本，batch 用已選批次成本）
   get redeemReferenceReturnRate(): number {
+    if (this.redeemMode === 'batch') {
+      const batchCost = this.selectedBatches.reduce((s, b) => s + b.amount, 0);
+      if (batchCost <= 0) return 0;
+      return ((this.redeemReferenceAmount - batchCost) / batchCost) * 100;
+    }
     const costBasis = this.selectedContract?.costBasis ?? 0;
     if (costBasis <= 0) return 0;
     const paidTotal = this.selectedContract?.paidTotal ?? 0;
     return ((this.redeemReferenceAmount + paidTotal - costBasis) / costBasis) * 100;
+  }
+
+  // ── 升級四：申購批次層贖回 ──────────────────────────────
+
+  get batches(): PurchaseBatch[] {
+    return this.selectedContract ? batchesOf(this.selectedContract.fpNo) : [];
+  }
+
+  get selectableBatches(): PurchaseBatch[] {
+    return this.batches.filter(b => !b.isPayTouched);
+  }
+
+  get hasSelectableBatch(): boolean {
+    return this.selectableBatches.length > 0;
+  }
+
+  get selectedBatches(): PurchaseBatch[] {
+    return this.batches.filter(b => this.selectedBatchIds.has(b.batchId));
+  }
+
+  get hasSelectedBatch(): boolean {
+    return this.selectedBatchIds.size > 0;
+  }
+
+  get allSelectableSelected(): boolean {
+    return this.hasSelectableBatch && this.selectableBatches.every(b => this.selectedBatchIds.has(b.batchId));
+  }
+
+  isBatchSelected(batchId: string): boolean {
+    return this.selectedBatchIds.has(batchId);
+  }
+
+  setRedeemMode(mode: RedeemMode): void {
+    if (mode === 'batch' && !this.hasSelectableBatch) return;
+    this.redeemMode = mode;
+    if (mode !== 'batch') this.selectedBatchIds.clear();
+  }
+
+  toggleBatch(batch: PurchaseBatch): void {
+    if (batch.isPayTouched) return;
+    if (this.selectedBatchIds.has(batch.batchId)) {
+      this.selectedBatchIds.delete(batch.batchId);
+    } else {
+      this.selectedBatchIds.add(batch.batchId);
+    }
+  }
+
+  toggleAllSelectableBatches(): void {
+    if (this.allSelectableSelected) {
+      this.selectedBatchIds.clear();
+    } else {
+      this.selectableBatches.forEach(b => this.selectedBatchIds.add(b.batchId));
+    }
   }
 
   get redeemNavDate(): string {
@@ -392,7 +467,12 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   get actionDisabled(): boolean {
     if (this.activeStep === 'confirm') return this.submitDisabled;
-    if (this.isRedeemMode && this.activeStep === 'settings') return this.pwd.trim() === '' || !this.selectedContract;
+    if (this.isRedeemMode && this.activeStep === 'settings') {
+      if (this.pwd.trim() === '' || !this.selectedContract) return true;
+      // 升級四：贖回方式必選；若選 batch 模式須至少勾 1 筆批次
+      if (!this.redeemMode) return true;
+      if (this.redeemMode === 'batch' && !this.hasSelectedBatch) return true;
+    }
     return false;
   }
 
@@ -476,7 +556,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     }
     if (this.activeStep === 'settings') {
       if (this.isRedeemMode) {
-        if (this.pwd.trim() === '' || !this.selectedContract) return;
+        if (this.actionDisabled) return;
         this.pwd = '';
         this.activeStep = 'done';
         return;
@@ -690,6 +770,9 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.payModeHintOpen = false;
     this.dateHintOpen = false;
     this.applyPayModeValidators();
+    // 升級四：贖回模式進入時重置兩層狀態
+    this.redeemMode = null;
+    this.selectedBatchIds.clear();
   }
 
   private applyContractSettings(contract: Contract): void {
