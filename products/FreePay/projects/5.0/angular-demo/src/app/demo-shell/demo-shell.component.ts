@@ -7,7 +7,7 @@ import { findFund, Fund } from '../mock-data/funds';
 import { HoldingContract, holdingsOfFund, PurchaseBatch, batchesOf } from '../mock-data/holdings';
 import { FlowContext, isEntryMode } from '../mock-data/flow-context';
 
-type DemoStep = 'ccy' | 'settings' | 'confirm' | 'done';
+type DemoStep = 'settings' | 'confirm' | 'done';
 type PayMode = 'amount' | 'ratio';
 type ThresholdMode = 'protect' | 'unlock';
 type PurchaseMode = 'addOn' | 'new' | null;
@@ -59,7 +59,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   pwdVisible = false;
   payModeHintOpen = false;
   dateHintOpen = false;
-  purchaseMode: PurchaseMode = 'new';
   selectedContract: Contract | null = null;
   selectedCurrency: CurrencyOption | null = null;
   thresholdCustomActive = false;
@@ -132,21 +131,15 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.selectedCurrency = this.scenario.availableCurrencies[0] ?? null;
 
     if (this.addOnDirect && addonContract) {
-      // 帳戶總覽「加碼」直入：跳過 s-ccy，鎖定該筆交易，直接進加碼設定頁
+      // 帳戶總覽指定契約直入：鎖定該筆契約，直接進設定/異動/贖回頁
       this.selectedContract = addonContract;
       this.selectedCurrency = this.scenario.availableCurrencies
         .find(c => c.currencyCode === addonContract.currencyCode) ?? this.selectedCurrency;
-      this.purchaseMode = ctx.mode === 'addOn' ? 'addOn' : 'new';
-      this.activeStep = 'settings';
-    } else if (this.shouldShowSccy) {
-      this.activeStep = 'ccy';
-      this.selectedContract = null;
-      this.syncPurchaseModeForSelectedCurrency();
     } else {
-      this.activeStep = 'settings';
-      this.selectedContract = null;
-      this.purchaseMode = 'new';
+      // 申購：一律直接進設定頁；多幣別時頂部切換器處理幣別選擇
+      this.syncSelectedContractForCurrency();
     }
+    this.activeStep = 'settings';
     this.resetFormState();
     this.applySettingsForMode();
   }
@@ -176,7 +169,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   private toScenarioContract(c: HoldingContract): Contract {
     return {
       fpNo: c.fpNo,
-      name: c.alias,
       currencyCode: c.currencyCode,
       startDate: c.startDate,
       monthlyPay: c.monthlyPay,
@@ -198,12 +190,11 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return '不設門檻';
   }
 
-  get shouldShowSccy(): boolean {
-    return !this.addOnDirect && (this.scenario?.hasExistingContracts ?? false);
-  }
-
   get isAddOnMode(): boolean {
-    return this.purchaseMode === 'addOn';
+    // 5.0 起：模式由「該幣別是否有既有契約」自動判斷
+    if (this.flowContext.mode === 'addOn') return true;
+    if (this.flowContext.mode === 'modify' || this.flowContext.mode === 'redeem') return false;
+    return this.hasContractForSelectedCurrency;
   }
 
   get isModifyMode(): boolean {
@@ -218,30 +209,28 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return (this.scenario?.availableCurrencies.length ?? 0) > 1;
   }
 
-  get contractsForSelectedCurrency(): Contract[] {
-    return (this.scenario?.contracts ?? []).filter(c => c.currencyCode === this.selectedCurrency?.currencyCode);
+  get contractForSelectedCurrency(): Contract | null {
+    // 5.0 起：同基金同幣別僅一筆契約
+    return (this.scenario?.contracts ?? []).find(c => c.currencyCode === this.selectedCurrency?.currencyCode) ?? null;
   }
 
-  get hasContractsForSelectedCurrency(): boolean {
-    return this.contractsForSelectedCurrency.length > 0;
+  get hasContractForSelectedCurrency(): boolean {
+    return this.contractForSelectedCurrency !== null;
   }
 
   get steps(): Array<{ key: DemoStep; label: string; description: string }> {
     if (this.isRedeemMode) {
       return [
-        { key: 'settings', label: '贖回確認', description: '確認單位與金額' },
+        { key: 'settings', label: '贖回設定', description: '選擇贖回方式' },
+        { key: 'confirm', label: '確認送出', description: '確認試算與送出' },
         { key: 'done', label: '完成', description: '委託完成' }
       ];
     }
-    const base: Array<{ key: DemoStep; label: string; description: string }> = [
+    return [
       { key: 'settings', label: '申購設定', description: '金額、Pay 設定' },
       { key: 'confirm', label: '確認送出', description: '確認摘要並送出' },
       { key: 'done', label: '完成', description: '委託完成' }
     ];
-    if (this.shouldShowSccy) {
-      return [{ key: 'ccy', label: '交易選擇', description: '加碼或新申購' }, ...base];
-    }
-    return base;
   }
 
   get stepIndex(): number {
@@ -395,6 +384,12 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return stockUnits > 0 ? Math.round((this.redeemUnits / stockUnits) * marketValue) : marketValue;
   }
 
+  // 單一批次的贖回參考金額（用於批次列表每列）
+  batchReferenceAmount(batch: PurchaseBatch): number {
+    if (batch.isPayTouched) return 0;
+    return Math.round(batch.remainUnits * this.redeemNav * this.redeemExchangeRate);
+  }
+
   // 升級四：依贖回模式切換報酬率分母（all 用契約成本，batch 用已選批次成本）
   get redeemReferenceReturnRate(): number {
     if (this.redeemMode === 'batch') {
@@ -406,6 +401,26 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     if (costBasis <= 0) return 0;
     const paidTotal = this.selectedContract?.paidTotal ?? 0;
     return ((this.redeemReferenceAmount + paidTotal - costBasis) / costBasis) * 100;
+  }
+
+  get postRedeemCostBasis(): number {
+    const costBasis = this.selectedContract?.costBasis ?? 0;
+    if (this.redeemMode !== 'batch') return 0;
+    const redeemCost = this.selectedBatches.reduce((s, b) => s + b.amount, 0);
+    return Math.max(costBasis - redeemCost, 0);
+  }
+
+  get postRedeemAnnualRate(): number {
+    const monthlyPay = this.selectedContract?.monthlyPay ?? 0;
+    const costBasis = this.postRedeemCostBasis;
+    return costBasis > 0 ? (monthlyPay * 12 / costBasis) * 100 : 0;
+  }
+
+  get showRedeemPayAdjustmentNotice(): boolean {
+    return this.redeemMode === 'batch'
+      && this.selectedBatches.length > 0
+      && this.selectedContract?.payMode === 'amount'
+      && this.postRedeemAnnualRate > 15;
   }
 
   // ── 升級四：申購批次層贖回 ──────────────────────────────
@@ -468,7 +483,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   get actionDisabled(): boolean {
     if (this.activeStep === 'confirm') return this.submitDisabled;
     if (this.isRedeemMode && this.activeStep === 'settings') {
-      if (this.pwd.trim() === '' || !this.selectedContract) return true;
+      if (!this.selectedContract) return true;
       // 升級四：贖回方式必選；若選 batch 模式須至少勾 1 筆批次
       if (!this.redeemMode) return true;
       if (this.redeemMode === 'batch' && !this.hasSelectedBatch) return true;
@@ -477,13 +492,11 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get primaryActionLabel(): string {
-    return this.activeStep === 'confirm' || (this.isRedeemMode && this.activeStep === 'settings')
-      ? '確認送出'
-      : '下一步';
+    return this.activeStep === 'confirm' ? '確認送出' : '下一步';
   }
 
   get primaryActionIsSubmit(): boolean {
-    return this.activeStep === 'confirm' || (this.isRedeemMode && this.activeStep === 'settings');
+    return this.activeStep === 'confirm';
   }
 
   setStep(step: DemoStep): void {
@@ -499,30 +512,13 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.setStep(step.key);
   }
 
-  selectContract(contract: Contract): void {
-    this.selectedContract = contract;
-    this.purchaseMode = 'addOn';
-  }
-
-  setPurchaseMode(mode: PurchaseMode): void {
-    if (mode === 'addOn' && !this.hasContractsForSelectedCurrency) return;
-    this.purchaseMode = mode;
-    this.selectedContract = null;
-  }
-
   selectCurrency(currencyCode: string): void {
     this.selectedCurrency = this.scenario?.availableCurrencies.find(c => c.currencyCode === currencyCode) ?? null;
-    if (this.activeStep === 'ccy') {
-      this.selectedContract = null;
-      this.syncPurchaseModeForSelectedCurrency();
-    }
+    // 5.0 起：幣別切換器整合到設定頁；切換後即時更新該幣別契約狀態（決定加碼/新申購模式）
+    this.syncSelectedContractForCurrency();
     // 幣別改變後，門檻與金額單位都會跟著變，強制重設為新幣別的最低值
     this.form.controls.amount.setValue(this.minAmount);
     this.applySettingsForMode();
-  }
-
-  selectNewPurchase(): void {
-    this.setPurchaseMode('new');
   }
 
   setPayMode(mode: PayMode): void {
@@ -547,18 +543,10 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   next(): void {
-    if (this.activeStep === 'ccy') {
-      if (!this.purchaseMode) return;
-      if (this.purchaseMode === 'addOn' && !this.selectedContract) return;
-      this.applySettingsForMode();
-      this.activeStep = 'settings';
-      return;
-    }
     if (this.activeStep === 'settings') {
       if (this.isRedeemMode) {
         if (this.actionDisabled) return;
-        this.pwd = '';
-        this.activeStep = 'done';
+        this.activeStep = 'confirm';
         return;
       }
       this.form.markAllAsTouched();
@@ -573,12 +561,16 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   previous(): void {
-    if (this.isRedeemMode && this.activeStep === 'settings') {
-      this.goOverview();
-    } else if (this.activeStep === 'confirm') {
+    if (this.activeStep === 'confirm') {
       this.activeStep = 'settings';
-    } else if (this.activeStep === 'settings' && this.shouldShowSccy) {
-      this.activeStep = 'ccy';
+      return;
+    }
+    if (this.activeStep === 'settings') {
+      if (this.flowContext.mode === 'new') {
+        this.router.navigate(['/demo/search']);
+      } else {
+        this.goOverview();
+      }
     }
   }
 
@@ -647,14 +639,22 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     }
   }
 
+  currencyName(code?: string | null): string {
+    const key = code ?? this.selectedCurrency?.currencyCode ?? 'TWD';
+    return (MIN_AMOUNT_TABLE[key] ?? MIN_AMOUNT_TABLE['TWD']).name;
+  }
+
   formatMoney(value: number, currencyCode?: string): string {
+    return `${this.currencyName(currencyCode)} ${this.formatNumber(value, currencyCode)}`;
+  }
+
+  // 純數字（無幣別前綴）：用於贖回流程已透過 banner 宣告幣別的情境
+  formatNumber(value: number, currencyCode?: string): string {
     const code = currencyCode ?? this.selectedCurrency?.currencyCode ?? 'TWD';
-    const name = (MIN_AMOUNT_TABLE[code] ?? MIN_AMOUNT_TABLE['TWD']).name;
     const num = Number(value || 0);
-    const formatted = code === 'TWD'
+    return code === 'TWD'
       ? num.toLocaleString('en-US')
       : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-    return `${name} ${formatted}`;
   }
 
   formatRate(value: number): string {
@@ -754,8 +754,9 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     control.updateValueAndValidity({ emitEvent: false });
   }
 
-  private syncPurchaseModeForSelectedCurrency(): void {
-    this.purchaseMode = this.hasContractsForSelectedCurrency ? null : 'new';
+  private syncSelectedContractForCurrency(): void {
+    // 5.0 起：依選定幣別自動帶入該幣別的既有契約（若有），決定加碼或新申購模式
+    this.selectedContract = this.contractForSelectedCurrency;
   }
 
   private resetFormState(): void {

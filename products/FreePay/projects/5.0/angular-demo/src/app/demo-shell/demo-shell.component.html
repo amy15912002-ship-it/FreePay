@@ -31,114 +31,26 @@
 
 <div class="page-body">
   <main class="main-content">
-    <section class="fund-card" aria-label="基金資訊" *ngIf="activeStep !== 'done'">
+    <section class="fund-card" aria-label="基金資訊" *ngIf="activeStep === 'settings'">
       <div class="fund-name">
         <span class="fund-code">{{ scenario?.fundId }}</span>{{ scenario?.fundName }}
       </div>
       <div class="sidebar-tags">
         <span>{{ scenario?.tscd }}</span>
-        <span>{{ selectedCurrency?.currency }}計價</span>
+        <span>{{ scenario?.fundCurrency }}計價</span>
         <span>{{ scenario?.risk }}</span>
+      </div>
+      <div class="fund-card-redeem-ref" *ngIf="isRedeemMode">
+        <div class="sum-table">
+          <div class="sum-row"><span>交易幣別</span><strong>{{ currencyName(selectedContract?.currencyCode) }}</strong></div>
+          <div class="sum-row"><span>參考淨值</span><strong>{{ formatNav(redeemNav) }} <small class="ref-meta">({{ redeemNavDate }})</small></strong></div>
+          <div class="sum-row"><span>參考匯率</span><strong>{{ redeemExchangeRate === 1 ? '-' : formatNav(redeemExchangeRate) }}</strong></div>
+          <div class="sum-row"><span>收款帳號</span><strong>{{ scenario?.bank }} {{ scenario?.acc }}</strong></div>
+        </div>
       </div>
     </section>
 
-    <!-- s-ccy：交易選擇 -->
-    <section class="screen" *ngIf="activeStep === 'ccy'">
-      <section class="block" *ngIf="!isModifyMode">
-        <div class="block-header">
-          <h2 class="block-title">選擇交易方式</h2>
-        </div>
-
-        <!-- 多幣別：幣別切換 -->
-        <mat-button-toggle-group
-          *ngIf="isMultiCurrency"
-          class="mode-toggle mode-toggle-fill ccy-selector"
-          [value]="selectedCurrency?.currencyCode"
-          (change)="selectCurrency($event.value)"
-          aria-label="申購幣別"
-        >
-          <mat-button-toggle
-            *ngFor="let c of scenario?.availableCurrencies"
-            [value]="c.currencyCode"
-          >{{ c.currency }}（{{ c.currencyCode }}）</mat-button-toggle>
-        </mat-button-toggle-group>
-
-        <div *ngIf="hasContractsForSelectedCurrency" class="decision-grid" role="radiogroup" aria-label="交易方式">
-          <button
-            class="decision-card"
-            type="button"
-            role="radio"
-            [class.is-selected]="purchaseMode === 'addOn'"
-            [disabled]="!hasContractsForSelectedCurrency"
-            [attr.aria-checked]="purchaseMode === 'addOn'"
-            (click)="setPurchaseMode('addOn')"
-          >
-            <span class="decision-copy">
-              <span class="decision-title-row">
-                <span class="decision-icon">
-                  <i class="bi" [class.bi-record-circle-fill]="purchaseMode === 'addOn'" [class.bi-circle]="purchaseMode !== 'addOn'"></i>
-                </span>
-                <strong>加碼</strong>
-              </span>
-              <span>沿用已成立的交易。</span>
-            </span>
-          </button>
-
-          <button
-            class="decision-card"
-            type="button"
-            role="radio"
-            [class.is-selected]="purchaseMode === 'new'"
-            [attr.aria-checked]="purchaseMode === 'new'"
-            (click)="selectNewPurchase()"
-          >
-            <span class="decision-copy">
-              <span class="decision-title-row">
-                <span class="decision-icon">
-                  <i class="bi" [class.bi-record-circle-fill]="purchaseMode === 'new'" [class.bi-circle]="purchaseMode !== 'new'"></i>
-                </span>
-                <strong>新申購</strong>
-              </span>
-              <span>重新設定Pay出方式、基準日與觸發門檻。</span>
-            </span>
-          </button>
-        </div>
-
-        <!-- 此幣別無既有合約 -->
-        <div class="info-box" *ngIf="!hasContractsForSelectedCurrency">
-          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-          <span>{{ selectedCurrency?.currency }}（{{ selectedCurrency?.currencyCode }}）尚無既有交易，本次將建立新申購。</span>
-        </div>
-      </section>
-
-      <!-- 選擇加碼：第二層選擇既有交易 -->
-      <section class="block" *ngIf="purchaseMode === 'addOn' && hasContractsForSelectedCurrency">
-        <div class="block-header">
-          <h2 class="block-title">要加碼的交易</h2>
-        </div>
-        <div class="contract-list">
-          <button
-            *ngFor="let contract of contractsForSelectedCurrency"
-            class="contract-card"
-            [class.is-selected]="selectedContract?.fpNo === contract.fpNo"
-            type="button"
-            (click)="selectContract(contract)"
-          >
-            <div class="contract-card-check">
-              <i class="bi" [class.bi-record-circle-fill]="selectedContract?.fpNo === contract.fpNo" [class.bi-circle]="selectedContract?.fpNo !== contract.fpNo"></i>
-            </div>
-            <div class="contract-card-body">
-              <div class="contract-name">{{ contract.name }}</div>
-              <div class="contract-meta">{{ selectedCurrency?.currencyCode }} ・ 成立 {{ contract.startDate }}</div>
-              <div class="contract-pay">每月 Pay {{ formatMoney(contract.monthlyPay, contract.currencyCode) }}（年化 {{ contract.annualRate }}%）・ {{ contract.threshold }}</div>
-              <div class="contract-value">約當市值 {{ formatMoney(contract.marketValue, contract.currencyCode) }}</div>
-            </div>
-          </button>
-        </div>
-      </section>
-    </section>
-
-    <!-- s-settings：申購設定 -->
+    <!-- s-settings：申購設定（多幣別時頂部含幣別切換器，原 s-ccy 步驟已併入此頁） -->
     <form [formGroup]="form" class="screen" *ngIf="activeStep === 'settings'" novalidate>
 
       <ng-container *ngIf="isRedeemMode; else purchaseSettings">
@@ -147,155 +59,94 @@
           <div class="block-header">
             <h2 class="block-title">贖回方式</h2>
           </div>
-          <div class="info-box redeem-scope-note">
-            <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-            <span>您正在贖回 <strong>{{ selectedContract?.name }}</strong> 底下的批次，若要贖回其他契約請返回帳戶總覽。</span>
+          <mat-radio-group
+            class="redeem-mode-radio-group"
+            [value]="redeemMode"
+            (change)="setRedeemMode($event.value)"
+            aria-label="贖回方式"
+          >
+            <mat-radio-button color="primary" value="all">全部贖回</mat-radio-button>
+            <mat-radio-button color="primary" value="batch" [disabled]="!hasSelectableBatch">指定贖回</mat-radio-button>
+          </mat-radio-group>
+          <!-- 全部贖回模式：合計摘要 -->
+          <div class="redeem-all-summary" *ngIf="redeemMode === 'all'">
+            <div class="sum-row"><span>可贖回單位</span><strong>{{ formatUnits(redeemUnits) }}</strong></div>
+            <div class="sum-row" *ngIf="redeemOrderingUnits > 0"><span>在途中（已扣除）</span><strong>{{ formatUnits(redeemOrderingUnits) }}</strong></div>
+            <div class="sum-row"><span>贖回參考金額</span><strong class="batch-row-cell--total-amount">{{ formatNumber(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
           </div>
-          <div class="decision-grid redeem-decision-grid" role="radiogroup" aria-label="贖回方式">
-            <button
-              class="decision-card"
-              type="button"
-              role="radio"
-              [class.is-selected]="redeemMode === 'all'"
-              [attr.aria-checked]="redeemMode === 'all'"
-              (click)="setRedeemMode('all')"
-            >
-              <span class="decision-copy">
-                <span class="decision-title-row">
-                  <span class="decision-icon">
-                    <i class="bi" [class.bi-record-circle-fill]="redeemMode === 'all'" [class.bi-circle]="redeemMode !== 'all'"></i>
-                  </span>
-                  <strong>全部贖回</strong>
-                </span>
-                <span>一次贖回此契約所有未贖回的部位。</span>
-              </span>
-            </button>
-            <button
-              class="decision-card"
-              type="button"
-              role="radio"
-              [class.is-selected]="redeemMode === 'batch'"
-              [disabled]="!hasSelectableBatch"
-              [attr.aria-checked]="redeemMode === 'batch'"
-              (click)="setRedeemMode('batch')"
-            >
-              <span class="decision-copy">
-                <span class="decision-title-row">
-                  <span class="decision-icon">
-                    <i class="bi" [class.bi-record-circle-fill]="redeemMode === 'batch'" [class.bi-circle]="redeemMode !== 'batch'"></i>
-                  </span>
-                  <strong>指定贖回</strong>
-                </span>
-                <span *ngIf="hasSelectableBatch">挑選此契約底下尚未開始被 Pay 的單筆或多筆申購／加碼。</span>
-                <span *ngIf="!hasSelectableBatch">此契約所有批次都已開始被 Pay 觸及，無法指定贖回。</span>
-              </span>
-            </button>
-          </div>
-        </section>
 
-        <!-- 升級四：兩層贖回 UI 第二層 — 批次清單（僅指定贖回顯示） -->
-        <section class="block" *ngIf="redeemMode === 'batch'">
-          <div class="block-header">
-            <h2 class="block-title">要贖回的批次</h2>
-            <button
-              mat-button
-              type="button"
-              class="batch-select-all"
-              (click)="toggleAllSelectableBatches()"
-              [disabled]="!hasSelectableBatch"
-            >
-              {{ allSelectableSelected ? '取消全選' : '全選可選批次' }}
-            </button>
-          </div>
-          <div class="batch-list">
+          <!-- 指定贖回模式：批次列表 -->
+          <p class="batch-table-hint" *ngIf="redeemMode === 'batch'">
+            <i class="bi bi-info-circle" aria-hidden="true"></i>
+            表示該批次已開始 Pay 回，無法指定贖回
+          </p>
+          <div class="batch-table" *ngIf="redeemMode === 'batch'">
+            <div class="batch-detail-head" *ngIf="redeemMode === 'batch'">
+              <button
+                type="button"
+                class="batch-head-check batch-head-check-btn"
+                [class.is-selected]="allSelectableSelected"
+                [disabled]="!hasSelectableBatch"
+                [attr.aria-label]="allSelectableSelected ? '取消全選' : '全選可選批次'"
+                (click)="toggleAllSelectableBatches()"
+              >
+                <i class="bi"
+                  [class.bi-check-square-fill]="allSelectableSelected"
+                  [class.bi-square]="!allSelectableSelected"
+                ></i>
+              </button>
+              <div class="batch-head-cell">批次日期</div>
+              <div class="batch-head-cell">申購金額</div>
+              <div class="batch-head-cell">申購單位數</div>
+              <div class="batch-head-cell">可贖回單位</div>
+              <div class="batch-head-cell">贖回參考金額</div>
+            </div>
+            <ng-container *ngIf="redeemMode === 'batch'">
             <button
               *ngFor="let batch of batches"
               type="button"
-              class="batch-card"
+              class="batch-row"
               [class.is-selected]="isBatchSelected(batch.batchId)"
               [class.is-disabled]="batch.isPayTouched"
               [disabled]="batch.isPayTouched"
               (click)="toggleBatch(batch)"
             >
-              <div class="batch-card-check">
+              <span class="batch-row-check">
                 <i class="bi"
+                  *ngIf="!batch.isPayTouched"
                   [class.bi-check-square-fill]="isBatchSelected(batch.batchId)"
                   [class.bi-square]="!isBatchSelected(batch.batchId)"
                 ></i>
-              </div>
-              <div class="batch-card-body">
-                <div class="batch-row batch-row--main">
-                  <span class="batch-date">{{ batch.batchDate }}</span>
-                  <span class="batch-amount">{{ formatMoney(batch.amount, selectedContract?.currencyCode) }}</span>
-                </div>
-                <div class="batch-row batch-row--sub">
-                  <span>申購單位 {{ formatUnits(batch.units) }}</span>
-                  <span *ngIf="!batch.isPayTouched">・剩餘可贖回 {{ formatUnits(batch.remainUnits) }}</span>
-                </div>
-                <div class="batch-disabled-reason" *ngIf="batch.isPayTouched">
-                  <i class="bi bi-info-circle"></i>
-                  此批次已開始被 Pay 觸及，無法單獨贖回
-                </div>
-              </div>
+                <i class="bi bi-info-circle batch-row-info" *ngIf="batch.isPayTouched" aria-label="此批次已被 Pay 觸及，無法單獨贖回"></i>
+              </span>
+              <span class="batch-row-cell batch-row-cell--date">
+                {{ batch.batchDate }}
+              </span>
+              <span class="batch-row-cell" data-label="申購金額">{{ formatNumber(batch.amount, selectedContract?.currencyCode) }}</span>
+              <span class="batch-row-cell" data-label="申購單位數">{{ formatUnits(batch.units) }}</span>
+              <span class="batch-row-cell" data-label="可贖回單位">{{ batch.isPayTouched ? '—' : formatUnits(batch.remainUnits) }}</span>
+              <span class="batch-row-cell" data-label="贖回參考金額">{{ batch.isPayTouched ? '—' : formatNumber(batchReferenceAmount(batch), selectedContract?.currencyCode) }}</span>
             </button>
-          </div>
-        </section>
+            </ng-container>
 
-        <section class="block" *ngIf="redeemMode">
-          <div class="block-header">
-            <h2 class="block-title">贖回試算</h2>
-          </div>
-          <div class="redeem-panel">
-            <div class="redeem-result">
-              <span class="redeem-result-label">參考金額</span>
-              <strong>{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong>
-              <small>最新淨值估算，非實際金額</small>
-            </div>
-            <div class="redeem-result redeem-rate">
-              <span class="redeem-result-label">參考報酬率</span>
-              <strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatSignedRate(redeemReferenceReturnRate) }}</strong>
-              <small>{{ redeemMode === 'batch' ? '已選批次估算' : '含已 Pay 估算' }}</small>
+            <!-- 動態合計列（已選批次的贖回參考金額合計，僅指定贖回模式且有勾選時顯示） -->
+            <div class="batch-row batch-row--total" *ngIf="redeemMode === 'batch' && hasSelectedBatch">
+              <span class="batch-row-check"></span>
+              <span class="batch-row-cell batch-row-cell--total-label">合計</span>
+              <span class="batch-row-cell"></span>
+              <span class="batch-row-cell"></span>
+              <span class="batch-row-cell" data-label="可贖回單位">{{ formatUnits(redeemUnits) }}</span>
+              <span class="batch-row-cell batch-row-cell--total-amount" data-label="贖回參考金額">{{ formatNumber(redeemReferenceAmount, selectedContract?.currencyCode) }}</span>
             </div>
           </div>
-          <div class="sum-table redeem-sum-table">
-            <div class="sum-row"><span>交易名稱</span><strong>{{ selectedContract?.name || '-' }}</strong></div>
-            <div class="sum-row"><span>交易幣別</span><strong>{{ selectedCurrency?.currency }}（{{ selectedContract?.currencyCode }}）</strong></div>
-            <div class="sum-row">
-              <span>可贖回單位數</span>
-              <strong>
-                {{ formatUnits(redeemUnits) }}
-                <button
-                  *ngIf="redeemOrderingUnits > 0"
-                  class="hint-icon redeem-inline-hint"
-                  type="button"
-                  aria-label="可贖回單位數說明"
-                  (click)="payModeHintOpen = !payModeHintOpen"
-                >
-                  <i class="bi bi-info-circle"></i>
-                </button>
-              </strong>
-            </div>
-            <div class="hint-panel" [class.is-open]="payModeHintOpen">
-              已扣除在途中之單位數 {{ formatUnits(redeemOrderingUnits) }}。
-            </div>
-            <div class="sum-row"><span>參考淨值</span><strong>{{ scenario?.fundCurrencyCode }} {{ formatNav(redeemNav) }}</strong></div>
-            <div class="sum-row"><span>參考淨值日期</span><strong>{{ redeemNavDate }}</strong></div>
-            <div class="sum-row"><span>參考匯率</span><strong>{{ redeemExchangeRate === 1 ? '-' : formatNav(redeemExchangeRate) }}</strong></div>
-            <div class="sum-row"><span>收款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
-          </div>
-        </section>
 
-        <section class="block" *ngIf="redeemMode">
-          <div class="block-header">
-            <h2 class="block-title">交易密碼</h2>
+          <div class="info-box redeem-adjust-note" *ngIf="showRedeemPayAdjustmentNotice">
+            <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
+            <span>
+              <strong>重要提醒</strong>本次贖回後，既有月 Pay 金額 {{ formatMoney(selectedContract?.monthlyPay || 0, selectedContract?.currencyCode) }}
+              估算年化提領率約 {{ formatRate(postRedeemAnnualRate) }}，高於 15% 上限。系統不會強制調整，建議完成贖回後至異動設定調整月 Pay 金額。
+            </span>
           </div>
-          <mat-form-field appearance="standard" color="accent" class="full-field">
-            <mat-label>請輸入交易密碼</mat-label>
-            <input matInput [type]="pwdVisible ? 'text' : 'password'" [(ngModel)]="pwd" [ngModelOptions]="{ standalone: true }" autocomplete="off">
-            <button mat-icon-button matSuffix type="button" (click)="pwdVisible = !pwdVisible" [attr.aria-label]="pwdVisible ? '隱藏密碼' : '顯示密碼'">
-              <i class="bi" [class.bi-eye]="!pwdVisible" [class.bi-eye-slash]="pwdVisible"></i>
-            </button>
-          </mat-form-field>
         </section>
 
         <div class="notes-block">
@@ -315,9 +166,9 @@
         <div class="block-header">
           <h2 class="block-title">{{ amountSectionTitle }}</h2>
         </div>
-        <!-- 多幣別・新申購：幣別選擇與金額同塊 -->
+        <!-- 多幣別：頂部幣別切換器（不論新申購/加碼都顯示；切換後依該幣別狀態自動判斷模式） -->
         <mat-button-toggle-group
-          *ngIf="isMultiCurrency && !isAddOnMode"
+          *ngIf="isMultiCurrency"
           class="mode-toggle mode-toggle-fill ccy-selector"
           [value]="selectedCurrency?.currencyCode"
           (change)="selectCurrency($event.value)"
@@ -326,8 +177,9 @@
           <mat-button-toggle
             *ngFor="let c of scenario?.availableCurrencies"
             [value]="c.currencyCode"
-          >{{ c.currency }}（{{ c.currencyCode }}）</mat-button-toggle>
+          >{{ c.currency }}</mat-button-toggle>
         </mat-button-toggle-group>
+
         <mat-form-field appearance="standard" color="accent" class="full-field">
           <mat-label>金額</mat-label>
           <input matInput type="text" inputmode="numeric" formControlName="amount" required>
@@ -341,7 +193,7 @@
       <!-- 加碼模式：Pay 設定維持既有，顯示說明 -->
       <div class="info-box" *ngIf="isAddOnMode">
         <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-        <span>加碼至既有交易時，Pay 設定維持原本不變。如需修改，請至持有查詢頁面使用異動設定功能。</span>
+        <span>本次為加碼，Pay 設定維持原本不變。</span>
       </div>
 
       <!-- 新申購模式：Pay 出設定 -->
@@ -579,32 +431,69 @@
         <div class="block-header">
           <h2 class="block-title">確認明細</h2>
         </div>
-        <div class="sum-table">
-          <div class="sum-row"><span>交易類型</span><strong>{{ transactionTypeLabel }}</strong></div>
-          <div class="sum-row" *ngIf="isAddOnMode && selectedContract">
-            <span>加碼至</span><strong>{{ selectedContract.name }}</strong>
-          </div>
-          <div class="sum-row" *ngIf="isModifyMode && selectedContract">
-            <span>異動交易</span><strong>{{ selectedContract.name }}</strong>
-          </div>
-          <div class="sum-row" *ngIf="!isModifyMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
-          <ng-container *ngIf="!isAddOnMode">
-            <div class="sum-row" *ngIf="payMode === 'amount'">
-              <span>每月 Pay 金額</span>
-              <strong class="hl">{{ formatMoney(monthlyPay) }}</strong>
+        <ng-container *ngIf="isRedeemMode; else purchaseConfirmSummary">
+          <!-- 確認頁：完整試算與資訊（最終送出前再次呈現） -->
+          <div class="redeem-panel">
+            <div class="redeem-result">
+              <span class="redeem-result-label">參考金額</span>
+              <strong>{{ formatNumber(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong>
+              <small>最新淨值估算，非實際金額</small>
             </div>
-            <div class="sum-row" *ngIf="payMode === 'ratio'">
-              <span>每月 Pay 比例</span>
-              <strong class="hl">年化 {{ form.controls.ratio.value }}%</strong>
+            <div class="redeem-result redeem-rate">
+              <span class="redeem-result-label">參考報酬率</span>
+              <strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatSignedRate(redeemReferenceReturnRate) }}</strong>
+              <small>{{ redeemMode === 'batch' ? '已選批次估算' : '含已 Pay 估算' }}</small>
             </div>
-            <div class="sum-row"><span>Pay 基準日</span><strong>每月 {{ form.controls.day.value }} 日</strong></div>
-            <div class="sum-row"><span>停 Pay 門檻</span><strong>{{ thresholdText }}</strong></div>
-          </ng-container>
-        </div>
-        <div class="info-box confirm-addon-note" *ngIf="isAddOnMode">
-          <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-          <span>加碼後 Pay 設定維持既有交易不變。</span>
-        </div>
+          </div>
+          <div class="sum-table redeem-sum-table">
+            <div class="sum-row"><span>基金</span><strong>{{ scenario?.fundName }}</strong></div>
+            <div class="sum-row"><span>交易幣別</span><strong>{{ selectedCurrency?.currency }}</strong></div>
+            <div class="sum-row">
+              <span>
+                可贖回單位數
+                <button
+                  *ngIf="redeemMode === 'all' && redeemOrderingUnits > 0"
+                  class="hint-icon redeem-inline-hint"
+                  type="button"
+                  aria-label="可贖回單位數說明"
+                  (click)="payModeHintOpen = !payModeHintOpen"
+                >
+                  <i class="bi bi-info-circle"></i>
+                </button>
+              </span>
+              <strong>{{ formatUnits(redeemUnits) }}</strong>
+            </div>
+            <div class="hint-panel" [class.is-open]="payModeHintOpen">
+              已扣除在途中之單位數 {{ formatUnits(redeemOrderingUnits) }}。
+            </div>
+            <div class="sum-row"><span>參考淨值</span><strong>{{ formatNav(redeemNav) }}</strong></div>
+            <div class="sum-row"><span>參考淨值日期</span><strong>{{ redeemNavDate }}</strong></div>
+            <div class="sum-row"><span>參考匯率</span><strong>{{ redeemExchangeRate === 1 ? '-' : formatNav(redeemExchangeRate) }}</strong></div>
+            <div class="sum-row"><span>收款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
+          </div>
+        </ng-container>
+        <ng-template #purchaseConfirmSummary>
+          <div class="sum-table">
+            <div class="sum-row"><span>交易類型</span><strong>{{ transactionTypeLabel }}</strong></div>
+            <div class="sum-row" *ngIf="!isModifyMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
+            <ng-container *ngIf="!isAddOnMode">
+              <div class="sum-row" *ngIf="payMode === 'amount'">
+                <span>每月 Pay 金額</span>
+                <strong class="hl">{{ formatMoney(monthlyPay) }}</strong>
+              </div>
+              <div class="sum-row" *ngIf="payMode === 'ratio'">
+                <span>每月 Pay 比例</span>
+                <strong class="hl">年化 {{ form.controls.ratio.value }}%</strong>
+              </div>
+              <div class="sum-row"><span>Pay 基準日</span><strong>每月 {{ form.controls.day.value }} 日</strong></div>
+              <div class="sum-row"><span>觸發門檻</span><strong>{{ thresholdText }}</strong></div>
+            </ng-container>
+          </div>
+          <div class="info-box confirm-addon-note" *ngIf="isAddOnMode">
+            <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+            <span>加碼後 Pay 設定維持既有交易不變。</span>
+          </div>
+        </ng-template>
       </section>
 
       <section class="block">
@@ -694,8 +583,8 @@
           <div class="sum-row"><span>委託時間</span><strong>2026/05/12 14:30</strong></div>
           <div class="sum-row"><span>基金</span><strong><span class="fund-code">{{ scenario?.fundId }}</span>{{ scenario?.fundName }}</strong></div>
           <div class="sum-row"><span>交易類型</span><strong>{{ transactionTypeLabel }}</strong></div>
-          <div class="sum-row" *ngIf="isModifyMode && selectedContract"><span>異動交易</span><strong>{{ selectedContract.name }}</strong></div>
-          <div class="sum-row" *ngIf="isRedeemMode && selectedContract"><span>贖回交易</span><strong>{{ selectedContract.name }}</strong></div>
+          <div class="sum-row" *ngIf="isModifyMode && selectedContract"><span>異動契約</span><strong>{{ currencyName(selectedContract.currencyCode) }}契約</strong></div>
+          <div class="sum-row" *ngIf="isRedeemMode && selectedContract"><span>贖回契約</span><strong>{{ currencyName(selectedContract.currencyCode) }}契約</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode"><span>贖回單位數</span><strong>{{ formatUnits(redeemUnits) }}</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode"><span>參考金額</span><strong class="hl">{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode"><span>參考報酬率</span><strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatSignedRate(redeemReferenceReturnRate) }}</strong></div>
@@ -727,7 +616,7 @@
 
 <div class="action-bar" *ngIf="activeStep !== 'done'">
   <div class="action-inner">
-    <button mat-stroked-button type="button" [disabled]="activeStep === 'ccy' || (activeStep === 'settings' && !shouldShowSccy && !isRedeemMode)" (click)="previous()">上一步</button>
+    <button mat-stroked-button type="button" (click)="previous()">上一步</button>
     <button mat-raised-button color="primary" type="button" [disabled]="actionDisabled" (click)="next()">
       {{ primaryActionLabel }}
       <i class="bi" [class.bi-check-lg]="primaryActionIsSubmit" [class.bi-arrow-right]="!primaryActionIsSubmit"></i>

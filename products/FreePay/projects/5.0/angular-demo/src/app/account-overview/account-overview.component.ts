@@ -3,7 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
   OV_FUNDS, MOCK_ALT_ORDERS, MOCK_CHG_ORDERS, MOCK_RDM_ORDERS, MOCK_PROFITS,
-  OvSummary, AltOrder, ProfitRecord, DetailTxRecord, DetailChgRecord, DETAIL_TX_DETAIL, DETAIL_TX_CHANGE
+  OvSummary, OvFund, OvContract, AltOrder, ProfitRecord, DetailTxRecord, DetailChgRecord, DETAIL_TX_DETAIL, DETAIL_TX_CHANGE
 } from '../mock-data/overview';
 
 type OvTab = 'overview' | 'order' | 'profit';
@@ -90,33 +90,19 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   profitCustomStart: Date | null = null;
   profitCustomEnd: Date | null = null;
 
-  expandedFunds = new Set<string>();
   expandedProfitRows = new Set<string>();
+  expandedFundRows = new Set<string>();
   selectedOrders = new Set<string>();
   cancelPwd = '';
   cancelPwdVisible = false;
-  openActionFpNo: string | null = null;
+  openInfoPopoverId: string | null = null;
 
   detailFpNo: string | null = null;
-  detailAlias = '';
-  detailIsEditingTitle = false;
-  detailTitleDraft = '';
   detailTxType: DetailTxType = 'all';
   detailChgType: DetailChgType = 'all';
   detailTimeType: DetailTimeType = 'ALL';
   detailCustomStart: Date | null = null;
   detailCustomEnd: Date | null = null;
-  private aliasOverrides = new Map<string, string>();
-
-  // ── Fund expand/collapse ──
-
-  toggleFund(id: string): void {
-    this.expandedFunds.has(id) ? this.expandedFunds.delete(id) : this.expandedFunds.add(id);
-  }
-
-  isFundExpanded(id: string): boolean {
-    return this.expandedFunds.has(id);
-  }
 
   // ── Order filters ──
 
@@ -223,6 +209,32 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     return val > 0 ? 'val-up' : val < 0 ? 'val-down' : '';
   }
 
+  isFundExpanded(id: string): boolean {
+    return this.expandedFundRows.has(id);
+  }
+
+  toggleFund(id: string): void {
+    this.expandedFundRows.has(id) ? this.expandedFundRows.delete(id) : this.expandedFundRows.add(id);
+  }
+
+  returnWithPay(item: Pick<OvFund, 'cost' | 'profit' | 'paid'>): number {
+    return item.cost ? ((item.profit + item.paid) / item.cost) * 100 : 0;
+  }
+
+  returnWithoutPay(item: Pick<OvFund, 'ret'>): number {
+    return item.ret;
+  }
+
+  payMethodText(contract: OvContract): string {
+    const [method, value] = contract.setting.split('・');
+    return method === '依比例' && value ? `${method} ${value}` : method || contract.setting;
+  }
+
+  payDayText(contract: OvContract): string {
+    const day = contract.setting.split('・').find(part => part.endsWith('日'));
+    return day ?? '-';
+  }
+
   fmtN(n: number): string { return Number(n || 0).toLocaleString('en-US'); }
 
   fmtSigned(n: number): string {
@@ -261,32 +273,29 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     alert(`${action}（${fpNo}）Demo 示意`);
   }
 
-  toggleActionMenu(event: MouseEvent, fpNo: string): void {
-    event.stopPropagation();
-    this.openActionFpNo = this.openActionFpNo === fpNo ? null : fpNo;
-  }
-
-  isActionMenuOpen(fpNo: string): boolean {
-    return this.openActionFpNo === fpNo;
-  }
-
-  onPopoverAction(action: string, fpNo: string): void {
-    this.openActionFpNo = null;
-    this.onAction(action, fpNo);
-  }
-
   @HostListener('document:click')
-  closeActionMenu(): void {
-    this.openActionFpNo = null;
+  closeFloatingPanels(): void {
+    this.openInfoPopoverId = null;
+  }
+
+  @HostListener('document:keydown.escape')
+  closeFloatingPanelsByEsc(): void {
+    this.openInfoPopoverId = null;
+  }
+
+  toggleInfoPopover(event: MouseEvent, id: string): void {
+    event.stopPropagation();
+    this.openInfoPopoverId = this.openInfoPopoverId === id ? null : id;
+  }
+
+  isInfoPopoverOpen(id: string): boolean {
+    return this.openInfoPopoverId === id;
   }
 
   // ── Detail modal ──
 
-  openDetail(fpNo: string, alias: string): void {
+  openDetail(fpNo: string): void {
     this.detailFpNo = fpNo;
-    this.detailAlias = this.aliasOverrides.get(fpNo) ?? alias;
-    this.detailIsEditingTitle = false;
-    this.detailTitleDraft = '';
     this.detailTxType = 'all';
     this.detailChgType = 'all';
     this.detailTimeType = 'ALL';
@@ -298,20 +307,19 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     this.detailFpNo = null;
   }
 
-  startEditTitle(): void {
-    this.detailTitleDraft = this.detailAlias;
-    this.detailIsEditingTitle = true;
+  get detailFund() {
+    if (!this.detailFpNo) return null;
+    return this.funds.find(f => f.contracts.some(c => c.fpNo === this.detailFpNo)) ?? null;
   }
 
-  saveTitle(): void {
-    const trimmed = this.detailTitleDraft.trim().slice(0, 12);
-    this.detailAlias = trimmed;
-    if (this.detailFpNo) this.aliasOverrides.set(this.detailFpNo, trimmed);
-    this.detailIsEditingTitle = false;
+  get detailPanelTitle(): string {
+    return this.detailFund?.name ?? '交易明細';
   }
 
-  cancelEditTitle(): void {
-    this.detailIsEditingTitle = false;
+  get detailPanelMeta(): string {
+    const fund = this.detailFund;
+    if (!fund) return this.detailFpNo ? `契約號 ${this.detailFpNo}` : '';
+    return `${fund.code}・${fund.txCcy}`;
   }
 
   get detailTxRecords(): DetailTxRecord[] {
@@ -365,7 +373,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
 
   chgTypeText(t: string): string {
     const map: Record<string, string> = {
-      TAP: 'Pay方式', AL: 'Pay金額', P: 'Pay比例', D: '扣款日期', DL: '停Pay門檻'
+      TAP: 'Pay方式', AL: 'Pay金額', P: 'Pay比例', D: '扣款日期', DL: '觸發門檻'
     };
     return map[t] ?? t;
   }

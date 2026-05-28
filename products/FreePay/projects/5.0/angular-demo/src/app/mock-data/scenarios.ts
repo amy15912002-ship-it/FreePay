@@ -10,7 +10,6 @@ export interface CurrencyOption {
 
 export interface Contract {
   fpNo: string;
-  name: string;
   currencyCode: string;
   startDate: string;
   monthlyPay: number;
@@ -50,10 +49,9 @@ export interface DemoScenarioLink {
   contractFpNo?: string;
 }
 
+// 5.0 起：移除多契約規格，加碼／新申購由系統依「該幣別是否有既有契約」自動判斷
+// 情境精簡為「單幣別」與「多幣別」兩種
 export const DEMO_SCENARIOS: DemoScenarioLink[] = [
-  { id: 1, label: '單幣別・無既有', mode: 'new', fundId: 'TA112233' },
-  { id: 2, label: '單幣別・有既有', mode: 'new', fundId: 'TA123456' },
-  { id: 3, label: '多幣別・無既有', mode: 'new', fundId: 'TA445566' },
-  { id: 4, label: '多幣別・單幣有既有', mode: 'new', fundId: 'TA778899' },
-  { id: 5, label: '多幣別・雙幣有既有', mode: 'new', fundId: 'TA654321' },
+  { id: 1, label: '單幣別', mode: 'new', fundId: 'TA112233' },
+  { id: 2, label: '多幣別', mode: 'new', fundId: 'TA445566' },
 ];

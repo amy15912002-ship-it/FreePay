@@ -57,15 +57,15 @@
             (click)="toggleBrandFilter(b)"
           >{{ b }}</mat-chip>
         </mat-chip-list>
-        <div class="fs-brand-search-row" *ngIf="brandSearchOpen">
-          <input class="fs-brand-keyword" [(ngModel)]="brandKeyword" placeholder="輸入品牌關鍵字快速搜尋" autocomplete="off">
+        <div class="fs-brand-search-row" *ngIf="isFilterExpanded('brand')">
+          <button class="fs-brand-search-toggle" type="button" (click)="toggleBrandSearch()">
+            <i class="bi bi-search"></i>
+            搜尋品牌
+          </button>
+          <input *ngIf="brandSearchOpen" class="fs-brand-keyword" [(ngModel)]="brandKeyword" placeholder="輸入品牌關鍵字快速搜尋" autocomplete="off">
         </div>
       </div>
       <div class="fs-filter-actions">
-        <button class="fs-brand-search-toggle" type="button" (click)="brandSearchOpen = !brandSearchOpen">
-          <i class="bi bi-search"></i>
-          搜尋品牌
-        </button>
         <button class="fs-filter-more" type="button" *ngIf="hasHiddenOptions('brand') || isFilterExpanded('brand')" (click)="toggleFilterExpanded('brand')">
           {{ isFilterExpanded('brand') ? '收合' : '更多' }}
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('brand')" [class.bi-chevron-down]="!isFilterExpanded('brand')"></i>

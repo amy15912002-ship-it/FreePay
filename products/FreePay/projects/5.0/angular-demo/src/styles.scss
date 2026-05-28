@@ -126,6 +126,7 @@ $freepay-theme: mat.define-light-theme((
 @include mat.form-field-theme($freepay-theme);
 @include mat.input-theme($freepay-theme);
 @include mat.menu-theme($freepay-theme);
+@include mat.radio-theme($freepay-theme);
 @include mat.slide-toggle-theme($freepay-theme);
 @include mat.slider-theme($freepay-theme);
 @include mat.stepper-theme($freepay-theme);

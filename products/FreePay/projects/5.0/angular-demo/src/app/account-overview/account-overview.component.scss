@@ -159,6 +159,11 @@
       background: var(--color-brand-primary-400);
     }
   }
+
+  .ov-sum-tile--cost { order: 1; }
+  .ov-sum-tile--profit { order: 2; }
+  .ov-sum-tile--pay { order: 3; }
+  .ov-sum-tile--paid { order: 4; }
 }
 
 .ov-sum-ccy-row {
@@ -191,7 +196,7 @@
   color: var(--color-text-primary);
 }
 
-.ov-sum-change {
+.ov-sum-return-mobile {
   display: flex;
   justify-content: space-between;
   align-items: baseline;
@@ -199,6 +204,11 @@
   color: var(--color-text-secondary);
   padding-bottom: 4px;
   border-bottom: 1px solid var(--color-border-default);
+
+  strong {
+    font-size: 22px;
+    font-weight: 500;
+  }
 }
 
 .ccy-accent--primary {
@@ -222,8 +232,15 @@
   strong {
     font-size: 16px;
     font-weight: 500;
-    color: var(--color-text-primary);
   }
+}
+
+.ov-sum-tile--pay {
+  background: var(--color-brand-primary-50);
+}
+
+.ov-sum-tile--return {
+  display: none;
 }
 
 .ov-sum-tile-lbl {
@@ -246,7 +263,7 @@
 
   .ov-sum-card {
     display: grid;
-    grid-template-columns: minmax(260px, 1.7fr) minmax(180px, 1fr) repeat(3, minmax(150px, 1fr));
+    grid-template-columns: minmax(240px, 1.8fr) repeat(5, minmax(110px, 1fr));
     gap: 12px;
     align-items: center;
     width: 100%;
@@ -266,22 +283,16 @@
 
   .ov-sum-market { font-size: 28px; }
 
+  .ov-sum-return-mobile {
+    display: none;
+  }
+
   .ov-sum-card > .ov-sum-tiles {
     display: contents;
   }
 
-  .ov-sum-card > .ov-sum-change {
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    gap: 4px;
-    padding: 10px 12px;
-    border-bottom: none;
-    background: var(--color-bg-muted);
-    border-radius: 8px;
-
-    > span:first-child { font-size: 14px; }
-    > span:last-child  { font-size: 16px; font-weight: 500; }
+  .ov-sum-tile--return {
+    display: flex;
   }
 }
 
@@ -337,7 +348,7 @@
 
 .ov-detail-head {
   display: grid;
-  grid-template-columns: 280px 1fr 100px;
+  grid-template-columns: 280px 1fr 172px;
   gap: 20px;
   padding: 12px 0;
   background: var(--color-bg-muted);
@@ -374,9 +385,95 @@
   color: var(--color-text-secondary);
 }
 
+.ov-head-label--info,
+.ov-kv-lbl--info {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+}
+
+.ov-trigger-info {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  flex: 0 0 auto;
+}
+
+.ov-info-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-brand-tertiary-500);
+  font-size: 14px;
+  line-height: 1;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-brand-tertiary-600);
+    outline: none;
+  }
+}
+
+.ov-info-popover {
+  position: absolute;
+  left: 50%;
+  bottom: calc(100% + 8px);
+  z-index: 20;
+  width: 300px;
+  padding: 10px 12px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-neutral-0);
+  box-shadow: var(--shadow-md);
+  color: var(--color-text-primary);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.5;
+  text-align: left;
+  white-space: normal;
+  opacity: 0;
+  pointer-events: none;
+  transform: translate(-50%, 4px);
+  transition: opacity .12s, transform .12s;
+
+  &::after {
+    content: '';
+    position: absolute;
+    left: 50%;
+    top: 100%;
+    width: 8px;
+    height: 8px;
+    border-right: 1px solid var(--color-border-default);
+    border-bottom: 1px solid var(--color-border-default);
+    background: var(--color-neutral-0);
+    transform: translate(-50%, -4px) rotate(45deg);
+  }
+}
+
+.ov-trigger-info:hover .ov-info-popover,
+.ov-trigger-info:focus-within .ov-info-popover,
+.ov-info-popover.is-open {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+
 .ov-metric,
 .ov-ct-metric {
   font-size: 16px;
+
+  > .ov-kv > span,
+  > span {
+    white-space: nowrap;
+  }
 }
 
 .ov-line {
@@ -393,18 +490,110 @@
   border-bottom: 1px solid var(--color-border-default);
 }
 
+.ov-fund:nth-of-type(even) .ov-fund-main {
+  background: var(--color-bg-subtle);
+}
+
 .ov-fund-main {
   display: grid;
-  grid-template-columns: 280px 1fr 100px;
+  grid-template-columns: 280px 1fr 172px;
   gap: 20px;
   padding: 24px 0;
   align-items: center;
   cursor: pointer;
-  transition: background .12s;
+}
 
-  &:hover {
-    background: var(--color-bg-subtle);
+.ov-fund-main > .ov-fund-name {
+  grid-column: 1;
+}
+
+.ov-fund-main > .ov-metric-grid {
+  grid-column: 2;
+}
+
+.ov-fund-main > .ov-fund-actions {
+  grid-column: 3;
+  grid-row: 1;
+  justify-self: center;
+}
+
+.ov-mobile-pay-summary {
+  display: none;
+}
+
+.ov-fund-expand-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-primary);
+  font-size: 18px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-text-primary);
+    background: transparent;
+    outline: none;
   }
+}
+
+.ov-fund-expand-btn--mobile {
+  display: none;
+}
+
+.ov-fund-extra {
+  display: grid;
+  grid-template-columns: 280px 1fr 172px;
+  align-items: center;
+  gap: 20px;
+  padding: 18px 0;
+  background: var(--color-bg-muted);
+  border-bottom: 1px solid var(--color-border-default);
+  color: var(--color-text-secondary);
+}
+
+.ov-fund-extra-content {
+  grid-column: 2;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 26px;
+}
+
+.ov-fund-extra-content > .ov-extra-kv--ccy {
+  display: none;
+}
+
+.ov-extra-kv {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding-right: 24px;
+  border-right: 1px solid var(--color-border-default);
+  font-size: 14px;
+  white-space: nowrap;
+
+  &:last-child {
+    padding-right: 0;
+    border-right: 0;
+  }
+
+  strong {
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 500;
+  }
+}
+
+.ov-extra-kv--info > span:first-child {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .ov-fund-toggle {
@@ -494,46 +683,24 @@
 .ov-ct-alias { color: var(--color-text-primary); }
 .ov-ct-fpno  { color: var(--color-text-secondary); font-size: 14px; display: flex; align-items: center; gap: 6px; }
 
-.ov-ct-actions {
+.ov-ct-actions,
+.ov-fund-actions {
   position: relative;
   display: flex;
   align-items: center;
-  justify-content: center;
+  justify-content: flex-end;
   gap: 8px;
+  padding-right: 12px;
 }
 
-.ct-action-popover {
-  position: absolute;
-  top: calc(100% + 8px);
-  right: 8px;
-  z-index: 20;
-  min-width: 96px;
-  padding: 4px;
-  border: 1px solid var(--color-border-default);
-  border-radius: 8px;
-  background: var(--color-bg-base);
-  box-shadow: var(--shadow-md);
+.ov-fund-code-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
 }
 
-.ct-action-item {
-  display: block;
-  width: 100%;
-  min-height: 36px;
-  padding: 0 12px;
-  border: 0;
-  border-radius: 6px;
-  background: transparent;
-  color: var(--color-text-primary);
-  font-family: var(--font-primary);
-  font-size: 14px;
-  text-align: left;
-  cursor: pointer;
-}
-
-.ct-action-item:hover,
-.ct-action-item:focus-visible {
-  background: var(--color-bg-muted);
-  outline: none;
+.ov-fund-detail-btn {
+  flex-shrink: 0;
 }
 
 // ── Filter bar ──────────────────────────────────────────
@@ -583,7 +750,7 @@
 .ov-order-date,
 .ov-order-date-mobile {
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 14px;
 }
 .ov-order-effect-date .ov-order-effect-value,
 .ov-order-effect-mobile {
@@ -634,6 +801,21 @@
   th.col-date,   td.col-date   { white-space: nowrap; }
   th.col-currency, td.col-currency { width: 90px; }
   th.col-result, td.col-result { width: 90px; }
+
+  th:nth-child(n + 4):nth-child(-n + 6),
+  td[data-label="Pay設定 / 已Pay金額"],
+  td[data-label="原始投入 / 贖回金額"],
+  td[data-label="已實現損益 / 含Pay報酬率"] {
+    padding-left: 0;
+    padding-right: 0;
+  }
+
+  th:nth-child(n + 4):nth-child(-n + 6) .ov-metric-head,
+  td[data-label="Pay設定 / 已Pay金額"] .ov-metric,
+  td[data-label="原始投入 / 贖回金額"] .ov-metric,
+  td[data-label="已實現損益 / 含Pay報酬率"] .ov-metric {
+    width: 100%;
+  }
 }
 
 .ov-profit-list {
@@ -701,17 +883,24 @@
 
 .detail-panel-title {
   display: flex;
-  align-items: center;
-  gap: 8px;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4px;
+  min-width: 0;
+  padding-right: 16px;
 }
 
 .detail-title-text {
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
   font-size: 18px;
   font-weight: 500;
   color: var(--color-text-primary);
 }
 
-.detail-title-fpno {
+.detail-title-meta {
   font-size: 14px;
   color: var(--color-text-secondary);
 }
@@ -831,8 +1020,9 @@
 // ── RWD ─────────────────────────────────────────────────────
 
 @media (max-width: 1024px) {
-  .ov-detail-head { grid-template-columns: 200px 1fr 100px; }
-  .ov-fund-main   { grid-template-columns: 200px 1fr 100px; }
+  .ov-detail-head { grid-template-columns: 200px 1fr 172px; }
+  .ov-fund-main   { grid-template-columns: 200px 1fr 172px; }
+  .ov-fund-extra  { grid-template-columns: 200px 1fr 172px; }
 
   .ov-ct-head,
   .ov-ct-row {
@@ -862,33 +1052,75 @@
   }
 
   // ── 基金列：名稱 + toggle 同行，指標 2×2 往下 ────────────────
+  .ov-fund-table {
+    gap: 24px;
+  }
+
+  .ov-fund {
+    position: relative;
+    border-bottom: 0;
+    border-radius: 12px;
+    background: var(--color-bg-subtle);
+    overflow: hidden;
+  }
+
+  .ov-fund:nth-of-type(even) .ov-fund-main {
+    background: transparent;
+  }
+
   .ov-fund-main {
     grid-template-columns: 1fr auto;
-    grid-template-rows: auto auto;
+    grid-template-rows: auto auto auto;
     grid-template-areas:
-      "fname ftoggle"
-      "fmetrics fmetrics";
-    padding: 0;
-    gap: 0 8px;
-    background: var(--color-bg-muted);
+      "fname fname"
+      "fmetrics fmetrics"
+      "mpay factions";
+    position: relative;
+    padding: 14px 14px 16px;
+    gap: 12px 8px;
+    background: var(--color-bg-subtle);
   }
 
-  .ov-fund-name {
+  .ov-fund-main > .ov-fund-name {
     grid-area: fname;
-    padding: 16px 0 16px 12px;
+    padding: 0;
+
+    strong {
+      font-size: 16px;
+      font-weight: 500;
+      line-height: 1.35;
+    }
   }
 
-  .ov-fund-toggle {
-    grid-area: ftoggle;
-    padding: 16px 12px 16px 0;
-    align-self: center;
+  .ov-fund-main > .ov-metric-grid {
+    grid-area: fmetrics;
+  }
+
+  .ov-fund-main > .ov-fund-actions {
+    grid-area: factions;
+  }
+
+  .ov-fund-expand-btn--desktop {
+    display: none;
+  }
+
+  .ov-fund-expand-btn--mobile {
+    display: inline-flex;
+    margin-left: auto;
+  }
+
+  .ov-fund-expand-btn {
+    position: static;
+    width: 28px;
+    height: 28px;
+    font-size: 16px;
   }
 
   .ov-metric-grid {
     grid-area: fmetrics;
-    grid-template-columns: 1fr;
-    background: var(--color-bg-base);
-    border-top: 1px solid var(--color-border-default);
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    background: transparent;
+    border-top: 0;
     padding: 0;
   }
 
@@ -901,19 +1133,150 @@
   .ov-metric:last-child > .ov-kv:last-child { border-bottom: none; }
 
   .ov-metric-grid--2col {
-    grid-template-columns: repeat(2, 1fr);
-    row-gap: 16px;
-    padding: 12px;
+    grid-template-columns: repeat(3, 1fr);
+    row-gap: 18px;
+    padding: 2px 0 0;
 
     .ov-kv {
       flex-direction: column;
-      align-items: flex-start;
+      align-items: center;
       padding: 0;
       border-bottom: none;
+      border-left: 1px solid var(--color-border-default);
       width: auto;
+      text-align: center;
 
-      > span:last-child { text-align: left; }
+      > span:last-child {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+      }
     }
+
+    .ov-kv--market,
+    .ov-kv--cost {
+      border-left: 0;
+    }
+
+    .ov-kv--ccy,
+    .ov-kv--monthly,
+    > .ov-metric:first-child > .ov-line {
+      display: none;
+    }
+
+    .ov-kv--market { order: 1; }
+    .ov-kv--profit { order: 2; }
+    .ov-kv--return-with { order: 3; }
+    .ov-kv--cost { order: 4; }
+    .ov-kv--paid { order: 5; }
+    .ov-kv--return-no-pay { order: 6; }
+  }
+
+  .ov-mobile-pay-summary {
+    grid-area: mpay;
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+
+    strong {
+      color: var(--color-text-primary);
+      font-size: 16px;
+      font-weight: 500;
+    }
+  }
+
+  .ov-fund-actions {
+    grid-area: factions;
+    justify-self: end;
+    justify-content: flex-end;
+  }
+
+  .ov-fund-extra {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 0 14px 16px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--color-bg-base);
+  }
+
+  .ov-fund-extra-content {
+    grid-column: auto;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    width: 100%;
+  }
+
+  .ov-fund-extra-content > .ov-extra-kv--ccy {
+    display: flex;
+  }
+
+  .ov-fund-extra-content > .ov-extra-kv {
+    grid-column: auto;
+    grid-row: auto;
+  }
+
+  .ov-fund-extra-content > .ov-extra-kv:nth-of-type(3),
+  .ov-fund-extra-content > .ov-extra-kv:nth-of-type(4) {
+    justify-self: stretch;
+  }
+
+  .ov-extra-kv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 52px;
+    padding: 10px 0;
+    border-right: 0;
+    border-bottom: 1px solid var(--color-border-default);
+
+    &:last-child {
+      border-bottom: 0;
+    }
+  }
+
+  .ov-extra-kv--info {
+    flex-wrap: nowrap;
+  }
+
+  .ov-extra-kv--info .ov-trigger-info {
+    position: relative;
+  }
+
+  .ov-extra-kv--info .ov-info-popover {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    bottom: auto;
+    z-index: 100;
+    width: min(300px, calc(100vw - 48px));
+    padding: 14px 16px;
+    border: 1px solid var(--color-border-default);
+    border-radius: 8px;
+    background: var(--color-neutral-0);
+    box-shadow: var(--shadow-lg);
+    color: var(--color-text-primary);
+    font-size: 14px;
+    opacity: 0;
+    transform: translate(-50%, calc(-50% + 4px));
+    pointer-events: none;
+
+    &::after {
+      display: none;
+    }
+  }
+
+  .ov-extra-kv--info .ov-trigger-info:hover .ov-info-popover,
+  .ov-extra-kv--info .ov-trigger-info:focus-within .ov-info-popover,
+  .ov-extra-kv--info .ov-info-popover.is-open {
+    opacity: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: auto;
   }
 
   // ── 合約列：名稱 + 操作按鈕同行，指標往下 ────────────────────
@@ -987,6 +1350,52 @@
     font-size: 14px;
     flex-shrink: 0;
     padding-right: 8px;
+  }
+
+  .ov-kv-lbl--info {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .ov-kv-lbl--info .ov-info-popover {
+    left: 0;
+    width: min(280px, calc(100vw - 56px));
+    transform: translate(-12px, 4px);
+
+    &::after {
+      left: 20px;
+    }
+  }
+
+  .ov-kv-lbl--info .ov-trigger-info:hover .ov-info-popover,
+  .ov-kv-lbl--info .ov-trigger-info:focus-within .ov-info-popover,
+  .ov-kv-lbl--info .ov-info-popover.is-open {
+    transform: translate(-12px, 0);
+  }
+
+  .ov-metric-grid--2col {
+    .ov-kv {
+      flex-direction: column;
+      justify-content: flex-start;
+      align-items: center;
+      padding: 0;
+      border-bottom: none;
+      border-left: 1px solid var(--color-border-default);
+      text-align: center;
+
+      > span:last-child {
+        text-align: center;
+        font-size: 16px;
+        font-weight: 500;
+      }
+    }
+
+    .ov-kv--market,
+    .ov-kv--cost {
+      border-left: 0;
+    }
   }
 
   // ── 真正 table 的手機卡片版型：委託查詢 / 已實現損益 ────────
@@ -1102,6 +1511,10 @@
         font-size: 14px;
       }
     }
+  }
+
+  .ov-profit-table td {
+    border-bottom: none;
   }
 
   .ov-profit-mobile-tools {

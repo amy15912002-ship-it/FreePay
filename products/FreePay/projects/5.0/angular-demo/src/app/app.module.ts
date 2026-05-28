@@ -11,6 +11,7 @@ import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
+import { MatRadioModule } from '@angular/material/radio';
 import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatStepperModule } from '@angular/material/stepper';
@@ -44,6 +45,7 @@ import { FundSelectComponent } from './fund-select/fund-select.component';
     MatInputModule,
     MatMenuModule,
     MatNativeDateModule,
+    MatRadioModule,
     MatSliderModule,
     MatSlideToggleModule,
     MatStepperModule,

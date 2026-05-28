@@ -142,7 +142,7 @@ export class FundSelectComponent {
   }
 
   get visibleBrands(): string[] {
-    return this.visibleOptions(this.filteredBrands, this.brandFilters, this.expandedFilters.brand || this.brandKeyword.trim() !== '', 10);
+    return this.visibleOptions(this.filteredBrands, this.brandFilters, this.expandedFilters.brand, 10);
   }
 
   get emptyStateMessage(): string {
@@ -251,6 +251,15 @@ export class FundSelectComponent {
 
   toggleFilterExpanded(group: CollapsibleFilter): void {
     this.expandedFilters[group] = !this.expandedFilters[group];
+    if (group === 'brand' && !this.expandedFilters[group]) {
+      this.brandSearchOpen = false;
+      this.brandKeyword = '';
+    }
+  }
+
+  toggleBrandSearch(): void {
+    this.brandSearchOpen = !this.brandSearchOpen;
+    if (!this.brandSearchOpen) this.brandKeyword = '';
   }
 
   isFilterExpanded(group: CollapsibleFilter): boolean {

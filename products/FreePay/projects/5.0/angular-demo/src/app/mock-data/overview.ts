@@ -7,7 +7,7 @@ export interface OvSummary {
 }
 
 export interface OvContract {
-  fpNo: string; alias: string; ccy: string;
+  fpNo: string; ccy: string;
   setting: string; threshold: string;
   pay: number; paid: number; market: number; cost: number; profit: number; ret: number;
 }
@@ -42,7 +42,7 @@ export interface RdmOrder {
 }
 
 export interface ProfitRecord {
-  id: string; fund: string; code: string; fpNo: string; alias: string;
+  id: string; fund: string; code: string; fpNo: string;
   ccy: string; redeemDate: string; totalPaid: number;
   paySetting: string; threshold: string;
   cost: number; redeemAmount: number; profit: number; returnRate: number; status: string;
@@ -85,7 +85,6 @@ function toOvContract(c: HoldingContract): OvContract {
   const profit = c.marketValue - c.costBasis;
   return {
     fpNo: c.fpNo,
-    alias: c.alias,
     ccy: CCY_NAME[c.currencyCode] ?? c.currencyCode,
     setting: contractSetting(c),
     threshold: contractThreshold(c),
@@ -145,11 +144,11 @@ export const MOCK_RDM_ORDERS: RdmOrder[] = [
 ];
 
 export const MOCK_PROFITS: ProfitRecord[] = [
-  { id: 'hp-001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024001', alias: '20240315',   ccy: 'TWD', redeemDate: '2026/04/18', totalPaid: 12000, paySetting: '依金額・15日',    threshold: '市值守護・跌20%',  cost: 300000, redeemAmount: 318000, profit:  30000, returnRate:  10.00, status: '已完成' },
-  { id: 'hp-002', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024002', alias: '20240315',   ccy: 'USD', redeemDate: '2026/03/22', totalPaid:   240, paySetting: '依金額・15日',    threshold: '增值啟動・漲30%', cost:   8000, redeemAmount:   8420, profit:    660, returnRate:   8.25, status: '已完成' },
-  { id: 'hp-003', fund: '統一大滿貫台灣平衡基金',       code: 'TA123456', fpNo: 'FP2025002', alias: '20250101',   ccy: 'TWD', redeemDate: '2026/02/10', totalPaid: 18000, paySetting: '依比例・6%・5日', threshold: '不設門檻',         cost: 150000, redeemAmount: 162000, profit:  30000, returnRate:  20.00, status: '已完成' },
-  { id: 'hp-004', fund: '施羅德環球收益基金 A',         code: 'TU778899', fpNo: 'FP2025001', alias: '20250318',   ccy: 'USD', redeemDate: '2025/12/19', totalPaid:   150, paySetting: '依金額・10日',    threshold: '不設門檻',         cost:   5000, redeemAmount:   4860, profit:     10, returnRate:   0.20, status: '已完成' },
-  { id: 'hp-005', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2023008', alias: '20231201',   ccy: 'TWD', redeemDate: '2025/10/06', totalPaid:  6000, paySetting: '依金額・20日',    threshold: '不設門檻',         cost: 200000, redeemAmount: 188000, profit:  -6000, returnRate:  -3.00, status: '已完成' },
+  { id: 'hp-001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024001', ccy: 'TWD', redeemDate: '2026/04/18', totalPaid: 12000, paySetting: '依金額・15日',    threshold: '市值守護・跌20%',  cost: 300000, redeemAmount: 318000, profit:  30000, returnRate:  10.00, status: '已完成' },
+  { id: 'hp-002', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024002', ccy: 'USD', redeemDate: '2026/03/22', totalPaid:   240, paySetting: '依金額・15日',    threshold: '增值啟動・漲30%', cost:   8000, redeemAmount:   8420, profit:    660, returnRate:   8.25, status: '已完成' },
+  { id: 'hp-003', fund: '統一大滿貫台灣平衡基金',       code: 'TA123456', fpNo: 'FP2025002', ccy: 'TWD', redeemDate: '2026/02/10', totalPaid: 18000, paySetting: '依比例・6%・5日', threshold: '不設門檻',         cost: 150000, redeemAmount: 162000, profit:  30000, returnRate:  20.00, status: '已完成' },
+  { id: 'hp-004', fund: '施羅德環球收益基金 A',         code: 'TU778899', fpNo: 'FP2025001', ccy: 'USD', redeemDate: '2025/12/19', totalPaid:   150, paySetting: '依金額・10日',    threshold: '不設門檻',         cost:   5000, redeemAmount:   4860, profit:     10, returnRate:   0.20, status: '已完成' },
+  { id: 'hp-005', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2023008', ccy: 'TWD', redeemDate: '2025/10/06', totalPaid:  6000, paySetting: '依金額・20日',    threshold: '不設門檻',         cost: 200000, redeemAmount: 188000, profit:  -6000, returnRate:  -3.00, status: '已完成' },
 ];
 
 // 自由 Pay (R) 與贖回 (RDM) 紀錄 — 手動 mock；申購 (A) 紀錄從 holdings.purchaseBatches 自動衍生

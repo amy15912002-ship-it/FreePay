@@ -41,26 +41,32 @@
                 <span class="ov-sum-market-lbl">市值</span>
                 <span class="ov-sum-market">{{ fmtN(row.market) }}</span>
               </div>
-            </div>
-
-            <div class="ov-sum-change">
-              <span>持有損益</span>
-              <span [ngClass]="numClass(row.profit)">{{ fmtN(row.profit) }}&nbsp;/&nbsp;{{ fmtRate(row.ret) }}</span>
-            </div>
-
-            <div class="ov-sum-tile">
-              <span class="ov-sum-tile-lbl">投入成本</span>
-              <strong>{{ fmtN(row.cost) }}</strong>
+              <div class="ov-sum-return-mobile">
+                <span>含Pay報酬率</span>
+                <strong [ngClass]="numClass(row.ret)">{{ fmtRate(row.ret) }}</strong>
+              </div>
             </div>
 
             <div class="ov-sum-tiles">
-              <div class="ov-sum-tile">
+              <div class="ov-sum-tile ov-sum-tile--pay">
                 <span class="ov-sum-tile-lbl">月Pay金額</span>
                 <strong>{{ fmtN(row.pay) }}</strong>
               </div>
-              <div class="ov-sum-tile">
+              <div class="ov-sum-tile ov-sum-tile--cost">
+                <span class="ov-sum-tile-lbl">投入成本</span>
+                <strong>{{ fmtN(row.cost) }}</strong>
+              </div>
+              <div class="ov-sum-tile ov-sum-tile--profit">
+                <span class="ov-sum-tile-lbl">持有損益</span>
+                <strong [ngClass]="numClass(row.profit)">{{ fmtN(row.profit) }}</strong>
+              </div>
+              <div class="ov-sum-tile ov-sum-tile--paid">
                 <span class="ov-sum-tile-lbl">已Pay金額</span>
                 <strong>{{ fmtN(row.paid) }}</strong>
+              </div>
+              <div class="ov-sum-tile ov-sum-tile--return">
+                <span class="ov-sum-tile-lbl">含Pay報酬率</span>
+                <strong [ngClass]="numClass(row.ret)">{{ fmtRate(row.ret) }}</strong>
               </div>
             </div>
 
@@ -84,124 +90,138 @@
           <div class="ov-detail-head">
             <div class="ov-head-name">基金名稱</div>
             <div class="ov-metric-grid">
-              <div class="ov-metric-head"><span>計價幣別</span><span class="ov-line"></span><span>交易幣別</span></div>
-              <div class="ov-metric-head"><span>月Pay金額</span><span class="ov-line"></span><span>已Pay金額</span></div>
+              <div class="ov-metric-head"><span>交易/計價幣別</span><span class="ov-line"></span><span>月Pay金額</span></div>
               <div class="ov-metric-head"><span>約當市值</span><span class="ov-line"></span><span>投入成本</span></div>
-              <div class="ov-metric-head"><span>持有損益</span><span class="ov-line"></span><span>含Pay報酬率</span></div>
+              <div class="ov-metric-head"><span>持有損益</span><span class="ov-line"></span><span>已Pay金額</span></div>
+              <div class="ov-metric-head"><span>含Pay報酬率</span><span class="ov-line"></span><span>不含Pay報酬率</span></div>
             </div>
             <div></div>
           </div>
 
-          <article class="ov-fund" *ngFor="let f of funds; trackBy: trackByFund">
-          <div class="ov-fund-main" (click)="toggleFund(f.id)">
-            <div class="ov-fund-name">
-              <span class="ov-fund-code">{{ f.code }}</span>
-              <strong>{{ f.name }}</strong>
-            </div>
-            <div class="ov-metric-grid ov-metric-grid--2col">
-              <div class="ov-metric">
-                <div class="ov-kv"><span class="ov-kv-lbl">計價幣別</span><span>{{ f.buyCcy }}</span></div>
-                <span class="ov-line"></span>
-                <div class="ov-kv"><span class="ov-kv-lbl">交易幣別</span><span>{{ f.txCcy }}</span></div>
-              </div>
-              <div class="ov-metric">
-                <div class="ov-kv"><span class="ov-kv-lbl">月Pay金額</span><span>{{ fmtN(f.pay) }}</span></div>
-                <span class="ov-line"></span>
-                <div class="ov-kv"><span class="ov-kv-lbl">已Pay金額</span><span>{{ fmtN(f.paid) }}</span></div>
-              </div>
-              <div class="ov-metric">
-                <div class="ov-kv"><span class="ov-kv-lbl">約當市值</span><span>{{ fmtN(f.market) }}</span></div>
-                <span class="ov-line"></span>
-                <div class="ov-kv"><span class="ov-kv-lbl">投入成本</span><span>{{ fmtN(f.cost) }}</span></div>
-              </div>
-              <div class="ov-metric">
-                <div class="ov-kv"><span class="ov-kv-lbl">持有損益</span><span [ngClass]="numClass(f.profit)">{{ fmtN(f.profit) }}</span></div>
-                <span class="ov-line"></span>
-                <div class="ov-kv"><span class="ov-kv-lbl">含Pay報酬率</span><span [ngClass]="numClass(f.ret)">{{ fmtRate(f.ret) }}</span></div>
-              </div>
-            </div>
-            <div class="ov-fund-toggle">
-              <span>{{ f.contracts.length }} 筆</span>
-              <i class="bi" [class.bi-chevron-down]="!isFundExpanded(f.id)" [class.bi-chevron-up]="isFundExpanded(f.id)"></i>
-            </div>
-          </div>
-
-          <div class="ov-contracts" *ngIf="isFundExpanded(f.id)">
-            <div class="ov-ct-head">
-              <div class="ov-ct-name">交易明細</div>
-              <div class="ov-ct-grid">
-                <div class="ov-metric-head"><span>Pay設定</span><span class="ov-line"></span><span>觸發門檻</span></div>
-                <div class="ov-metric-head"><span>月Pay金額</span><span class="ov-line"></span><span>已Pay金額</span></div>
-                <div class="ov-metric-head"><span>約當市值</span><span class="ov-line"></span><span>投入成本</span></div>
-                <div class="ov-metric-head"><span>持有損益</span><span class="ov-line"></span><span>含Pay報酬率</span></div>
-              </div>
-              <div></div>
-            </div>
-            <div class="ov-ct-row" *ngFor="let c of f.contracts">
-              <div class="ov-ct-name">
-                <div class="ov-ct-fpno">
-                  <span>{{ c.fpNo }}</span>
-                  <button class="detail-icon-btn" type="button" (click)="openDetail(c.fpNo, c.alias); $event.stopPropagation()" aria-label="查看明細">
+          <!-- 5.0 起：一基金一幣別一列，無雙層展開；f.contracts 永遠長度 1 -->
+          <article class="ov-fund" *ngFor="let f of funds; trackBy: trackByFund" [class.is-expanded]="isFundExpanded(f.id)">
+            <div class="ov-fund-main">
+              <div class="ov-fund-name">
+                <div class="ov-fund-code-row">
+                  <span class="ov-fund-code">{{ f.code }}</span>
+                  <button class="detail-icon-btn ov-fund-detail-btn" type="button"
+                    (click)="openDetail(f.contracts[0].fpNo); $event.stopPropagation()" aria-label="查看明細">
                     <i class="bi bi-file-text"></i>
                   </button>
+                  <button
+                    class="ov-fund-expand-btn ov-fund-expand-btn--mobile"
+                    type="button"
+                    [attr.aria-expanded]="isFundExpanded(f.id)"
+                    (click)="toggleFund(f.id)"
+                    aria-label="展開 Pay 設定"
+                  >
+                    <i class="bi" [ngClass]="isFundExpanded(f.id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                  </button>
                 </div>
-                <span class="ov-ct-alias">{{ c.alias }}</span>
+                <strong>{{ f.name }}</strong>
               </div>
-              <div class="ov-ct-grid">
-                <div class="ov-ct-metric">
-                  <div class="ov-kv"><span class="ov-kv-lbl">Pay設定</span><span>{{ c.setting }}</span></div>
+              <div class="ov-metric-grid ov-metric-grid--2col">
+                <div class="ov-metric">
+                  <div class="ov-kv ov-kv--ccy"><span class="ov-kv-lbl">交易/計價幣別</span><span>{{ f.txCcy }} / {{ f.buyCcy }}</span></div>
                   <span class="ov-line"></span>
-                  <div class="ov-kv"><span class="ov-kv-lbl">觸發門檻</span><span>{{ c.threshold }}</span></div>
+                  <div class="ov-kv ov-kv--monthly"><span class="ov-kv-lbl">月Pay金額</span><span>{{ fmtN(f.pay) }}</span></div>
                 </div>
-                <div class="ov-ct-metric">
-                  <div class="ov-kv"><span class="ov-kv-lbl">月Pay金額</span><span>{{ fmtN(c.pay) }}</span></div>
+                <div class="ov-metric">
+                  <div class="ov-kv ov-kv--market"><span class="ov-kv-lbl">約當市值</span><span>{{ fmtN(f.market) }}</span></div>
                   <span class="ov-line"></span>
-                  <div class="ov-kv"><span class="ov-kv-lbl">已Pay金額</span><span>{{ fmtN(c.paid) }}</span></div>
+                  <div class="ov-kv ov-kv--cost"><span class="ov-kv-lbl">投入成本</span><span>{{ fmtN(f.cost) }}</span></div>
                 </div>
-                <div class="ov-ct-metric">
-                  <div class="ov-kv"><span class="ov-kv-lbl">約當市值</span><span>{{ fmtN(c.market) }}</span></div>
+                <div class="ov-metric">
+                  <div class="ov-kv ov-kv--profit"><span class="ov-kv-lbl">持有損益</span><span [ngClass]="numClass(f.profit)">{{ fmtN(f.profit) }}</span></div>
                   <span class="ov-line"></span>
-                  <div class="ov-kv"><span class="ov-kv-lbl">投入成本</span><span>{{ fmtN(c.cost) }}</span></div>
+                  <div class="ov-kv ov-kv--paid"><span class="ov-kv-lbl">已Pay金額</span><span>{{ fmtN(f.paid) }}</span></div>
                 </div>
-                <div class="ov-ct-metric">
-                  <div class="ov-kv"><span class="ov-kv-lbl">持有損益</span><span [ngClass]="numClass(c.profit)">{{ fmtN(c.profit) }}</span></div>
+                <div class="ov-metric">
+                  <div class="ov-kv ov-kv--return-with"><span class="ov-kv-lbl">含Pay報酬率</span><span [ngClass]="numClass(returnWithPay(f))">{{ fmtRate(returnWithPay(f)) }}</span></div>
                   <span class="ov-line"></span>
-                  <div class="ov-kv"><span class="ov-kv-lbl">含Pay報酬率</span><span [ngClass]="numClass(c.ret)">{{ fmtRate(c.ret) }}</span></div>
+                  <div class="ov-kv ov-kv--return-no-pay"><span class="ov-kv-lbl">不含Pay報酬率</span><span [ngClass]="numClass(returnWithoutPay(f))">{{ fmtRate(returnWithoutPay(f)) }}</span></div>
                 </div>
               </div>
-              <div class="ov-ct-actions">
+              <div class="ov-mobile-pay-summary"><span>月Pay金額</span><strong>{{ fmtN(f.pay) }}</strong></div>
+              <div class="ov-fund-actions">
+                <button
+                  class="ov-fund-expand-btn ov-fund-expand-btn--desktop"
+                  type="button"
+                  [attr.aria-expanded]="isFundExpanded(f.id)"
+                  (click)="toggleFund(f.id)"
+                  aria-label="展開 Pay 設定"
+                >
+                  <i class="bi" [ngClass]="isFundExpanded(f.id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                </button>
                 <button
                   class="circle-btn"
                   type="button"
-                  [class.is-active]="isActionMenuOpen(c.fpNo)"
-                  [attr.aria-expanded]="isActionMenuOpen(c.fpNo)"
-                  (click)="toggleActionMenu($event, c.fpNo)"
-                  aria-label="更多操作"
+                  (click)="onAction('異動', f.contracts[0].fpNo)"
+                  aria-label="異動設定"
+                  title="異動設定"
                 >
-                  <i class="bi bi-three-dots"></i>
+                  <i class="bi bi-gear ov-action-icon ov-action-icon--setting"></i>
                 </button>
-                <button class="circle-btn circle-btn--buy" type="button" (click)="onAction('加碼', c.fpNo)">BUY</button>
-                <div class="ct-action-popover" *ngIf="isActionMenuOpen(c.fpNo)" (click)="$event.stopPropagation()">
-                  <button
-                    class="ct-action-item"
-                    type="button"
-                    (click)="onPopoverAction('異動', c.fpNo)"
-                  >異動</button>
-                  <button
-                    class="ct-action-item"
-                    type="button"
-                    (click)="onPopoverAction('贖回', c.fpNo)"
-                  >贖回</button>
+                <button
+                  class="circle-btn"
+                  type="button"
+                  (click)="onAction('贖回', f.contracts[0].fpNo)"
+                  aria-label="贖回"
+                  title="贖回"
+                >
+                  <i class="bi bi-cash-coin ov-action-icon ov-action-icon--redeem"></i>
+                </button>
+                <button
+                  class="circle-btn circle-btn--buy"
+                  type="button"
+                  (click)="onAction('加碼', f.contracts[0].fpNo)"
+                  aria-label="申購"
+                  title="申購"
+                >
+                  BUY
+                </button>
+              </div>
+            </div>
+            <div class="ov-fund-extra" *ngIf="isFundExpanded(f.id)">
+              <div class="ov-fund-extra-content">
+                <div class="ov-extra-kv ov-extra-kv--ccy">
+                  <span>交易 / 計價幣別</span>
+                  <strong>{{ f.txCcy }} / {{ f.buyCcy }}</strong>
+                </div>
+                <div class="ov-extra-kv">
+                  <span>Pay方式</span>
+                  <strong>{{ payMethodText(f.contracts[0]) }}</strong>
+                </div>
+                <div class="ov-extra-kv">
+                  <span>基準日</span>
+                  <strong>{{ payDayText(f.contracts[0]) }}</strong>
+                </div>
+                <div class="ov-extra-kv ov-extra-kv--info">
+                  <span>
+                    觸發門檻
+                    <span class="ov-trigger-info">
+                      <button
+                        class="ov-info-button"
+                        type="button"
+                        aria-label="觸發門檻說明"
+                        [attr.aria-expanded]="isInfoPopoverOpen(f.id)"
+                        (click)="toggleInfoPopover($event, f.id)"
+                      >
+                        <i class="bi bi-info-circle"></i>
+                      </button>
+                      <span class="ov-info-popover" [class.is-open]="isInfoPopoverOpen(f.id)" role="tooltip">依持有市值相對於原始投入判斷是否執行 Pay 出。市值守護為低於設定比例時暫停 Pay 出；增值啟動為首次達設定比例後才開始 Pay 出。</span>
+                    </span>
+                  </span>
+                  <strong>{{ f.contracts[0].threshold }}</strong>
                 </div>
               </div>
             </div>
-          </div>
-        </article>
+          </article>
         </div>
 
         <!-- 注意事項 -->
         <div class="notes-block">
-          <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
+          <div class="notes-title">注意事項</div>
           <ul class="notes-list">
             <li>當您於本網進行基金交易，系統將保留您所有的基金交易確認單歷史紀錄以供查詢之用。若交易未結帳完成前之相關記錄，可以透過在途交易查詢。</li>
             <li>上述投資組合損益，為資料期間內已完成交易程序者，資料若有不符，應以臺灣集中保管結算所電腦記錄為準，歡迎您至集保網站查詢（www.tdcc.com.tw）。</li>
@@ -393,7 +413,7 @@
 
       <!-- 注意事項 -->
       <div class="notes-block">
-        <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
+        <div class="notes-title">注意事項</div>
         <ul class="notes-list">
           <li>當日申請之申購（含加碼）委託可於13:00前取消，若逾時則無法取消，將於次一營業日生效。</li>
           <li>當日申請之異動/贖回委託可於14:00前取消，若逾時則無法取消，將於次一營業日生效。</li>
@@ -513,9 +533,8 @@
                 <td class="col-date" data-label="贖回日">{{ item.redeemDate }}</td>
                 <td class="col-fund ov-desktop-only-cell" data-label="交易明細">
                   <div>{{ item.fpNo }}</div>
-                  <div class="ov-cell-sub">{{ item.alias }}</div>
                 </td>
-                <td class="ov-mobile-only-cell" data-label="交易明細">{{ item.alias }}</td>
+                <td class="ov-mobile-only-cell" data-label="交易明細">{{ item.fpNo }}</td>
                 <td class="col-currency ov-desktop-only-cell" data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
                 <td class="ov-desktop-only-cell" data-label="Pay設定 / 已Pay金額">
                   <div class="ov-metric">
@@ -573,7 +592,7 @@
 
       <!-- 注意事項 -->
       <div class="notes-block">
-        <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
+        <div class="notes-title">注意事項</div>
         <ul class="notes-list">
           <li>上述損益數據為估算值，實際以交易確認書為準。</li>
           <li>匯率損益未納入計算，外幣交易實際損益請參照匯兌盈虧。</li>
@@ -591,24 +610,8 @@
 
     <div class="detail-panel-head">
       <div class="detail-panel-title">
-        <ng-container *ngIf="!detailIsEditingTitle">
-          <span class="detail-title-fpno">{{ detailFpNo }}</span>
-          <span class="detail-title-text">{{ detailAlias }}</span>
-          <button class="detail-icon-btn" type="button" (click)="startEditTitle()" aria-label="編輯名稱">
-            <i class="bi bi-pencil"></i>
-          </button>
-        </ng-container>
-        <ng-container *ngIf="detailIsEditingTitle">
-          <input class="detail-title-input" [(ngModel)]="detailTitleDraft" maxlength="12"
-            placeholder="最多12字" (keydown.enter)="saveTitle()" (keydown.escape)="cancelEditTitle()">
-          <span class="detail-title-count">{{ detailTitleDraft.length }}/12</span>
-          <button class="detail-icon-btn" type="button" (click)="saveTitle()" aria-label="儲存">
-            <i class="bi bi-check-lg"></i>
-          </button>
-          <button class="detail-icon-btn" type="button" (click)="cancelEditTitle()" aria-label="取消">
-            <i class="bi bi-x"></i>
-          </button>
-        </ng-container>
+        <span class="detail-title-text">{{ detailPanelTitle }}</span>
+        <span class="detail-title-meta">{{ detailPanelMeta }}</span>
       </div>
       <button class="detail-close" type="button" (click)="closeDetail()" aria-label="關閉">
         <i class="bi bi-x-lg"></i>
@@ -696,7 +699,7 @@
               <mat-chip [selectable]="false" [selected]="detailChgType==='AL'" (click)="detailChgType='AL'">Pay金額</mat-chip>
               <mat-chip [selectable]="false" [selected]="detailChgType==='P'" (click)="detailChgType='P'">Pay比例</mat-chip>
               <mat-chip [selectable]="false" [selected]="detailChgType==='D'" (click)="detailChgType='D'">扣款日期</mat-chip>
-              <mat-chip [selectable]="false" [selected]="detailChgType==='DL'" (click)="detailChgType='DL'">停Pay門檻</mat-chip>
+              <mat-chip [selectable]="false" [selected]="detailChgType==='DL'" (click)="detailChgType='DL'">觸發門檻</mat-chip>
             </mat-chip-list>
           </div>
         </div>
