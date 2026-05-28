@@ -142,10 +142,22 @@
 
           <div class="info-box redeem-adjust-note" *ngIf="showRedeemPayAdjustmentNotice">
             <i class="bi bi-exclamation-triangle-fill" aria-hidden="true"></i>
-            <span>
-              <strong>重要提醒</strong>本次贖回後，既有月 Pay 金額 {{ formatMoney(selectedContract?.monthlyPay || 0, selectedContract?.currencyCode) }}
-              估算年化提領率約 {{ formatRate(postRedeemAnnualRate) }}，高於 15% 上限。系統不會強制調整，建議完成贖回後至異動設定調整月 Pay 金額。
-            </span>
+            <div class="redeem-adjust-body">
+              <p class="redeem-adjust-title"><strong>重要：月 Pay 將自動調整</strong></p>
+              <p class="redeem-adjust-desc">
+                您目前月 Pay 為 <strong>{{ formatMoney(selectedContract?.monthlyPay || 0, selectedContract?.currencyCode) }}</strong>，
+                本次贖回後將自動調降為 <strong>{{ formatMoney(suggestedMonthlyPay, selectedContract?.currencyCode) }}</strong>（系統依年化 15% 上限換算）。
+                如不接受此調整，請取消贖回並至異動設定手動調整月 Pay 金額。
+              </p>
+              <mat-checkbox
+                color="primary"
+                class="redeem-adjust-ack"
+                [(ngModel)]="acknowledgePayAdjustment"
+                [ngModelOptions]="{ standalone: true }"
+              >
+                我確認接受月 Pay 由 {{ formatMoney(selectedContract?.monthlyPay || 0, selectedContract?.currencyCode) }} 調整為 {{ formatMoney(suggestedMonthlyPay, selectedContract?.currencyCode) }}
+              </mat-checkbox>
+            </div>
           </div>
         </section>
 
@@ -470,6 +482,10 @@
             <div class="sum-row"><span>參考淨值日期</span><strong>{{ redeemNavDate }}</strong></div>
             <div class="sum-row"><span>參考匯率</span><strong>{{ redeemExchangeRate === 1 ? '-' : formatNav(redeemExchangeRate) }}</strong></div>
             <div class="sum-row"><span>收款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
+            <div class="sum-row" *ngIf="showRedeemPayAdjustmentNotice">
+              <span>月 Pay 調整</span>
+              <strong class="hl">{{ formatMoney(selectedContract?.monthlyPay || 0, selectedContract?.currencyCode) }} → {{ formatMoney(suggestedMonthlyPay, selectedContract?.currencyCode) }}</strong>
+            </div>
           </div>
         </ng-container>
         <ng-template #purchaseConfirmSummary>
@@ -496,7 +512,7 @@
         </ng-template>
       </section>
 
-      <section class="block">
+      <section class="block" *ngIf="!isRedeemMode">
         <div class="block-header">
           <h2 class="block-title">相關文件</h2>
         </div>
@@ -604,6 +620,7 @@
           <ul class="notes-list">
             <li *ngIf="isModifyMode">您的自由 Pay 異動委託已送出。設定將依委託查詢狀態生效。</li>
             <li *ngIf="isRedeemMode">您的贖回委託已送出。若超過本營業日交易時間 14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。</li>
+            <li *ngIf="isRedeemMode && showRedeemPayAdjustmentNotice">月 Pay 已自動調整為 {{ formatMoney(suggestedMonthlyPay, selectedContract?.currencyCode) }}，您可於持有頁隨時異動。</li>
             <li *ngIf="!isAddOnMode && !isModifyMode && !isRedeemMode">您的自由 Pay 申購委託已送出。預計 3-4 個營業日後申購確認書入帳，首次 Pay 將於設定基準日（每月 {{ form.controls.day.value }} 日）執行；若距申購確認日不足 30 日，將順延至屆滿後的第一個基準日。</li>
             <li *ngIf="isAddOnMode">您的加碼委託已送出。申購確認後金額將計入既有交易，Pay 設定維持既有交易不變。預計 3-4 個營業日後申購確認書入帳。</li>
             <li *ngIf="!isRedeemMode">若超過本營業日交易時間 13:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。若您有任何疑問，請洽客服專線 02-27208126。</li>

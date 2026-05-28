@@ -65,6 +65,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   // 升級四：贖回兩層 UI 狀態
   redeemMode: RedeemMode = null;
   selectedBatchIds = new Set<string>();
+  // 升級四方案 D：用戶明確確認接受月 Pay 自動調整
+  acknowledgePayAdjustment = false;
   private addOnDirect = false;
   private flowContext: FlowContext = { mode: 'new', fundId: DEFAULT_DEMO_SCENARIO.fundId };
 
@@ -423,6 +425,11 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       && this.postRedeemAnnualRate > 15;
   }
 
+  // 升級四方案 D：貼上限 15%（剩餘成本 × 0.15 ÷ 12，無條件捨去）
+  get suggestedMonthlyPay(): number {
+    return Math.floor(this.postRedeemCostBasis * 0.15 / 12);
+  }
+
   // ── 升級四：申購批次層贖回 ──────────────────────────────
 
   get batches(): PurchaseBatch[] {
@@ -457,6 +464,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     if (mode === 'batch' && !this.hasSelectableBatch) return;
     this.redeemMode = mode;
     if (mode !== 'batch') this.selectedBatchIds.clear();
+    this.acknowledgePayAdjustment = false;
   }
 
   toggleBatch(batch: PurchaseBatch): void {
@@ -466,6 +474,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     } else {
       this.selectedBatchIds.add(batch.batchId);
     }
+    this.acknowledgePayAdjustment = false;
   }
 
   toggleAllSelectableBatches(): void {
@@ -474,6 +483,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     } else {
       this.selectableBatches.forEach(b => this.selectedBatchIds.add(b.batchId));
     }
+    this.acknowledgePayAdjustment = false;
   }
 
   get redeemNavDate(): string {
@@ -487,6 +497,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       // 升級四：贖回方式必選；若選 batch 模式須至少勾 1 筆批次
       if (!this.redeemMode) return true;
       if (this.redeemMode === 'batch' && !this.hasSelectedBatch) return true;
+      // 升級四方案 D：年化超標時，未明確勾選接受月 Pay 調整 → 阻擋
+      if (this.showRedeemPayAdjustmentNotice && !this.acknowledgePayAdjustment) return true;
     }
     return false;
   }
@@ -675,7 +687,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   formatUnits(value: number): string {
-    return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    // 最多 4 位小數，自動 trim 尾零（8000 → 8,000；95.2381 → 95.2381；30.5 → 30.5）
+    return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
   }
 
   formatNav(value: number): string {
@@ -774,6 +787,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     // 升級四：贖回模式進入時重置兩層狀態
     this.redeemMode = null;
     this.selectedBatchIds.clear();
+    this.acknowledgePayAdjustment = false;
   }
 
   private applyContractSettings(contract: Contract): void {
