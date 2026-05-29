@@ -22,13 +22,17 @@ import { AppComponent } from './app.component';
 import { DemoShellComponent } from './demo-shell/demo-shell.component';
 import { AccountOverviewComponent } from './account-overview/account-overview.component';
 import { FundSelectComponent } from './fund-select/fund-select.component';
+import { FreepayIntroComponent } from './freepay-intro/freepay-intro.component';
+import { FooterComponent } from './footer/footer.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     DemoShellComponent,
     AccountOverviewComponent,
-    FundSelectComponent
+    FundSelectComponent,
+    FreepayIntroComponent,
+    FooterComponent
   ],
   imports: [
     BrowserModule,

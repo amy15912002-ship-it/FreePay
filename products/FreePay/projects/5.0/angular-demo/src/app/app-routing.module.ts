@@ -3,9 +3,11 @@ import { RouterModule, Routes } from '@angular/router';
 import { DemoShellComponent } from './demo-shell/demo-shell.component';
 import { AccountOverviewComponent } from './account-overview/account-overview.component';
 import { FundSelectComponent } from './fund-select/fund-select.component';
+import { FreepayIntroComponent } from './freepay-intro/freepay-intro.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'demo/flow', pathMatch: 'full' },
+  { path: 'demo/freepay-intro', component: FreepayIntroComponent },
   { path: 'demo/overview', component: AccountOverviewComponent },
   { path: 'demo/search', component: FundSelectComponent },
   { path: 'demo/flow', component: DemoShellComponent }

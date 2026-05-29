@@ -90,7 +90,7 @@
                 ></i>
               </button>
               <div class="batch-head-cell">交易日</div>
-              <div class="batch-head-cell">申購金額</div>
+              <div class="batch-head-cell">投入成本</div>
               <div class="batch-head-cell">剩餘單位數</div>
               <div class="batch-head-cell">參考金額</div>
               <div class="batch-head-cell">含 Pay 報酬率</div>
@@ -117,7 +117,7 @@
               <span class="batch-row-cell batch-row-cell--date">
                 {{ batch.tDate }}
               </span>
-              <span class="batch-row-cell" data-label="申購金額">{{ formatNumber(batch.amount, selectedContract?.currencyCode) }}</span>
+              <span class="batch-row-cell" data-label="投入成本">{{ formatNumber(batch.amount, selectedContract?.currencyCode) }}</span>
               <span class="batch-row-cell" data-label="剩餘單位數">{{ batch.isPayTouched && batch.remainUnits === 0 ? '-' : formatUnits(batch.remainUnits) }}</span>
               <span class="batch-row-cell" data-label="參考金額">{{ batch.isPayTouched ? '-' : formatNumber(batchReferenceAmount(batch), selectedContract?.currencyCode) }}</span>
               <span class="batch-row-cell" data-label="含 Pay 報酬率" [ngClass]="rateClass(batchReturnRate(batch))">{{ formatRate(batchReturnRate(batch)) }}</span>
