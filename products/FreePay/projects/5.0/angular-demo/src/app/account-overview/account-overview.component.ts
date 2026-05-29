@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
@@ -90,12 +90,10 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   profitCustomStart: Date | null = null;
   profitCustomEnd: Date | null = null;
 
-  expandedProfitRows = new Set<string>();
   expandedFundRows = new Set<string>();
   selectedOrders = new Set<string>();
   cancelPwd = '';
   cancelPwdVisible = false;
-  openInfoPopoverId: string | null = null;
 
   detailFpNo: string | null = null;
   detailTxType: DetailTxType = 'all';
@@ -175,28 +173,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     return groups;
   }
 
-  isProfitExpanded(id: string): boolean {
-    return this.expandedProfitRows.has(id);
-  }
-
-  toggleProfitRow(id: string): void {
-    this.expandedProfitRows.has(id) ? this.expandedProfitRows.delete(id) : this.expandedProfitRows.add(id);
-  }
-
-  get allProfitRowsExpanded(): boolean {
-    const ids = this.filteredProfits.map(item => item.id);
-    return ids.length > 0 && ids.every(id => this.expandedProfitRows.has(id));
-  }
-
-  toggleAllProfitRows(): void {
-    const ids = this.filteredProfits.map(item => item.id);
-    if (this.allProfitRowsExpanded) {
-      ids.forEach(id => this.expandedProfitRows.delete(id));
-      return;
-    }
-    ids.forEach(id => this.expandedProfitRows.add(id));
-  }
-
   // ── Helpers ──
 
   ccyAccent(ccy: string): string {
@@ -223,6 +199,11 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
 
   returnWithoutPay(item: Pick<OvFund, 'ret'>): number {
     return item.ret;
+  }
+
+  // 已實現損益：不含 Pay 報酬率 = (贖回金額 − 投入成本) / 投入成本 × 100
+  profitReturnNoPay(item: Pick<ProfitRecord, 'cost' | 'redeemAmount'>): number {
+    return item.cost ? ((item.redeemAmount - item.cost) / item.cost) * 100 : 0;
   }
 
   payMethodText(contract: OvContract): string {
@@ -255,6 +236,15 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     return `依金額・${Number(item.rdmAmt || 0).toLocaleString('en-US')}・${item.rdmDay}日`;
   }
 
+  fmtOrderPayMethod(item: AltOrder): string {
+    if (item.payType === 'P') return `依比例 ${item.payRate}%`;
+    return `依金額 ${Number(item.rdmAmt || 0).toLocaleString('en-US')}`;
+  }
+
+  fmtOrderPayDay(item: AltOrder): string {
+    return `每月 ${item.rdmDay} 日`;
+  }
+
   fmtLimitMode(limitMode: string, limitVal: number | null): string {
     if (limitMode === 'neg') return `市值守護・跌${Math.abs(limitVal ?? 0)}%`;
     if (limitMode === 'pos') return `增值啟動・漲${limitVal ?? 0}%`;
@@ -271,25 +261,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
       }
     }
     alert(`${action}（${fpNo}）Demo 示意`);
-  }
-
-  @HostListener('document:click')
-  closeFloatingPanels(): void {
-    this.openInfoPopoverId = null;
-  }
-
-  @HostListener('document:keydown.escape')
-  closeFloatingPanelsByEsc(): void {
-    this.openInfoPopoverId = null;
-  }
-
-  toggleInfoPopover(event: MouseEvent, id: string): void {
-    event.stopPropagation();
-    this.openInfoPopoverId = this.openInfoPopoverId === id ? null : id;
-  }
-
-  isInfoPopoverOpen(id: string): boolean {
-    return this.openInfoPopoverId === id;
   }
 
   // ── Detail modal ──

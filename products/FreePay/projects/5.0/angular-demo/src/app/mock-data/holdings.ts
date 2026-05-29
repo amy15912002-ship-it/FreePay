@@ -19,6 +19,7 @@ export interface PurchaseBatch {
   nav: number;              // 成交淨值
   isPayTouched: boolean;    // FIFO 下被 Pay 涵蓋過為 true → 該批次不可單獨贖回
   remainUnits: number;      // 剩餘可贖回單位（被 Pay 觸及後扣減；未觸及時 = units）
+  paidAmount: number;       // 該批次已 Pay 出金額（交易幣別）；FIFO 下早期批次優先累積
 }
 
 export interface HoldingContract {
@@ -48,10 +49,10 @@ export const HOLDINGS: HoldingContract[] = [
     purchaseBatches: [
       // 首次申購：已被 Pay 觸及
       { batchId: 'BFP20240101-1', batchDate: '2024/01/01', orderTime: '13:25:00', tDate: '2024/01/03',
-        amount: 120000, units: 8000, nav: 15.0, isPayTouched: true, remainUnits: 3200 },
+        amount: 120000, units: 8000, nav: 15.0, isPayTouched: true, remainUnits: 3200, paidAmount: 70000 },
       // 加碼：尚未被 Pay 觸及 → 可單獨贖回
       { batchId: 'BFP20240101-2', batchDate: '2024/09/12', orderTime: '10:42:30', tDate: '2024/09/16',
-        amount: 100000, units: 6250, nav: 16.0, isPayTouched: false, remainUnits: 6250 },
+        amount: 100000, units: 6250, nav: 16.0, isPayTouched: false, remainUnits: 6250, paidAmount: 0 },
     ],
   },
   {
@@ -61,9 +62,9 @@ export const HOLDINGS: HoldingContract[] = [
     costBasis: 320000, marketValue: 380000, paidTotal: 180000, status: 'Y',
     purchaseBatches: [
       { batchId: 'BFP20230901-1', batchDate: '2023/09/01', orderTime: '10:30:00', tDate: '2023/09/05',
-        amount: 200000, units: 19047.6190, nav: 10.5, isPayTouched: true, remainUnits: 9523.8095 },
+        amount: 200000, units: 19047.6190, nav: 10.5, isPayTouched: true, remainUnits: 9523.8095, paidAmount: 180000 },
       { batchId: 'BFP20230901-2', batchDate: '2024/03/15', orderTime: '14:20:33', tDate: '2024/03/19',
-        amount: 120000, units: 11428.5714, nav: 10.5, isPayTouched: false, remainUnits: 11428.5714 },
+        amount: 120000, units: 11428.5714, nav: 10.5, isPayTouched: false, remainUnits: 11428.5714, paidAmount: 0 },
     ],
   },
   {
@@ -71,20 +72,20 @@ export const HOLDINGS: HoldingContract[] = [
     fpNo: 'FP20240601', fundId: 'TA654321', currencyCode: 'USD',
     startDate: '2024/06/01', payMode: 'amount', monthlyPay: 200, annualRate: 0, payDay: 15,
     thresholdMode: 'none', thresholdValue: 0,
-    costBasis: 4000, marketValue: 4750, paidTotal: 2400, status: 'Y',
+    costBasis: 4000, marketValue: 4750, paidTotal: 1670, status: 'Y',
     purchaseBatches: [
       // 首次申購：已被 Pay 觸及（完全消耗）→ 不可單獨贖回
       { batchId: 'BFP20240601-1', batchDate: '2024/06/01', orderTime: '14:22:10', tDate: '2024/06/05',
-        amount: 1000, units: 95.2381, nav: 10.5, isPayTouched: true, remainUnits: 0 },
+        amount: 1000, units: 95.2381, nav: 10.5, isPayTouched: true, remainUnits: 0, paidAmount: 1050 },
       // 加碼 1：已被 Pay 觸及（部分消耗）→ 不可單獨贖回
       { batchId: 'BFP20240601-2', batchDate: '2024/08/15', orderTime: '09:33:12', tDate: '2024/08/19',
-        amount: 1200, units: 109.0909, nav: 11.0, isPayTouched: true, remainUnits: 52.4 },
+        amount: 1200, units: 109.0909, nav: 11.0, isPayTouched: true, remainUnits: 52.4, paidAmount: 620 },
       // 加碼 2：尚未被 Pay 觸及 → 可單獨贖回
       { batchId: 'BFP20240601-3', batchDate: '2024/10/20', orderTime: '11:08:45', tDate: '2024/10/22',
-        amount: 1000, units: 88.9680, nav: 11.24, isPayTouched: false, remainUnits: 88.9680 },
-      // 加碼 3：尚未被 Pay 觸及 → 可單獨贖回
-      { batchId: 'BFP20240601-4', batchDate: '2025/02/18', orderTime: '10:15:30', tDate: '2025/02/20',
-        amount: 800, units: 69.5652, nav: 11.50, isPayTouched: false, remainUnits: 69.5652 },
+        amount: 1000, units: 88.9680, nav: 11.24, isPayTouched: false, remainUnits: 88.9680, paidAmount: 0 },
+      // 加碼 3：30 天內申購（用於短線交易示意）→ 可單獨贖回
+      { batchId: 'BFP20240601-4', batchDate: '2026/05/15', orderTime: '10:15:30', tDate: '2026/05/19',
+        amount: 800, units: 69.5652, nav: 11.50, isPayTouched: false, remainUnits: 69.5652, paidAmount: 0 },
     ],
   },
   {
@@ -94,9 +95,9 @@ export const HOLDINGS: HoldingContract[] = [
     costBasis: 280000, marketValue: 308000, paidTotal: 54000, status: 'Y',
     purchaseBatches: [
       { batchId: 'BFP20250601-1', batchDate: '2025/06/01', orderTime: '10:30:00', tDate: '2025/06/04',
-        amount: 180000, units: 10112.3596, nav: 17.8, isPayTouched: true, remainUnits: 7078.6517 },
+        amount: 180000, units: 10112.3596, nav: 17.8, isPayTouched: true, remainUnits: 7078.6517, paidAmount: 54000 },
       { batchId: 'BFP20250601-2', batchDate: '2026/01/20', orderTime: '11:08:42', tDate: '2026/01/22',
-        amount: 100000, units: 5347.5936, nav: 18.7, isPayTouched: false, remainUnits: 5347.5936 },
+        amount: 100000, units: 5347.5936, nav: 18.7, isPayTouched: false, remainUnits: 5347.5936, paidAmount: 0 },
     ],
   },
   {
@@ -106,11 +107,11 @@ export const HOLDINGS: HoldingContract[] = [
     costBasis: 1300000, marketValue: 1444000, paidTotal: 45000, status: 'Y',
     purchaseBatches: [
       { batchId: 'BFP20240801-1', batchDate: '2024/08/01', orderTime: '11:18:29', tDate: '2024/08/05',
-        amount: 500000, units: 5094.2435, nav: 98.15, isPayTouched: true, remainUnits: 4636.4915 },
+        amount: 500000, units: 5094.2435, nav: 98.15, isPayTouched: true, remainUnits: 4636.4915, paidAmount: 45000 },
       { batchId: 'BFP20240801-2', batchDate: '2025/02/14', orderTime: '09:42:11', tDate: '2025/02/18',
-        amount: 500000, units: 4878.0488, nav: 102.5, isPayTouched: false, remainUnits: 4878.0488 },
+        amount: 500000, units: 4878.0488, nav: 102.5, isPayTouched: false, remainUnits: 4878.0488, paidAmount: 0 },
       { batchId: 'BFP20240801-3', batchDate: '2025/12/05', orderTime: '13:55:02', tDate: '2025/12/09',
-        amount: 300000, units: 2752.2936, nav: 109.0, isPayTouched: false, remainUnits: 2752.2936 },
+        amount: 300000, units: 2752.2936, nav: 109.0, isPayTouched: false, remainUnits: 2752.2936, paidAmount: 0 },
     ],
   },
 ];

@@ -1,7 +1,7 @@
 :host {
   display: block;
   min-height: 100vh;
-  padding-bottom: 96px;
+  padding-bottom: 0;
   color: var(--color-text-primary);
   background: var(--color-bg-base);
 }
@@ -9,7 +9,7 @@
 .material-flow-stepper {
   width: min(800px, 100%);
   margin: 0 auto;
-  padding: 20px 0 18px;
+  padding: 0 0 18px;
   background: transparent;
 
   ::ng-deep .mat-horizontal-stepper-wrapper,
@@ -85,7 +85,7 @@
 .page-body {
   width: min(800px, 100%);
   margin: 0 auto;
-  padding: 0 0 80px;
+  padding: 0;
 }
 
 .fund-card {
@@ -923,7 +923,7 @@
 
 @media (max-width: 767px) {
   :host {
-    padding-bottom: 84px;
+    padding-bottom: 0;
   }
 
   .success-block h2 {
@@ -989,7 +989,7 @@
 
   .page-body {
     width: 100%;
-    padding: 0 15px 80px;
+    padding: 0 15px;
   }
 
   .block {
@@ -1120,8 +1120,8 @@
 
 // ── 批次列表（對齊帳戶總覽明細列：表頭 + 列式 grid + border-bottom + 置中對齊） ──
 
-// 等寬 grid：check（固定 28px）+ 5 個內容欄等寬
-$batch-grid: 28px repeat(5, minmax(0, 1fr));
+// 等寬 grid：check（固定 28px）+ 6 個內容欄等寬
+$batch-grid: 28px repeat(6, minmax(0, 1fr));
 
 .batch-table {
   display: flex;
@@ -1200,11 +1200,12 @@ $batch-grid: 28px repeat(5, minmax(0, 1fr));
 
   &:last-of-type { border-bottom: 0; }
 
-  &:hover:not(:disabled) {
+  &:not(.is-selected):hover:not(:disabled) {
     background: var(--color-bg-subtle);
   }
 
-  &.is-selected {
+  &.is-selected,
+  &.is-selected:hover {
     background: var(--color-bg-brand-subtle);
   }
 
@@ -1261,6 +1262,10 @@ $batch-grid: 28px repeat(5, minmax(0, 1fr));
   line-height: 1.4;
   word-break: break-word;
   min-width: 0;
+
+  // 漲跌色覆寫（component 範疇下，全域 .val-up/.val-down 會被 .batch-row-cell 蓋掉）
+  &.val-up   { color: var(--color-price-up); }
+  &.val-down { color: var(--color-price-down); }
 }
 
 .batch-row-cell--date {
@@ -1290,6 +1295,17 @@ $batch-grid: 28px repeat(5, minmax(0, 1fr));
 // 不可選列：取代 checkbox 的 info icon（保持原色，整列不灰化）
 .batch-row-info {
   color: var(--color-brand-tertiary-400);
+}
+
+// 短線交易欄：勾勾用品牌主色強調（會被扣費警示）
+.batch-row-cell--shortterm {
+  i.bi-check-lg {
+    color: var(--color-brand-primary-400);
+    font-size: 16px; // DesignSystem §5.3 inline 圖示尺寸
+  }
+  span {
+    color: var(--color-text-tertiary);
+  }
 }
 
 // ── 預估贖回金額（設定頁簡潔強調區塊） ──

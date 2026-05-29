@@ -1,9 +1,3 @@
-<div class="demo-bar">
-  <span>DEMO 情境</span>
-  <a routerLink="/demo/overview" class="demo-button">帳戶總覽</a>
-  <a routerLink="/demo/search" class="demo-button">選擇基金</a>
-</div>
-
 <mat-horizontal-stepper
   class="material-flow-stepper"
   labelPosition="bottom"
@@ -70,9 +64,9 @@
           </mat-radio-group>
           <!-- 全部贖回模式：合計摘要 -->
           <div class="redeem-all-summary" *ngIf="redeemMode === 'all'">
-            <div class="sum-row"><span>可贖回單位</span><strong>{{ formatUnits(redeemUnits) }}</strong></div>
+            <div class="sum-row"><span>可贖回單位數</span><strong>{{ formatUnits(redeemUnits) }}</strong></div>
             <div class="sum-row" *ngIf="redeemOrderingUnits > 0"><span>在途中（已扣除）</span><strong>{{ formatUnits(redeemOrderingUnits) }}</strong></div>
-            <div class="sum-row"><span>贖回參考金額</span><strong class="batch-row-cell--total-amount">{{ formatNumber(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
+            <div class="sum-row"><span>參考金額</span><strong class="batch-row-cell--total-amount">{{ formatNumber(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
           </div>
 
           <!-- 指定贖回模式：批次列表 -->
@@ -95,11 +89,12 @@
                   [class.bi-square]="!allSelectableSelected"
                 ></i>
               </button>
-              <div class="batch-head-cell">批次日期</div>
+              <div class="batch-head-cell">交易日</div>
               <div class="batch-head-cell">申購金額</div>
-              <div class="batch-head-cell">申購單位數</div>
-              <div class="batch-head-cell">可贖回單位</div>
-              <div class="batch-head-cell">贖回參考金額</div>
+              <div class="batch-head-cell">剩餘單位數</div>
+              <div class="batch-head-cell">參考金額</div>
+              <div class="batch-head-cell">含 Pay 報酬率</div>
+              <div class="batch-head-cell">短線交易</div>
             </div>
             <ng-container *ngIf="redeemMode === 'batch'">
             <button
@@ -120,23 +115,28 @@
                 <i class="bi bi-info-circle batch-row-info" *ngIf="batch.isPayTouched" aria-label="此批次已被 Pay 觸及，無法單獨贖回"></i>
               </span>
               <span class="batch-row-cell batch-row-cell--date">
-                {{ batch.batchDate }}
+                {{ batch.tDate }}
               </span>
               <span class="batch-row-cell" data-label="申購金額">{{ formatNumber(batch.amount, selectedContract?.currencyCode) }}</span>
-              <span class="batch-row-cell" data-label="申購單位數">{{ formatUnits(batch.units) }}</span>
-              <span class="batch-row-cell" data-label="可贖回單位">{{ batch.isPayTouched ? '—' : formatUnits(batch.remainUnits) }}</span>
-              <span class="batch-row-cell" data-label="贖回參考金額">{{ batch.isPayTouched ? '—' : formatNumber(batchReferenceAmount(batch), selectedContract?.currencyCode) }}</span>
+              <span class="batch-row-cell" data-label="剩餘單位數">{{ batch.isPayTouched && batch.remainUnits === 0 ? '-' : formatUnits(batch.remainUnits) }}</span>
+              <span class="batch-row-cell" data-label="參考金額">{{ batch.isPayTouched ? '-' : formatNumber(batchReferenceAmount(batch), selectedContract?.currencyCode) }}</span>
+              <span class="batch-row-cell" data-label="含 Pay 報酬率" [ngClass]="rateClass(batchReturnRate(batch))">{{ formatRate(batchReturnRate(batch)) }}</span>
+              <span class="batch-row-cell batch-row-cell--shortterm" data-label="短線交易">
+                <i class="bi bi-check-lg" *ngIf="isShortTerm(batch)" aria-label="短線交易"></i>
+                <span *ngIf="!isShortTerm(batch)" aria-hidden="true">-</span>
+              </span>
             </button>
             </ng-container>
 
-            <!-- 動態合計列（已選批次的贖回參考金額合計，僅指定贖回模式且有勾選時顯示） -->
+            <!-- 動態合計列（已選批次的參考金額合計，僅指定贖回模式且有勾選時顯示） -->
             <div class="batch-row batch-row--total" *ngIf="redeemMode === 'batch' && hasSelectedBatch">
               <span class="batch-row-check"></span>
               <span class="batch-row-cell batch-row-cell--total-label">合計</span>
               <span class="batch-row-cell"></span>
+              <span class="batch-row-cell" data-label="剩餘單位數">{{ formatUnits(redeemUnits) }}</span>
+              <span class="batch-row-cell batch-row-cell--total-amount" data-label="參考金額">{{ formatNumber(redeemReferenceAmount, selectedContract?.currencyCode) }}</span>
               <span class="batch-row-cell"></span>
-              <span class="batch-row-cell" data-label="可贖回單位">{{ formatUnits(redeemUnits) }}</span>
-              <span class="batch-row-cell batch-row-cell--total-amount" data-label="贖回參考金額">{{ formatNumber(redeemReferenceAmount, selectedContract?.currencyCode) }}</span>
+              <span class="batch-row-cell"></span>
             </div>
           </div>
 
@@ -162,7 +162,7 @@
         </section>
 
         <div class="notes-block">
-          <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
+          <div class="notes-title">注意事項</div>
           <ul class="notes-list">
             <li>贖回申請下單截止時間為每營業日下午 14:00 前截止，如逾時，則順延至次一營業日辦理；若遇基金為非營業日或非報價日，交易日將依基金公司規定順延。</li>
             <li>實際贖回單位數依客戶基金帳上餘額為限，部分贖回單位數可能因未達交割日而導致交易失敗，請以基金最新公開說明書或投資人須知為準。</li>
@@ -247,7 +247,7 @@
           </div>
           <div class="pay-setting-panel pay-setting-panel--mode">
           <div class="form-group">
-          <mat-button-toggle-group class="mode-toggle mode-toggle-fill" [value]="payMode" (change)="setPayMode($event.value)" aria-label="Pay 方式">
+          <mat-button-toggle-group class="mode-toggle mode-toggle-fill" [value]="payMode" (change)="setPayMode($event.value)" aria-label="Pay 出方式">
             <mat-button-toggle value="amount">依金額</mat-button-toggle>
             <mat-button-toggle value="ratio">依比例</mat-button-toggle>
           </mat-button-toggle-group>
@@ -452,8 +452,8 @@
               <small>最新淨值估算，非實際金額</small>
             </div>
             <div class="redeem-result redeem-rate">
-              <span class="redeem-result-label">參考報酬率</span>
-              <strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatSignedRate(redeemReferenceReturnRate) }}</strong>
+              <span class="redeem-result-label">含 Pay 報酬率</span>
+              <strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatRate(redeemReferenceReturnRate) }}</strong>
               <small>{{ redeemMode === 'batch' ? '已選批次估算' : '含已 Pay 估算' }}</small>
             </div>
           </div>
@@ -478,8 +478,7 @@
             <div class="hint-panel" [class.is-open]="payModeHintOpen">
               已扣除在途中之單位數 {{ formatUnits(redeemOrderingUnits) }}。
             </div>
-            <div class="sum-row"><span>參考淨值</span><strong>{{ formatNav(redeemNav) }}</strong></div>
-            <div class="sum-row"><span>參考淨值日期</span><strong>{{ redeemNavDate }}</strong></div>
+            <div class="sum-row"><span>參考淨值</span><strong>{{ formatNav(redeemNav) }} <small class="ref-meta">({{ redeemNavDate }})</small></strong></div>
             <div class="sum-row"><span>參考匯率</span><strong>{{ redeemExchangeRate === 1 ? '-' : formatNav(redeemExchangeRate) }}</strong></div>
             <div class="sum-row"><span>收款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
             <div class="sum-row" *ngIf="showRedeemPayAdjustmentNotice">
@@ -501,7 +500,7 @@
                 <span>每月 Pay 比例</span>
                 <strong class="hl">年化 {{ form.controls.ratio.value }}%</strong>
               </div>
-              <div class="sum-row"><span>Pay 基準日</span><strong>每月 {{ form.controls.day.value }} 日</strong></div>
+              <div class="sum-row"><span>自由 Pay 基準日</span><strong>每月 {{ form.controls.day.value }} 日</strong></div>
               <div class="sum-row"><span>觸發門檻</span><strong>{{ thresholdText }}</strong></div>
             </ng-container>
           </div>
@@ -603,7 +602,7 @@
           <div class="sum-row" *ngIf="isRedeemMode && selectedContract"><span>贖回契約</span><strong>{{ currencyName(selectedContract.currencyCode) }}契約</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode"><span>贖回單位數</span><strong>{{ formatUnits(redeemUnits) }}</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode"><span>參考金額</span><strong class="hl">{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
-          <div class="sum-row" *ngIf="isRedeemMode"><span>參考報酬率</span><strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatSignedRate(redeemReferenceReturnRate) }}</strong></div>
+          <div class="sum-row" *ngIf="isRedeemMode"><span>含 Pay 報酬率</span><strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatRate(redeemReferenceReturnRate) }}</strong></div>
           <div class="sum-row" *ngIf="!isModifyMode && !isRedeemMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
           <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode && payMode === 'amount'"><span>每月 Pay 金額</span><strong class="hl">{{ formatMoney(monthlyPay) }}</strong></div>
           <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode && payMode === 'ratio'"><span>每月 Pay 比例</span><strong class="hl">年化 {{ form.controls.ratio.value }}%</strong></div>
@@ -616,7 +615,7 @@
           <button *ngIf="isRedeemMode" mat-raised-button color="primary" type="button" (click)="goOverview()">帳戶總覽</button>
         </div>
         <div class="notes-block">
-          <div class="notes-title"><i class="bi bi-info-circle"></i> 注意事項</div>
+          <div class="notes-title">注意事項</div>
           <ul class="notes-list">
             <li *ngIf="isModifyMode">您的自由 Pay 異動委託已送出。設定將依委託查詢狀態生效。</li>
             <li *ngIf="isRedeemMode">您的贖回委託已送出。若超過本營業日交易時間 14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。</li>

@@ -15,6 +15,8 @@ type PurchaseMode = 'addOn' | 'new' | null;
 type RedeemMode = 'all' | 'batch' | null;
 
 const DEFAULT_DEMO_SCENARIO = DEMO_SCENARIOS[0];
+// Demo 固定參考日：避免短線判斷依賴系統時間（過 30 天後示意會失效）
+const DEMO_TODAY = '2026/05/29';
 const FUND_CURRENCY_CODE_MAP: Record<string, string> = {
   '台幣': 'TWD',
   '美元': 'USD',
@@ -392,12 +394,32 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return Math.round(batch.remainUnits * this.redeemNav * this.redeemExchangeRate);
   }
 
-  // 升級四：依贖回模式切換報酬率分母（all 用契約成本，batch 用已選批次成本）
+  // 含 Pay 報酬率：(剩餘市值 + 已 Pay 金額 − 申購金額) / 申購金額 × 100
+  batchReturnRate(batch: PurchaseBatch): number {
+    if (batch.amount <= 0) return 0;
+    const remainValue = batch.remainUnits * this.redeemNav * this.redeemExchangeRate;
+    return ((remainValue + batch.paidAmount - batch.amount) / batch.amount) * 100;
+  }
+
+  // 短線交易判定：自成交日起 30 天內 → 短線（使用 tDate 與 demo 固定參考日，避免時區漂移與真實系統時間污染）
+  isShortTerm(batch: PurchaseBatch): boolean {
+    // slash 格式被瀏覽器當 local 解析（避免 ISO '-' 強制 UTC 漂移）
+    const tradeDate = new Date(batch.tDate);
+    const today = new Date(DEMO_TODAY);
+    const days = (today.getTime() - tradeDate.getTime()) / (1000 * 60 * 60 * 24);
+    return days >= 0 && days < 30;
+  }
+
+  // 升級四：含 Pay 報酬率 — 公式與 batchReturnRate 一致 (剩餘市值 + 已 Pay - 投入成本) / 投入成本
   get redeemReferenceReturnRate(): number {
     if (this.redeemMode === 'batch') {
-      const batchCost = this.selectedBatches.reduce((s, b) => s + b.amount, 0);
-      if (batchCost <= 0) return 0;
-      return ((this.redeemReferenceAmount - batchCost) / batchCost) * 100;
+      const totalAmount = this.selectedBatches.reduce((s, b) => s + b.amount, 0);
+      if (totalAmount <= 0) return 0;
+      const totalRemainValue = this.selectedBatches.reduce(
+        (s, b) => s + b.remainUnits * this.redeemNav * this.redeemExchangeRate, 0
+      );
+      const totalPaid = this.selectedBatches.reduce((s, b) => s + b.paidAmount, 0);
+      return ((totalRemainValue + totalPaid - totalAmount) / totalAmount) * 100;
     }
     const costBasis = this.selectedContract?.costBasis ?? 0;
     if (costBasis <= 0) return 0;
@@ -661,22 +683,17 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   // 純數字（無幣別前綴）：用於贖回流程已透過 banner 宣告幣別的情境
+  // DesignSystem §4.5：台幣整數；外幣最多 2 位 trim 尾零
   formatNumber(value: number, currencyCode?: string): string {
     const code = currencyCode ?? this.selectedCurrency?.currencyCode ?? 'TWD';
     const num = Number(value || 0);
     return code === 'TWD'
       ? num.toLocaleString('en-US')
-      : num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      : num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
   }
 
   formatRate(value: number): string {
     return `${Number(value || 0).toFixed(2)}%`;
-  }
-
-  formatSignedRate(value: number): string {
-    const num = Number(value || 0);
-    const sign = num > 0 ? '+' : '';
-    return `${sign}${num.toFixed(2)}%`;
   }
 
   rateClass(value: number): string {
@@ -692,7 +709,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   formatNav(value: number): string {
-    return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 4, maximumFractionDigits: 4 });
+    // DesignSystem §4.5：淨值最多 4 位 trim 尾零（16.2045 → 16.2045；10.5 → 10.5；100 → 100）
+    return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
   }
 
   trackStep(_: number, step: { key: DemoStep }): DemoStep {

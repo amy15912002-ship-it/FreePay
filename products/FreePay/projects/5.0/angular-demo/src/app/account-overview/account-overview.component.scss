@@ -3,7 +3,7 @@
   min-height: 100vh;
   background: var(--color-bg-base);
   color: var(--color-text-primary);
-  padding-bottom: 80px;
+  padding-bottom: 0;
 }
 
 // ── Shell ──────────────────────────────────────────────
@@ -11,7 +11,7 @@
 .ov-shell {
   width: min(1200px, 100%);
   margin: 0 auto;
-  padding: 0 0 60px;
+  padding: 0;
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -735,9 +735,9 @@
 }
 
 .ov-order-table {
-  th.col-check, td.col-check { width: 64px; }
-  th.col-fund,  td.col-fund  { width: 240px; text-align: left; }
-  th.col-status,td.col-status{ width: 90px; }
+  // col-check 56px、col-fund 200px 給基金名稱足夠寬度；其餘欄位讓 table-layout: fixed 平均分配
+  th.col-check, td.col-check { width: 56px; }
+  th.col-fund,  td.col-fund  { width: 200px; text-align: left; }
 }
 
 // ── Order cell helpers ─────────────────────────────────────
@@ -751,6 +751,20 @@
 .ov-order-date-mobile {
   white-space: nowrap;
   font-size: 14px;
+}
+
+// 委託結果 / 委託日 合併欄：結果主要、日期次要
+.ov-order-result {
+  color: var(--color-text-primary);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.ov-order-date-sub {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  white-space: nowrap;
 }
 .ov-order-effect-date .ov-order-effect-value,
 .ov-order-effect-mobile {
@@ -1032,7 +1046,7 @@
 
 @media (max-width: 767px) {
   .ov-shell {
-    padding: 0 15px 80px;
+    padding: 0 15px;
     gap: 24px;
   }
 
