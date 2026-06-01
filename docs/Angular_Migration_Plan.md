@@ -227,6 +227,20 @@ npm run build:pages
 
 若既有專案目前是透過 `npm run build` 部署，且 `build` script 已包含正確的 `--base-href`，可以先維持現況，不影響其他新專案部署。
 
+**Angular clean URL 與 GitHub Pages 重新整理**
+
+這個問題不是因為多了一個 build 才發生，而是因為 Angular SPA、乾淨 URL 與 GitHub Pages 靜態部署放在一起時，本來就會遇到的限制。
+
+Angular 真正的入口只有一個 `index.html`。像 `/FreePay/demo/overview`、`/FreePay/demo/redeem` 這類網址，是 Angular Router 在瀏覽器裡切出來的前端路由，不是 GitHub Pages 上真的存在一個 `demo/overview/index.html` 檔案。
+
+所以從 GitHub Pages 的 `Visit site` 進到 `/FreePay/` 會正常，因為 root 有 `index.html`。但如果在 demo 裡切到某個乾淨 URL 後按瀏覽器重新整理，GitHub Pages 會先把那個 URL 當成真實檔案路徑去找；找不到檔案時，就會出現 GitHub Pages 的 404。
+
+GitHub Pages 不能像一般 web server 一樣設定「所有路由都 rewrite 到 `index.html`」。比較適合這個 demo 的做法，是 build 完後把 `index.html` 複製成同一份 `404.html`。這樣使用者重新整理乾淨 URL 時，GitHub Pages 雖然先走到 404 fallback，但實際回傳的內容仍是 Angular app，Angular Router 接手後就能回到正確畫面。
+
+這不是把每個頁面都複製一份，也不是把很多 route 產生成實體檔案；只是部署產物裡多一個 `404.html`，內容跟 `index.html` 一樣。每次部署都會覆蓋線上的 `gh-pages` 內容，所以線上只保留最新版；真正的版控與還原紀錄在 Git commit 裡。
+
+這個做法不衝突「`main` 只放原始碼、`dist/` 不提交」的原則。`404.html` 是 GitHub Actions 在部署產物中自動產生，不需要手動複製，也不需要提交到 `main`。
+
 **Step 3 — 在 GitHub 開啟 Pages**
 
 進入 GitHub repo → Settings → Pages，將 Source 設為 `gh-pages` branch（root）。設定完成後無需再調整。

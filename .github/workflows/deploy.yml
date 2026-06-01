@@ -27,6 +27,10 @@ jobs:
         working-directory: products/FreePay/projects/5.0/angular-demo
         run: npm run build
 
+      - name: Add SPA fallback
+        working-directory: products/FreePay/projects/5.0/angular-demo
+        run: cp dist/freepay-5-angular-demo/index.html dist/freepay-5-angular-demo/404.html
+
       - name: Deploy to gh-pages
         uses: JamesIves/github-pages-deploy-action@v4
         with:
