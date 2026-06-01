@@ -143,7 +143,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       // 申購：一律直接進設定頁；多幣別時頂部切換器處理幣別選擇
       this.syncSelectedContractForCurrency();
     }
-    this.activeStep = 'settings';
+    // 無可選批次的贖回直接進確認頁（設定頁無事可做）
+    this.activeStep = this.isRedeemMode && !this.hasSelectableBatch ? 'confirm' : 'settings';
     this.resetFormState();
     this.applySettingsForMode();
   }
@@ -222,8 +223,19 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.contractForSelectedCurrency !== null;
   }
 
+  // 無可選批次的贖回 → 設定頁無任何可操作項（指定贖回不可行動），跳過設定頁直接進確認
+  get redeemSkipsSettings(): boolean {
+    return this.isRedeemMode && !this.hasSelectableBatch;
+  }
+
   get steps(): Array<{ key: DemoStep; label: string; description: string }> {
     if (this.isRedeemMode) {
+      if (this.redeemSkipsSettings) {
+        return [
+          { key: 'confirm', label: '確認送出', description: '確認試算與送出' },
+          { key: 'done', label: '完成', description: '委託完成' }
+        ];
+      }
       return [
         { key: 'settings', label: '贖回設定', description: '選擇贖回方式' },
         { key: 'confirm', label: '確認送出', description: '確認試算與送出' },
@@ -388,9 +400,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return stockUnits > 0 ? Math.round((this.redeemUnits / stockUnits) * marketValue) : marketValue;
   }
 
-  // 單一批次的贖回參考金額（用於批次列表每列）
+  // 單一批次的贖回參考金額：依剩餘單位數計算（完全領完 → 自然為 0）
   batchReferenceAmount(batch: PurchaseBatch): number {
-    if (batch.isPayTouched) return 0;
     return Math.round(batch.remainUnits * this.redeemNav * this.redeemExchangeRate);
   }
 
@@ -596,6 +607,11 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   previous(): void {
     if (this.activeStep === 'confirm') {
+      // 無可選批次贖回沒有設定頁 → 上一步直接回帳戶總覽
+      if (this.redeemSkipsSettings) {
+        this.goOverview();
+        return;
+      }
       this.activeStep = 'settings';
       return;
     }
@@ -803,7 +819,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.dateHintOpen = false;
     this.applyPayModeValidators();
     // 升級四：贖回模式進入時重置兩層狀態
-    this.redeemMode = null;
+    // 若該契約無可選批次（全部已被 Pay 觸及）→ 自動鎖定全部贖回，免去無意義的決策
+    this.redeemMode = this.isRedeemMode && !this.hasSelectableBatch ? 'all' : null;
     this.selectedBatchIds.clear();
     this.acknowledgePayAdjustment = false;
   }

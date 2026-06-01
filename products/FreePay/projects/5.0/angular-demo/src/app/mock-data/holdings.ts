@@ -42,17 +42,18 @@ export interface HoldingContract {
 
 export const HOLDINGS: HoldingContract[] = [
   {
+    // FP20240101 為「全契約批次皆被 Pay 觸及」示範：贖回流程自動鎖定全部贖回
     fpNo: 'FP20240101', fundId: 'TA123456', currencyCode: 'TWD',
     startDate: '2024/01/01', payMode: 'amount', monthlyPay: 5000, annualRate: 0, payDay: 15,
     thresholdMode: 'none', thresholdValue: 0,
-    costBasis: 220000, marketValue: 245000, paidTotal: 70000, status: 'Y',
+    costBasis: 220000, marketValue: 40000, paidTotal: 180000, status: 'Y',
     purchaseBatches: [
-      // 首次申購：已被 Pay 觸及
+      // 首次申購：完全消耗
       { batchId: 'BFP20240101-1', batchDate: '2024/01/01', orderTime: '13:25:00', tDate: '2024/01/03',
-        amount: 120000, units: 8000, nav: 15.0, isPayTouched: true, remainUnits: 3200, paidAmount: 70000 },
-      // 加碼：尚未被 Pay 觸及 → 可單獨贖回
+        amount: 120000, units: 8000, nav: 15.0, isPayTouched: true, remainUnits: 0, paidAmount: 120000 },
+      // 加碼：FIFO 下接續消耗（部分）→ 仍不可單獨贖回
       { batchId: 'BFP20240101-2', batchDate: '2024/09/12', orderTime: '10:42:30', tDate: '2024/09/16',
-        amount: 100000, units: 6250, nav: 16.0, isPayTouched: false, remainUnits: 6250, paidAmount: 0 },
+        amount: 100000, units: 6250, nav: 16.0, isPayTouched: true, remainUnits: 2500, paidAmount: 60000 },
     ],
   },
   {
