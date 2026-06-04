@@ -410,16 +410,24 @@
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--color-brand-tertiary-500);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
 
   &:hover,
   &:focus-visible {
-    color: var(--color-brand-tertiary-600);
+    color: var(--color-brand-tertiary-400);
     outline: none;
   }
+}
+
+.ov-market-info-label,
+.ov-market-value {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
 }
 
 .ov-info-popover {
@@ -862,6 +870,188 @@
   &:hover { color: var(--color-text-primary); }
 }
 
+// ── Market value modal overlay ────────────────────────────────
+
+.market-info-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 920;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-overlay-scrim);
+}
+
+.market-info-panel {
+  position: relative;
+  width: min(640px, 100%);
+  padding: 28px 48px 32px;
+  border-radius: 8px;
+  background: var(--color-bg-base);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+
+  h3 {
+    margin: 0 0 10px;
+    color: var(--color-text-heading);
+    font-size: 22px;
+    font-weight: 700;
+  }
+}
+
+.market-info-fund {
+  margin: 0 0 26px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.market-info-close {
+  position: absolute;
+  top: 18px;
+  right: 18px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-tertiary);
+  font-size: 22px;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-text-primary);
+    outline: none;
+  }
+}
+
+.market-calc-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr) auto minmax(0, 1fr);
+  align-items: start;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.market-calc-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+  color: var(--color-text-primary);
+
+  span {
+    color: var(--color-text-secondary);
+    font-size: 16px;
+  }
+
+  strong {
+    color: var(--color-text-primary);
+    font-size: 18px;
+    font-weight: 400;
+    line-height: 1.35;
+  }
+
+  em {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-style: normal;
+    line-height: 1.25;
+  }
+}
+
+.market-calc-item--result strong {
+  font-weight: 500;
+}
+
+.market-calc-op {
+  padding-top: 34px;
+  color: var(--color-text-primary);
+  font-size: 18px;
+}
+
+.market-info-confirm {
+  min-width: 160px;
+  min-height: 46px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-brand-primary-400);
+  color: var(--color-text-on-brand);
+  font-family: var(--font-primary);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+
+  &:hover,
+  &:focus-visible {
+    background: var(--color-brand-primary-600);
+    outline: none;
+  }
+}
+
+@media (max-width: 767px) {
+  .market-info-overlay {
+    padding: 18px;
+  }
+
+  .market-info-panel {
+    padding: 26px 18px 24px;
+
+    h3 {
+      font-size: 20px;
+    }
+  }
+
+  .market-info-fund {
+    margin-bottom: 20px;
+    text-align: left;
+  }
+
+  .market-calc-row {
+    grid-template-columns: 1fr;
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .market-calc-item {
+    display: grid;
+    grid-template-columns: 72px minmax(0, 1fr);
+    align-items: baseline;
+    gap: 4px 12px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border-default);
+    text-align: left;
+
+    span {
+      font-size: 14px;
+    }
+
+    strong {
+      text-align: right;
+      font-size: 16px;
+    }
+
+    em {
+      grid-column: 2;
+      text-align: right;
+    }
+  }
+
+  .market-calc-item--result {
+    border-bottom: 0;
+  }
+
+  .market-calc-op {
+    display: none;
+  }
+}
+
 // ── Detail modal overlay ──────────────────────────────────────
 
 .detail-overlay {
@@ -1165,6 +1355,10 @@
         font-size: 16px;
         font-weight: 500;
       }
+    }
+
+    .ov-market-info-button--value {
+      display: none;
     }
 
     .ov-kv--market,

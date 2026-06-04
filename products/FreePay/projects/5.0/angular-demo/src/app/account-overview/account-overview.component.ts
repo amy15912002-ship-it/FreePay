@@ -101,6 +101,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   detailTimeType: DetailTimeType = 'ALL';
   detailCustomStart: Date | null = null;
   detailCustomEnd: Date | null = null;
+  marketInfoFund: OvFund | null = null;
 
   // ── Order filters ──
 
@@ -226,6 +227,30 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     return `${n < 0 ? '-' : ''}${Math.abs(n).toFixed(2)}%`;
   }
 
+  fmtUnits(n: number): string {
+    return Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
+  }
+
+  fmtDecimal(n: number): string {
+    return Number(n || 0).toLocaleString('en-US', {
+      minimumFractionDigits: 4,
+      maximumFractionDigits: 4,
+    });
+  }
+
+  openMarketInfo(fund: OvFund | null, event?: Event): void {
+    event?.stopPropagation();
+    this.marketInfoFund = fund;
+  }
+
+  closeMarketInfo(): void {
+    this.marketInfoFund = null;
+  }
+
+  get marketInfoContract(): OvContract | null {
+    return this.marketInfoFund?.contracts[0] ?? null;
+  }
+
   ccyText(code: string): string {
     const names: Record<string, string> = { TWD: '台幣', USD: '美元', JPY: '日幣' };
     return names[code] ?? code;
@@ -246,8 +271,8 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   fmtLimitMode(limitMode: string, limitVal: number | null): string {
-    if (limitMode === 'neg') return `市值守護・跌${Math.abs(limitVal ?? 0)}%`;
-    if (limitMode === 'pos') return `增值啟動・漲${limitVal ?? 0}%`;
+    if (limitMode === 'protect') return `市值守護・低於投入成本 ${limitVal ?? 0}% 暫停`;
+    if (limitMode === 'unlock') return `增值啟動・達投入成本 ${limitVal ?? 0}% 才 Pay`;
     return '不設門檻';
   }
 

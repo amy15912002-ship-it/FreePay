@@ -2,18 +2,31 @@
 <div class="fs-shell">
   <h1 class="block-title fs-title">鉅亨自由 Pay — 基金搜尋</h1>
 
-  <!-- 已篩條件 + 清除 -->
-  <div class="fs-summary">
-    <span>已篩條件　【相關結果共有 <strong>{{ filteredFunds.length }}</strong> 檔】</span>
-    <button type="button" class="fs-clear" (click)="clearFilters()">清除條件</button>
+  <!-- 基金搜尋：獨立主入口，與篩選 chip 分開 -->
+  <div class="fs-search-bar">
+    <span class="fs-filter-label">基金搜尋</span>
+    <label class="fs-search-field">
+      <i class="bi bi-search" aria-hidden="true"></i>
+      <input class="fs-keyword" [(ngModel)]="keyword" (input)="onFilterChange()" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keyup.enter)="applyKeywordSearch()" placeholder="請輸入基金代碼或名稱關鍵字" autocomplete="off">
+      <div class="fs-search-suggest" *ngIf="searchFocused && keyword.trim().length > 0">
+        <button type="button" class="fs-search-suggest-all" (click)="applyKeywordSearch()">
+          <i class="bi bi-search" aria-hidden="true"></i>
+          以「{{ keyword.trim() }}」搜尋全部結果
+        </button>
+        <button
+          *ngFor="let f of searchMatches; trackBy: trackByFundId"
+          type="button"
+          class="fs-search-suggest-item"
+          (click)="selectSearchFund(f)"
+        >
+          <span class="fs-search-suggest-code"><span *ngFor="let p of highlightParts(f.fundId)" [class.fs-hl]="p.hl">{{ p.text }}</span></span>
+          <span class="fs-search-suggest-name"><span *ngFor="let p of highlightParts(f.name)" [class.fs-hl]="p.hl">{{ p.text }}</span></span>
+        </button>
+      </div>
+    </label>
   </div>
 
   <ng-template #filterControls>
-    <div class="fs-filter-row">
-      <span class="fs-filter-label">基金搜尋</span>
-      <input class="fs-keyword" [(ngModel)]="keyword" (input)="onFilterChange()" placeholder="請輸入基金代碼或名稱關鍵字" autocomplete="off">
-    </div>
-
     <div class="fs-filter-row">
       <span class="fs-filter-label">境內境外</span>
       <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="境內境外篩選">
@@ -22,26 +35,39 @@
       </mat-chip-list>
     </div>
 
-    <div class="fs-filter-row">
+    <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('category')">
       <span class="fs-filter-label">基金類型</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金類型篩選">
+      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金類型篩選" #chipArea data-filter-group="category">
         <mat-chip [selectable]="true" [selected]="categoryFilters.length===0" (click)="clearFilterGroup('category')">全部</mat-chip>
         <mat-chip *ngFor="let c of visibleCategories; trackBy: trackByValue" [selectable]="true" [selected]="categoryFilters.includes(c)" (click)="toggleCategoryFilter(c)">{{ c }}</mat-chip>
       </mat-chip-list>
+      <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('category') || isFilterExpanded('category')">
+        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('category')" [attr.aria-label]="isFilterExpanded('category') ? '收合基金類型' : '展開基金類型'">
+          <i class="bi" [class.bi-chevron-up]="isFilterExpanded('category')" [class.bi-chevron-down]="!isFilterExpanded('category')"></i>
+        </button>
+      </div>
     </div>
 
-    <div class="fs-filter-row">
+    <div class="fs-filter-row fs-filter-row--compact fs-filter-row--pricing" [class.is-expanded]="isFilterExpanded('pricingCcy')">
       <span class="fs-filter-label">計價幣別</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="計價幣別篩選">
+      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="計價幣別篩選" #chipArea data-filter-group="pricingCcy">
         <mat-chip [selectable]="true" [selected]="pricingCcyFilters.length===0" (click)="clearFilterGroup('pricingCcy')">全部</mat-chip>
         <mat-chip *ngFor="let ccy of visiblePricingCurrencies; trackBy: trackByValue" [selectable]="true" [selected]="pricingCcyFilters.includes(ccy)" (click)="togglePricingCcyFilter(ccy)">{{ ccy }}</mat-chip>
       </mat-chip-list>
+      <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('pricingCcy') || isFilterExpanded('pricingCcy')">
+        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('pricingCcy')" [attr.aria-label]="isFilterExpanded('pricingCcy') ? '收合計價幣別' : '展開計價幣別'">
+          <i class="bi" [class.bi-chevron-up]="isFilterExpanded('pricingCcy')" [class.bi-chevron-down]="!isFilterExpanded('pricingCcy')"></i>
+        </button>
+      </div>
     </div>
 
-    <div class="fs-filter-row">
+    <div class="fs-filter-row fs-filter-row--compact fs-filter-row--brand" [class.is-expanded]="isFilterExpanded('brand')" [class.has-brand-search]="brandSearchOpen" [class.has-search-keyword]="brandKeyword.trim().length > 0">
       <span class="fs-filter-label">基金品牌</span>
-      <div class="fs-brand-filter">
-        <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金品牌篩選">
+      <div class="fs-brand-search-row" *ngIf="brandSearchOpen || isFilterExpanded('brand')">
+        <input class="fs-brand-keyword" [(ngModel)]="brandKeyword" (input)="onBrandKeywordChange()" placeholder="輸入品牌關鍵字快速搜尋" autocomplete="off">
+      </div>
+      <div #brandFilterArea class="fs-brand-filter">
+        <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金品牌篩選" #chipArea data-filter-group="brand">
           <mat-chip [selectable]="true" [selected]="brandFilters.length===0" (click)="clearFilterGroup('brand')">全部</mat-chip>
           <mat-chip
             *ngFor="let b of visibleBrands; trackBy: trackByValue"
@@ -50,34 +76,111 @@
             (click)="toggleBrandFilter(b)"
           >{{ b }}</mat-chip>
         </mat-chip-list>
-        <div class="fs-brand-search-row" *ngIf="isFilterExpanded('brand')">
-          <button class="fs-brand-search-toggle" type="button" (click)="toggleBrandSearch()">
-            <i class="bi bi-search"></i>
-            搜尋品牌
-          </button>
-          <input *ngIf="brandSearchOpen" class="fs-brand-keyword" [(ngModel)]="brandKeyword" placeholder="輸入品牌關鍵字快速搜尋" autocomplete="off">
-        </div>
       </div>
       <div class="fs-filter-actions">
-        <button class="fs-filter-more" type="button" *ngIf="hasHiddenOptions('brand') || isFilterExpanded('brand')" (click)="toggleFilterExpanded('brand')">
-          {{ isFilterExpanded('brand') ? '收合' : '更多' }}
+        <button class="fs-brand-search-toggle" type="button" (click)="toggleBrandSearch()" [attr.aria-label]="brandSearchOpen ? '關閉品牌搜尋' : '搜尋品牌'">
+          <i class="bi" [class.bi-search]="!brandSearchOpen" [class.bi-x-lg]="brandSearchOpen"></i>
+        </button>
+        <button class="fs-filter-more fs-filter-more--icon" type="button" *ngIf="hasHiddenOptions('brand') || isFilterExpanded('brand')" (click)="toggleFilterExpanded('brand')" [attr.aria-label]="isFilterExpanded('brand') ? '收合基金品牌' : '展開基金品牌'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('brand')" [class.bi-chevron-down]="!isFilterExpanded('brand')"></i>
         </button>
       </div>
     </div>
 
-    <div class="fs-filter-row">
+    <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('region')">
       <span class="fs-filter-label">投資區域</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="投資區域篩選">
+      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="投資區域篩選" #chipArea data-filter-group="region">
         <mat-chip [selectable]="true" [selected]="regionFilters.length===0" (click)="clearFilterGroup('region')">全部</mat-chip>
         <mat-chip *ngFor="let r of visibleRegions; trackBy: trackByValue" [selectable]="true" [selected]="regionFilters.includes(r)" (click)="toggleRegionFilter(r)">{{ r }}</mat-chip>
       </mat-chip-list>
+      <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('region') || isFilterExpanded('region')">
+        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('region')" [attr.aria-label]="isFilterExpanded('region') ? '收合投資區域' : '展開投資區域'">
+          <i class="bi" [class.bi-chevron-up]="isFilterExpanded('region')" [class.bi-chevron-down]="!isFilterExpanded('region')"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="fs-filter-row fs-filter-row--compact fs-filter-row--brand" [class.is-expanded]="isFilterExpanded('group')" [class.has-brand-search]="groupSearchOpen" [class.has-search-keyword]="groupKeyword.trim().length > 0">
+      <span class="fs-filter-label">基金組別</span>
+      <div class="fs-brand-search-row" *ngIf="groupSearchOpen || isFilterExpanded('group')">
+        <input class="fs-brand-keyword" [(ngModel)]="groupKeyword" (input)="onGroupKeywordChange()" placeholder="輸入組別關鍵字快速搜尋" autocomplete="off">
+      </div>
+      <div class="fs-brand-filter">
+        <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金組別篩選" #chipArea data-filter-group="group">
+          <mat-chip [selectable]="true" [selected]="groupFilters.length===0" (click)="clearFilterGroup('group')">全部</mat-chip>
+          <mat-chip
+            *ngFor="let g of visibleGroups; trackBy: trackByValue"
+            [selectable]="true"
+            [selected]="groupFilters.includes(g)"
+            (click)="toggleGroupFilter(g)"
+          >{{ g }}</mat-chip>
+        </mat-chip-list>
+      </div>
+      <div class="fs-filter-actions">
+        <button class="fs-brand-search-toggle" type="button" (click)="toggleGroupSearch()" [attr.aria-label]="groupSearchOpen ? '關閉組別搜尋' : '搜尋組別'">
+          <i class="bi" [class.bi-search]="!groupSearchOpen" [class.bi-x-lg]="groupSearchOpen"></i>
+        </button>
+        <button class="fs-filter-more fs-filter-more--icon" type="button" *ngIf="hasHiddenOptions('group') || isFilterExpanded('group')" (click)="toggleFilterExpanded('group')" [attr.aria-label]="isFilterExpanded('group') ? '收合基金組別' : '展開基金組別'">
+          <i class="bi" [class.bi-chevron-up]="isFilterExpanded('group')" [class.bi-chevron-down]="!isFilterExpanded('group')"></i>
+        </button>
+      </div>
+    </div>
+
+    <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('lipper')">
+      <span class="fs-filter-label">理柏總回報</span>
+      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="理柏總回報篩選" #chipArea data-filter-group="lipper">
+        <mat-chip [selectable]="true" [selected]="lipperFilters.length===0" (click)="clearFilterGroup('lipper')">全部</mat-chip>
+        <mat-chip *ngFor="let r of lipperRatings" [selectable]="true" [selected]="lipperFilters.includes(r)" (click)="toggleLipperFilter(r)">{{ r }}</mat-chip>
+      </mat-chip-list>
+      <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('lipper') || isFilterExpanded('lipper')">
+        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('lipper')" [attr.aria-label]="isFilterExpanded('lipper') ? '收合理柏總回報' : '展開理柏總回報'">
+          <i class="bi" [class.bi-chevron-up]="isFilterExpanded('lipper')" [class.bi-chevron-down]="!isFilterExpanded('lipper')"></i>
+        </button>
+      </div>
     </div>
   </ng-template>
 
   <!-- 篩選列 -->
   <div class="fs-filters">
     <ng-container *ngTemplateOutlet="filterControls"></ng-container>
+  </div>
+
+  <div class="fs-filter-overlay" *ngIf="filterPanelOpen" (click)="closeFilterPanel()">
+    <section class="fs-filter-sheet" (click)="$event.stopPropagation()" aria-label="篩選條件">
+      <div class="fs-filter-sheet-head">
+        <button class="fs-filter-back" type="button" (click)="closeFilterPanel()" aria-label="返回">
+          <i class="bi bi-arrow-left"></i>
+        </button>
+        <h2>篩選</h2>
+      </div>
+      <div class="fs-filter-sheet-body">
+        <ng-container *ngTemplateOutlet="filterControls"></ng-container>
+      </div>
+      <div class="fs-filter-sheet-actions">
+        <button mat-stroked-button color="primary" type="button" (click)="clearFilters()">清除條件</button>
+        <button mat-raised-button color="primary" type="button" (click)="closeFilterPanel()">套用篩選</button>
+      </div>
+    </section>
+  </div>
+
+  <!-- 已篩條件 + 清除 -->
+  <div class="fs-summary">
+    <div class="fs-summary-result">
+      <span>【相關結果共有 <strong>{{ filteredFunds.length }}</strong> 檔】</span>
+      <button type="button" class="fs-clear" (click)="clearFilters()" aria-label="清空條件">
+        <i class="bi bi-trash3" aria-hidden="true"></i>
+        <span>清空條件</span>
+      </button>
+    </div>
+    <div class="fs-summary-actions">
+      <button class="fs-mobile-filter-btn" type="button" (click)="openFilterPanel()" aria-label="篩選">
+        <i class="bi bi-funnel"></i>
+        <strong *ngIf="activeFilterCount > 0">{{ activeFilterCount }}</strong>
+      </button>
+      <button class="fs-sort-trigger" type="button" (click)="sortPanelOpen = true" aria-label="開啟排序">
+        <i class="bi bi-arrow-down-up"></i>
+      </button>
+    </div>
   </div>
 
   <!-- 績效 tabs -->
@@ -87,10 +190,6 @@
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='roi'" (click)="setTab('roi')">年度報酬率</button>
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
     </div>
-    <button class="fs-sort-trigger" type="button" (click)="sortPanelOpen = true" aria-label="開啟排序">
-      <i class="bi bi-sort-down"></i>
-      排序
-    </button>
   </div>
 
   <div class="fs-sort-overlay" *ngIf="sortPanelOpen" (click)="closeSortPanel()">
@@ -125,7 +224,7 @@
 
   <!-- 表格 -->
   <div class="fs-table-wrap">
-    <table class="fs-table">
+    <table class="fs-table" *ngIf="pagedFunds.length > 0">
       <thead>
         <tr>
           <th class="col-code" (click)="setSort('fundId')">基金代碼<i class="bi fs-sort" [ngClass]="sortIconClass('fundId')" [class.is-active]="isSortActive('fundId')"></i></th>
@@ -177,11 +276,9 @@
             <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">BUY</button>
           </td>
         </tr>
-        <tr *ngIf="pagedFunds.length === 0">
-          <td colspan="99" class="fs-empty">{{ emptyStateMessage }}</td>
-        </tr>
       </tbody>
     </table>
+    <div class="fs-empty" *ngIf="pagedFunds.length === 0">{{ emptyStateMessage }}</div>
   </div>
 
   <!-- 分頁 -->

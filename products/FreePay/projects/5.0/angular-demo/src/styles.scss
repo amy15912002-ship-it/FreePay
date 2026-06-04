@@ -338,7 +338,7 @@ textarea {
 
 // ── Shared demo chrome (used across all demo components) ─────────────────
 
-.fp-demo-header {
+.fp-site-header {
   position: sticky;
   top: 0;
   z-index: 40;
@@ -352,7 +352,7 @@ textarea {
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
-.fp-demo-brand {
+.fp-site-brand {
   display: inline-flex;
   align-items: center;
   gap: 12px;
@@ -362,27 +362,27 @@ textarea {
   white-space: nowrap;
 }
 
-.fp-demo-logo {
+.fp-site-logo {
   display: block;
   width: auto;
   height: 42px;
 }
 
-.fp-demo-brand-divider {
+.fp-site-brand-divider {
   width: 1px;
   height: 28px;
   background: rgba(255, 255, 255, 0.7);
 }
 
-.fp-demo-brand-product {
+.fp-site-brand-product {
   color: var(--color-neutral-0);
-  font-size: 22px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: .02em;
   white-space: nowrap;
 }
 
-.fp-demo-nav {
+.fp-site-nav {
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
@@ -391,7 +391,7 @@ textarea {
 
   a {
     color: var(--color-neutral-150);
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 700;
     text-decoration: none;
     white-space: nowrap;
@@ -403,7 +403,7 @@ textarea {
   }
 }
 
-.fp-demo-nav-action {
+.fp-site-nav-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -411,24 +411,48 @@ textarea {
   padding: 0 18px;
   border: 1px solid var(--color-brand-secondary-400);
   border-radius: 4px;
-  color: var(--color-brand-secondary-400) !important;
+  background: var(--color-brand-secondary-400);
+  color: var(--color-neutral-0) !important;
+  font-weight: 700;
 }
 
-.fp-demo-login {
+.fp-site-login {
   min-height: 40px;
   padding: 0 18px;
   border: 0;
   border-radius: 4px;
-  background: var(--color-brand-secondary-400);
-  color: var(--color-neutral-0);
+  background: transparent;
+  color: var(--color-neutral-150);
   font-family: var(--font-primary);
-  font-size: 18px;
+  font-size: 16px;
   font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
 }
 
-.fp-demo-menu-btn {
+.fp-site-login--outline {
+  border: 1px solid var(--color-brand-secondary-400);
+  color: var(--color-brand-secondary-400);
+
+  &:hover,
+  &:focus-visible {
+    background: rgba(250, 166, 52, 0.12);
+    color: var(--color-brand-secondary-300);
+  }
+}
+
+.fp-site-login--ghost {
+  padding: 0;
+  background: transparent;
+  color: var(--color-neutral-150);
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-neutral-0);
+  }
+}
+
+.fp-site-menu-btn {
   display: none;
   align-items: center;
   justify-content: center;
@@ -443,7 +467,7 @@ textarea {
   cursor: pointer;
 }
 
-.fp-demo-main {
+.fp-site-main {
   display: block;
   padding: 40px 0;
   background: var(--color-bg-base);
@@ -474,7 +498,7 @@ textarea {
 }
 
 @media (max-width: 900px) {
-  .fp-demo-header {
+  .fp-site-header {
     position: sticky;
     min-height: 56px;
     padding: 0 16px;
@@ -482,28 +506,28 @@ textarea {
     overflow: visible;
   }
 
-  .fp-demo-logo {
+  .fp-site-logo {
     height: 30px;
   }
 
-  .fp-demo-brand {
+  .fp-site-brand {
     gap: 8px;
   }
 
-  .fp-demo-brand-divider {
+  .fp-site-brand-divider {
     height: 20px;
   }
 
-  .fp-demo-brand-product {
-    font-size: 18px;
+  .fp-site-brand-product {
+    font-size: 16px;
   }
 
-  .fp-demo-menu-btn {
+  .fp-site-menu-btn {
     display: inline-flex;
     flex: 0 0 auto;
   }
 
-  .fp-demo-nav {
+  .fp-site-nav {
     position: absolute;
     top: 100%;
     right: 0;
@@ -528,19 +552,25 @@ textarea {
     }
   }
 
-  .fp-demo-nav-action,
-  .fp-demo-login {
+  .fp-site-nav-action,
+  .fp-site-login {
     min-height: 34px;
     margin-top: 12px;
     padding: 0 12px;
     font-size: 14px;
   }
 
-  .fp-demo-nav-action {
-    border-bottom: 1px solid var(--color-brand-secondary-400) !important;
+  .fp-site-nav-action {
+    color: var(--color-neutral-0) !important;
   }
 
-  .fp-demo-main {
+  .fp-site-login--ghost {
+    min-height: auto;
+    padding: 8px 0 0;
+    border: 0;
+  }
+
+  .fp-site-main {
     padding: 28px 0;
   }
 }
@@ -690,6 +720,11 @@ table th { font-size: 14px; }
 .circle-btn:hover {
   border-color: var(--color-neutral-300);
   color: var(--color-text-primary);
+}
+
+.circle-btn--sell {
+  font-size: 12px;
+  font-weight: 700;
 }
 
 .circle-btn--buy {

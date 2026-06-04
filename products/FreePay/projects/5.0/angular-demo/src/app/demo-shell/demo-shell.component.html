@@ -151,16 +151,7 @@
               <p class="redeem-adjust-desc">
                 您目前月 Pay 為 <strong>{{ formatMoney(selectedContract?.monthlyPay || 0, selectedContract?.currencyCode) }}</strong>，
                 本次贖回後將自動調降為 <strong>{{ formatMoney(suggestedMonthlyPay, selectedContract?.currencyCode) }}</strong>（系統依年化 15% 上限換算）。
-                如不接受此調整，請取消贖回並至異動設定手動調整月 Pay 金額。
               </p>
-              <mat-checkbox
-                color="primary"
-                class="redeem-adjust-ack"
-                [(ngModel)]="acknowledgePayAdjustment"
-                [ngModelOptions]="{ standalone: true }"
-              >
-                我確認接受月 Pay 由 {{ formatMoney(selectedContract?.monthlyPay || 0, selectedContract?.currencyCode) }} 調整為 {{ formatMoney(suggestedMonthlyPay, selectedContract?.currencyCode) }}
-              </mat-checkbox>
             </div>
           </div>
         </section>
@@ -182,9 +173,9 @@
         <div class="block-header">
           <h2 class="block-title">{{ amountSectionTitle }}</h2>
         </div>
-        <!-- 多幣別：頂部幣別切換器（不論新申購/加碼都顯示；切換後依該幣別狀態自動判斷模式） -->
+        <!-- 基金型入口：多幣別時可切換；契約型入口（帳總加碼）鎖定契約交易幣別 -->
         <mat-button-toggle-group
-          *ngIf="isMultiCurrency"
+          *ngIf="canSwitchCurrency"
           class="mode-toggle mode-toggle-fill ccy-selector"
           [value]="selectedCurrency?.currencyCode"
           (change)="selectCurrency($event.value)"
@@ -195,7 +186,6 @@
             [value]="c.currencyCode"
           >{{ c.currency }}</mat-button-toggle>
         </mat-button-toggle-group>
-
         <mat-form-field appearance="standard" color="accent" class="full-field">
           <mat-label>金額</mat-label>
           <input matInput type="text" inputmode="numeric" formControlName="amount" required>
@@ -209,7 +199,7 @@
       <!-- 加碼模式：Pay 設定維持既有，顯示說明 -->
       <div class="info-box" *ngIf="isAddOnMode">
         <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-        <span>本次為加碼，Pay 設定維持原本不變。</span>
+        <span>{{ addOnPaySettingSummary }}</span>
       </div>
 
       <!-- 新申購模式：Pay 出設定 -->
@@ -265,7 +255,7 @@
             <mat-error *ngIf="form.controls.monthlyPay.hasError('required')">請輸入每月 Pay 金額</mat-error>
             <mat-error *ngIf="form.controls.monthlyPay.hasError('pattern')">請輸入數字</mat-error>
             <mat-error *ngIf="form.controls.monthlyPay.hasError('min') && !form.controls.monthlyPay.hasError('pattern')">每月 Pay 金額需大於 0</mat-error>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('annualRateExceeded') && !form.controls.monthlyPay.hasError('pattern')">年化提領率不可超過 15%，請降低每月 Pay 金額。</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('annualRateExceeded') && !form.controls.monthlyPay.hasError('pattern')">年化提領率不可超過 15%，約可設定至 {{ formatMoney(monthlyPayAnnualLimitAmount) }} 以內。</mat-error>
           </mat-form-field>
         </div>
 
@@ -358,18 +348,12 @@
           </mat-button-toggle-group>
 
           <div class="threshold-selector-panel">
-            <div class="threshold-preview" *ngIf="showThresholdPreview">
-              <div>
-                <div class="threshold-preview-label">
-                  {{ thresholdPreviewPrefix }}
-                  <span class="threshold-preview-amount">{{ formatMoney(thresholdPreviewAmount) }}</span>
-                  {{ thresholdPreviewSuffix }}
-                </div>
-                <div class="threshold-preview-hint">{{ thresholdPreviewHint }}</div>
+              <div class="threshold-preview">
+                <div class="threshold-preview-label" *ngIf="showThresholdPreview">
+                {{ thresholdPreviewLead }} <span class="threshold-preview-emphasis">{{ thresholdValue }}%</span>{{ thresholdPreviewSuffix }}
               </div>
-            </div>
 
-            <div class="threshold-option-area">
+              <div class="threshold-option-area">
               <div class="threshold-option-grid" *ngIf="thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
                 <button
                   *ngFor="let value of protectThresholdOptions"
@@ -377,11 +361,22 @@
                   class="threshold-option"
                   type="button"
                   role="radio"
-                  [class.is-active]="thresholdValue === value"
-                  [attr.aria-checked]="thresholdValue === value"
+                  [class.is-active]="!thresholdCustomActive && thresholdValue === value"
+                  [attr.aria-checked]="!thresholdCustomActive && thresholdValue === value"
                   (click)="setThresholdValue(value)"
                 >
                   {{ value }}%
+                </button>
+                <button
+                  mat-stroked-button
+                  class="threshold-option"
+                  type="button"
+                  role="radio"
+                  [class.is-active]="thresholdCustomActive"
+                  [attr.aria-checked]="thresholdCustomActive"
+                  (click)="selectCustomThreshold()"
+                >
+                  自訂
                 </button>
               </div>
 
@@ -396,7 +391,7 @@
                   [attr.aria-checked]="!thresholdCustomActive && thresholdValue === value"
                   (click)="setThresholdValue(value)"
                 >
-                  +{{ value }}%
+                  {{ value }}%
                 </button>
                 <button
                   mat-stroked-button
@@ -409,30 +404,35 @@
                 >
                   自訂
                 </button>
+              </div>
 
-                <mat-form-field
-                  *ngIf="thresholdCustomActive"
-                  appearance="standard"
-                  color="accent"
-                  class="threshold-custom-field"
+              <mat-form-field
+                *ngIf="thresholdCustomActive"
+                appearance="standard"
+                color="accent"
+                class="threshold-custom-field"
+              >
+                <mat-label>{{ thresholdMode === 'protect' ? '自訂守護比例' : '自訂增值比例' }}</mat-label>
+                <input
+                  matInput
+                  type="text"
+                  inputmode="numeric"
+                  formControlName="thresholdCustom"
+                  required
+                  (input)="setCustomThresholdValue(form.controls.thresholdCustom.value)"
                 >
-                  <mat-label>自訂增值比例</mat-label>
-                  <input
-                    matInput
-                    type="text"
-                    inputmode="numeric"
-                    formControlName="thresholdCustom"
-                    required
-                    (input)="setCustomUnlockValue(form.controls.thresholdCustom.value)"
-                  >
-                  <span matSuffix>%</span>
-                  <mat-hint>可輸入 1–100 的整數</mat-hint>
-                  <mat-error *ngIf="form.controls.thresholdCustom.hasError('required')">請輸入自訂比例</mat-error>
-                  <mat-error *ngIf="form.controls.thresholdCustom.hasError('pattern')">請輸入整數</mat-error>
-                  <mat-error *ngIf="form.controls.thresholdCustom.hasError('min') || form.controls.thresholdCustom.hasError('max')">請輸入 1–100 的數值</mat-error>
-                </mat-form-field>
+                <span matSuffix>%</span>
+                <mat-hint>{{ thresholdMode === 'protect' ? '可輸入 70–100 的整數' : '可輸入 101–200 的整數' }}</mat-hint>
+                <mat-error *ngIf="form.controls.thresholdCustom.hasError('required')">請輸入自訂比例</mat-error>
+                <mat-error *ngIf="form.controls.thresholdCustom.hasError('pattern')">請輸入整數</mat-error>
+                <mat-error *ngIf="form.controls.thresholdCustom.hasError('min') || form.controls.thresholdCustom.hasError('max')">
+                  {{ thresholdMode === 'protect' ? '請輸入 70–100 的數值' : '請輸入 101–200 的數值' }}
+                </mat-error>
+              </mat-form-field>
               </div>
             </div>
+
+            <div class="threshold-note" *ngIf="showThresholdPreview">{{ thresholdNote }}</div>
           </div>
         </div>
       </section>
@@ -510,7 +510,7 @@
           </div>
           <div class="info-box confirm-addon-note" *ngIf="isAddOnMode">
             <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-            <span>加碼後 Pay 設定維持既有交易不變。</span>
+            <span>{{ addOnPaySettingSummary }}</span>
           </div>
         </ng-template>
       </section>

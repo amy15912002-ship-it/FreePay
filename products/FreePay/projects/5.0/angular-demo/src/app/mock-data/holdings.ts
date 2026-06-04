@@ -32,7 +32,7 @@ export interface HoldingContract {
   annualRate: number;        // 依比例模式的年化比例（%）；依金額模式為 0
   payDay: number;            // 自由 Pay 基準日（1–31）
   thresholdMode: ThresholdMode;
-  thresholdValue: number;    // protect：負值（-X）；unlock：正值（+Y）；none：0
+  thresholdValue: number;    // protect：70–100；unlock：101–200；none：0
   costBasis: number;         // 累積投入成本（= 所有批次 amount 加總）
   marketValue: number;       // 約當市值
   paidTotal: number;         // 已 Pay 累計金額
@@ -92,7 +92,7 @@ export const HOLDINGS: HoldingContract[] = [
   {
     fpNo: 'FP20250601', fundId: 'TA778899', currencyCode: 'TWD',
     startDate: '2025/06/01', payMode: 'amount', monthlyPay: 6000, annualRate: 0, payDay: 15,
-    thresholdMode: 'protect', thresholdValue: -20,
+    thresholdMode: 'protect', thresholdValue: 80,
     costBasis: 280000, marketValue: 308000, paidTotal: 54000, status: 'Y',
     purchaseBatches: [
       { batchId: 'BFP20250601-1', batchDate: '2025/06/01', orderTime: '10:30:00', tDate: '2025/06/04',

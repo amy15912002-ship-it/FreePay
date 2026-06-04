@@ -9,7 +9,7 @@ export interface FundCurrency {
 }
 
 export type FundCategory = '股票型' | '平衡型' | '債券型' | '貨幣型' | '其他';
-export type FundRegion = '台灣' | '亞洲' | '北美洲' | '中東非洲' | '大洋洲' | '全球';
+export type FundRegion = '大洋洲' | '中東非洲' | '北美洲' | '全球' | '亞洲' | '拉丁美洲' | '非洲' | '新興市場' | '新興歐洲' | '歐洲';
 
 export interface FundPerf {
   m6: number;             // 近 6 個月（%）
@@ -28,6 +28,8 @@ export interface Fund {
   currencies: FundCurrency[];
   category: FundCategory;
   region: FundRegion;
+  group: string;                  // 基金組別（基金選擇頁篩選用）
+  lipper: number;                 // 理柏總回報評級（1–5，5 為最佳）
   brand: string;                  // 基金品牌（基金公司）
   perf: FundPerf;                 // 績效表現 tab
   stdDev: number;                 // 1 年年化標準差
@@ -46,6 +48,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'TA123456',
     name: '統一大滿貫多重資產平衡證券投資信託基金 A 類型 台幣 不配息',
+    group: '新台幣平衡混合型',
+    lipper: 3,
     domicile: '境內', pricingCurrency: '台幣', risk: 'RR3',
     currencies: [{ currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD }],
     category: '平衡型', region: '亞洲', brand: '統一',
@@ -57,6 +61,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'TA654321',
     name: '統一全球多元資產基金',
+    group: '其他平衡混合型',
+    lipper: 4,
     domicile: '境外', pricingCurrency: '美元', risk: 'RR4',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -71,8 +77,10 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'TA987654',
     name: '統一日本動力基金',
-    domicile: '境外', pricingCurrency: '日幣', risk: 'RR4',
-    currencies: [{ currency: '日幣', currencyCode: 'JPY', minPurchase: MIN_JPY }],
+    group: '日本股票',
+    lipper: 4,
+    domicile: '境外', pricingCurrency: '日圓', risk: 'RR4',
+    currencies: [{ currency: '日圓', currencyCode: 'JPY', minPurchase: MIN_JPY }],
     category: '股票型', region: '亞洲', brand: '統一',
     perf: { m6: 9.85, y1: 22.40, y2: 35.60, y3: 48.20, y5: 74.50 },
     stdDev: 18.20,
@@ -82,6 +90,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'TA112233',
     name: '統一台灣高股息基金',
+    group: '台灣股票',
+    lipper: 5,
     domicile: '境內', pricingCurrency: '台幣', risk: 'RR3',
     currencies: [{ currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD }],
     category: '股票型', region: '亞洲', brand: '統一',
@@ -93,6 +103,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'TA445566',
     name: '統一全球創新科技基金',
+    group: '資訊科技股票',
+    lipper: 5,
     domicile: '境外', pricingCurrency: '美元', risk: 'RR5',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -107,6 +119,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'TA778899',
     name: '統一亞洲機會基金',
+    group: '亞太區股票',
+    lipper: 3,
     domicile: '境外', pricingCurrency: '美元', risk: 'RR4',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -121,6 +135,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'AL200001',
     name: '安聯台灣科技基金',
+    group: '台灣股票',
+    lipper: 5,
     domicile: '境內', pricingCurrency: '台幣', risk: 'RR5',
     currencies: [{ currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD }],
     category: '股票型', region: '亞洲', brand: '安聯',
@@ -132,6 +148,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'BR200002',
     name: '貝萊德世界礦業基金 A2',
+    group: '材料股票',
+    lipper: 2,
     domicile: '境外', pricingCurrency: '美元', risk: 'RR5',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -146,6 +164,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'JP200003',
     name: '摩根環球債券基金',
+    group: '環球債券 美元',
+    lipper: 3,
     domicile: '境外', pricingCurrency: '美元', risk: 'RR2',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -160,6 +180,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'GS200004',
     name: '高盛新興市場股票基金',
+    group: '環球新興市場股票',
+    lipper: 2,
     domicile: '境外', pricingCurrency: '美元', risk: 'RR5',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -174,6 +196,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'AB200005',
     name: '聯博美國收益基金 A 級',
+    group: '美元企業債券',
+    lipper: 4,
     domicile: '境外', pricingCurrency: '美元', risk: 'RR3',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -188,6 +212,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'NM200006',
     name: '野村貨幣市場基金',
+    group: '新台幣貨幣市場',
+    lipper: 3,
     domicile: '境內', pricingCurrency: '台幣', risk: 'RR1',
     currencies: [{ currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD }],
     category: '貨幣型', region: '亞洲', brand: '野村',
@@ -199,6 +225,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'BR300001',
     name: '貝萊德歐洲價值型基金 A2 歐元',
+    group: '歐洲股票',
+    lipper: 4,
     domicile: '境外', pricingCurrency: '歐元', risk: 'RR4',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -213,6 +241,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'AL300002',
     name: '安聯南非黃金與礦業基金 A 南非幣',
+    group: '黃金及貴金屬股票',
+    lipper: 1,
     domicile: '境外', pricingCurrency: '南非幣', risk: 'RR5',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -227,6 +257,8 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'JP300003',
     name: '摩根人民幣高收益債券基金 A 人民幣',
+    group: '環球新興市場當地貨幣債券',
+    lipper: 3,
     domicile: '境外', pricingCurrency: '人民幣', risk: 'RR3',
     currencies: [
       { currency: '台幣', currencyCode: 'TWD', minPurchase: MIN_TWD },
@@ -241,11 +273,13 @@ export const FUNDS: Fund[] = [
   {
     fundId: 'TA300004',
     name: '統一台灣美元優選基金 A 美元',
+    group: '美元債券',
+    lipper: 4,
     domicile: '境內', pricingCurrency: '美元', risk: 'RR3',
     currencies: [
       { currency: '美元', currencyCode: 'USD', minPurchase: MIN_USD },
     ],
-    category: '債券型', region: '台灣', brand: '統一',
+    category: '債券型', region: '亞洲', brand: '統一',
     perf: { m6: 3.80, y1: 6.80, y2: 11.40, y3: 14.80, y5: 20.60 },
     stdDev: 5.80,
     yearRoi: [5.4, -2.8, 6.2, 4.8, 6.8],
@@ -259,7 +293,10 @@ export function findFund(fundId: string): Fund | undefined {
 
 // 篩選選項常數（用於選擇基金頁的篩選列）
 export const FUND_CATEGORIES: FundCategory[] = ['股票型', '平衡型', '債券型', '貨幣型', '其他'];
-export const FUND_REGIONS: FundRegion[] = ['台灣', '亞洲', '北美洲', '中東非洲', '大洋洲', '全球'];
+export const FUND_REGIONS: FundRegion[] = ['大洋洲', '中東非洲', '北美洲', '全球', '亞洲', '拉丁美洲', '非洲', '新興市場', '新興歐洲', '歐洲'];
+
+// 理柏總回報評級（基金選擇頁篩選用）：1–5，5 為最佳
+export const LIPPER_RATINGS = [1, 2, 3, 4, 5];
 export const FUND_BRANDS = [
   '安聯', '貝萊德', '摩根', '高盛', '聯博', '富達', '富蘭克林坦伯頓', '野村', '摩根士丹利',
   '中國信託', '復華', 'DWS', 'GAM', 'GAM Star', 'KBI', 'M&G', 'MFS全盛', 'PGIM', 'PIMCO品浩',
@@ -270,11 +307,42 @@ export const FUND_BRANDS = [
   '街口', '愛德蒙(法國)', '新加坡大華', '瑞士隆奧', '瑞萬通博', '瑞銀', '瑞聯UBAM',
   '群益', '資本', '路博邁', '歐義銳榮', '聯邦投信', '駿利亨德森', '瀚亞', '羅素', '匯豐'
 ];
+// 基金組別（5.0 spec §基金選擇頁新增）
+// 完整清單；即使 demo 資料暫無對應基金，也保留篩選標籤（同計價幣別做法）。
+export const FUND_GROUPS = [
+  '環球股票', '美國股票', '台灣股票', '資訊科技股票', '美元平衡混合型 - 美國', '新台幣靈活混合型', '環球新興市場強勢貨幣債券',
+  '黃金及貴金屬股票', '能源股票', '醫療保健股票', '生物科技股票', '材料股票', '主題股票 - 天然資源', '主題股票 - 水資源',
+  '主題股票 - 替代性能源', '主題股票 - 農業企業', '主題股票 - 基礎設施', '非必需消費品股票', '金融股票', '電訊服務股票', '美國房地產股票',
+  '環球房地產股票', '歐洲房地產股票', '亞洲太平洋房地產股票', '產業股票', '台灣中小型股票', '大中華股票', '美國中小型股票',
+  '美國收益股票', '環球中小型股票', '環球收益股票', '中國股票', '中國中小型股票', '越南股票', '日本股票', '日本中小型股票', '印度股票',
+  '印度中小型股票', '巴西股票', '泰國股票', '南韓股票', '印度尼西亞股票', '香港股票', '新加坡股票', '澳洲股票', '意大利股票',
+  '英國股票', '德國股票', '瑞士股票', '歐洲股票', '歐洲(除英國)股票', '歐洲中小型股票', '歐洲收益股票', '北歐股票', '環球新興市場股票',
+  '環球新興市場中小型股票', '拉丁美洲新興市場股票', '歐洲新興市場股票', '亞洲新興市場股票', '其他新興市場股票', '亞太區股票',
+  '亞太區(除日本)股票', '亞太區中小型股票', '東協股票', '邊境市場股票', '伊比利亞半島股票', '美元債券', '歐元平衡混合型 - 環球',
+  '美元平衡混合型 - 環球', '美元靈活混合型 - 環球', '歐元靈活混合型 - 環球', '美元進取混合型', '新台幣平衡混合型', '新台幣進取混合型',
+  '新台幣保守混合型', '其他平衡混合型', '其他靈活混合型', '環球宏觀另類投資', '多種策略另類投資', '其他目標期限',
+  '目標期限歐元混合型2030', '目標期限歐元混合型2025', '美元保守混合型', '歐元靈活混合型 - 歐洲', '港元平衡混合型',
+  '歐元平衡混合型 - 歐洲', '歐元進取混合型 - 環球', '美元企業債券', '亞太區強勢貨幣債券', '環球新興市場當地貨幣債券', '環球債券 美元',
+  '環球企業債券 美元', '歐元債券', '其他債券', '美元抵押債券', '環球通脹掛鈎債券', '環球債券 歐元', '環球債券 (當地貨幣)',
+  '環球企業債券 (當地貨幣)', '美元短期債券', '環球新興市場企業債券', '環球可轉換債券', '其他新興市場債券', '印度盧比債券',
+  '亞太區當地貨幣債券', '南非蘭特債券', '環球短期債券', '歐洲債券', '美元政府債券', '參與放款基金', '美元通脹掛鈎債券',
+  '絕對回報債券 美元', '日圓債券', '歐元企業債券', '環球企業債券 歐元', '其他可轉換債券', '美元中期債券', '歐元短期債券',
+  '歐洲可轉換債券', '歐洲貨幣聯盟政府債券', '環球債券 英鎊', '環球債券 瑞士法郎', '美元貨幣市場', '新台幣貨幣市場', '人民幣貨幣市場',
+  '歐元貨幣市場', '英鎊貨幣市場', '主題股票 - 電動汽車及未來移動', '目標期限美元債券', '目標期限新台幣債券', '印尼盧比債券',
+  '其他房地產股票', '其他股票', '美元地方政府債券', '美元非投資等級 (高收益) 債券', '美元靈活混合型 - 美國',
+  '歐元非投資等級 (高收益) 債券', '歐洲非投資等級 (高收益) 債券', '環球伊斯蘭債券 美元', '環球非投資等級 (高收益) 債券 (當地貨幣)',
+  '環球非投資等級 (高收益) 債券 美元', '環球非投資等級 (高收益) 債券 歐元'
+];
+
 // 計價幣別（5.0 spec §基金選擇頁新增）
-// 境內與境外的可選計價幣別不同，需依「境別篩選的當前狀態」動態切換選項。
-// 當境別篩選為「全部」（或同時勾選境內＋境外）時，合併呈現所有選項。
-export const PRICING_CCY_DOMESTIC = ['台幣', '美元'];
-export const PRICING_CCY_FOREIGN = ['台幣', '美元', '日幣', '歐元', '南非幣', '人民幣'];
+// 固定呈現完整清單與順序；即使 demo 資料暫無對應基金，也保留篩選標籤。
+export const FUND_PRICING_CCY = [
+  '台幣', '美元', '南非幣', '澳幣', '人民幣', '歐元', '日圓',
+  '加幣', '英鎊', '紐幣', '港幣', '新加坡幣', '瑞士法郎', '瑞典幣'
+];
+
+export const PRICING_CCY_DOMESTIC = FUND_PRICING_CCY;
+export const PRICING_CCY_FOREIGN = FUND_PRICING_CCY;
 
 export function pricingCurrenciesByDomiciles(domiciles: Array<'境內' | '境外'>): string[] {
   const showDomestic = domiciles.length === 0 || domiciles.includes('境內');
@@ -284,6 +352,3 @@ export function pricingCurrenciesByDomiciles(domiciles: Array<'境內' | '境外
   if (showForeign) PRICING_CCY_FOREIGN.forEach(c => merged.includes(c) || merged.push(c));
   return merged;
 }
-
-// 向後相容：合併版（不分境別）— 預留給其他模組需要全清單時使用
-export const FUND_PRICING_CCY = pricingCurrenciesByDomiciles([]);

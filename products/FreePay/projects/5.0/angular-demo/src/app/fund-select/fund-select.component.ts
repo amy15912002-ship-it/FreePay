@@ -1,15 +1,23 @@
-import { Component } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  ElementRef,
+  OnDestroy,
+  QueryList,
+  ViewChildren,
+} from '@angular/core';
 import { Router } from '@angular/router';
+import { Subscription } from 'rxjs';
 import {
   FUNDS, Fund, FundCategory, FundRegion,
-  FUND_CATEGORIES, FUND_REGIONS, FUND_BRANDS,
-  pricingCurrenciesByDomiciles,
+  FUND_CATEGORIES, FUND_REGIONS, FUND_BRANDS, FUND_PRICING_CCY, FUND_GROUPS, LIPPER_RATINGS,
 } from '../mock-data/funds';
 
 type DomicileOption = Fund['domicile'];
 type PricingCcyOption = string;
 type FundTab = 'perf' | 'roi' | 'drop';
-type CollapsibleFilter = 'brand';
+type CollapsibleFilter = 'category' | 'pricingCcy' | 'brand' | 'region' | 'group' | 'lipper';
 
 type SortKey =
   | 'fundId' | 'name'
@@ -24,11 +32,16 @@ type SortOption = { key: SortKey; label: string };
   templateUrl: './fund-select.component.html',
   styleUrls: ['./fund-select.component.scss'],
 })
-export class FundSelectComponent {
+export class FundSelectComponent implements AfterViewInit, OnDestroy {
+  @ViewChildren('chipArea', { read: ElementRef })
+  private chipAreas?: QueryList<ElementRef<HTMLElement>>;
+
   readonly funds = FUNDS;
   readonly categories = FUND_CATEGORIES;
   readonly regions = FUND_REGIONS;
   readonly brands = FUND_BRANDS;
+  readonly groups = FUND_GROUPS;
+  readonly lipperRatings = LIPPER_RATINGS;
   readonly domiciles: DomicileOption[] = ['境內', '境外'];
   readonly years = [2021, 2022, 2023, 2024, 2025];
   readonly pageSize = 10;
@@ -57,31 +70,55 @@ export class FundSelectComponent {
     { key: 'drop.4', label: '2025' }
   ];
 
-  // 計價幣別選項依「境別篩選的當前狀態」動態切換（spec 升級三 §基金選擇頁）
-  // 境內：台幣/美元；境外：台幣/美元/日幣/歐元/南非幣/人民幣；境別「全部」：合併呈現
   get pricingCurrencies(): PricingCcyOption[] {
-    return pricingCurrenciesByDomiciles(this.domicileFilters);
+    return FUND_PRICING_CCY;
   }
 
   keyword = '';
+  searchFocused = false;
   brandKeyword = '';
   brandSearchOpen = false;
+  groupKeyword = '';
+  groupSearchOpen = false;
   expandedFilters: Record<CollapsibleFilter, boolean> = {
-    brand: false
+    category: false,
+    pricingCcy: false,
+    brand: false,
+    region: false,
+    group: false,
+    lipper: false
   };
   domicileFilters: DomicileOption[] = [];
   categoryFilters: FundCategory[] = [];
   pricingCcyFilters: PricingCcyOption[] = [];
   brandFilters: string[] = [];
   regionFilters: FundRegion[] = [];
+  groupFilters: string[] = [];
+  lipperFilters: number[] = [];
 
   activeTab: FundTab = 'perf';
   sortKey: SortKey = 'perf.m6';
   sortDesc = true;
   page = 1;
   sortPanelOpen = false;
+  filterPanelOpen = false;
+  // 每個可收合篩選列：chip 是否換行（放不下一行）→ 需顯示展開鈕
+  overflowState: Record<CollapsibleFilter, boolean> = {
+    category: false,
+    pricingCcy: false,
+    brand: false,
+    region: false,
+    group: false,
+    lipper: false
+  };
 
-  constructor(private readonly router: Router) {}
+  private chipObservers: ResizeObserver[] = [];
+  private chipAreaChangesSub?: Subscription;
+
+  constructor(
+    private readonly router: Router,
+    private readonly cdr: ChangeDetectorRef
+  ) {}
 
   get filteredFunds(): Fund[] {
     const kw = this.keyword.trim().toLowerCase();
@@ -92,8 +129,43 @@ export class FundSelectComponent {
       if (this.pricingCcyFilters.length && !this.pricingCcyFilters.includes(f.pricingCurrency as PricingCcyOption)) return false;
       if (this.brandFilters.length && !this.brandFilters.includes(f.brand)) return false;
       if (this.regionFilters.length && !this.regionFilters.includes(f.region)) return false;
+      if (this.groupFilters.length && !this.groupFilters.includes(f.group)) return false;
+      if (this.lipperFilters.length && !this.lipperFilters.includes(f.lipper)) return false;
       return true;
     });
+  }
+
+  // 基金搜尋即時下拉：匹配代碼或名稱，開頭匹配優先、組內按名稱排序，上限 20 筆
+  get searchMatches(): Fund[] {
+    const kw = this.keyword.trim().toLowerCase();
+    if (!kw) return [];
+    const startsWith = (f: Fund) =>
+      f.fundId.toLowerCase().startsWith(kw) || f.name.toLowerCase().startsWith(kw);
+    return this.funds
+      .filter(f => f.fundId.toLowerCase().includes(kw) || f.name.toLowerCase().includes(kw))
+      .sort((a, b) => {
+        const diff = (startsWith(a) ? 0 : 1) - (startsWith(b) ? 0 : 1);
+        return diff !== 0 ? diff : a.name.localeCompare(b.name, 'zh-Hant');
+      })
+      .slice(0, 20);
+  }
+
+  // 將文字依目前關鍵字拆段，匹配段標記 hl=true 供下拉變色
+  highlightParts(text: string): { text: string; hl: boolean }[] {
+    const kw = this.keyword.trim();
+    if (!kw) return [{ text, hl: false }];
+    const lower = text.toLowerCase();
+    const kwLower = kw.toLowerCase();
+    const parts: { text: string; hl: boolean }[] = [];
+    let i = 0;
+    while (i < text.length) {
+      const idx = lower.indexOf(kwLower, i);
+      if (idx === -1) { parts.push({ text: text.slice(i), hl: false }); break; }
+      if (idx > i) parts.push({ text: text.slice(i, idx), hl: false });
+      parts.push({ text: text.slice(idx, idx + kw.length), hl: true });
+      i = idx + kw.length;
+    }
+    return parts;
   }
 
   get sortedFunds(): Fund[] {
@@ -127,10 +199,29 @@ export class FundSelectComponent {
     return this.dropSortOptions;
   }
 
+  get activeFilterCount(): number {
+    return [
+      this.keyword.trim(),
+      ...this.domicileFilters,
+      ...this.categoryFilters,
+      ...this.pricingCcyFilters,
+      ...this.brandFilters,
+      ...this.regionFilters,
+      ...this.groupFilters,
+      ...this.lipperFilters
+    ].filter(Boolean).length;
+  }
+
   get filteredBrands(): string[] {
     const kw = this.brandKeyword.trim().toLowerCase();
     if (!kw) return this.brands;
     return this.brands.filter(brand => brand.toLowerCase().includes(kw));
+  }
+
+  get filteredGroups(): string[] {
+    const kw = this.groupKeyword.trim().toLowerCase();
+    if (!kw) return this.groups;
+    return this.groups.filter(group => group.toLowerCase().includes(kw));
   }
 
   get visibleCategories(): FundCategory[] {
@@ -142,7 +233,11 @@ export class FundSelectComponent {
   }
 
   get visibleBrands(): string[] {
-    return this.visibleOptions(this.filteredBrands, this.brandFilters, this.expandedFilters.brand, 10);
+    return this.filteredBrands;
+  }
+
+  get visibleGroups(): string[] {
+    return this.filteredGroups;
   }
 
   get emptyStateMessage(): string {
@@ -195,9 +290,6 @@ export class FundSelectComponent {
 
   toggleDomicileFilter(value: DomicileOption): void {
     this.domicileFilters = this.toggleFilterValue(this.domicileFilters, value);
-    // 切換境別後，可選的計價幣別範圍會改變；已選但已不在新範圍內的幣別自動移除
-    const allowed = this.pricingCurrencies;
-    this.pricingCcyFilters = this.pricingCcyFilters.filter(c => allowed.includes(c));
     this.onFilterChange();
   }
 
@@ -216,17 +308,37 @@ export class FundSelectComponent {
     this.onFilterChange();
   }
 
+  onBrandKeywordChange(): void {
+    this.scheduleOverflowCheck();
+  }
+
+  toggleGroupFilter(value: string): void {
+    this.groupFilters = this.toggleFilterValue(this.groupFilters, value);
+    this.onFilterChange();
+  }
+
+  onGroupKeywordChange(): void {
+    this.scheduleOverflowCheck();
+  }
+
   toggleRegionFilter(value: FundRegion): void {
     this.regionFilters = this.toggleFilterValue(this.regionFilters, value);
     this.onFilterChange();
   }
 
-  clearFilterGroup(group: 'domicile' | 'category' | 'pricingCcy' | 'brand' | 'region'): void {
+  toggleLipperFilter(value: number): void {
+    this.lipperFilters = this.toggleFilterValue(this.lipperFilters, value);
+    this.onFilterChange();
+  }
+
+  clearFilterGroup(group: 'domicile' | 'category' | 'pricingCcy' | 'brand' | 'region' | 'group' | 'lipper'): void {
     if (group === 'domicile') this.domicileFilters = [];
     else if (group === 'category') this.categoryFilters = [];
     else if (group === 'pricingCcy') this.pricingCcyFilters = [];
     else if (group === 'brand') this.brandFilters = [];
-    else this.regionFilters = [];
+    else if (group === 'region') this.regionFilters = [];
+    else if (group === 'group') this.groupFilters = [];
+    else this.lipperFilters = [];
     this.onFilterChange();
   }
 
@@ -234,32 +346,77 @@ export class FundSelectComponent {
     this.keyword = '';
     this.brandKeyword = '';
     this.brandSearchOpen = false;
+    this.groupKeyword = '';
+    this.groupSearchOpen = false;
+    this.filterPanelOpen = false;
     this.expandedFilters = {
-      brand: false
+      category: false,
+      pricingCcy: false,
+      brand: false,
+      region: false,
+      group: false,
+      lipper: false
     };
     this.domicileFilters = [];
     this.categoryFilters = [];
     this.pricingCcyFilters = [];
     this.brandFilters = [];
     this.regionFilters = [];
+    this.groupFilters = [];
+    this.lipperFilters = [];
     this.page = 1;
+    this.scheduleOverflowCheck();
+  }
+
+  ngAfterViewInit(): void {
+    this.observeChipAreas();
+    this.chipAreaChangesSub = this.chipAreas?.changes.subscribe(() => this.observeChipAreas());
+  }
+
+  ngOnDestroy(): void {
+    this.chipAreaChangesSub?.unsubscribe();
+    this.disconnectChipObservers();
   }
 
   closeSortPanel(): void {
     this.sortPanelOpen = false;
   }
 
+  openFilterPanel(): void {
+    this.filterPanelOpen = true;
+  }
+
+  closeFilterPanel(): void {
+    this.filterPanelOpen = false;
+  }
+
   toggleFilterExpanded(group: CollapsibleFilter): void {
     this.expandedFilters[group] = !this.expandedFilters[group];
-    if (group === 'brand' && !this.expandedFilters[group]) {
+    if (group === 'brand' && !this.expandedFilters.brand) {
       this.brandSearchOpen = false;
       this.brandKeyword = '';
     }
+    if (group === 'group' && !this.expandedFilters.group) {
+      this.groupSearchOpen = false;
+      this.groupKeyword = '';
+    }
+    this.scheduleOverflowCheck();
   }
 
   toggleBrandSearch(): void {
     this.brandSearchOpen = !this.brandSearchOpen;
-    if (!this.brandSearchOpen) this.brandKeyword = '';
+    if (!this.brandSearchOpen) {
+      this.brandKeyword = '';
+    }
+    this.scheduleOverflowCheck();
+  }
+
+  toggleGroupSearch(): void {
+    this.groupSearchOpen = !this.groupSearchOpen;
+    if (!this.groupSearchOpen) {
+      this.groupKeyword = '';
+    }
+    this.scheduleOverflowCheck();
   }
 
   isFilterExpanded(group: CollapsibleFilter): boolean {
@@ -267,11 +424,33 @@ export class FundSelectComponent {
   }
 
   hasHiddenOptions(group: CollapsibleFilter): boolean {
-    return group === 'brand' && this.filteredBrands.length > this.visibleBrands.length;
+    return this.overflowState[group];
   }
 
   onFilterChange(): void {
     this.page = 1;
+    this.scheduleOverflowCheck();
+  }
+
+  onSearchFocus(): void {
+    this.searchFocused = true;
+  }
+
+  onSearchBlur(): void {
+    // 延遲收起，讓下拉項目的點選先觸發
+    setTimeout(() => this.searchFocused = false, 150);
+  }
+
+  selectSearchFund(fund: Fund): void {
+    this.keyword = fund.name;
+    this.searchFocused = false;
+    this.onFilterChange();
+  }
+
+  // 以目前關鍵字搜尋全部（不指定單一基金）：收起下拉，表格保留關鍵字篩選（可顯示多檔）
+  applyKeywordSearch(): void {
+    this.searchFocused = false;
+    this.onFilterChange();
   }
 
   goPage(p: number): void {
@@ -313,16 +492,49 @@ export class FundSelectComponent {
     return value;
   }
 
-  private visibleOptions<T extends string>(options: T[], selected: T[], expanded: boolean, limit: number): T[] {
-    if (expanded || options.length <= limit) return options;
-    const visible = options.slice(0, limit);
-    for (const value of selected) {
-      if (options.includes(value) && !visible.includes(value)) visible.push(value);
-    }
-    return visible;
-  }
-
   private toggleFilterValue<T>(values: T[], value: T): T[] {
     return values.includes(value) ? values.filter(item => item !== value) : [...values, value];
+  }
+
+  private observeChipAreas(): void {
+    this.disconnectChipObservers();
+    this.chipAreas?.forEach(ref => {
+      const observer = new ResizeObserver(() => this.scheduleOverflowCheck());
+      observer.observe(ref.nativeElement);
+      this.chipObservers.push(observer);
+    });
+    this.scheduleOverflowCheck();
+  }
+
+  private disconnectChipObservers(): void {
+    this.chipObservers.forEach(observer => observer.disconnect());
+    this.chipObservers = [];
+  }
+
+  private scheduleOverflowCheck(): void {
+    setTimeout(() => this.detectAllOverflow());
+  }
+
+  // 以「首尾 chip 是否在同一行」判斷該列放不放得下，比估算字寬可靠
+  private detectAllOverflow(): void {
+    let changed = false;
+    this.chipAreas?.forEach(ref => {
+      const el = ref.nativeElement;
+      if (el.offsetParent === null) return; // 隱藏的實例（如未開的手機面板）跳過
+      const group = el.dataset['filterGroup'] as CollapsibleFilter | undefined;
+      if (!group) return;
+      const next = this.isChipWrapped(el);
+      if (this.overflowState[group] !== next) {
+        this.overflowState[group] = next;
+        changed = true;
+      }
+    });
+    if (changed) this.cdr.detectChanges();
+  }
+
+  private isChipWrapped(container: HTMLElement): boolean {
+    const chips = container.querySelectorAll<HTMLElement>('.mat-chip');
+    if (chips.length < 2) return false;
+    return chips[chips.length - 1].offsetTop > chips[0].offsetTop;
   }
 }

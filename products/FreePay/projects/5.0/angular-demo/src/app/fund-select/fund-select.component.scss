@@ -35,43 +35,160 @@
   }
 }
 
+.fs-summary-result {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-width: 0;
+}
+
+.fs-summary-actions {
+  display: none;
+}
+
 .fs-clear {
-  background: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
   border: none;
   padding: 0;
-  color: var(--color-brand-tertiary-600);
+  color: var(--color-text-secondary);
   font-size: 14px;
   cursor: pointer;
 
-  &:hover { color: var(--color-brand-tertiary-400); }
+  .bi {
+    font-size: 14px;
+    line-height: 1;
+  }
+
+  &:hover { color: var(--color-text-primary); }
+}
+
+.fs-filter-overlay {
+  display: none;
+}
+
+// 基金搜尋列：與篩選列同樣式靠攏（下劃線搜尋框、標題對齊、緊貼篩選區）
+.fs-search-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--color-border-default);
+
+  .fs-filter-label {
+    min-width: 6em;
+    color: var(--color-text-primary);
+    font-size: 16px;
+    white-space: nowrap;
+  }
+
+  .fs-search-field {
+    flex: 1;
+  }
+}
+
+// 基金搜尋即時下拉建議
+.fs-search-suggest {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  z-index: 50;
+  max-height: 320px;
+  overflow-y: auto;
+  background: var(--color-bg-base);
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  box-shadow: var(--shadow-md);
+}
+
+// 下拉頂部「以『X』搜尋全部結果」：與下方單檔建議區隔
+.fs-search-suggest-all {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  border-bottom: 1px solid var(--color-border-default);
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  color: var(--color-action-primary);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 500;
+
+  .bi { font-size: 14px; }
+
+  &:hover {
+    background: var(--color-bg-subtle);
+  }
+}
+
+.fs-search-suggest-item {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  width: 100%;
+  padding: 10px 14px;
+  border: none;
+  background: transparent;
+  text-align: left;
+  cursor: pointer;
+  font-family: var(--font-primary);
+
+  &:hover {
+    background: var(--color-bg-subtle);
+  }
+}
+
+.fs-search-suggest-code {
+  flex: 0 0 auto;
+  min-width: 5em;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.fs-search-suggest-name {
+  color: var(--color-text-primary);
+  font-size: 14px;
+}
+
+// 下拉建議：匹配的關鍵字以主色變色強調（取代黃底高亮，符合設計系統）
+.fs-search-suggest .fs-hl {
+  color: var(--color-action-primary);
+  font-weight: 700;
 }
 
 // ── 篩選列 ──────────────────────────────────────────────
 .fs-filters {
   display: flex;
   flex-direction: column;
-  border-top: 1px solid var(--color-border-default);
   background: var(--color-bg-base);
 }
 
 .fs-filter-row {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr) auto;
-  align-items: start;
-  gap: 8px;
+  grid-template-columns: max-content minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 8px 16px;
   padding: 8px 0;
   border-bottom: 1px solid var(--color-border-default);
 }
 
 .fs-filter-label {
-  padding-top: 7px;
+  min-width: 6em;
   color: var(--color-text-primary);
   font-size: 16px;
   white-space: nowrap;
 }
 
 .fs-keyword {
-  grid-column: 2 / -1;
   min-width: 0;
   height: 36px;
   padding: 0;
@@ -93,8 +210,34 @@
   }
 }
 
+.fs-search-field {
+  position: relative;
+  grid-column: 2 / -1;
+  display: block;
+  min-width: 0;
+
+  .bi {
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--color-text-tertiary);
+    font-size: 15px;
+    line-height: 1;
+    pointer-events: none;
+  }
+
+  .fs-keyword {
+    width: 100%;
+    padding-left: 24px;
+  }
+}
+
 .fs-brand-search-toggle,
 .fs-filter-more {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 32px;
   padding: 0 10px;
   border: 1px solid var(--color-neutral-200);
@@ -110,31 +253,125 @@
   }
 }
 
+.fs-brand-search-toggle {
+  width: 32px;
+  padding: 0;
+  border-radius: 8px;
+
+  .bi {
+    margin-right: 0;
+  }
+}
+
+.fs-filter-more--icon {
+  width: 32px;
+  padding: 0;
+
+  .bi {
+    margin-right: 0;
+    font-size: 14px;
+    line-height: 1;
+  }
+}
+
+.fs-filter-row--brand {
+  grid-template-columns: max-content minmax(0, 1fr) auto;
+
+  .fs-filter-label {
+    grid-column: 1;
+    grid-row: 1;
+  }
+
+  .fs-brand-filter {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .fs-filter-actions {
+    grid-column: 3;
+    grid-row: 1;
+  }
+
+  // 搜尋框：第一行 col2（標題與按鈕之間就地展開）
+  .fs-brand-search-row {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  // 搜尋框或展開時：搜尋框占第一行，chip 移到第二行並佔滿 col2 到末尾
+  &.has-brand-search .fs-brand-filter,
+  &.is-expanded .fs-brand-filter {
+    grid-column: 2 / -1;
+    grid-row: 2;
+  }
+
+  // 收合且未搜尋：chip 單行，裁切溢出避免蓋住展開鈕
+  &:not(.is-expanded):not(.has-brand-search) .fs-brand-filter {
+    overflow: hidden;
+  }
+}
+
+// 可收合列：收合態置中（上下等距）；展開/搜尋內容變多行時改頂部對齊，標題與按鈕不下移
+.fs-filter-row--compact {
+  align-items: center;
+}
+
+.fs-filter-row--compact.is-expanded,
+.fs-filter-row--brand.has-brand-search {
+  align-items: flex-start;
+}
+
+// 標題與右側按鈕高度 = 一行 chip，對齊第一行
+.fs-filter-row--compact .fs-filter-label,
+.fs-filter-row--compact .fs-filter-actions {
+  min-height: 32px;
+}
+
+.fs-filter-row--compact .fs-filter-label {
+  display: inline-flex;
+  align-items: center;
+}
+
+// chip 收合成一行、超出裁切；展開或品牌搜尋時全顯示
+.fs-filter-row--compact .fs-filter-options {
+  max-height: 38px;
+  overflow: hidden;
+}
+
+.fs-filter-row--compact.is-expanded .fs-filter-options,
+.fs-filter-row--brand.has-brand-search.has-search-keyword .fs-filter-options {
+  max-height: none;
+}
+
 .fs-brand-filter {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  align-items: flex-start;
+  gap: 6px;
+  align-items: center;
   min-width: 0;
 }
 
 .fs-filter-actions {
   display: flex;
+  align-items: center;
   gap: 8px;
   justify-self: end;
   white-space: nowrap;
 }
 
+.fs-filter-actions--mobile {
+  display: flex;
+}
+
 .fs-brand-search-row {
-  flex: 0 0 100%;
   display: flex;
   align-items: center;
   gap: 8px;
-  padding-top: 2px;
+  min-width: 0;
 }
 
 .fs-brand-keyword {
-  width: min(520px, 100%);
+  width: 100%;
   height: 36px;
   padding: 0 16px;
   border: 1px solid var(--color-border-default);
@@ -158,8 +395,19 @@
   min-width: 0;
 }
 
+::ng-deep .fs-filter-options .mat-chip.mat-standard-chip {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+// 抵消 Material chip-list-wrapper 預設的上下負邊距，避免 chip 在列內偏上、下方留白
+::ng-deep .fs-filter-options .mat-chip-list-wrapper {
+  margin-top: 0;
+  margin-bottom: 0;
+}
+
 .fs-filter-more {
-  color: var(--color-brand-tertiary-400);
+  color: var(--color-text-secondary);
   font-weight: 500;
   white-space: nowrap;
 }
@@ -266,9 +514,13 @@
   vertical-align: -1px;
 }
 
-.fs-table th:hover .fs-sort,
-.fs-sort.is-active {
+.fs-table th:hover .fs-sort {
   color: var(--color-text-secondary);
+}
+
+.fs-table th .fs-sort.is-active,
+.fs-table th:hover .fs-sort.is-active {
+  color: var(--color-action-primary);
 }
 
 .fs-empty {
@@ -324,11 +576,185 @@
 @media (max-width: 767px) {
   .fs-shell {
     padding: 16px 15px 80px;
+    gap: 14px;
   }
 
   .fs-title { font-size: 18px; }
 
-  .fs-summary { flex-wrap: wrap; }
+  .fs-summary {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: -4px;
+    color: var(--color-text-secondary);
+    font-size: 13px;
+  }
+
+  .fs-summary-result {
+    flex: 0 1 auto;
+    justify-content: flex-start;
+    gap: 6px;
+  }
+
+  .fs-summary-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  // 手機移除清空垃圾桶，改用篩選頁的「清除條件」
+  .fs-clear {
+    display: none;
+  }
+
+  // 基金搜尋列：手機隱藏標題、搜尋框滿版
+  .fs-search-bar {
+    padding: 0;
+    border-bottom: none;
+
+    .fs-filter-label {
+      display: none;
+    }
+  }
+
+  .fs-mobile-filter-btn {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--color-action-primary);
+    border-radius: 50%;
+    background: var(--color-neutral-0);
+    color: var(--color-action-primary);
+    font-family: var(--font-primary);
+    font-size: 15px;
+    font-weight: 700;
+
+    strong {
+      position: absolute;
+      top: -6px;
+      right: -6px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 18px;
+      height: 18px;
+      padding: 0 5px;
+      border-radius: 9px;
+      background: var(--color-action-primary);
+      color: var(--color-text-on-brand);
+      font-size: 12px;
+      line-height: 1;
+    }
+  }
+
+  .fs-filters {
+    display: none;
+  }
+
+  // 篩選改全屏頁面（非底部 sheet）：佔滿、不透明背景，像進入一個頁面
+  .fs-filter-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    display: block;
+    background: var(--color-bg-base);
+  }
+
+  .fs-filter-sheet {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    background: var(--color-bg-base);
+    overflow: hidden;
+  }
+
+  .fs-filter-sheet-head {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px 12px;
+    border-bottom: 1px solid var(--color-border-default);
+
+    h2 {
+      margin: 0;
+      color: var(--color-text-primary);
+      font-size: 18px;
+      font-weight: 500;
+    }
+  }
+
+  .fs-filter-back {
+    position: absolute;
+    left: 8px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: var(--color-text-primary);
+    font-size: 20px;
+  }
+
+  .fs-filter-sheet-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: 2px 18px 16px;
+
+    // 篩選頁預設收合（露第一行 + 展開鈕，與桌機列表一致）；chip 改換行避免單行被截斷
+    .fs-filter-row--compact:not(.is-expanded) .fs-filter-options ::ng-deep > .mat-chip-list-wrapper {
+      flex-wrap: wrap;
+    }
+  }
+
+  ::ng-deep .fs-filter-sheet-body {
+    .filter-chips {
+      gap: 6px;
+    }
+
+    .filter-chips .mat-chip.mat-standard-chip {
+      min-height: 30px;
+      padding: 6px 7px;
+      font-size: 12px;
+    }
+  }
+
+  .fs-filter-sheet-body {
+    .fs-brand-search-toggle {
+      width: 32px;
+      padding: 0;
+      border-radius: 8px;
+
+      .bi {
+        margin-right: 0;
+        font-size: 14px;
+        line-height: 1;
+      }
+    }
+  }
+
+  .fs-filter-sheet-actions {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    padding: 12px 18px 18px;
+    border-top: 1px solid var(--color-border-default);
+    background: var(--color-bg-base);
+
+    button {
+      width: 100%;
+    }
+  }
 
   .fs-filter-row {
     grid-template-columns: minmax(0, 1fr) 52px;
@@ -337,20 +763,110 @@
   }
 
   .fs-filter-label {
-    padding-top: 4px;
     font-size: 14px;
   }
 
   .fs-keyword,
   .fs-brand-filter,
   .fs-filter-options,
-  .fs-filter-more,
   .fs-filter-actions {
     grid-column: 1 / -1;
   }
 
-  .fs-filter-more {
-    justify-self: start;
+  .fs-filter-row--compact {
+    grid-template-columns: minmax(0, 1fr) auto;
+    align-items: start;
+    gap: 8px 8px;
+
+    .fs-filter-label {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    // 展開鈕跟標題同一行（右側），收合/展開都一致（與品牌列相同）
+    .fs-filter-actions--mobile {
+      grid-column: 2;
+      grid-row: 1;
+      display: flex;
+      justify-self: end;
+      align-self: center;
+      flex-wrap: nowrap;
+    }
+
+    .fs-filter-options,
+    .fs-brand-filter {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .fs-filter-options {
+      max-height: 38px;
+      overflow: hidden;
+    }
+
+    &:not(.is-expanded) {
+      .fs-filter-options ::ng-deep > .mat-chip-list-wrapper {
+        flex-wrap: nowrap;
+        overflow: visible;
+
+        .mat-chip {
+          flex: 0 0 auto;
+        }
+      }
+    }
+
+    &.is-expanded .fs-filter-options,
+    &.has-brand-search.has-search-keyword .fs-filter-options {
+      max-height: none;
+    }
+
+    &.is-expanded .fs-filter-options ::ng-deep > .mat-chip-list-wrapper {
+      flex-wrap: wrap;
+    }
+  }
+
+  .fs-filter-row--brand {
+    grid-template-columns: minmax(0, 1fr) auto;
+
+    .fs-filter-label {
+      grid-column: 1;
+      grid-row: 1;
+    }
+
+    .fs-filter-actions {
+      grid-column: 2;
+      grid-row: 1;
+      align-self: center;
+      justify-self: end;
+      flex-wrap: nowrap;
+      gap: 6px;
+    }
+
+    .fs-brand-search-row {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    .fs-brand-filter {
+      grid-column: 1 / -1;
+      grid-row: 2;
+    }
+
+    &.has-brand-search .fs-brand-filter,
+    &.is-expanded .fs-brand-filter {
+      grid-row: 3;
+    }
+
+    &.is-expanded {
+      .fs-filter-label {
+        grid-column: 1;
+      }
+
+      .fs-filter-actions {
+        grid-row: 1;
+        align-self: center;
+      }
+    }
   }
 
   .fs-filter-actions {
@@ -358,14 +874,35 @@
     flex-wrap: wrap;
   }
 
-  .fs-brand-keyword {
-    flex-basis: 100%;
-    height: 34px;
-    font-size: 14px;
+  .fs-filter-row--brand .fs-filter-actions {
+    justify-self: end;
+    flex-wrap: nowrap;
+    grid-row: 1;
   }
 
-  .filter-chips {
-    gap: 6px;
+  .fs-brand-search-toggle,
+  .fs-filter-more {
+    height: 30px;
+    padding: 0 8px;
+    font-size: 13px;
+  }
+
+  .fs-filter-more--icon {
+    width: 32px;
+    padding: 0;
+    border-radius: 8px;
+
+    .bi {
+      margin-right: 0;
+      font-size: 14px;
+      line-height: 1;
+    }
+  }
+
+  .fs-brand-keyword {
+    width: 100%;
+    height: 34px;
+    font-size: 14px;
   }
 
   .fs-tabs-row {
@@ -381,17 +918,22 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 4px;
     flex: 0 0 auto;
-    min-width: 76px;
-    padding: 0 10px;
-    border: none;
-    border-bottom: 2px solid transparent;
-    background: transparent;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--color-action-primary);
+    border-radius: 50%;
+    background: var(--color-neutral-0);
     color: var(--color-action-primary);
     font-family: var(--font-primary);
     font-size: 14px;
     font-weight: 700;
+
+    .bi {
+      font-size: 14px;
+      line-height: 1;
+    }
   }
 
   .fs-sort-overlay {

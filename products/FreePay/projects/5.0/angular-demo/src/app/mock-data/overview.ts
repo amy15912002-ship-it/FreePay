@@ -10,6 +10,7 @@ export interface OvContract {
   fpNo: string; ccy: string;
   setting: string; threshold: string;
   pay: number; paid: number; market: number; cost: number; profit: number; ret: number;
+  marketUnits: number; marketNav: number; marketNavDate: string; marketFx: number;
 }
 
 export interface OvFund {
@@ -78,13 +79,17 @@ function contractSetting(c: HoldingContract): string {
 }
 
 function contractThreshold(c: HoldingContract): string {
-  if (c.thresholdMode === 'protect') return `市值守護・跌${Math.abs(c.thresholdValue)}%`;
-  if (c.thresholdMode === 'unlock') return `增值啟動・漲${c.thresholdValue}%`;
+  if (c.thresholdMode === 'protect') return `市值守護・低於投入成本 ${c.thresholdValue}% 暫停`;
+  if (c.thresholdMode === 'unlock') return `增值啟動・達投入成本 ${c.thresholdValue}% 才 Pay`;
   return '不設門檻';
 }
 
 function toOvContract(c: HoldingContract): OvContract {
   const profit = c.marketValue - c.costBasis;
+  const marketUnits = c.purchaseBatches.reduce((sum, batch) => sum + batch.remainUnits, 0);
+  const latestBatch = [...c.purchaseBatches].sort((a, b) => b.tDate.localeCompare(a.tDate))[0];
+  const marketNav = latestBatch?.nav ?? (marketUnits ? c.marketValue / marketUnits : 0);
+  const marketFx = marketUnits && marketNav ? c.marketValue / marketUnits / marketNav : 1;
   return {
     fpNo: c.fpNo,
     ccy: CCY_NAME[c.currencyCode] ?? c.currencyCode,
@@ -96,6 +101,10 @@ function toOvContract(c: HoldingContract): OvContract {
     cost: c.costBasis,
     profit,
     ret: c.costBasis ? (profit / c.costBasis) * 100 : 0,
+    marketUnits,
+    marketNav,
+    marketNavDate: latestBatch?.tDate ?? c.startDate,
+    marketFx,
   };
 }
 
@@ -133,12 +142,12 @@ function buildOvFunds(): OvFund[] {
 export const OV_FUNDS: OvFund[] = buildOvFunds();
 
 export const MOCK_ALT_ORDERS: AltOrder[] = [
-  { id: 'A20260505001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', ccy: 'TWD', fdCcy: 'USD', amount: 300000, payType: 'A', rdmAmt: 2000,  payRate: 0, rdmDay: 15, limitMode: 'neg',  limitVal: -20, date: '2026/05/05', time: '09:12:30', effectDate: '2026/05/07', status: '成功' },
+  { id: 'A20260505001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', ccy: 'TWD', fdCcy: 'USD', amount: 300000, payType: 'A', rdmAmt: 2000,  payRate: 0, rdmDay: 15, limitMode: 'protect',  limitVal: 80, date: '2026/05/05', time: '09:12:30', effectDate: '2026/05/07', status: '成功' },
   { id: 'A20260505002', fund: '統一大滿貫台灣平衡基金',       code: 'TA123456', ccy: 'TWD', fdCcy: 'TWD', amount: 100000, payType: 'P', rdmAmt: 810,   payRate: 6, rdmDay: 5,  limitMode: 'none', limitVal: null, date: '2026/05/05', time: '10:05:11', effectDate: '2026/05/07', status: '成功' },
 ];
 
 export const MOCK_CHG_ORDERS: ChgOrder[] = [
-  { id: 'C20260505001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', ccy: 'USD', oldPay: '依金額・80', newPay: '依比例・年化 6%', oldDay: '15', newDay: '15', oldLimit: '增值啟動・漲50%', newLimit: '增值啟動・漲30%', effectDate: '2026/05/06', date: '2026/05/05', time: '11:20:18', status: '成功' },
+  { id: 'C20260505001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', ccy: 'USD', oldPay: '依金額・80', newPay: '依比例・年化 6%', oldDay: '15', newDay: '15', oldLimit: '增值啟動・達投入成本 150% 才 Pay', newLimit: '增值啟動・達投入成本 130% 才 Pay', effectDate: '2026/05/06', date: '2026/05/05', time: '11:20:18', status: '成功' },
 ];
 
 export const MOCK_RDM_ORDERS: RdmOrder[] = [
@@ -146,8 +155,8 @@ export const MOCK_RDM_ORDERS: RdmOrder[] = [
 ];
 
 export const MOCK_PROFITS: ProfitRecord[] = [
-  { id: 'hp-001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024001', ccy: 'TWD', fundCcy: 'USD', redeemDate: '2026/04/18', totalPaid: 12000, paySetting: '依金額・15日',    threshold: '市值守護・跌20%',  cost: 300000, redeemAmount: 318000, profit:  30000, returnRate:  10.00, status: '已完成' },
-  { id: 'hp-002', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024002', ccy: 'USD', fundCcy: 'USD', redeemDate: '2026/03/22', totalPaid:   240, paySetting: '依金額・15日',    threshold: '增值啟動・漲30%', cost:   8000, redeemAmount:   8420, profit:    660, returnRate:   8.25, status: '已完成' },
+  { id: 'hp-001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024001', ccy: 'TWD', fundCcy: 'USD', redeemDate: '2026/04/18', totalPaid: 12000, paySetting: '依金額・15日',    threshold: '市值守護・低於投入成本 80% 暫停',  cost: 300000, redeemAmount: 318000, profit:  30000, returnRate:  10.00, status: '已完成' },
+  { id: 'hp-002', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024002', ccy: 'USD', fundCcy: 'USD', redeemDate: '2026/03/22', totalPaid:   240, paySetting: '依金額・15日',    threshold: '增值啟動・達投入成本 130% 才 Pay', cost:   8000, redeemAmount:   8420, profit:    660, returnRate:   8.25, status: '已完成' },
   { id: 'hp-003', fund: '統一大滿貫台灣平衡基金',       code: 'TA123456', fpNo: 'FP2025002', ccy: 'TWD', fundCcy: 'TWD', redeemDate: '2026/02/10', totalPaid: 18000, paySetting: '依比例・6%・5日', threshold: '不設門檻',         cost: 150000, redeemAmount: 162000, profit:  30000, returnRate:  20.00, status: '已完成' },
   { id: 'hp-004', fund: '施羅德環球收益基金 A',         code: 'TU778899', fpNo: 'FP2025001', ccy: 'USD', fundCcy: 'USD', redeemDate: '2025/12/19', totalPaid:   150, paySetting: '依金額・10日',    threshold: '不設門檻',         cost:   5000, redeemAmount:   4860, profit:     10, returnRate:   0.20, status: '已完成' },
   { id: 'hp-005', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2023008', ccy: 'TWD', fundCcy: 'USD', redeemDate: '2025/10/06', totalPaid:  6000, paySetting: '依金額・20日',    threshold: '不設門檻',         cost: 200000, redeemAmount: 188000, profit:  -6000, returnRate:  -3.00, status: '已完成' },
@@ -215,25 +224,25 @@ export const DETAIL_TX_DETAIL: Record<string, DetailTxRecord[]> = (() => {
 
 export const DETAIL_TX_CHANGE: Record<string, DetailChgRecord[]> = {
   FP20230901: [
-    { orderDate: '2026-04-30', orderTime: '15:34:21', tDate: '2026-05-04', tradeType: 'AL',  status: '已完成', orgPayType: 'A', orgRDMAmt: 2000, orgPayRate: 0, payType: 'A', rdmAmt: 2500, payRate: 0, orgRDMDay: 15, rdmDay: 15, orgLimitMode: 'neg',  orgLimitVal: -20, limitMode: 'none', limitVal: null },
-    { orderDate: '2026-01-12', orderTime: '10:18:06', tDate: '2026-01-14', tradeType: 'D',   status: '已完成', orgPayType: 'A', orgRDMAmt: 2000, orgPayRate: 0, payType: 'A', rdmAmt: 2000, payRate: 0, orgRDMDay: 20, rdmDay: 15, orgLimitMode: 'neg',  orgLimitVal: -20, limitMode: 'neg',  limitVal: -20 },
-    { orderDate: '2025-10-02', orderTime: '13:08:49', tDate: '2025-10-06', tradeType: 'TAP', status: '已完成', orgPayType: 'P', orgRDMAmt: 0,    orgPayRate: 8, payType: 'A', rdmAmt: 2000, payRate: 0, orgRDMDay: 20, rdmDay: 20, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'neg',  limitVal: -20 },
+    { orderDate: '2026-04-30', orderTime: '15:34:21', tDate: '2026-05-04', tradeType: 'AL',  status: '已完成', orgPayType: 'A', orgRDMAmt: 2000, orgPayRate: 0, payType: 'A', rdmAmt: 2500, payRate: 0, orgRDMDay: 15, rdmDay: 15, orgLimitMode: 'protect',  orgLimitVal: 80, limitMode: 'none', limitVal: null },
+    { orderDate: '2026-01-12', orderTime: '10:18:06', tDate: '2026-01-14', tradeType: 'D',   status: '已完成', orgPayType: 'A', orgRDMAmt: 2000, orgPayRate: 0, payType: 'A', rdmAmt: 2000, payRate: 0, orgRDMDay: 20, rdmDay: 15, orgLimitMode: 'protect',  orgLimitVal: 80, limitMode: 'protect',  limitVal: 80 },
+    { orderDate: '2025-10-02', orderTime: '13:08:49', tDate: '2025-10-06', tradeType: 'TAP', status: '已完成', orgPayType: 'P', orgRDMAmt: 0,    orgPayRate: 8, payType: 'A', rdmAmt: 2000, payRate: 0, orgRDMDay: 20, rdmDay: 20, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'protect',  limitVal: 80 },
   ],
   FP20240601: [
-    { orderDate: '2026-03-28', orderTime: '11:22:18', tDate: '2026-04-01', tradeType: 'AL', status: '已完成', orgPayType: 'A', orgRDMAmt: 60, orgPayRate: 0, payType: 'A', rdmAmt: 80, payRate: 0, orgRDMDay: 15, rdmDay: 15, orgLimitMode: 'pos', orgLimitVal: 50, limitMode: 'pos', limitVal: 30 },
-    { orderDate: '2025-12-10', orderTime: '09:46:33', tDate: '2025-12-12', tradeType: 'D',  status: '已完成', orgPayType: 'A', orgRDMAmt: 60, orgPayRate: 0, payType: 'A', rdmAmt: 60, payRate: 0, orgRDMDay: 10, rdmDay: 15, orgLimitMode: 'pos', orgLimitVal: 50, limitMode: 'pos', limitVal: 50 },
+    { orderDate: '2026-03-28', orderTime: '11:22:18', tDate: '2026-04-01', tradeType: 'AL', status: '已完成', orgPayType: 'A', orgRDMAmt: 60, orgPayRate: 0, payType: 'A', rdmAmt: 80, payRate: 0, orgRDMDay: 15, rdmDay: 15, orgLimitMode: 'unlock', orgLimitVal: 150, limitMode: 'unlock', limitVal: 130 },
+    { orderDate: '2025-12-10', orderTime: '09:46:33', tDate: '2025-12-12', tradeType: 'D',  status: '已完成', orgPayType: 'A', orgRDMAmt: 60, orgPayRate: 0, payType: 'A', rdmAmt: 60, payRate: 0, orgRDMDay: 10, rdmDay: 15, orgLimitMode: 'unlock', orgLimitVal: 150, limitMode: 'unlock', limitVal: 150 },
   ],
   FP20241201: [
     { orderDate: '2026-02-26', orderTime: '14:03:12', tDate: '2026-03-02', tradeType: 'P', status: '已完成', orgPayType: 'P', orgRDMAmt: 0, orgPayRate: 5, payType: 'P', rdmAmt: 0, payRate: 6, orgRDMDay: 5, rdmDay: 5, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'none', limitVal: null },
   ],
   FP20240101: [
-    { orderDate: '2026-04-15', orderTime: '10:30:55', tDate: '2026-04-17', tradeType: 'DL', status: '已完成', orgPayType: 'P', orgRDMAmt: 0, orgPayRate: 5, payType: 'P', rdmAmt: 0, payRate: 5, orgRDMDay: 10, rdmDay: 5, orgLimitMode: 'neg', orgLimitVal: -15, limitMode: 'none', limitVal: null },
+    { orderDate: '2026-04-15', orderTime: '10:30:55', tDate: '2026-04-17', tradeType: 'DL', status: '已完成', orgPayType: 'P', orgRDMAmt: 0, orgPayRate: 5, payType: 'P', rdmAmt: 0, payRate: 5, orgRDMDay: 10, rdmDay: 5, orgLimitMode: 'protect', orgLimitVal: 85, limitMode: 'none', limitVal: null },
   ],
   FP20250301: [
-    { orderDate: '2026-02-18', orderTime: '14:12:33', tDate: '2026-02-20', tradeType: 'DL', status: '已完成', orgPayType: 'P', orgRDMAmt: 0, orgPayRate: 4, payType: 'P', rdmAmt: 0, payRate: 4, orgRDMDay: 10, rdmDay: 10, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'pos', limitVal: 20 },
+    { orderDate: '2026-02-18', orderTime: '14:12:33', tDate: '2026-02-20', tradeType: 'DL', status: '已完成', orgPayType: 'P', orgRDMAmt: 0, orgPayRate: 4, payType: 'P', rdmAmt: 0, payRate: 4, orgRDMDay: 10, rdmDay: 10, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'unlock', limitVal: 120 },
   ],
   FP20250601: [
-    { orderDate: '2026-03-12', orderTime: '10:08:11', tDate: '2026-03-16', tradeType: 'D', status: '已完成', orgPayType: 'A', orgRDMAmt: 6000, orgPayRate: 0, payType: 'A', rdmAmt: 6000, payRate: 0, orgRDMDay: 10, rdmDay: 15, orgLimitMode: 'neg', orgLimitVal: -20, limitMode: 'neg', limitVal: -20 },
+    { orderDate: '2026-03-12', orderTime: '10:08:11', tDate: '2026-03-16', tradeType: 'D', status: '已完成', orgPayType: 'A', orgRDMAmt: 6000, orgPayRate: 0, payType: 'A', rdmAmt: 6000, payRate: 0, orgRDMDay: 10, rdmDay: 15, orgLimitMode: 'protect', orgLimitVal: 80, limitMode: 'protect', limitVal: 80 },
   ],
   FP20240801: [
     { orderDate: '2026-01-08', orderTime: '09:55:20', tDate: '2026-01-12', tradeType: 'AL', status: '已完成', orgPayType: 'A', orgRDMAmt: 4000, orgPayRate: 0, payType: 'A', rdmAmt: 5000, payRate: 0, orgRDMDay: 20, rdmDay: 20, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'none', limitVal: null },

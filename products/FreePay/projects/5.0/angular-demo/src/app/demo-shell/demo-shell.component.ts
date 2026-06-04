@@ -54,7 +54,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   payMode: PayMode = 'amount';
   thresholdEnabled = false;
   thresholdMode: ThresholdMode = 'protect';
-  thresholdValue = -20;
+  thresholdValue = 80;
   payActive = true;
   agreedTerms = false;
   pwd = '';
@@ -67,23 +67,21 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   // 升級四：贖回兩層 UI 狀態
   redeemMode: RedeemMode = null;
   selectedBatchIds = new Set<string>();
-  // 升級四方案 D：用戶明確確認接受月 Pay 自動調整
-  acknowledgePayAdjustment = false;
   private addOnDirect = false;
   private flowContext: FlowContext = { mode: 'new', fundId: DEFAULT_DEMO_SCENARIO.fundId };
 
   readonly dateOptions = Array.from({ length: 31 }, (_, i) => i + 1);
-  readonly protectThresholdOptions = [-5, -10, -15, -20];
-  readonly unlockPresetThresholdOptions = [5, 10, 20];
+  readonly protectThresholdOptions = [95, 90, 80];
+  readonly unlockPresetThresholdOptions = [105, 110, 120];
 
   readonly form = this.fb.group({
     amount: [100000, this.numericAmountValidators(100000)],
     monthlyPay: [null as number | string | null, this.numericAmountValidators(1)],
     ratio: [null as number | null, [Validators.required, Validators.min(1), Validators.max(15)]],
     day: [15, [Validators.required]],
-    thresholdCustom: [20, [
+    thresholdCustom: [80, [
       Validators.required,
-      Validators.min(1),
+      Validators.min(70),
       Validators.max(100),
       Validators.pattern(/^[1-9][0-9]*$/)
     ]]
@@ -190,8 +188,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   private contractThresholdText(c: HoldingContract): string {
-    if (c.thresholdMode === 'protect') return `市值守護・跌${Math.abs(c.thresholdValue)}%`;
-    if (c.thresholdMode === 'unlock') return `增值啟動・漲${c.thresholdValue}%`;
+    if (c.thresholdMode === 'protect') return `市值守護・低於投入成本 ${c.thresholdValue}% 暫停`;
+    if (c.thresholdMode === 'unlock') return `增值啟動・達投入成本 ${c.thresholdValue}% 才 Pay`;
     return '不設門檻';
   }
 
@@ -212,6 +210,14 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   get isMultiCurrency(): boolean {
     return (this.scenario?.availableCurrencies.length ?? 0) > 1;
+  }
+
+  get isContractScopedEntry(): boolean {
+    return this.addOnDirect;
+  }
+
+  get canSwitchCurrency(): boolean {
+    return this.isMultiCurrency && !this.isContractScopedEntry;
   }
 
   get contractForSelectedCurrency(): Contract | null {
@@ -267,6 +273,23 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.isAddOnMode ? '加碼' : '新申購';
   }
 
+  get addOnPaySettingSummary(): string {
+    const contract = this.selectedContract ?? this.contractForSelectedCurrency;
+    if (!contract) return '加碼至既有契約，Pay 設定維持既有設定。';
+
+    const method = contract.payMode === 'ratio'
+      ? `依比例 ${contract.annualRate}%`
+      : '依金額';
+    const day = `每月 ${contract.payDay} 日`;
+    const value = contract.payMode === 'amount'
+      ? this.formatMoney(contract.monthlyPay, contract.currencyCode)
+      : '';
+    const threshold = contract.threshold || '不設門檻';
+    const parts = [method, day, value, threshold].filter(Boolean);
+
+    return `加碼至既有契約，Pay 設定維持：${parts.join('・')}。`;
+  }
+
   get minAmount(): number {
     const code = this.selectedCurrency?.currencyCode ?? 'TWD';
     const row = MIN_AMOUNT_TABLE[code] ?? MIN_AMOUNT_TABLE['TWD'];
@@ -310,27 +333,35 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.amount > 0 ? (this.monthlyPay * 12 / this.amount) * 100 : 0;
   }
 
-  get thresholdText(): string {
-    if (!this.thresholdEnabled) return '不設門檻';
-    if (this.thresholdValue < 0) return `市值守護・跌${Math.abs(this.thresholdValue)}% 停 Pay`;
-    return `增值啟動・漲${this.thresholdValue}% 啟動`;
+  get monthlyPayAnnualLimitAmount(): number {
+    return Math.floor(this.amount * 0.15 / 12);
   }
 
-  get thresholdPreviewPrefix(): string {
-    return this.thresholdMode === 'protect' ? '低於' : '首次達';
+  get thresholdText(): string {
+    if (!this.thresholdEnabled) return '不設門檻';
+    if (this.thresholdMode === 'protect') return `市值守護・低於投入成本 ${this.thresholdValue}% 暫停`;
+    return `增值啟動・達投入成本 ${this.thresholdValue}% 才 Pay`;
+  }
+
+  get thresholdPreviewLead(): string {
+    return this.thresholdMode === 'protect' ? '市值低於投入成本' : '市值達投入成本';
   }
 
   get thresholdPreviewSuffix(): string {
-    return this.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時，啟動 Pay 出';
+    return this.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時才 Pay 出';
   }
 
   get thresholdPreviewAmount(): number {
-    const rate = this.thresholdValue / 100;
-    return Math.round(this.amount * (1 + rate));
+    return Math.round(this.amount * (this.thresholdValue / 100));
   }
 
-  get thresholdPreviewHint(): string {
-    return `以投入成本 ${this.formatMoney(this.amount)}、門檻 ${Math.abs(this.thresholdValue)}% 估算`;
+  get thresholdNote(): string {
+    const cost = this.formatMoney(this.amount);
+    const line = this.formatMoney(this.thresholdPreviewAmount);
+    const pct = this.thresholdValue;
+    return this.thresholdMode === 'protect'
+      ? `每月基準日依當時市值重新判斷；以投入成本 ${cost}、門檻 ${pct}% 估算，市值低於 ${line} 時暫停 Pay 出。`
+      : `每月基準日依當時市值重新判斷；以投入成本 ${cost}、門檻 ${pct}% 估算，市值達 ${line} 的月份才 Pay 出，未達暫停。`;
   }
 
   get showThresholdPreview(): boolean {
@@ -412,7 +443,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return ((remainValue + batch.paidAmount - batch.amount) / batch.amount) * 100;
   }
 
-  // 短線交易判定：自成交日起 30 天內 → 短線（使用 tDate 與 demo 固定參考日，避免時區漂移與真實系統時間污染）
+  // 短線交易判定（demo 示意）：此處以「自成交日起 30 天內」簡化展演，實際短線判斷以工程既有規格為準。
+  // 使用 tDate 與 demo 固定參考日，避免時區漂移與真實系統時間污染。
   isShortTerm(batch: PurchaseBatch): boolean {
     // slash 格式被瀏覽器當 local 解析（避免 ISO '-' 強制 UTC 漂移）
     const tradeDate = new Date(batch.tDate);
@@ -497,7 +529,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     if (mode === 'batch' && !this.hasSelectableBatch) return;
     this.redeemMode = mode;
     if (mode !== 'batch') this.selectedBatchIds.clear();
-    this.acknowledgePayAdjustment = false;
   }
 
   toggleBatch(batch: PurchaseBatch): void {
@@ -507,7 +538,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     } else {
       this.selectedBatchIds.add(batch.batchId);
     }
-    this.acknowledgePayAdjustment = false;
   }
 
   toggleAllSelectableBatches(): void {
@@ -516,7 +546,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     } else {
       this.selectableBatches.forEach(b => this.selectedBatchIds.add(b.batchId));
     }
-    this.acknowledgePayAdjustment = false;
   }
 
   get redeemNavDate(): string {
@@ -530,8 +559,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       // 升級四：贖回方式必選；若選 batch 模式須至少勾 1 筆批次
       if (!this.redeemMode) return true;
       if (this.redeemMode === 'batch' && !this.hasSelectedBatch) return true;
-      // 升級四方案 D：年化超標時，未明確勾選接受月 Pay 調整 → 阻擋
-      if (this.showRedeemPayAdjustmentNotice && !this.acknowledgePayAdjustment) return true;
     }
     return false;
   }
@@ -558,6 +585,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   selectCurrency(currencyCode: string): void {
+    if (!this.canSwitchCurrency) return;
     this.selectedCurrency = this.scenario?.availableCurrencies.find(c => c.currencyCode === currencyCode) ?? null;
     // 5.0 起：幣別切換器整合到設定頁；切換後即時更新該幣別契約狀態（決定加碼/新申購模式）
     this.syncSelectedContractForCurrency();
@@ -658,12 +686,15 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   setThresholdMode(mode: ThresholdMode): void {
     this.thresholdMode = mode;
     this.thresholdCustomActive = false;
-    this.thresholdValue = mode === 'protect' ? -20 : 20;
+    this.thresholdValue = mode === 'protect' ? 80 : 110;
     this.resetThresholdCustomControl();
   }
 
   setThresholdValue(value: number): void {
-    this.thresholdCustomActive = this.thresholdMode === 'unlock' && !this.unlockPresetThresholdOptions.includes(value);
+    const presets = this.thresholdMode === 'protect'
+      ? this.protectThresholdOptions
+      : this.unlockPresetThresholdOptions;
+    this.thresholdCustomActive = !presets.includes(value);
     this.thresholdValue = value;
     if (!this.thresholdCustomActive) {
       this.resetThresholdCustomControl();
@@ -673,18 +704,21 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   selectCustomThreshold(): void {
     this.thresholdCustomActive = true;
     const control = this.form.controls.thresholdCustom;
+    this.applyThresholdCustomValidators();
     if (control.invalid) {
-      control.setValue(20);
+      control.setValue(this.thresholdMode === 'protect' ? 100 : 110);
       control.markAsPristine();
       control.markAsUntouched();
     }
-    this.thresholdValue = Number(control.value || 20);
+    this.thresholdValue = Number(control.value || (this.thresholdMode === 'protect' ? 100 : 110));
   }
 
-  setCustomUnlockValue(value: number | string | null): void {
+  setCustomThresholdValue(value: number | string | null): void {
     const raw = String(value ?? '').trim();
     const parsed = Number(raw);
-    if (/^[1-9][0-9]*$/.test(raw) && parsed >= 1 && parsed <= 100) {
+    const min = this.thresholdMode === 'protect' ? 70 : 101;
+    const max = this.thresholdMode === 'protect' ? 100 : 200;
+    if (/^[1-9][0-9]*$/.test(raw) && parsed >= min && parsed <= max) {
       this.thresholdValue = parsed;
     }
   }
@@ -789,16 +823,29 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   private resetThresholdState(): void {
     this.thresholdCustomActive = false;
     this.thresholdMode = 'protect';
-    this.thresholdValue = -20;
+    this.thresholdValue = 80;
     this.resetThresholdCustomControl();
   }
 
   private resetThresholdCustomControl(): void {
     const control = this.form.controls.thresholdCustom;
-    control.setValue(20);
+    this.applyThresholdCustomValidators();
+    control.setValue(this.thresholdMode === 'protect' ? 80 : 110);
     control.markAsPristine();
     control.markAsUntouched();
     control.updateValueAndValidity({ emitEvent: false });
+  }
+
+  private applyThresholdCustomValidators(): void {
+    const min = this.thresholdMode === 'protect' ? 70 : 101;
+    const max = this.thresholdMode === 'protect' ? 100 : 200;
+    this.form.controls.thresholdCustom.setValidators([
+      Validators.required,
+      Validators.min(min),
+      Validators.max(max),
+      Validators.pattern(/^[1-9][0-9]*$/)
+    ]);
+    this.form.controls.thresholdCustom.updateValueAndValidity({ emitEvent: false });
   }
 
   private syncSelectedContractForCurrency(): void {
@@ -810,7 +857,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.agreedTerms = false;
     this.pwd = '';
     this.pwdVisible = false;
-    this.form.reset({ amount: this.minAmount, monthlyPay: null, ratio: null, day: 15, thresholdCustom: 20 });
+    this.form.reset({ amount: this.minAmount, monthlyPay: null, ratio: null, day: 15, thresholdCustom: 80 });
     this.payMode = 'amount';
     this.payActive = true;
     this.thresholdEnabled = false;
@@ -822,7 +869,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     // 若該契約無可選批次（全部已被 Pay 觸及）→ 自動鎖定全部贖回，免去無意義的決策
     this.redeemMode = this.isRedeemMode && !this.hasSelectableBatch ? 'all' : null;
     this.selectedBatchIds.clear();
-    this.acknowledgePayAdjustment = false;
   }
 
   private applyContractSettings(contract: Contract): void {
@@ -837,13 +883,17 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
     this.thresholdEnabled = contract.thresholdMode !== 'none';
     this.thresholdMode = contract.thresholdMode === 'unlock' ? 'unlock' : 'protect';
-    this.thresholdValue = contract.thresholdMode === 'none' ? -20 : contract.thresholdValue;
-    this.thresholdCustomActive = contract.thresholdMode === 'unlock'
-      && !this.unlockPresetThresholdOptions.includes(contract.thresholdValue);
+    this.thresholdValue = contract.thresholdMode === 'none' ? 80 : contract.thresholdValue;
+    const presets = this.thresholdMode === 'protect'
+      ? this.protectThresholdOptions
+      : this.unlockPresetThresholdOptions;
+    this.thresholdCustomActive = contract.thresholdMode !== 'none'
+      && !presets.includes(contract.thresholdValue);
     this.form.controls.thresholdCustom.setValue(
-      this.thresholdCustomActive ? contract.thresholdValue : 20,
+      this.thresholdCustomActive ? contract.thresholdValue : (this.thresholdMode === 'protect' ? 80 : 110),
       { emitEvent: false }
     );
+    this.applyThresholdCustomValidators();
     this.applyPayModeValidators();
   }
 
