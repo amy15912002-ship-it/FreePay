@@ -453,30 +453,6 @@
     <ng-container *ngIf="activeTab === 'profit'">
 
       <div class="ov-tab-stack">
-      <div class="ov-filters">
-        <div class="ov-filter-row">
-          <span class="ov-filter-label">期間</span>
-          <mat-chip-list class="filter-chips" aria-label="資料期間">
-            <mat-chip [selectable]="false" [selected]="profitPeriod==='ALL'" (click)="profitPeriod='ALL'">全部</mat-chip>
-            <mat-chip [selectable]="false" [selected]="profitPeriod==='YTD'" (click)="profitPeriod='YTD'">今年</mat-chip>
-            <mat-chip [selectable]="false" [selected]="profitPeriod==='3M'" (click)="profitPeriod='3M'">3個月</mat-chip>
-            <mat-chip [selectable]="false" [selected]="profitPeriod==='6M'" (click)="profitPeriod='6M'">6個月</mat-chip>
-            <mat-chip [selectable]="false" [selected]="profitPeriod==='1Y'" (click)="profitPeriod='1Y'">1年</mat-chip>
-            <mat-chip [selectable]="false" [selected]="profitPeriod==='CUSTOM'" (click)="profitPeriod='CUSTOM'">自訂</mat-chip>
-          </mat-chip-list>
-          <ng-container *ngIf="profitPeriod === 'CUSTOM'">
-            <mat-form-field appearance="standard" color="accent" class="date-range-field">
-              <mat-label>期間</mat-label>
-              <mat-date-range-input [rangePicker]="profitRangePicker">
-                <input matStartDate placeholder="起日" [(ngModel)]="profitCustomStart" [ngModelOptions]="{ standalone: true }">
-                <input matEndDate placeholder="迄日" [(ngModel)]="profitCustomEnd" [ngModelOptions]="{ standalone: true }">
-              </mat-date-range-input>
-              <mat-datepicker-toggle matSuffix [for]="profitRangePicker"></mat-datepicker-toggle>
-              <mat-date-range-picker #profitRangePicker></mat-date-range-picker>
-            </mat-form-field>
-          </ng-container>
-        </div>
-      </div>
 
       <div class="ov-table-wrap ov-mobile-card-wrap">
         <table class="ov-table ov-profit-summary-table">
@@ -506,56 +482,50 @@
         </table>
       </div>
 
-      <div class="ov-profit-list" *ngIf="profitGroupedByFund.length > 0">
-        <section class="ov-profit-section" *ngFor="let group of profitGroupedByFund; trackBy: trackByCode" [attr.aria-label]="group.fund">
-        <div class="block-header">
-          <div>
-            <span class="ov-cell-code">{{ group.code }}</span>
-            <h3 class="block-title"> {{ group.fund }}</h3>
+      <div class="ov-fund-table ov-fund-table--profit" *ngIf="profitRows.length > 0">
+        <div class="ov-detail-head">
+          <div class="ov-head-name">基金名稱</div>
+          <div class="ov-metric-grid ov-metric-grid--row">
+            <span>交易/計價幣別</span>
+            <span>贖回金額</span>
+            <span>投入成本</span>
+            <span>已 Pay 金額</span>
+            <span>已實現損益</span>
+            <span>含 Pay 報酬率</span>
+            <span>不含 Pay 報酬率</span>
           </div>
-          <span class="ov-order-count">{{ group.rows.length }} 筆</span>
         </div>
-        <div class="ov-table-wrap ov-mobile-card-wrap">
-          <table class="ov-table ov-profit-table">
-            <thead>
-              <tr>
-                <th class="col-date">贖回日</th>
-                <th>交易/計價幣別</th>
-                <th>贖回金額</th>
-                <th>投入成本</th>
-                <th>已實現損益</th>
-                <th>已 Pay 金額</th>
-                <th>含 Pay 報酬率</th>
-                <th>不含 Pay 報酬率</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of group.rows; trackBy: trackById" [attr.title]="'契約編號 ' + item.fpNo + '・' + item.status">
-                <td class="col-date" data-label="贖回日">{{ item.redeemDate }}</td>
-                <td data-label="交易/計價幣別">{{ ccyText(item.ccy) }} / {{ ccyText(item.fundCcy) }}</td>
-                <td data-label="贖回金額">{{ fmtN(item.redeemAmount) }}</td>
-                <td data-label="投入成本">{{ fmtN(item.cost) }}</td>
-                <td data-label="已實現損益" [ngClass]="numClass(item.profit)">{{ fmtSigned(item.profit) }}</td>
-                <td data-label="已 Pay 金額">{{ fmtN(item.totalPaid) }}</td>
-                <td data-label="含 Pay 報酬率" [ngClass]="numClass(item.returnRate)">{{ fmtRate(item.returnRate) }}</td>
-                <td data-label="不含 Pay 報酬率" [ngClass]="numClass(profitReturnNoPay(item))">{{ fmtRate(profitReturnNoPay(item)) }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-        </section>
+        <article class="ov-fund" *ngFor="let item of profitRows; trackBy: trackById" [attr.aria-label]="item.fund">
+          <div class="ov-fund-main">
+            <div class="ov-fund-name">
+              <div class="ov-fund-code-row">
+                <span class="ov-fund-code">{{ item.code }}</span>
+                <button class="detail-icon-btn ov-fund-detail-btn" type="button" (click)="openDetail(item.fpNo)" aria-label="查看交易明細">
+                  <i class="bi bi-file-text"></i>
+                </button>
+              </div>
+              <strong>{{ item.fund }}</strong>
+            </div>
+            <div class="ov-metric-grid ov-metric-grid--row">
+              <div class="ov-kv ov-kv--ccy"><span class="ov-kv-lbl">交易/計價幣別</span><span>{{ ccyText(item.ccy) }} / {{ ccyText(item.fundCcy) }}</span></div>
+              <div class="ov-kv"><span class="ov-kv-lbl">贖回金額</span><span>{{ fmtN(item.redeemAmount) }}</span></div>
+              <div class="ov-kv"><span class="ov-kv-lbl">投入成本</span><span>{{ fmtN(item.cost) }}</span></div>
+              <div class="ov-kv"><span class="ov-kv-lbl">已 Pay 金額</span><span>{{ fmtN(item.totalPaid) }}</span></div>
+              <div class="ov-kv ov-kv--profit"><span class="ov-kv-lbl">已實現損益</span><span [ngClass]="numClass(item.profit)">{{ fmtSigned(item.profit) }}</span></div>
+              <div class="ov-kv ov-kv--return-with"><span class="ov-kv-lbl">含 Pay 報酬率</span><span [ngClass]="numClass(item.returnRate)">{{ fmtRate(item.returnRate) }}</span></div>
+              <div class="ov-kv ov-kv--return-no-pay"><span class="ov-kv-lbl">不含 Pay 報酬率</span><span [ngClass]="numClass(profitReturnNoPay(item))">{{ fmtRate(profitReturnNoPay(item)) }}</span></div>
+            </div>
+          </div>
+        </article>
       </div>
 
-      <div class="ov-empty" *ngIf="profitGroupedByFund.length === 0">查無已實現損益資料</div>
-
-      <p class="ov-profit-note">
-        說明：已實現損益為資料期間內已完成交易程序者，計算方式為贖回金額加計已 Pay 金額後，扣除原始投入成本。資料若有不符，仍以交易平台與集保紀錄為準。
-      </p>
+      <div class="ov-empty" *ngIf="profitRows.length === 0">查無已實現損益資料</div>
 
       <!-- 注意事項 -->
       <div class="notes-block">
         <div class="notes-title">注意事項</div>
         <ul class="notes-list">
+          <li>已實現損益為資料期間內已完成交易程序者，計算方式為贖回金額加計已 Pay 金額後扣除原始投入成本；資料若有不符，仍以交易平台與集保紀錄為準。</li>
           <li>上述損益數據為估算值，實際以交易確認書為準。</li>
           <li>匯率損益未納入計算，外幣交易實際損益請參照匯兌盈虧。</li>
         </ul>
@@ -707,7 +677,7 @@
                 <th>異動前</th>
                 <th>異動後</th>
                 <th>生效日</th>
-                <th>委託結果</th>
+                <th *ngIf="!isProfitDetail">委託結果</th>
               </tr>
             </thead>
             <tbody>
@@ -717,10 +687,10 @@
                 <td data-label="異動前">{{ fmtChgBefore(r) }}</td>
                 <td data-label="異動後" class="ov-cell-new">{{ fmtChgAfter(r) }}</td>
                 <td data-label="生效日" class="ov-cell-new">{{ fmtDate(r.tDate) }}</td>
-                <td data-label="委託結果">{{ r.status }}</td>
+                <td *ngIf="!isProfitDetail" data-label="委託結果">{{ r.status }}</td>
               </tr>
               <tr *ngIf="detailChgRecords.length === 0">
-                <td colspan="6" class="ov-empty">查無資料</td>
+                <td [attr.colspan]="isProfitDetail ? 5 : 6" class="ov-empty">查無資料</td>
               </tr>
             </tbody>
           </table>
@@ -730,3 +700,4 @@
     </mat-tab-group>
   </div>
 </div>
+

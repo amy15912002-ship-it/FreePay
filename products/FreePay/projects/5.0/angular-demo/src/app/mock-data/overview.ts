@@ -190,6 +190,41 @@ const HAND_MOCK_PAY_REDEEM: Record<string, DetailTxRecord[]> = {
   ],
 };
 
+// 已實現損益契約的完整交易明細（已贖回、不在 HOLDINGS，故手動補；含申購 A／自由 Pay R／贖回 RDM）
+const HAND_MOCK_PROFIT_TX: Record<string, DetailTxRecord[]> = {
+  FP2024001: [
+    { orderDate: '2026-04-18', orderTime: '10:15:30', tDate: '2026-04-22', tradeType: 'RDM', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '12.4500', unitDesc: '796.7800', exRateDesc: '32.0500', amount: 318000 },
+    { orderDate: '2026-03-15', orderTime: '09:00:10', tDate: '2026-03-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '12.2000', unitDesc: '10.2300',  exRateDesc: '32.0800', amount: 4000 },
+    { orderDate: '2026-02-15', orderTime: '09:00:10', tDate: '2026-02-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '12.0000', unitDesc: '10.4100',  exRateDesc: '31.9800', amount: 4000 },
+    { orderDate: '2026-01-15', orderTime: '09:00:10', tDate: '2026-01-17', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.8000', unitDesc: '10.5900',  exRateDesc: '31.8500', amount: 4000 },
+    { orderDate: '2024-08-01', orderTime: '13:20:00', tDate: '2024-08-05', tradeType: 'A',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.5000', unitDesc: '828.2100', exRateDesc: '31.5000', amount: 300000 },
+  ],
+  FP2024002: [
+    { orderDate: '2026-03-22', orderTime: '10:20:15', tDate: '2026-03-24', tradeType: 'RDM', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '12.4500', unitDesc: '676.3000', exRateDesc: '-', amount: 8420 },
+    { orderDate: '2026-02-22', orderTime: '09:05:00', tDate: '2026-02-24', tradeType: 'R',   trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '12.0000', unitDesc: '10.0000', exRateDesc: '-', amount: 120 },
+    { orderDate: '2026-01-22', orderTime: '09:05:00', tDate: '2026-01-24', tradeType: 'R',   trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '11.8000', unitDesc: '10.1700', exRateDesc: '-', amount: 120 },
+    { orderDate: '2024-12-01', orderTime: '14:00:00', tDate: '2024-12-03', tradeType: 'A',   trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '11.5000', unitDesc: '695.6500', exRateDesc: '-', amount: 8000 },
+  ],
+  FP2025002: [
+    { orderDate: '2026-02-10', orderTime: '10:30:00', tDate: '2026-02-12', tradeType: 'RDM', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '16.2000', unitDesc: '10,000.0000', exRateDesc: '-', amount: 162000 },
+    { orderDate: '2026-01-05', orderTime: '09:00:05', tDate: '2026-01-07', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '15.8000', unitDesc: '569.6200',    exRateDesc: '-', amount: 9000 },
+    { orderDate: '2025-12-05', orderTime: '09:00:05', tDate: '2025-12-07', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '15.6000', unitDesc: '576.9200',    exRateDesc: '-', amount: 9000 },
+    { orderDate: '2025-06-01', orderTime: '13:10:00', tDate: '2025-06-03', tradeType: 'A',   trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '15.0000', unitDesc: '10,000.0000', exRateDesc: '-', amount: 150000 },
+  ],
+  FP2025001: [
+    { orderDate: '2025-12-19', orderTime: '11:00:00', tDate: '2025-12-23', tradeType: 'RDM', trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '9.7200',  unitDesc: '500.0000', exRateDesc: '-', amount: 4860 },
+    { orderDate: '2025-11-10', orderTime: '09:10:00', tDate: '2025-11-12', tradeType: 'R',   trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '9.9000',  unitDesc: '7.5700',   exRateDesc: '-', amount: 75 },
+    { orderDate: '2025-10-10', orderTime: '09:10:00', tDate: '2025-10-12', tradeType: 'R',   trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '10.0000', unitDesc: '7.5000',   exRateDesc: '-', amount: 75 },
+    { orderDate: '2025-03-01', orderTime: '14:20:00', tDate: '2025-03-03', tradeType: 'A',   trCcyDesc: '美元', fdCcyDesc: '美元', navDesc: '10.0000', unitDesc: '500.0000', exRateDesc: '-', amount: 5000 },
+  ],
+  FP2023008: [
+    { orderDate: '2025-10-06', orderTime: '10:45:00', tDate: '2025-10-08', tradeType: 'RDM', trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.2000', unitDesc: '524.1000', exRateDesc: '32.0000', amount: 188000 },
+    { orderDate: '2025-08-20', orderTime: '09:00:20', tDate: '2025-08-22', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.5000', unitDesc: '8.1500',   exRateDesc: '31.9000', amount: 3000 },
+    { orderDate: '2025-07-20', orderTime: '09:00:20', tDate: '2025-07-22', tradeType: 'R',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '11.6000', unitDesc: '8.0900',   exRateDesc: '31.8000', amount: 3000 },
+    { orderDate: '2023-09-15', orderTime: '13:30:00', tDate: '2023-09-19', tradeType: 'A',   trCcyDesc: '台幣', fdCcyDesc: '美元', navDesc: '12.0000', unitDesc: '520.8300', exRateDesc: '32.0000', amount: 200000 },
+  ],
+};
+
 // 把申購批次轉成「申購（A）」交易明細紀錄
 function batchToTxRecord(c: HoldingContract, b: PurchaseBatch): DetailTxRecord {
   const fund = findFund(c.fundId);
@@ -219,10 +254,30 @@ export const DETAIL_TX_DETAIL: Record<string, DetailTxRecord[]> = (() => {
     result[c.fpNo] = [...others, ...aFromBatches]
       .sort((a, b) => b.orderDate.localeCompare(a.orderDate));
   }
+  // 已實現損益契約（已贖回、不在 HOLDINGS）：直接帶入手動明細
+  for (const [fpNo, txs] of Object.entries(HAND_MOCK_PROFIT_TX)) {
+    result[fpNo] = [...txs].sort((a, b) => b.orderDate.localeCompare(a.orderDate));
+  }
   return result;
 })();
 
 export const DETAIL_TX_CHANGE: Record<string, DetailChgRecord[]> = {
+  // 已實現損益契約的變更履歷
+  FP2024001: [
+    { orderDate: '2026-02-01', orderTime: '10:00:00', tDate: '2026-02-03', tradeType: 'AL', status: '已完成', orgPayType: 'A', orgRDMAmt: 3000, orgPayRate: 0, payType: 'A', rdmAmt: 4000, payRate: 0, orgRDMDay: 15, rdmDay: 15, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'none', limitVal: null },
+  ],
+  FP2024002: [
+    { orderDate: '2026-01-05', orderTime: '11:20:00', tDate: '2026-01-07', tradeType: 'D', status: '已完成', orgPayType: 'A', orgRDMAmt: 120, orgPayRate: 0, payType: 'A', rdmAmt: 120, payRate: 0, orgRDMDay: 20, rdmDay: 15, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'none', limitVal: null },
+  ],
+  FP2025002: [
+    { orderDate: '2025-11-20', orderTime: '14:10:00', tDate: '2025-11-24', tradeType: 'P', status: '已完成', orgPayType: 'P', orgRDMAmt: 0, orgPayRate: 5, payType: 'P', rdmAmt: 0, payRate: 6, orgRDMDay: 5, rdmDay: 5, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'none', limitVal: null },
+  ],
+  FP2025001: [
+    { orderDate: '2025-10-01', orderTime: '09:30:00', tDate: '2025-10-03', tradeType: 'AL', status: '已完成', orgPayType: 'A', orgRDMAmt: 60, orgPayRate: 0, payType: 'A', rdmAmt: 75, payRate: 0, orgRDMDay: 10, rdmDay: 10, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'none', limitVal: null },
+  ],
+  FP2023008: [
+    { orderDate: '2025-06-15', orderTime: '13:45:00', tDate: '2025-06-17', tradeType: 'DL', status: '已完成', orgPayType: 'A', orgRDMAmt: 3000, orgPayRate: 0, payType: 'A', rdmAmt: 3000, payRate: 0, orgRDMDay: 20, rdmDay: 20, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'protect', limitVal: 80 },
+  ],
   FP20230901: [
     { orderDate: '2026-04-30', orderTime: '15:34:21', tDate: '2026-05-04', tradeType: 'AL',  status: '已完成', orgPayType: 'A', orgRDMAmt: 2000, orgPayRate: 0, payType: 'A', rdmAmt: 2500, payRate: 0, orgRDMDay: 15, rdmDay: 15, orgLimitMode: 'protect',  orgLimitVal: 80, limitMode: 'none', limitVal: null },
     { orderDate: '2026-01-12', orderTime: '10:18:06', tDate: '2026-01-14', tradeType: 'D',   status: '已完成', orgPayType: 'A', orgRDMAmt: 2000, orgPayRate: 0, payType: 'A', rdmAmt: 2000, payRate: 0, orgRDMDay: 20, rdmDay: 15, orgLimitMode: 'protect',  orgLimitVal: 80, limitMode: 'protect',  limitVal: 80 },

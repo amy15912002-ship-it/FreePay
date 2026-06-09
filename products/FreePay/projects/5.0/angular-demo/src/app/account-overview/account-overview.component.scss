@@ -64,8 +64,7 @@
 
 .ov-section,
 .ov-sum-scroll-wrap,
-.ov-order-section,
-.ov-profit-section {
+.ov-order-section {
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -368,6 +367,32 @@
   align-items: center;
 }
 
+// 已實現損益：metric 單行平鋪（每欄一值，不上下並列；空間足夠）
+.ov-metric-grid--row {
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+
+  > span {
+    text-align: center;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+  }
+
+  .ov-kv {
+    align-items: center;
+    text-align: center;
+  }
+}
+
+// 已實現損益：無操作按鈕，桌機去掉 actions 欄、metric 撐滿右側（避免右側留白、欄寬不均）
+@media (min-width: 1025px) {
+  .ov-fund-table--profit {
+    .ov-detail-head,
+    .ov-fund-main {
+      grid-template-columns: 280px 1fr;
+    }
+  }
+}
+
 .ov-metric-head,
 .ov-metric,
 .ov-ct-metric {
@@ -498,7 +523,8 @@
   border-bottom: 1px solid var(--color-border-default);
 }
 
-.ov-fund:nth-of-type(even) .ov-fund-main {
+.ov-fund:nth-of-type(even) .ov-fund-main,
+.ov-fund:nth-of-type(even) .ov-fund-extra {
   background: var(--color-bg-subtle);
 }
 
@@ -560,7 +586,7 @@
   align-items: center;
   gap: 20px;
   padding: 18px 0;
-  background: var(--color-bg-muted);
+  background: var(--color-bg-base);
   border-bottom: 1px solid var(--color-border-default);
   color: var(--color-text-secondary);
 }
@@ -731,10 +757,6 @@
   display: none !important;
 }
 
-.ov-profit-mobile-tools {
-  display: none;
-}
-
 // ── Order section ──────────────────────────────────────────
 
 .ov-order-count {
@@ -813,44 +835,6 @@
 .ov-cancel-actions {
   display: flex;
   gap: 8px;
-}
-
-// ── Profit section ─────────────────────────────────────────
-
-.ov-profit-table {
-  th.col-date,   td.col-date,
-  th.col-fund,   td.col-fund   { width: 130px; text-align: center; }
-  th.col-date,   td.col-date   { white-space: nowrap; }
-  th.col-currency, td.col-currency { width: 90px; }
-  th.col-result, td.col-result { width: 90px; }
-
-  th:nth-child(n + 4):nth-child(-n + 6),
-  td[data-label="Pay設定 / 已Pay金額"],
-  td[data-label="原始投入 / 贖回金額"],
-  td[data-label="已實現損益 / 含Pay報酬率"] {
-    padding-left: 0;
-    padding-right: 0;
-  }
-
-  th:nth-child(n + 4):nth-child(-n + 6) .ov-metric-head,
-  td[data-label="Pay設定 / 已Pay金額"] .ov-metric,
-  td[data-label="原始投入 / 贖回金額"] .ov-metric,
-  td[data-label="已實現損益 / 含Pay報酬率"] .ov-metric {
-    width: 100%;
-  }
-}
-
-.ov-profit-list {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.ov-profit-note {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.75;
-  margin: 0;
 }
 
 // ── Detail icon button ────────────────────────────────────────
@@ -1085,6 +1069,13 @@
   flex-shrink: 0;
 }
 
+// 已實現損益彈窗內容區（期間篩選＋各筆贖回表）；padding 對齊帳總 mat-tab-body-content
+.detail-panel-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0 24px 24px;
+}
+
 .detail-panel-title {
   display: flex;
   flex-direction: column;
@@ -1196,12 +1187,8 @@
 }
 
 .detail-chg-table {
-  th:nth-child(1), td:nth-child(1) { width: 155px; }
-  th:nth-child(2), td:nth-child(2) { width: 100px; }
-  th:nth-child(3), td:nth-child(3) { width: 120px; }
-  th:nth-child(4), td:nth-child(4) { width: 120px; }
-  th:nth-child(5), td:nth-child(5) { width: 100px; }
-  th:nth-child(6), td:nth-child(6) { width: 80px; }
+  table-layout: auto;   // 欄數會變（已實現損益隱藏委託結果），改內容自適應，避免單欄暴寬
+  th:nth-child(1), td:nth-child(1) { width: 150px; white-space: nowrap; }   // 異動日期/時間
 }
 
 // ── Empty state ─────────────────────────────────────────────
@@ -1613,7 +1600,6 @@
 
   .ov-order-table,
   .ov-profit-summary-table,
-  .ov-profit-table,
   .detail-tx-table,
   .detail-chg-table {
     display: block;
@@ -1718,27 +1704,6 @@
       .bi {
         font-size: 14px;
       }
-    }
-  }
-
-  .ov-profit-table td {
-    border-bottom: none;
-  }
-
-  .ov-profit-mobile-tools {
-    display: flex;
-    justify-content: flex-end;
-
-    button {
-      min-width: 0;
-      padding: 0 4px;
-      color: var(--color-text-secondary);
-      font-size: 14px;
-    }
-
-    .bi {
-      margin-left: 4px;
-      font-size: 14px;
     }
   }
 

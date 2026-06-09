@@ -187,8 +187,13 @@
   <div class="fs-tabs-row">
     <div class="fs-tabs" role="tablist">
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='perf'" (click)="setTab('perf')">績效表現</button>
+      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='nav'" (click)="setTab('nav')">最新淨值</button>
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='roi'" (click)="setTab('roi')">年度報酬率</button>
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
+    </div>
+    <div class="fs-view-toggle">
+      <button *ngIf="viewMode==='card'" class="fs-view-btn" type="button" (click)="setViewMode('table')" aria-label="切換為列表檢視"><i class="bi bi-list-ul"></i></button>
+      <button *ngIf="viewMode==='table'" class="fs-view-btn" type="button" (click)="setViewMode('card')" aria-label="切換為卡片檢視"><i class="bi bi-grid-1x2-fill"></i></button>
     </div>
   </div>
 
@@ -223,7 +228,7 @@
   </div>
 
   <!-- 表格 -->
-  <div class="fs-table-wrap">
+  <div class="fs-table-wrap" [class.fs-view-active]="viewMode==='table'">
     <table class="fs-table" *ngIf="pagedFunds.length > 0">
       <thead>
         <tr>
@@ -231,6 +236,7 @@
           <th class="col-name" (click)="setSort('name')">基金名稱<i class="bi fs-sort" [ngClass]="sortIconClass('name')" [class.is-active]="isSortActive('name')"></i></th>
 
           <ng-container *ngIf="activeTab==='perf'">
+            <th (click)="setSort('perf.m3')">3個月<i class="bi fs-sort" [ngClass]="sortIconClass('perf.m3')" [class.is-active]="isSortActive('perf.m3')"></i></th>
             <th (click)="setSort('perf.m6')">6個月<i class="bi fs-sort" [ngClass]="sortIconClass('perf.m6')" [class.is-active]="isSortActive('perf.m6')"></i></th>
             <th (click)="setSort('perf.y1')">1年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y1')" [class.is-active]="isSortActive('perf.y1')"></i></th>
             <th (click)="setSort('perf.y2')">2年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y2')" [class.is-active]="isSortActive('perf.y2')"></i></th>
@@ -247,32 +253,49 @@
             <th *ngFor="let y of years; let i = index" (click)="setSort(dropSortKey(i))">{{ y }}<i class="bi fs-sort" [ngClass]="sortIconClass(dropSortKey(i))" [class.is-active]="isSortActive(dropSortKey(i))"></i></th>
           </ng-container>
 
+          <ng-container *ngIf="activeTab==='nav'">
+            <th (click)="setSort('currency')">幣別<i class="bi fs-sort" [ngClass]="sortIconClass('currency')" [class.is-active]="isSortActive('currency')"></i></th>
+            <th (click)="setSort('navDate')">日期<i class="bi fs-sort" [ngClass]="sortIconClass('navDate')" [class.is-active]="isSortActive('navDate')"></i></th>
+            <th (click)="setSort('nav')">淨值<i class="bi fs-sort" [ngClass]="sortIconClass('nav')" [class.is-active]="isSortActive('nav')"></i></th>
+            <th (click)="setSort('navChange')">日漲跌<i class="bi fs-sort" [ngClass]="sortIconClass('navChange')" [class.is-active]="isSortActive('navChange')"></i></th>
+            <th (click)="setSort('navChangePct')">日漲跌幅<i class="bi fs-sort" [ngClass]="sortIconClass('navChangePct')" [class.is-active]="isSortActive('navChangePct')"></i></th>
+          </ng-container>
+
           <th class="col-buy">申購</th>
         </tr>
       </thead>
       <tbody>
         <tr *ngFor="let f of pagedFunds; trackBy: trackByFundId">
-          <td class="col-code" data-label="基金代碼">{{ f.fundId }}</td>
-          <td class="col-name" data-label="基金名稱">{{ f.name }}</td>
+          <td class="col-code">{{ f.fundId }}</td>
+          <td class="col-name">{{ f.name }}</td>
 
           <ng-container *ngIf="activeTab==='perf'">
-            <td data-label="6個月" [class]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</td>
-            <td data-label="1年" [class]="numClass(f.perf.y1)">{{ fmtPct(f.perf.y1) }}</td>
-            <td data-label="2年" [class]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</td>
-            <td data-label="3年" [class]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</td>
-            <td data-label="5年" [class]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</td>
-            <td data-label="年化標準差">{{ f.stdDev.toFixed(2) }}</td>
+            <td [class]="numClass(f.perf.m3)">{{ fmtPct(f.perf.m3) }}</td>
+            <td [class]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</td>
+            <td [class]="numClass(f.perf.y1)">{{ fmtPct(f.perf.y1) }}</td>
+            <td [class]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</td>
+            <td [class]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</td>
+            <td [class]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</td>
+            <td>{{ f.stdDev.toFixed(2) }}</td>
           </ng-container>
 
           <ng-container *ngIf="activeTab==='roi'">
-            <td *ngFor="let v of f.yearRoi; let i = index" [attr.data-label]="years[i]" [class]="numClass(v)">{{ fmtPct(v) }}</td>
+            <td *ngFor="let v of f.yearRoi; let i = index" [class]="numClass(v)">{{ fmtPct(v) }}</td>
           </ng-container>
 
           <ng-container *ngIf="activeTab==='drop'">
-            <td *ngFor="let v of f.yearMaxDrop; let i = index" [attr.data-label]="years[i]" [class]="numClass(v)">{{ fmtPct(v) }}</td>
+            <td *ngFor="let v of f.yearMaxDrop; let i = index" [class]="numClass(v)">{{ fmtPct(v) }}</td>
           </ng-container>
 
-          <td class="col-buy" data-label="申購">
+          <ng-container *ngIf="activeTab==='nav'">
+            <td>{{ f.pricingCurrency }}</td>
+            <td>{{ f.navDate }}</td>
+            <td>{{ fmtNav(f.nav) }}</td>
+            <td [class]="numClass(f.navChange)">{{ fmtNav(f.navChange) }}</td>
+            <td [class]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</td>
+          </ng-container>
+
+          <td class="col-buy">
             <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">BUY</button>
           </td>
         </tr>
@@ -281,14 +304,90 @@
     <div class="fs-empty" *ngIf="pagedFunds.length === 0">{{ emptyStateMessage }}</div>
   </div>
 
-  <!-- 分頁 -->
-  <div class="fs-pagination" *ngIf="totalPages > 1">
-    <button class="fs-page-btn" type="button" [disabled]="page<=1" (click)="goPage(page-1)" aria-label="上一頁">
-      <i class="bi bi-chevron-left"></i>
-    </button>
-    <button class="fs-page-btn" type="button" *ngFor="let p of pages" [class.is-active]="page===p" (click)="goPage(p)">{{ p }}</button>
-    <button class="fs-page-btn" type="button" [disabled]="page>=totalPages" (click)="goPage(page+1)" aria-label="下一頁">
-      <i class="bi bi-chevron-right"></i>
-    </button>
+  <!-- 手機卡片版（ov-fund-main 風格，4 tab 各自欄位）；桌機隱藏 -->
+  <div class="fs-fund-cards" [class.fs-view-active]="viewMode==='card'">
+    <article *ngFor="let f of pagedFunds; trackBy: trackByFundId" class="fs-fund-card" [class.is-expanded]="isCardExpanded(f.fundId)">
+      <button class="fs-fund-card-head" type="button" (click)="toggleCard(f.fundId)" [attr.aria-expanded]="isCardExpanded(f.fundId)">
+        <div class="fs-fund-card-top">
+          <span class="fs-fund-card-code">{{ f.fundId }}</span>
+          <i class="bi" [ngClass]="isCardExpanded(f.fundId) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+        </div>
+        <strong class="fs-fund-card-name">{{ f.name }}</strong>
+        <div class="fs-fund-card-metrics">
+          <ng-container *ngIf="activeTab==='perf'">
+            <div class="fs-fund-card-metric"><span class="m-lbl">淨值</span><span class="m-val">{{ fmtNav(f.nav) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">日漲跌幅</span><span class="m-val" [ngClass]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">3個月績效</span><span class="m-val" [ngClass]="numClass(f.perf.m3)">{{ fmtPct(f.perf.m3) }}</span></div>
+          </ng-container>
+          <ng-container *ngIf="activeTab==='nav'">
+            <div class="fs-fund-card-metric"><span class="m-lbl">淨值</span><span class="m-val">{{ fmtNav(f.nav) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">日漲跌</span><span class="m-val" [ngClass]="numClass(f.navChange)">{{ fmtNav(f.navChange) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">日漲跌幅</span><span class="m-val" [ngClass]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</span></div>
+          </ng-container>
+          <ng-container *ngIf="activeTab==='roi'">
+            <div class="fs-fund-card-metric"><span class="m-lbl">2025</span><span class="m-val" [ngClass]="numClass(f.yearRoi[4])">{{ fmtPct(f.yearRoi[4]) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">2024</span><span class="m-val" [ngClass]="numClass(f.yearRoi[3])">{{ fmtPct(f.yearRoi[3]) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">2023</span><span class="m-val" [ngClass]="numClass(f.yearRoi[2])">{{ fmtPct(f.yearRoi[2]) }}</span></div>
+          </ng-container>
+          <ng-container *ngIf="activeTab==='drop'">
+            <div class="fs-fund-card-metric"><span class="m-lbl">2025</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[4])">{{ fmtPct(f.yearMaxDrop[4]) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">2024</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[3])">{{ fmtPct(f.yearMaxDrop[3]) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">2023</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[2])">{{ fmtPct(f.yearMaxDrop[2]) }}</span></div>
+          </ng-container>
+        </div>
+      </button>
+      <div class="fs-fund-card-foot">
+        <span class="fs-fund-card-navdate"><span class="m-lbl">淨值日</span>{{ f.navDate }}</span>
+        <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">BUY</button>
+      </div>
+      <div class="fs-fund-card-detail" *ngIf="isCardExpanded(f.fundId)">
+        <ng-container *ngIf="activeTab==='perf'">
+          <div class="fs-fund-card-row"><span class="r-lbl">6個月績效</span><span class="r-val" [ngClass]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</span></div>
+          <div class="fs-fund-card-row"><span class="r-lbl">1年績效</span><span class="r-val" [ngClass]="numClass(f.perf.y1)">{{ fmtPct(f.perf.y1) }}</span></div>
+          <div class="fs-fund-card-row"><span class="r-lbl">2年績效</span><span class="r-val" [ngClass]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</span></div>
+          <div class="fs-fund-card-row"><span class="r-lbl">3年績效</span><span class="r-val" [ngClass]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</span></div>
+          <div class="fs-fund-card-row"><span class="r-lbl">5年績效</span><span class="r-val" [ngClass]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</span></div>
+          <div class="fs-fund-card-row"><span class="r-lbl">年化標準差</span><span class="r-val">{{ f.stdDev.toFixed(2) }}</span></div>
+        </ng-container>
+        <ng-container *ngIf="activeTab==='nav'">
+          <div class="fs-fund-card-row"><span class="r-lbl">幣別</span><span class="r-val">{{ f.pricingCurrency }}</span></div>
+        </ng-container>
+        <ng-container *ngIf="activeTab==='roi'">
+          <div class="fs-fund-card-row"><span class="r-lbl">2022</span><span class="r-val" [ngClass]="numClass(f.yearRoi[1])">{{ fmtPct(f.yearRoi[1]) }}</span></div>
+          <div class="fs-fund-card-row"><span class="r-lbl">2021</span><span class="r-val" [ngClass]="numClass(f.yearRoi[0])">{{ fmtPct(f.yearRoi[0]) }}</span></div>
+        </ng-container>
+        <ng-container *ngIf="activeTab==='drop'">
+          <div class="fs-fund-card-row"><span class="r-lbl">2022</span><span class="r-val" [ngClass]="numClass(f.yearMaxDrop[1])">{{ fmtPct(f.yearMaxDrop[1]) }}</span></div>
+          <div class="fs-fund-card-row"><span class="r-lbl">2021</span><span class="r-val" [ngClass]="numClass(f.yearMaxDrop[0])">{{ fmtPct(f.yearMaxDrop[0]) }}</span></div>
+        </ng-container>
+      </div>
+    </article>
+    <div class="fs-empty" *ngIf="pagedFunds.length === 0">{{ emptyStateMessage }}</div>
+  </div>
+
+  <!-- 分頁（頁碼上）+ 每頁筆數（下），皆置中 -->
+  <div class="fs-pagination-bar" *ngIf="sortedFunds.length > 0">
+    <div class="fs-pagination" *ngIf="totalPages > 1">
+      <button class="fs-page-btn" type="button" [disabled]="page<=1" (click)="goPage(1)" aria-label="第一頁">
+        <i class="bi bi-chevron-double-left"></i>
+      </button>
+      <button class="fs-page-btn" type="button" [disabled]="page<=1" (click)="goPage(page-1)" aria-label="上一頁">
+        <i class="bi bi-chevron-left"></i>
+      </button>
+      <button class="fs-page-btn" type="button" *ngFor="let p of pages" [class.is-active]="page===p" (click)="goPage(p)">{{ p }}</button>
+      <button class="fs-page-btn" type="button" [disabled]="page>=totalPages" (click)="goPage(page+1)" aria-label="下一頁">
+        <i class="bi bi-chevron-right"></i>
+      </button>
+      <button class="fs-page-btn" type="button" [disabled]="page>=totalPages" (click)="goPage(totalPages)" aria-label="最後一頁">
+        <i class="bi bi-chevron-double-right"></i>
+      </button>
+    </div>
+    <div class="fs-page-size">
+      <span class="fs-page-size-label">每頁</span>
+      <ng-container *ngFor="let s of pageSizeOptions; let last = last">
+        <button class="fs-page-size-btn" type="button" [class.is-active]="pageSize === s" (click)="setPageSize(s)">{{ s }}</button><span *ngIf="!last" class="fs-page-size-sep">,</span>
+      </ng-container>
+      <span class="fs-page-size-label">筆</span>
+    </div>
   </div>
 </div>

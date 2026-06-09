@@ -16,14 +16,15 @@ import {
 
 type DomicileOption = Fund['domicile'];
 type PricingCcyOption = string;
-type FundTab = 'perf' | 'roi' | 'drop';
+type FundTab = 'perf' | 'roi' | 'drop' | 'nav';
 type CollapsibleFilter = 'category' | 'pricingCcy' | 'brand' | 'region' | 'group' | 'lipper';
 
 type SortKey =
   | 'fundId' | 'name'
-  | 'perf.m6' | 'perf.y1' | 'perf.y2' | 'perf.y3' | 'perf.y5' | 'stdDev'
+  | 'perf.m3' | 'perf.m6' | 'perf.y1' | 'perf.y2' | 'perf.y3' | 'perf.y5' | 'stdDev'
   | 'roi.0' | 'roi.1' | 'roi.2' | 'roi.3' | 'roi.4'
-  | 'drop.0' | 'drop.1' | 'drop.2' | 'drop.3' | 'drop.4';
+  | 'drop.0' | 'drop.1' | 'drop.2' | 'drop.3' | 'drop.4'
+  | 'navDate' | 'nav' | 'navChange' | 'navChangePct' | 'currency';
 type PerfKey = keyof Fund['perf'];
 type SortOption = { key: SortKey; label: string };
 
@@ -44,8 +45,10 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   readonly lipperRatings = LIPPER_RATINGS;
   readonly domiciles: DomicileOption[] = ['境內', '境外'];
   readonly years = [2021, 2022, 2023, 2024, 2025];
-  readonly pageSize = 10;
+  pageSize = 20;
+  readonly pageSizeOptions = [20, 50, 100];
   readonly perfSortOptions: SortOption[] = [
+    { key: 'perf.m3', label: '3個月' },
     { key: 'perf.m6', label: '6個月' },
     { key: 'perf.y1', label: '1年' },
     { key: 'perf.y2', label: '2年' },
@@ -68,6 +71,13 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     { key: 'drop.2', label: '2023' },
     { key: 'drop.3', label: '2024' },
     { key: 'drop.4', label: '2025' }
+  ];
+  readonly navSortOptions: SortOption[] = [
+    { key: 'navChangePct', label: '日漲跌幅' },
+    { key: 'navChange', label: '日漲跌' },
+    { key: 'nav', label: '淨值' },
+    { key: 'navDate', label: '日期' },
+    { key: 'currency', label: '幣別' }
   ];
 
   get pricingCurrencies(): PricingCcyOption[] {
@@ -101,6 +111,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   sortDesc = true;
   page = 1;
   sortPanelOpen = false;
+  expandedCards = new Set<string>();
+  viewMode: 'card' | 'table' = 'card';   // 手機資料區：卡片（預設）／列表；桌機恆為表格，不受此值影響
   filterPanelOpen = false;
   // 每個可收合篩選列：chip 是否換行（放不下一行）→ 需顯示展開鈕
   overflowState: Record<CollapsibleFilter, boolean> = {
@@ -196,7 +208,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   get mobileSortOptions(): SortOption[] {
     if (this.activeTab === 'perf') return this.perfSortOptions;
     if (this.activeTab === 'roi') return this.roiSortOptions;
-    return this.dropSortOptions;
+    if (this.activeTab === 'drop') return this.dropSortOptions;
+    return this.navSortOptions;
   }
 
   get activeFilterCount(): number {
@@ -257,6 +270,11 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     if (key === 'stdDev') return f.stdDev;
     if (key.startsWith('roi.')) return f.yearRoi[Number(key.split('.')[1])];
     if (key.startsWith('drop.')) return f.yearMaxDrop[Number(key.split('.')[1])];
+    if (key === 'nav') return f.nav;
+    if (key === 'navChange') return f.navChange;
+    if (key === 'navChangePct') return f.navChangePct;
+    if (key === 'navDate') return f.navDate;
+    if (key === 'currency') return f.pricingCurrency;
     return 0;
   }
 
@@ -275,7 +293,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.activeTab = tab;
     if (tab === 'perf') this.sortKey = 'perf.m6';
     else if (tab === 'roi') this.sortKey = 'roi.4';     // 預設依最新一年排序
-    else this.sortKey = 'drop.4';
+    else if (tab === 'drop') this.sortKey = 'drop.4';
+    else this.sortKey = 'navChangePct';                 // 最新淨值：預設依日漲跌幅排序
     this.sortDesc = true;
     this.page = 1;
   }
@@ -458,14 +477,37 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.page = p;
   }
 
+  setPageSize(size: number): void {
+    this.pageSize = size;
+    this.page = 1;
+  }
+
+  isCardExpanded(id: string): boolean {
+    return this.expandedCards.has(id);
+  }
+
+  toggleCard(id: string): void {
+    this.expandedCards.has(id) ? this.expandedCards.delete(id) : this.expandedCards.add(id);
+  }
+
+  setViewMode(mode: 'card' | 'table'): void {
+    this.viewMode = mode;
+  }
+
   onBuy(fund: Fund): void {
     this.router.navigate(['/demo/flow'], {
       queryParams: { mode: 'new', fundId: fund.fundId }
     });
   }
 
+  // 百分比：千分位、最多 2 位小數、不補零（依平台通規 §4.4）
   fmtPct(n: number): string {
-    return `${n < 0 ? '-' : ''}${Math.abs(n).toFixed(2)}%`;
+    return `${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}%`;
+  }
+
+  // 淨值：千分位、最多 4 位小數、不補零（依平台通規 §4.4；位數依各基金公司浮動，不寫死）
+  fmtNav(n: number): string {
+    return Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
   }
 
   numClass(n: number): string {

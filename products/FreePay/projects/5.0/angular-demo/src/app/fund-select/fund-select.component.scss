@@ -429,6 +429,7 @@
 
 .fs-tab {
   padding: 10px 4px;
+  white-space: nowrap;
   background: none;
   border: none;
   border-bottom: 2px solid transparent;
@@ -465,7 +466,7 @@
   width: 100%;
   min-width: 960px;
   border-collapse: collapse;
-  table-layout: fixed;
+  table-layout: auto;
   font-size: 14px;
 
   th {
@@ -493,9 +494,10 @@
     border-bottom: 1px solid var(--color-border-default);
     text-align: center;
     font-size: 16px;
+    white-space: nowrap;
 
     &.col-code { color: var(--color-text-secondary); font-size: 14px; }
-    &.col-name { text-align: left; word-break: break-word; }
+    &.col-name { text-align: left; white-space: normal; word-break: break-word; }
     &.col-buy { width: 80px; }
   }
 
@@ -530,13 +532,58 @@
   font-size: 16px;
 }
 
+// 手機卡片版（桌機隱藏，手機 @media 顯示）
+.fs-fund-cards {
+  display: none;
+}
+
+// 檢視切換鈕（卡片／列表）：桌機恆為表格，不顯示；僅手機 @media 顯示
+.fs-view-toggle {
+  display: none;
+}
+
 // ── 分頁 ────────────────────────────────────────────────
+// 分頁列：頁碼（上）+ 每頁筆數（下），皆置中（同 anuefund）
+.fs-pagination-bar {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.fs-page-size {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+// 每頁筆數：逗號分隔的文字樣式（非方框），當前以主色強調
+.fs-page-size-btn {
+  padding: 0 2px;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+
+  &.is-active {
+    color: var(--color-action-primary);
+    font-weight: 700;
+  }
+
+  &:hover:not(.is-active) {
+    color: var(--color-text-primary);
+  }
+}
+
 .fs-pagination {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  margin-top: 8px;
 }
 
 .fs-page-btn {
@@ -1025,65 +1072,205 @@
     font-weight: 500;
   }
 
-  // ── 表格 → 卡片（同委託查詢做法）─────────
-  .fs-table {
+  // 手機資料區：卡片（預設）／列表切換鈕
+  .fs-view-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    flex: 0 0 auto;
+    align-self: center;
+  }
+
+  .fs-view-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: 1px solid var(--color-action-primary);
+    border-radius: 50%;
+    background: var(--color-neutral-0);
+    color: var(--color-action-primary);
+    cursor: pointer;
+
+    .bi {
+      font-size: 14px;
+      line-height: 1;
+    }
+  }
+
+  // 卡片視圖（預設）：顯示卡片、隱藏表格
+  .fs-table-wrap {
+    display: none;
+  }
+
+  .fs-fund-cards.fs-view-active {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  // 列表視圖：桌機表格原形橫向滾動；基金名稱欄固定於左、代碼欄隱藏
+  .fs-table-wrap.fs-view-active {
     display: block;
-    min-width: 0;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
 
-    thead { display: none; }
-
-    tbody {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    tr {
-      display: block;
-      border: 1px solid var(--color-border-default);
-      border-radius: 8px;
-      background: var(--color-bg-base);
-      overflow: hidden;
-    }
-
-    td {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 12px;
+    .fs-table {
+      min-width: 0;
       width: auto;
-      height: auto;
-      margin: 0 12px;
-      padding: 9px 4px;
-      border-bottom: 1px solid var(--color-border-default);
-      background: var(--color-bg-base);
-      text-align: right;
+      table-layout: auto;
+
+      th,
+      td {
+        white-space: nowrap;
+      }
+
+      th.col-code,
+      td.col-code {
+        display: none;
+      }
+
+      th.col-name,
+      td.col-name {
+        position: sticky;
+        left: 0;
+        z-index: 1;
+        width: 8.5em;
+        min-width: 8.5em;
+        max-width: 8.5em;
+        white-space: normal;
+        word-break: break-word;
+        background: var(--color-bg-base);
+      }
+
+      thead th.col-name {
+        z-index: 2;
+      }
+    }
+  }
+
+  .fs-fund-card {
+    border: 1px solid var(--color-border-default);
+    border-radius: 12px;
+    background: var(--color-bg-subtle);
+    overflow: hidden;
+  }
+
+  .fs-fund-card-head {
+    display: block;
+    width: 100%;
+    padding: 16px 16px 12px;
+    border: none;
+    background: transparent;
+    text-align: left;
+    cursor: pointer;
+
+    &:focus { outline: none; }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-action-primary);
+      outline-offset: -2px;
+    }
+  }
+
+  .fs-fund-card-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  .fs-fund-card-name {
+    display: block;
+    margin: 6px 0 14px;
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  .fs-fund-card-metrics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .fs-fund-card-metric {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    padding: 4px;
+    text-align: center;
+
+    &:not(:last-child) {
+      border-right: 1px solid var(--color-border-default);
+    }
+
+    .m-lbl {
+      color: var(--color-text-secondary);
+      font-size: 14px;
+    }
+
+    .m-val {
+      color: var(--color-text-primary);
+      font-size: 16px;
+      font-weight: 700;
+      white-space: nowrap;
+
+      &.val-up { color: var(--color-price-up); }
+      &.val-down { color: var(--color-price-down); }
+    }
+  }
+
+  .fs-fund-card-foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px 16px;
+
+    .fs-fund-card-navdate {
+      color: var(--color-text-primary);
       font-size: 14px;
 
-      &::before {
-        content: attr(data-label);
-        flex: 0 0 auto;
-        max-width: 44%;
-        padding-right: 8px;
+      .m-lbl {
+        margin-right: 8px;
         color: var(--color-text-secondary);
-        font-size: 14px;
-        text-align: left;
-      }
-
-      &:last-child { border-bottom: none; }
-      &.col-name { text-align: right; }
-      &.col-buy {
-        width: auto;
-        justify-content: space-between;
-      }
-
-      &.col-buy .circle-btn {
-        margin-left: auto;
       }
     }
+  }
 
-    tbody tr:nth-child(even) td {
-      background: var(--color-bg-base);
+  .fs-fund-card-detail {
+    margin: 0 14px 16px;
+    padding: 0 14px;
+    border-radius: 8px;
+    background: var(--color-bg-base);
+  }
+
+  .fs-fund-card-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px 0;
+
+    &:not(:last-child) {
+      border-bottom: 1px solid var(--color-border-default);
+    }
+
+    .r-lbl {
+      color: var(--color-text-secondary);
+      font-size: 14px;
+    }
+
+    .r-val {
+      color: var(--color-text-primary);
+      font-size: 16px;
+
+      &.val-up { color: var(--color-price-up); }
+      &.val-down { color: var(--color-price-down); }
     }
   }
 }

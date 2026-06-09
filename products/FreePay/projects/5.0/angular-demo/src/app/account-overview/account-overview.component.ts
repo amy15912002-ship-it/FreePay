@@ -8,7 +8,6 @@ import {
 
 type OvTab = 'overview' | 'order' | 'profit';
 type OrderFilter = 'all' | 'alt' | 'chg' | 'rdm';
-type ProfitPeriod = '3M' | '6M' | '1Y' | 'YTD' | 'ALL' | 'CUSTOM';
 type DetailTxType = 'all' | 'A' | 'R' | 'RDM';
 type DetailChgType = 'all' | 'TAP' | 'AL' | 'P' | 'D' | 'DL';
 type DetailTimeType = '3M' | '6M' | '1Y' | 'YTD' | 'ALL' | 'CUSTOM';
@@ -86,9 +85,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
 
   activeTab: OvTab = 'overview';
   orderFilter: OrderFilter = 'all';
-  profitPeriod: ProfitPeriod = '6M';
-  profitCustomStart: Date | null = null;
-  profitCustomEnd: Date | null = null;
 
   expandedFundRows = new Set<string>();
   selectedOrders = new Set<string>();
@@ -127,33 +123,12 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     this.cancelPwd = '';
   }
 
-  // ── Profit filters ──
-
-  get filteredProfits(): ProfitRecord[] {
-    let start: Date, end: Date;
-    if (this.profitPeriod === 'CUSTOM') {
-      start = this.profitCustomStart ? this.startOfDay(this.profitCustomStart) : new Date(2000, 0, 1);
-      end   = this.profitCustomEnd   ? this.endOfDay(this.profitCustomEnd) : REFERENCE_DATE;
-    } else {
-      end = REFERENCE_DATE;
-      start = new Date(end);
-      if (this.profitPeriod === '3M') start.setMonth(start.getMonth() - 3);
-      else if (this.profitPeriod === '6M') start.setMonth(start.getMonth() - 6);
-      else if (this.profitPeriod === '1Y') start.setFullYear(start.getFullYear() - 1);
-      else if (this.profitPeriod === 'YTD') start = new Date(end.getFullYear(), 0, 1);
-      else start.setFullYear(2000);
-    }
-
-    return this.allProfits.filter(item => {
-      const d = new Date(item.redeemDate.replace(/\//g, '-') + 'T00:00:00');
-      return d >= start && d <= end;
-    });
-  }
+  // ── Profit ──
 
   get profitSummaryByCcy(): Array<{ ccy: string; paid: number; redeem: number; cost: number; profit: number; rate: number }> {
     return ['TWD', 'USD']
       .map(ccy => {
-        const list = this.filteredProfits.filter(r => r.ccy === ccy);
+        const list = this.allProfits.filter(r => r.ccy === ccy);
         if (!list.length) return null;
         const cost   = list.reduce((s, r) => s + r.cost, 0);
         const redeem = list.reduce((s, r) => s + r.redeemAmount, 0);
@@ -164,14 +139,9 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
       .filter((r): r is NonNullable<typeof r> => r !== null);
   }
 
-  get profitGroupedByFund(): Array<{ code: string; fund: string; rows: ProfitRecord[] }> {
-    const groups: Array<{ code: string; fund: string; rows: ProfitRecord[] }> = [];
-    for (const item of this.filteredProfits) {
-      let g = groups.find(g => g.code === item.code && g.fund === item.fund);
-      if (!g) { g = { code: item.code, fund: item.fund, rows: [] }; groups.push(g); }
-      g.rows.push(item);
-    }
-    return groups;
+  // 已實現損益外層：每契約一行（一基金一交易幣一契約），依贖回日倒序
+  get profitRows(): ProfitRecord[] {
+    return [...this.allProfits].sort((a, b) => b.redeemDate.localeCompare(a.redeemDate));
   }
 
   // ── Helpers ──
@@ -223,19 +193,18 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     return `${n < 0 ? '-' : ''}${Math.abs(n).toLocaleString('en-US')}`;
   }
 
+  // 百分比：千分位、最多 2 位、不補零（平台通規 §4.4）
   fmtRate(n: number): string {
-    return `${n < 0 ? '-' : ''}${Math.abs(n).toFixed(2)}%`;
+    return `${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}%`;
   }
 
   fmtUnits(n: number): string {
     return Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
   }
 
+  // 淨值／匯率：千分位、最多 4 位、不補零（平台通規 §4.4）
   fmtDecimal(n: number): string {
-    return Number(n || 0).toLocaleString('en-US', {
-      minimumFractionDigits: 4,
-      maximumFractionDigits: 4,
-    });
+    return Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
   }
 
   openMarketInfo(fund: OvFund | null, event?: Event): void {
@@ -257,13 +226,13 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   fmtOrderPaySetting(item: AltOrder): string {
-    if (item.payType === 'P') return `依比例・${item.payRate}%・${item.rdmDay}日`;
-    return `依金額・${Number(item.rdmAmt || 0).toLocaleString('en-US')}・${item.rdmDay}日`;
+    if (item.payType === 'P') return `依比例・${this.fmtRate(item.payRate)}・${item.rdmDay}日`;
+    return `依金額・${this.fmtN(item.rdmAmt)}・${item.rdmDay}日`;
   }
 
   fmtOrderPayMethod(item: AltOrder): string {
-    if (item.payType === 'P') return `依比例 ${item.payRate}%`;
-    return `依金額 ${Number(item.rdmAmt || 0).toLocaleString('en-US')}`;
+    if (item.payType === 'P') return `依比例 ${this.fmtRate(item.payRate)}`;
+    return `依金額 ${this.fmtN(item.rdmAmt)}`;
   }
 
   fmtOrderPayDay(item: AltOrder): string {
@@ -271,8 +240,8 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   fmtLimitMode(limitMode: string, limitVal: number | null): string {
-    if (limitMode === 'protect') return `市值守護・低於投入成本 ${limitVal ?? 0}% 暫停`;
-    if (limitMode === 'unlock') return `增值啟動・達投入成本 ${limitVal ?? 0}% 才 Pay`;
+    if (limitMode === 'protect') return `市值守護・低於投入成本 ${this.fmtRate(limitVal ?? 0)} 暫停`;
+    if (limitMode === 'unlock') return `增值啟動・達投入成本 ${this.fmtRate(limitVal ?? 0)} 才 Pay`;
     return '不設門檻';
   }
 
@@ -303,9 +272,18 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     this.detailFpNo = null;
   }
 
-  get detailFund() {
+  get detailFund(): { name: string; code: string; txCcy: string } | null {
     if (!this.detailFpNo) return null;
-    return this.funds.find(f => f.contracts.some(c => c.fpNo === this.detailFpNo)) ?? null;
+    const held = this.funds.find(f => f.contracts.some(c => c.fpNo === this.detailFpNo));
+    if (held) return held;
+    // 已實現損益契約（已贖回、不在持倉）：fallback 到損益資料
+    const p = this.allProfits.find(r => r.fpNo === this.detailFpNo);
+    return p ? { name: p.fund, code: p.code, txCcy: this.ccyText(p.ccy) } : null;
+  }
+
+  // 當前明細彈窗是否為已實現損益契約（已結束、異動皆已完成，不顯示「委託結果」欄）
+  get isProfitDetail(): boolean {
+    return !!this.detailFpNo && this.allProfits.some(r => r.fpNo === this.detailFpNo);
   }
 
   get detailPanelTitle(): string {
@@ -375,14 +353,14 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   private fmtPayType(type: string, amt: number, rate: number): string {
-    return type === 'P' ? `依比例・${rate}%` : `依金額・${Number(amt).toLocaleString('en-US')}`;
+    return type === 'P' ? `依比例・${this.fmtRate(rate)}` : `依金額・${this.fmtN(amt)}`;
   }
 
   fmtChgBefore(r: DetailChgRecord): string {
     switch (r.tradeType) {
       case 'TAP': return this.fmtPayType(r.orgPayType, r.orgRDMAmt, r.orgPayRate);
-      case 'AL':  return Number(r.orgRDMAmt).toLocaleString('en-US');
-      case 'P':   return `${r.orgPayRate}%`;
+      case 'AL':  return this.fmtN(r.orgRDMAmt);
+      case 'P':   return this.fmtRate(r.orgPayRate);
       case 'D':   return `${r.orgRDMDay}日`;
       case 'DL':  return this.fmtLimitMode(r.orgLimitMode, r.orgLimitVal);
       default:    return '-';
@@ -392,8 +370,8 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   fmtChgAfter(r: DetailChgRecord): string {
     switch (r.tradeType) {
       case 'TAP': return this.fmtPayType(r.payType, r.rdmAmt, r.payRate);
-      case 'AL':  return Number(r.rdmAmt).toLocaleString('en-US');
-      case 'P':   return `${r.payRate}%`;
+      case 'AL':  return this.fmtN(r.rdmAmt);
+      case 'P':   return this.fmtRate(r.payRate);
       case 'D':   return `${r.rdmDay}日`;
       case 'DL':  return this.fmtLimitMode(r.limitMode, r.limitVal);
       default:    return '-';
