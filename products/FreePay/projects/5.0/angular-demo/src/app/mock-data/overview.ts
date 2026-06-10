@@ -71,7 +71,7 @@ export interface DetailChgRecord {
 // ── 帳戶總覽「基金 × 交易幣別」分組視圖：由 holdings 即時衍生 ──────────
 // 顯示用字串（Pay設定、門檻）與加總皆在此算出；holdings 為唯一資料來源。
 
-const CCY_NAME: Record<string, string> = { TWD: '台幣', USD: '美元', JPY: '日幣' };
+const CCY_NAME: Record<string, string> = { TWD: '台幣', USD: '美元', JPY: '日圓' };
 
 function contractSetting(c: HoldingContract): string {
   return c.payMode === 'ratio'
@@ -190,7 +190,7 @@ const HAND_MOCK_PAY_REDEEM: Record<string, DetailTxRecord[]> = {
     { orderDate: '2026-04-15', orderTime: '09:02:18', tDate: '2026-04-17', tradeType: 'R', trCcyDesc: '台幣', fdCcyDesc: '台幣', navDesc: '18.2500', unitDesc: '328.7671', exRateDesc: '-', amount: 6000 },
   ],
   FP20240801: [
-    { orderDate: '2026-04-20', orderTime: '09:06:42', tDate: '2026-04-22', tradeType: 'R', trCcyDesc: '日幣', fdCcyDesc: '日幣', navDesc: '102.5400', unitDesc: '48.7615', exRateDesc: '-', amount: 5000 },
+    { orderDate: '2026-04-20', orderTime: '09:06:42', tDate: '2026-04-22', tradeType: 'R', trCcyDesc: '日圓', fdCcyDesc: '日圓', navDesc: '102.5400', unitDesc: '48.7615', exRateDesc: '-', amount: 5000 },
   ],
 };
 

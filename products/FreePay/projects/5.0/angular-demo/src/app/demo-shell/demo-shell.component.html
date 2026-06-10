@@ -97,6 +97,7 @@
                   formControlName="redeemAmount"
                   (input)="setPartialRedeemInputMode('amount'); clearPartialRedeemCounterpart('amount'); limitPartialRedeemInput('amount')"
                 >
+                <mat-hint>可贖回約當市值 {{ formatNumber(redeemableReferenceAmount, selectedContract?.currencyCode) }}</mat-hint>
               </mat-form-field>
             </div>
 
@@ -179,7 +180,7 @@
         <div class="redeem-adjust-note" *ngIf="showRedeemAnnualRateNotice">
           <i class="bi bi-exclamation-circle-fill" aria-hidden="true"></i>
           <div class="redeem-adjust-body">
-            <p>提醒您，本次贖回後年化提領率將達 {{ formatRate(postRedeemAnnualRate) }}，高於建議上限 15%，恐加速消耗本金，請審慎評估。</p>
+            <p>提醒您，本次贖回後年化提領率達 {{ formatRate(postRedeemAnnualRate) }}，高於建議上限 15%。</p>
           </div>
         </div>
 
@@ -517,7 +518,7 @@
             <div class="sum-row"><span>收款帳號</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
             <div class="sum-row" *ngIf="showRedeemAnnualRateNotice">
               <span>年化提領率提醒</span>
-              <strong class="hl">提醒您，本次贖回後年化提領率將達 {{ formatRate(postRedeemAnnualRate) }}，高於建議上限 15%，恐加速消耗本金，請審慎評估。</strong>
+              <strong class="hl">提醒您，本次贖回後年化提領率達 {{ formatRate(postRedeemAnnualRate) }}，高於建議上限 15%。</strong>
             </div>
           </div>
         </ng-container>
@@ -653,7 +654,7 @@
           <ul class="notes-list">
             <li *ngIf="isModifyMode">您的自由 Pay 異動委託已送出。設定將依委託查詢狀態生效。</li>
             <li *ngIf="isRedeemMode">您的贖回委託已送出。若超過本營業日交易時間 14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。</li>
-            <li *ngIf="isRedeemMode && showRedeemAnnualRateNotice">本次贖回後年化提領率將達 {{ formatRate(postRedeemAnnualRate) }}、高於建議上限 15%；待贖回成交後，可至「帳戶總覽」檢視並調整每月 Pay 金額。</li>
+            <li *ngIf="isRedeemMode && showRedeemAnnualRateNotice">提醒您，本次贖回後年化提領率達 {{ formatRate(postRedeemAnnualRate) }}，高於建議上限 15%。</li>
             <li *ngIf="!isAddOnMode && !isModifyMode && !isRedeemMode">您的自由 Pay 申購委託已送出。預計 3-4 個營業日後申購確認書入帳，首次 Pay 將於設定基準日（每月 {{ form.controls.day.value }} 日）執行；若距申購確認日不足 30 日，將順延至屆滿後的第一個基準日。</li>
             <li *ngIf="isAddOnMode">您的加碼委託已送出。申購確認後金額將計入既有交易，Pay 設定維持既有交易不變。預計 3-4 個營業日後申購確認書入帳。</li>
             <li *ngIf="!isRedeemMode">若超過本營業日交易時間 13:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。若您有任何疑問，請洽客服專線 02-27208126。</li>

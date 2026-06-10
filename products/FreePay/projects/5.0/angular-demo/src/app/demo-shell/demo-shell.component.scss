@@ -200,15 +200,6 @@
   p { margin: 0; }
 }
 
-.redeem-adjust-title strong {
-  font-size: 16px;
-  font-weight: 500;
-}
-
-.redeem-adjust-desc {
-  line-height: 1.7;
-}
-
 .full-field {
   width: 100%;
 }
@@ -1036,14 +1027,6 @@
     }
   }
 
-  .batch-row-cell--date {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-
-    &::before { display: none; }
-  }
-
   .done-actions {
     width: 100%;
     justify-content: stretch;
@@ -1361,81 +1344,6 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
   white-space: nowrap;
 }
 
-.batch-row-cell--date {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  color: var(--color-text-heading);
-}
-
-// 表上方通用說明（取代每列重複的 inline tag）
-.batch-table-hint {
-  margin: 0 0 8px;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.5;
-
-  > i.bi-info-circle:first-child {
-    color: var(--color-brand-tertiary-400);
-    font-size: 16px;
-  }
-}
-
-// 不可選列：取代 checkbox 的 info icon（保持原色，整列不灰化）
-.batch-row-info {
-  color: var(--color-brand-tertiary-400);
-}
-
-// 短線交易欄：勾勾用品牌主色強調（會被扣費警示）
-.batch-row-cell--shortterm {
-  i.bi-check-lg {
-    color: var(--color-brand-primary-400);
-    font-size: 16px; // DesignSystem §5.3 inline 圖示尺寸
-  }
-  span {
-    color: var(--color-text-tertiary);
-  }
-}
-
-// ── 預估贖回金額（設定頁簡潔強調區塊） ──
-
-.redeem-estimate {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  padding: 20px 24px;
-  border: 1px solid var(--color-border-default);
-  border-radius: 8px;
-  background: var(--color-bg-base);
-}
-
-.redeem-estimate-label {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.4;
-}
-
-.redeem-estimate-amount {
-  color: var(--color-text-heading);
-  font-size: 28px;
-  font-weight: 700;
-  line-height: 1.2;
-}
-
-.redeem-estimate-hint {
-  color: var(--color-text-tertiary);
-  font-size: 14px;
-  line-height: 1.5;
-}
-
-@media (max-width: 767px) {
-  .redeem-estimate-amount { font-size: 24px; }
-}
-
 // 批次列表手機 RWD：表頭隱藏、列改為「check + 內容堆疊」雙欄
 // 注意：必須放在 .batch-row 主規則之後，否則同優先級會被後寫的桌機規則蓋掉
 @media (max-width: 767px) {
@@ -1503,17 +1411,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
     justify-self: stretch;
     justify-content: space-between;
     text-align: left;
-    font-size: 15px;
-  }
-
-  .batch-row-cell--date {
-    flex-direction: row;
-    align-items: baseline;
-    gap: 4px;
-    color: var(--color-text-heading);
-    font-weight: 500;
-
-    &::before { display: none; }
+    font-size: 14px;
   }
 
   // 合計列：label 在左、值在右

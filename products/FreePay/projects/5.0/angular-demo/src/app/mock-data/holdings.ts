@@ -73,7 +73,7 @@ export const HOLDINGS: HoldingContract[] = [
   {
     // FP20240601 為指定批次贖回主要示範契約：首次 + 多次加碼，共 4 個批次
     fpNo: 'FP20240601', fundId: 'TA654321', currencyCode: 'USD',
-    startDate: '2024/06/01', payMode: 'amount', monthlyPay: 200, annualRate: 0, payDay: 15,
+    startDate: '2024/06/01', payMode: 'amount', monthlyPay: 50, annualRate: 0, payDay: 15,
     thresholdMode: 'unlock', thresholdValue: 130,
     costBasis: 4000, marketValue: 4750, paidTotal: 1670, status: 'Y', payPaused: true,
     purchaseBatches: [
@@ -93,7 +93,7 @@ export const HOLDINGS: HoldingContract[] = [
   },
   {
     fpNo: 'FP20250601', fundId: 'TA778899', currencyCode: 'TWD',
-    startDate: '2025/06/01', payMode: 'amount', monthlyPay: 6000, annualRate: 0, payDay: 15,
+    startDate: '2025/06/01', payMode: 'amount', monthlyPay: 3000, annualRate: 0, payDay: 15,
     thresholdMode: 'protect', thresholdValue: 80,
     costBasis: 280000, marketValue: 212000, paidTotal: 54000, status: 'Y', payPaused: true,
     purchaseBatches: [
@@ -120,7 +120,7 @@ export const HOLDINGS: HoldingContract[] = [
   {
     // FP20261201 為「無可指定批次」示範：所有批次 remainUnits = 0，贖回設定頁不顯示「指定」
     fpNo: 'FP20261201', fundId: 'TA800009', currencyCode: 'TWD',
-    startDate: '2025/03/10', payMode: 'amount', monthlyPay: 3000, annualRate: 0, payDay: 10,
+    startDate: '2025/03/10', payMode: 'amount', monthlyPay: 1500, annualRate: 0, payDay: 10,
     thresholdMode: 'none', thresholdValue: 0,
     costBasis: 160000, marketValue: 0, paidTotal: 160000, status: 'Y',
     purchaseBatches: [

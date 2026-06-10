@@ -501,11 +501,13 @@
 
 .ov-alert-icon {
   color: var(--color-brand-secondary-400);
+  transition: color .12s;
 
+  // hover／聚焦／開啟時變深一階，給「可點」回饋（仍為品牌黃系）
   &:hover,
   &:focus-visible,
   &.is-active {
-    color: var(--color-brand-secondary-400);
+    color: var(--color-brand-secondary-600);
   }
 }
 

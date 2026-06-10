@@ -122,7 +122,7 @@
                 <div class="ov-metric">
                   <div class="ov-kv ov-kv--ccy"><span class="ov-kv-lbl">交易/計價幣別</span><span>{{ f.txCcy }} / {{ f.buyCcy }}</span></div>
                   <span class="ov-line"></span>
-                  <div class="ov-kv ov-kv--monthly"><span class="ov-kv-lbl">月 Pay 金額</span><span class="ov-kv-val">{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of contractAlerts(f)">{{ m }}</p></div></span></span></div>
+                  <div class="ov-kv ov-kv--monthly"><span class="ov-kv-lbl">月 Pay 金額</span><span>{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of alertsOf(f.id)">{{ m }}</p></div></span></span></div>
                 </div>
                 <div class="ov-metric">
                   <div class="ov-kv ov-kv--market">
@@ -143,7 +143,7 @@
                   <div class="ov-kv ov-kv--return-no-pay"><span class="ov-kv-lbl">不含 Pay 報酬率</span><span [ngClass]="numClass(returnWithoutPay(f))">{{ fmtRate(returnWithoutPay(f)) }}</span></div>
                 </div>
               </div>
-              <div class="ov-mobile-pay-summary"><span>月 Pay 金額</span><strong>{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of contractAlerts(f)">{{ m }}</p></div></span></strong></div>
+              <div class="ov-mobile-pay-summary"><span>月 Pay 金額</span><strong>{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of alertsOf(f.id)">{{ m }}</p></div></span></strong></div>
               <div class="ov-fund-actions">
                 <button
                   class="ov-fund-expand-btn ov-fund-expand-btn--desktop"

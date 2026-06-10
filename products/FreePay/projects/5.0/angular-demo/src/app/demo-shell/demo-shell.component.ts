@@ -20,7 +20,7 @@ const DEMO_TODAY = '2026/05/29';
 const FUND_CURRENCY_CODE_MAP: Record<string, string> = {
   '台幣': 'TWD',
   '美元': 'USD',
-  '日幣': 'JPY'
+  '日圓': 'JPY'
 };
 
 // 金額門檻表（spec.md §升級一）
@@ -40,7 +40,7 @@ const MIN_AMOUNT_TABLE: Record<string, { new: number; addOn: number; name: strin
   HKD: { new: 30000,  addOn: 1000,  name: '港幣' },
   SEK: { new: 30000,  addOn: 1000,  name: '瑞典幣' },
   ZAR: { new: 50000,  addOn: 1500,  name: '南非幣' },
-  JPY: { new: 500000, addOn: 10000, name: '日幣' }
+  JPY: { new: 500000, addOn: 10000, name: '日圓' }
 };
 
 @Component({
@@ -230,10 +230,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.contractForSelectedCurrency !== null;
   }
 
-  get redeemSkipsSettings(): boolean {
-    return false;
-  }
-
   get steps(): Array<{ key: DemoStep; label: string; description: string }> {
     if (this.isRedeemMode) {
       return [
@@ -379,6 +375,12 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get redeemNav(): number {
+    const batchUnits = this.batches.reduce((sum, batch) => sum + batch.remainUnits, 0);
+    const marketValue = this.selectedContract?.marketValue ?? 0;
+    const exchangeRate = this.redeemExchangeRate;
+    if (batchUnits > 0 && marketValue > 0 && exchangeRate > 0) {
+      return marketValue / batchUnits / exchangeRate;
+    }
     const fundCode = this.scenario?.fundCurrencyCode ?? 'TWD';
     if (fundCode === 'USD') return 11.85;
     if (fundCode === 'JPY') return 16850;
@@ -395,6 +397,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get redeemStockUnits(): number {
+    const batchUnits = this.batches.reduce((sum, batch) => sum + batch.remainUnits, 0);
+    if (batchUnits > 0) return batchUnits;
     const marketValue = this.selectedContract?.marketValue ?? 0;
     const unitPrice = this.redeemNav * this.redeemExchangeRate;
     return unitPrice > 0 ? marketValue / unitPrice : 0;
@@ -409,9 +413,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get redeemableReferenceAmount(): number {
-    const stockUnits = this.redeemStockUnits;
-    const marketValue = this.selectedContract?.marketValue ?? 0;
-    return stockUnits > 0 ? Math.round((this.redeemableUnits / stockUnits) * marketValue) : marketValue;
+    return Math.round(this.redeemableUnits * this.redeemNav * this.redeemExchangeRate);
   }
 
   get partialRedeemAmount(): number {
@@ -442,7 +444,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get postRedeemMarketValue(): number {
-    const marketValue = this.selectedContract?.marketValue ?? 0;
+    const marketValue = this.redeemableReferenceAmount;
     return Math.max(marketValue - this.redeemReferenceAmount, 0);
   }
 
@@ -463,9 +465,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     if (this.redeemMode === 'partial') {
       return this.partialRedeemReferenceAmount;
     }
-    const stockUnits = this.redeemStockUnits;
-    const marketValue = this.selectedContract?.marketValue ?? 0;
-    return stockUnits > 0 ? Math.round((this.redeemUnits / stockUnits) * marketValue) : marketValue;
+    return Math.round(this.redeemUnits * this.redeemNav * this.redeemExchangeRate);
   }
 
   // 單一批次的贖回約當市值：依剩餘單位數計算（完全領完 → 自然為 0）
@@ -516,6 +516,15 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     }, 0);
   }
 
+  get postRedeemRemainingUnits(): number {
+    if (this.redeemMode !== 'partial' && this.redeemMode !== 'batch') return this.redeemableUnits;
+    const redeemUnitsByBatch = this.currentRedeemUnitsByBatch();
+    return this.batches.reduce((sum, batch) => {
+      const redeemUnits = redeemUnitsByBatch.get(batch.batchId) ?? 0;
+      return sum + Math.max(batch.remainUnits - redeemUnits, 0);
+    }, 0);
+  }
+
   get postRedeemAnnualRate(): number {
     const monthlyPay = this.selectedContract?.monthlyPay ?? 0;
     const costBasis = this.postRedeemCostBasis;
@@ -525,6 +534,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   get showRedeemAnnualRateNotice(): boolean {
     return (this.redeemMode === 'partial' || this.redeemMode === 'batch')
       && (this.redeemMode === 'partial' ? this.partialRedeemValid : this.selectedBatches.length > 0)
+      && this.postRedeemRemainingUnits > 0.0001
       && this.selectedContract?.payMode === 'amount'
       && this.postRedeemAnnualRate > 15;
   }
@@ -829,7 +839,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   formatRate(value: number): string {
-    return `${Number(value || 0).toFixed(2)}%`;
+    // 平台通規 §4.4：千分位、最多 2 位、不補零
+    return `${Number(value || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}%`;
   }
 
   rateClass(value: number): string {

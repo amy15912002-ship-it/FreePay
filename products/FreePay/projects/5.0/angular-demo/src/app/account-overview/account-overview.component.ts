@@ -182,13 +182,20 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     if (this.openAlertFunds.size) this.openAlertFunds.clear();
   }
 
+  // 契約提醒（spec §7.1）：靜態 mock，建構時一次算好，避免每次變更偵測重建陣列
+  private readonly contractAlertMap = new Map<string, string[]>(
+    this.funds.map(f => [f.id, this.buildContractAlerts(f.contracts[0])])
+  );
+
   hasContractAlert(f: OvFund): boolean {
-    const c = f.contracts[0];
-    return c.payRateAlert || c.payPaused;
+    return this.alertsOf(f.id).length > 0;
   }
 
-  contractAlerts(f: OvFund): string[] {
-    const c = f.contracts[0];
+  alertsOf(id: string): string[] {
+    return this.contractAlertMap.get(id) ?? [];
+  }
+
+  private buildContractAlerts(c: OvContract): string[] {
     const msgs: string[] = [];
     if (c.payRateAlert) {
       const rate = c.cost ? (c.pay * 12 / c.cost) * 100 : 0;
@@ -237,7 +244,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   ccyText(code: string): string {
-    const names: Record<string, string> = { TWD: '台幣', USD: '美元', JPY: '日幣' };
+    const names: Record<string, string> = { TWD: '台幣', USD: '美元', JPY: '日圓' };
     return names[code] ?? code;
   }
 
