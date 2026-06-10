@@ -11,8 +11,8 @@ type DemoStep = 'settings' | 'confirm' | 'done';
 type PayMode = 'amount' | 'ratio';
 type ThresholdMode = 'protect' | 'unlock';
 type PurchaseMode = 'addOn' | 'new' | null;
-// 升級四：贖回方式（兩層 UI 第一層）
-type RedeemMode = 'all' | 'batch' | null;
+type RedeemMode = 'all' | 'partial' | 'batch' | null;
+type PartialRedeemInputMode = 'amount' | 'units';
 
 const DEFAULT_DEMO_SCENARIO = DEMO_SCENARIOS[0];
 // Demo 固定參考日：避免短線判斷依賴系統時間（過 30 天後示意會失效）
@@ -64,8 +64,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   selectedContract: Contract | null = null;
   selectedCurrency: CurrencyOption | null = null;
   thresholdCustomActive = false;
-  // 升級四：贖回兩層 UI 狀態
   redeemMode: RedeemMode = null;
+  partialRedeemInputMode: PartialRedeemInputMode = 'amount';
   selectedBatchIds = new Set<string>();
   private addOnDirect = false;
   private flowContext: FlowContext = { mode: 'new', fundId: DEFAULT_DEMO_SCENARIO.fundId };
@@ -79,6 +79,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     monthlyPay: [null as number | string | null, this.numericAmountValidators(1)],
     ratio: [null as number | null, [Validators.required, Validators.min(1), Validators.max(15)]],
     day: [15, [Validators.required]],
+    redeemAmount: [null as number | string | null],
+    redeemUnits: [null as number | string | null],
     thresholdCustom: [80, [
       Validators.required,
       Validators.min(70),
@@ -141,8 +143,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       // 申購：一律直接進設定頁；多幣別時頂部切換器處理幣別選擇
       this.syncSelectedContractForCurrency();
     }
-    // 無可選批次的贖回直接進確認頁（設定頁無事可做）
-    this.activeStep = this.isRedeemMode && !this.hasSelectableBatch ? 'confirm' : 'settings';
+    this.activeStep = 'settings';
     this.resetFormState();
     this.applySettingsForMode();
   }
@@ -229,19 +230,12 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.contractForSelectedCurrency !== null;
   }
 
-  // 無可選批次的贖回 → 設定頁無任何可操作項（指定贖回不可行動），跳過設定頁直接進確認
   get redeemSkipsSettings(): boolean {
-    return this.isRedeemMode && !this.hasSelectableBatch;
+    return false;
   }
 
   get steps(): Array<{ key: DemoStep; label: string; description: string }> {
     if (this.isRedeemMode) {
-      if (this.redeemSkipsSettings) {
-        return [
-          { key: 'confirm', label: '確認送出', description: '確認試算與送出' },
-          { key: 'done', label: '完成', description: '委託完成' }
-        ];
-      }
       return [
         { key: 'settings', label: '贖回設定', description: '選擇贖回方式' },
         { key: 'confirm', label: '確認送出', description: '確認試算與送出' },
@@ -410,37 +404,81 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.selectedContract?.fpNo === 'FP20241201' ? 12.3456 : 0;
   }
 
-  // 升級四：依贖回模式切換單位數計算
-  // all 模式 → 沿用契約整體可贖單位
-  // batch 模式 → 已選批次的 remainUnits 合計
+  get redeemableUnits(): number {
+    return Math.max(this.redeemStockUnits - this.redeemOrderingUnits, 0);
+  }
+
+  get redeemableReferenceAmount(): number {
+    const stockUnits = this.redeemStockUnits;
+    const marketValue = this.selectedContract?.marketValue ?? 0;
+    return stockUnits > 0 ? Math.round((this.redeemableUnits / stockUnits) * marketValue) : marketValue;
+  }
+
+  get partialRedeemAmount(): number {
+    return Number(this.form.controls.redeemAmount.value || 0);
+  }
+
+  get partialRedeemInputUnits(): number {
+    return Number(this.form.controls.redeemUnits.value || 0);
+  }
+
+  get partialRedeemUnits(): number {
+    const unitPrice = this.redeemNav * this.redeemExchangeRate;
+    if (this.partialRedeemInputMode === 'amount') {
+      return unitPrice > 0 ? this.partialRedeemAmount / unitPrice : 0;
+    }
+    return this.partialRedeemInputUnits;
+  }
+
+  get partialRedeemReferenceAmount(): number {
+    return Math.round(this.partialRedeemUnits * this.redeemNav * this.redeemExchangeRate);
+  }
+
+  get partialRedeemValid(): boolean {
+    if (this.partialRedeemInputMode === 'amount') {
+      return this.partialRedeemAmount > 0 && this.partialRedeemReferenceAmount <= this.redeemableReferenceAmount;
+    }
+    return this.partialRedeemInputUnits > 0 && this.partialRedeemInputUnits <= this.redeemableUnits;
+  }
+
+  get postRedeemMarketValue(): number {
+    const marketValue = this.selectedContract?.marketValue ?? 0;
+    return Math.max(marketValue - this.redeemReferenceAmount, 0);
+  }
+
   get redeemUnits(): number {
     if (this.redeemMode === 'batch') {
       return this.selectedBatches.reduce((s, b) => s + b.remainUnits, 0);
     }
-    return Math.max(this.redeemStockUnits - this.redeemOrderingUnits, 0);
+    if (this.redeemMode === 'partial') {
+      return Math.min(this.partialRedeemUnits, this.redeemableUnits);
+    }
+    return this.redeemableUnits;
   }
 
-  // 升級四：依贖回模式切換參考金額計算
-  // batch 模式直接用 remainUnits × 淨值 × 匯率（精確對應批次）
   get redeemReferenceAmount(): number {
     if (this.redeemMode === 'batch') {
       return Math.round(this.redeemUnits * this.redeemNav * this.redeemExchangeRate);
+    }
+    if (this.redeemMode === 'partial') {
+      return this.partialRedeemReferenceAmount;
     }
     const stockUnits = this.redeemStockUnits;
     const marketValue = this.selectedContract?.marketValue ?? 0;
     return stockUnits > 0 ? Math.round((this.redeemUnits / stockUnits) * marketValue) : marketValue;
   }
 
-  // 單一批次的贖回參考金額：依剩餘單位數計算（完全領完 → 自然為 0）
+  // 單一批次的贖回約當市值：依剩餘單位數計算（完全領完 → 自然為 0）
   batchReferenceAmount(batch: PurchaseBatch): number {
     return Math.round(batch.remainUnits * this.redeemNav * this.redeemExchangeRate);
   }
 
-  // 含 Pay 報酬率：(剩餘市值 + 已 Pay 金額 − 申購金額) / 申購金額 × 100
+  // 含 Pay 報酬率：(剩餘市值 + 已 Pay 金額 − 批次投入成本) / 批次投入成本 × 100
   batchReturnRate(batch: PurchaseBatch): number {
-    if (batch.amount <= 0) return 0;
+    const cost = this.batchCostBasis(batch);
+    if (cost <= 0) return 0;
     const remainValue = batch.remainUnits * this.redeemNav * this.redeemExchangeRate;
-    return ((remainValue + batch.paidAmount - batch.amount) / batch.amount) * 100;
+    return ((remainValue + batch.paidAmount - cost) / cost) * 100;
   }
 
   // 短線交易判定（demo 示意）：此處以「自成交日起 30 天內」簡化展演，實際短線判斷以工程既有規格為準。
@@ -453,16 +491,15 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return days >= 0 && days < 30;
   }
 
-  // 升級四：含 Pay 報酬率 — 公式與 batchReturnRate 一致 (剩餘市值 + 已 Pay - 投入成本) / 投入成本
   get redeemReferenceReturnRate(): number {
     if (this.redeemMode === 'batch') {
-      const totalAmount = this.selectedBatches.reduce((s, b) => s + b.amount, 0);
-      if (totalAmount <= 0) return 0;
+      const totalCost = this.selectedBatches.reduce((s, b) => s + this.batchCostBasis(b), 0);
+      if (totalCost <= 0) return 0;
       const totalRemainValue = this.selectedBatches.reduce(
         (s, b) => s + b.remainUnits * this.redeemNav * this.redeemExchangeRate, 0
       );
       const totalPaid = this.selectedBatches.reduce((s, b) => s + b.paidAmount, 0);
-      return ((totalRemainValue + totalPaid - totalAmount) / totalAmount) * 100;
+      return ((totalRemainValue + totalPaid - totalCost) / totalCost) * 100;
     }
     const costBasis = this.selectedContract?.costBasis ?? 0;
     if (costBasis <= 0) return 0;
@@ -471,10 +508,12 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get postRedeemCostBasis(): number {
-    const costBasis = this.selectedContract?.costBasis ?? 0;
-    if (this.redeemMode !== 'batch') return 0;
-    const redeemCost = this.selectedBatches.reduce((s, b) => s + b.amount, 0);
-    return Math.max(costBasis - redeemCost, 0);
+    if (this.redeemMode !== 'partial' && this.redeemMode !== 'batch') return 0;
+    const redeemUnitsByBatch = this.currentRedeemUnitsByBatch();
+    return this.batches.reduce((sum, batch) => {
+      const redeemUnits = redeemUnitsByBatch.get(batch.batchId) ?? 0;
+      return sum + this.batchCostBasisAfterRedeem(batch, redeemUnits);
+    }, 0);
   }
 
   get postRedeemAnnualRate(): number {
@@ -483,30 +522,56 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return costBasis > 0 ? (monthlyPay * 12 / costBasis) * 100 : 0;
   }
 
-  get showRedeemPayAdjustmentNotice(): boolean {
-    return this.redeemMode === 'batch'
-      && this.selectedBatches.length > 0
+  get showRedeemAnnualRateNotice(): boolean {
+    return (this.redeemMode === 'partial' || this.redeemMode === 'batch')
+      && (this.redeemMode === 'partial' ? this.partialRedeemValid : this.selectedBatches.length > 0)
       && this.selectedContract?.payMode === 'amount'
       && this.postRedeemAnnualRate > 15;
   }
 
-  // 升級四方案 D：貼上限 15%（剩餘成本 × 0.15 ÷ 12，無條件捨去）
-  get suggestedMonthlyPay(): number {
-    return Math.floor(this.postRedeemCostBasis * 0.15 / 12);
+  private batchPaidUnits(batch: PurchaseBatch): number {
+    return Math.max(batch.units - batch.remainUnits, 0);
   }
 
-  // ── 升級四：申購批次層贖回 ──────────────────────────────
+  private batchCostBasis(batch: PurchaseBatch): number {
+    if (batch.units <= 0) return 0;
+    return batch.amount * (batch.remainUnits + this.batchPaidUnits(batch)) / batch.units;
+  }
+
+  private batchCostBasisAfterRedeem(batch: PurchaseBatch, redeemUnits: number): number {
+    if (batch.units <= 0) return 0;
+    const remainUnitsAfterRedeem = Math.max(batch.remainUnits - redeemUnits, 0);
+    return batch.amount * (remainUnitsAfterRedeem + this.batchPaidUnits(batch)) / batch.units;
+  }
+
+  private currentRedeemUnitsByBatch(): Map<string, number> {
+    const result = new Map<string, number>();
+    if (this.redeemMode === 'batch') {
+      this.selectedBatches.forEach(batch => result.set(batch.batchId, batch.remainUnits));
+      return result;
+    }
+    if (this.redeemMode === 'partial') {
+      let unitsToRedeem = Math.min(this.partialRedeemUnits, this.redeemableUnits);
+      for (const batch of this.selectableBatches) {
+        if (unitsToRedeem <= 0) break;
+        const units = Math.min(batch.remainUnits, unitsToRedeem);
+        result.set(batch.batchId, units);
+        unitsToRedeem -= units;
+      }
+    }
+    return result;
+  }
 
   get batches(): PurchaseBatch[] {
     return this.selectedContract ? batchesOf(this.selectedContract.fpNo) : [];
   }
 
   get selectableBatches(): PurchaseBatch[] {
-    return this.batches.filter(b => !b.isPayTouched);
+    return this.batches.filter(b => b.remainUnits > 0);
   }
 
   get hasSelectableBatch(): boolean {
-    return this.selectableBatches.length > 0;
+    return this.selectableBatches.length >= 2;
   }
 
   get selectedBatches(): PurchaseBatch[] {
@@ -531,8 +596,34 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     if (mode !== 'batch') this.selectedBatchIds.clear();
   }
 
+  setPartialRedeemInputMode(mode: PartialRedeemInputMode): void {
+    this.partialRedeemInputMode = mode;
+  }
+
+  clearPartialRedeemCounterpart(mode: PartialRedeemInputMode): void {
+    if (mode === 'amount' && this.form.controls.redeemUnits.value) {
+      this.form.controls.redeemUnits.setValue(null, { emitEvent: false });
+    }
+    if (mode === 'units' && this.form.controls.redeemAmount.value) {
+      this.form.controls.redeemAmount.setValue(null, { emitEvent: false });
+    }
+  }
+
+  limitPartialRedeemInput(mode: PartialRedeemInputMode): void {
+    const control = mode === 'amount' ? this.form.controls.redeemAmount : this.form.controls.redeemUnits;
+    const raw = String(control.value ?? '').replace(/,/g, '').trim();
+    if (!raw) return;
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) return;
+    const max = mode === 'amount' ? this.redeemableReferenceAmount : this.redeemableUnits;
+    if (parsed > max) {
+      const capped = mode === 'amount' ? Math.floor(max) : Number(max.toFixed(4));
+      control.setValue(capped, { emitEvent: false });
+    }
+  }
+
   toggleBatch(batch: PurchaseBatch): void {
-    if (batch.isPayTouched) return;
+    if (batch.remainUnits <= 0) return;
     if (this.selectedBatchIds.has(batch.batchId)) {
       this.selectedBatchIds.delete(batch.batchId);
     } else {
@@ -556,8 +647,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     if (this.activeStep === 'confirm') return this.submitDisabled;
     if (this.isRedeemMode && this.activeStep === 'settings') {
       if (!this.selectedContract) return true;
-      // 升級四：贖回方式必選；若選 batch 模式須至少勾 1 筆批次
       if (!this.redeemMode) return true;
+      if (this.redeemMode === 'partial' && !this.partialRedeemValid) return true;
       if (this.redeemMode === 'batch' && !this.hasSelectedBatch) return true;
     }
     return false;
@@ -635,11 +726,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   previous(): void {
     if (this.activeStep === 'confirm') {
-      // 無可選批次贖回沒有設定頁 → 上一步直接回帳戶總覽
-      if (this.redeemSkipsSettings) {
-        this.goOverview();
-        return;
-      }
       this.activeStep = 'settings';
       return;
     }
@@ -857,7 +943,15 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.agreedTerms = false;
     this.pwd = '';
     this.pwdVisible = false;
-    this.form.reset({ amount: this.minAmount, monthlyPay: null, ratio: null, day: 15, thresholdCustom: 80 });
+    this.form.reset({
+      amount: this.minAmount,
+      monthlyPay: null,
+      ratio: null,
+      day: 15,
+      redeemAmount: null,
+      redeemUnits: null,
+      thresholdCustom: 80
+    });
     this.payMode = 'amount';
     this.payActive = true;
     this.thresholdEnabled = false;
@@ -865,9 +959,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.payModeHintOpen = false;
     this.dateHintOpen = false;
     this.applyPayModeValidators();
-    // 升級四：贖回模式進入時重置兩層狀態
-    // 若該契約無可選批次（全部已被 Pay 觸及）→ 自動鎖定全部贖回，免去無意義的決策
-    this.redeemMode = this.isRedeemMode && !this.hasSelectableBatch ? 'all' : null;
+    this.redeemMode = null;
+    this.partialRedeemInputMode = 'amount';
     this.selectedBatchIds.clear();
   }
 

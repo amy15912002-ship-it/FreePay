@@ -86,17 +86,7 @@
             <div class="ov-metric-grid">
               <div class="ov-metric-head"><span>交易/計價幣別</span><span class="ov-line"></span><span>月 Pay 金額</span></div>
               <div class="ov-metric-head">
-                <span class="ov-market-info-label">
-                  約當市值
-                  <button
-                    class="ov-info-button ov-market-info-button"
-                    type="button"
-                    (click)="openMarketInfo(funds[0], $event)"
-                    aria-label="約當市值計算說明"
-                  >
-                    <i class="bi bi-info-circle" aria-hidden="true"></i>
-                  </button>
-                </span>
+                <span>約當市值</span>
                 <span class="ov-line"></span>
                 <span>投入成本</span>
               </div>
@@ -132,32 +122,12 @@
                 <div class="ov-metric">
                   <div class="ov-kv ov-kv--ccy"><span class="ov-kv-lbl">交易/計價幣別</span><span>{{ f.txCcy }} / {{ f.buyCcy }}</span></div>
                   <span class="ov-line"></span>
-                  <div class="ov-kv ov-kv--monthly"><span class="ov-kv-lbl">月 Pay 金額</span><span>{{ fmtN(f.pay) }}</span></div>
+                  <div class="ov-kv ov-kv--monthly"><span class="ov-kv-lbl">月 Pay 金額</span><span class="ov-kv-val">{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of contractAlerts(f)">{{ m }}</p></div></span></span></div>
                 </div>
                 <div class="ov-metric">
                   <div class="ov-kv ov-kv--market">
-                    <span class="ov-kv-lbl ov-market-info-label">
-                      約當市值
-                      <button
-                        class="ov-info-button ov-market-info-button"
-                        type="button"
-                        (click)="openMarketInfo(f, $event)"
-                        aria-label="約當市值計算說明"
-                      >
-                        <i class="bi bi-info-circle" aria-hidden="true"></i>
-                      </button>
-                    </span>
-                    <span class="ov-market-value">
-                      {{ fmtN(f.market) }}
-                      <button
-                        class="ov-info-button ov-market-info-button ov-market-info-button--value"
-                        type="button"
-                        (click)="openMarketInfo(f, $event)"
-                        aria-label="約當市值計算說明"
-                      >
-                        <i class="bi bi-info-circle" aria-hidden="true"></i>
-                      </button>
-                    </span>
+                    <span class="ov-kv-lbl">約當市值</span>
+                    <span>{{ fmtN(f.market) }}</span>
                   </div>
                   <span class="ov-line"></span>
                   <div class="ov-kv ov-kv--cost"><span class="ov-kv-lbl">投入成本</span><span>{{ fmtN(f.cost) }}</span></div>
@@ -173,7 +143,7 @@
                   <div class="ov-kv ov-kv--return-no-pay"><span class="ov-kv-lbl">不含 Pay 報酬率</span><span [ngClass]="numClass(returnWithoutPay(f))">{{ fmtRate(returnWithoutPay(f)) }}</span></div>
                 </div>
               </div>
-              <div class="ov-mobile-pay-summary"><span>月 Pay 金額</span><strong>{{ fmtN(f.pay) }}</strong></div>
+              <div class="ov-mobile-pay-summary"><span>月 Pay 金額</span><strong>{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of contractAlerts(f)">{{ m }}</p></div></span></strong></div>
               <div class="ov-fund-actions">
                 <button
                   class="ov-fund-expand-btn ov-fund-expand-btn--desktop"
@@ -243,6 +213,7 @@
             <li>當您於本網進行基金交易，系統將保留您所有的基金交易確認單歷史紀錄以供查詢之用。若交易未結帳完成前之相關記錄，可以透過在途交易查詢。</li>
             <li>上述投資組合損益，為資料期間內已完成交易程序者，資料若有不符，應以臺灣集中保管結算所電腦記錄為準，歡迎您至集保網站查詢（www.tdcc.com.tw）。</li>
             <li>觸發門檻：依持有市值相對於投入成本比例判斷是否執行 Pay 出。市值守護為低於設定比例時暫停 Pay 出；增值啟動為達設定比例的月份才 Pay 出。</li>
+            <li>約當市值 = 單位數 × 淨值 × 匯率。</li>
           </ul>
         </div>
       </section>
@@ -387,7 +358,7 @@
                 <th class="col-time">委託 / 生效日</th>
                 <th>交易幣別</th>
                 <th>贖回單位數</th>
-                <th class="col-amount">參考金額</th>
+                <th class="col-amount">約當市值</th>
                 <th>委託結果</th>
               </tr>
             </thead>
@@ -410,7 +381,7 @@
                 <td class="ov-mobile-only-cell ov-order-effect-mobile" data-label="生效日">{{ item.effectDate }}</td>
                 <td data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
                 <td data-label="贖回單位數">{{ item.unit }}</td>
-                <td class="col-amount" data-label="參考金額">{{ fmtN(item.amount) }}</td>
+                <td class="col-amount" data-label="約當市值">{{ fmtN(item.amount) }}</td>
                 <td data-label="委託結果">{{ item.status }}</td>
               </tr>
             </tbody>
@@ -442,7 +413,7 @@
         <ul class="notes-list">
           <li>當日申請之申購（含加碼）委託可於13:00前取消，若逾時則無法取消，將於次一營業日生效。</li>
           <li>當日申請之異動/贖回委託可於14:00前取消，若逾時則無法取消，將於次一營業日生效。</li>
-          <li>參考金額係依最新淨值估算，非實際金額；實際金額將以基金公司回覆為準。</li>
+          <li>約當市值係依最新淨值估算，非實際金額；實際金額將以基金公司回覆為準。</li>
           <li>交易相關問題請洽客服專線 02-27208126。</li>
         </ul>
       </div>
@@ -535,39 +506,6 @@
     </ng-container>
 
   </mat-tab-nav-panel>
-</div>
-
-<div class="market-info-overlay" *ngIf="marketInfoFund && marketInfoContract as calc" (click)="closeMarketInfo()">
-  <div class="market-info-panel" (click)="$event.stopPropagation()" role="dialog" aria-modal="true" aria-labelledby="market-info-title">
-    <button class="market-info-close" type="button" (click)="closeMarketInfo()" aria-label="關閉">
-      <i class="bi bi-x-lg" aria-hidden="true"></i>
-    </button>
-    <h3 id="market-info-title">約當市值</h3>
-    <p class="market-info-fund">{{ marketInfoFund.code }} {{ marketInfoFund.name }}</p>
-    <div class="market-calc-row" aria-label="約當市值計算公式">
-      <div class="market-calc-item">
-        <span>單位數</span>
-        <strong>{{ fmtUnits(calc.marketUnits) }}</strong>
-      </div>
-      <span class="market-calc-op">×</span>
-      <div class="market-calc-item">
-        <span>淨值</span>
-        <strong>{{ fmtDecimal(calc.marketNav) }}</strong>
-        <em>({{ calc.marketNavDate }})</em>
-      </div>
-      <span class="market-calc-op">×</span>
-      <div class="market-calc-item">
-        <span>匯率</span>
-        <strong>{{ fmtDecimal(calc.marketFx) }}</strong>
-      </div>
-      <span class="market-calc-op">=</span>
-      <div class="market-calc-item market-calc-item--result">
-        <span>約當市值</span>
-        <strong>{{ fmtN(calc.market) }}</strong>
-      </div>
-    </div>
-    <button class="market-info-confirm" type="button" (click)="closeMarketInfo()">我知道了</button>
-  </div>
 </div>
 
 <div class="detail-overlay" *ngIf="detailFpNo" (click)="closeDetail()">

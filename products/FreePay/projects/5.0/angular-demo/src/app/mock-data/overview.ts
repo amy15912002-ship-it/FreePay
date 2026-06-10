@@ -1,5 +1,5 @@
 import { findFund } from './funds';
-import { HOLDINGS, HoldingContract, PurchaseBatch } from './holdings';
+import { HOLDINGS, HoldingContract, PurchaseBatch, ThresholdMode } from './holdings';
 
 export interface OvSummary {
   ccy: string; pay: number; paid: number;
@@ -11,6 +11,7 @@ export interface OvContract {
   setting: string; threshold: string;
   pay: number; paid: number; market: number; cost: number; profit: number; ret: number;
   marketUnits: number; marketNav: number; marketNavDate: string; marketFx: number;
+  payRateAlert: boolean; payPaused: boolean; payPausedMode: ThresholdMode;
 }
 
 export interface OvFund {
@@ -105,6 +106,9 @@ function toOvContract(c: HoldingContract): OvContract {
     marketNav,
     marketNavDate: latestBatch?.tDate ?? c.startDate,
     marketFx,
+    payRateAlert: !!c.payRateAlert,
+    payPaused: !!c.payPaused,
+    payPausedMode: c.thresholdMode,
   };
 }
 

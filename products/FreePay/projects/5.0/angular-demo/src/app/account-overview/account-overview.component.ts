@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
@@ -97,7 +97,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   detailTimeType: DetailTimeType = 'ALL';
   detailCustomStart: Date | null = null;
   detailCustomEnd: Date | null = null;
-  marketInfoFund: OvFund | null = null;
 
   // ── Order filters ──
 
@@ -164,6 +163,45 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     this.expandedFundRows.has(id) ? this.expandedFundRows.delete(id) : this.expandedFundRows.add(id);
   }
 
+  // ── 契約提醒（spec §7.1）：月 Pay 金額旁，點 icon 展開文案 ──
+  openAlertFunds = new Set<string>();
+
+  isAlertOpen(id: string): boolean {
+    return this.openAlertFunds.has(id);
+  }
+
+  toggleAlert(id: string): void {
+    const isOpen = this.openAlertFunds.has(id);
+    this.openAlertFunds.clear();          // 一次只開一個
+    if (!isOpen) this.openAlertFunds.add(id);
+  }
+
+  // 點浮層以外任意處自動關閉（.ov-alert 內點擊已 stopPropagation，不會觸發此處）
+  @HostListener('document:click')
+  closeAlertsOnOutsideClick(): void {
+    if (this.openAlertFunds.size) this.openAlertFunds.clear();
+  }
+
+  hasContractAlert(f: OvFund): boolean {
+    const c = f.contracts[0];
+    return c.payRateAlert || c.payPaused;
+  }
+
+  contractAlerts(f: OvFund): string[] {
+    const c = f.contracts[0];
+    const msgs: string[] = [];
+    if (c.payRateAlert) {
+      const rate = c.cost ? (c.pay * 12 / c.cost) * 100 : 0;
+      msgs.push(`此契約年化提領率達 ${this.fmtRate(rate)}，高於 15%，建議調整 Pay 金額。`);
+    }
+    if (c.payPaused) {
+      msgs.push(c.payPausedMode === 'unlock'
+        ? '未達增值啟動門檻，本月暫停 Pay。'
+        : '市值守護已觸發，本月暫停 Pay。');
+    }
+    return msgs;
+  }
+
   returnWithPay(item: Pick<OvFund, 'cost' | 'profit' | 'paid'>): number {
     return item.cost ? ((item.profit + item.paid) / item.cost) * 100 : 0;
   }
@@ -196,28 +234,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   // 百分比：千分位、最多 2 位、不補零（平台通規 §4.4）
   fmtRate(n: number): string {
     return `${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}%`;
-  }
-
-  fmtUnits(n: number): string {
-    return Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
-  }
-
-  // 淨值／匯率：千分位、最多 4 位、不補零（平台通規 §4.4）
-  fmtDecimal(n: number): string {
-    return Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 4 });
-  }
-
-  openMarketInfo(fund: OvFund | null, event?: Event): void {
-    event?.stopPropagation();
-    this.marketInfoFund = fund;
-  }
-
-  closeMarketInfo(): void {
-    this.marketInfoFund = null;
-  }
-
-  get marketInfoContract(): OvContract | null {
-    return this.marketInfoFund?.contracts[0] ?? null;
   }
 
   ccyText(code: string): string {

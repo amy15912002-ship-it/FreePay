@@ -165,17 +165,21 @@
   line-height: 1.7;
 }
 
-// 贖回年化超標警示：warning 配色 + 自動調整月 Pay 確認區
+// 贖回年化超標提醒
 .redeem-adjust-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   margin-top: 16px;
   padding: 12px 16px;
+  border-radius: 8px;
   background: var(--color-brand-secondary-50);
   border: 1px solid var(--color-brand-secondary-200);
   color: var(--color-brand-secondary-800);
   font-size: 14px;
 
   > i {
-    color: var(--color-brand-secondary-600);
+    color: var(--color-brand-secondary-400);
     font-size: 18px;
     line-height: 1.5;
   }
@@ -198,6 +202,7 @@
 
 .redeem-adjust-title strong {
   font-size: 16px;
+  font-weight: 500;
 }
 
 .redeem-adjust-desc {
@@ -1058,13 +1063,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 24px;
-  margin-bottom: 16px;
 }
 
 // ── 全部贖回模式：合計摘要 ──
 
 .redeem-all-summary {
-  margin-top: 12px;
+  margin-top: 16px;
   padding: 12px 16px;
   border: 1px solid var(--color-border-default);
   border-radius: 8px;
@@ -1075,6 +1079,63 @@
 
     & + .sum-row {
       border-top: 1px dashed var(--color-border-default);
+    }
+  }
+}
+
+.redeem-reference-summary {
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 6px;
+  background: var(--color-bg-muted);
+}
+
+.redeem-partial-summary {
+  padding: 0;
+  border: 0;
+  background: transparent;
+
+  &.redeem-all-summary {
+    padding: 0;
+  }
+
+  .redeem-partial-input-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 20px;
+    align-items: start;
+    margin-bottom: 24px;
+  }
+
+  .redeem-partial-value-field {
+    width: 100%;
+  }
+
+  .redeem-partial-reference {
+    margin-top: 4px;
+  }
+
+  .sum-row {
+    grid-template-columns: minmax(180px, 1fr) minmax(120px, auto);
+    min-height: 40px;
+    padding: 8px 0;
+
+    span {
+      font-size: 14px;
+      line-height: 1.45;
+    }
+  }
+
+  .sum-row strong {
+    text-align: right;
+  }
+}
+
+@media (max-width: 767px) {
+  .redeem-partial-summary {
+    .redeem-partial-input-grid {
+      grid-template-columns: 1fr;
+      gap: 6px;
     }
   }
 }
@@ -1102,12 +1163,13 @@
 
 // ── 批次列表（對齊帳戶總覽明細列：表頭 + 列式 grid + border-bottom + 置中對齊） ──
 
-// 等寬 grid：check（固定 28px）+ 6 個內容欄等寬
-$batch-grid: 28px repeat(6, minmax(0, 1fr));
+// 群組 grid：check + 交易資訊（交易日/短線）+ 獨立資料欄
+$batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
 
 .batch-table {
   display: flex;
   flex-direction: column;
+  margin-top: 16px;
   border: 1px solid var(--color-border-default);
   border-radius: 8px;
   overflow: hidden;
@@ -1166,6 +1228,14 @@ $batch-grid: 28px repeat(6, minmax(0, 1fr));
   text-align: center;
 }
 
+.batch-head-cell--left {
+  text-align: left;
+}
+
+.batch-head-cell--right {
+  text-align: center;
+}
+
 .batch-row {
   display: grid;
   grid-template-columns: $batch-grid;
@@ -1197,7 +1267,7 @@ $batch-grid: 28px repeat(6, minmax(0, 1fr));
   }
 }
 
-// 合計列（footer，動態顯示已選批次的贖回參考金額合計）
+// 合計列（footer，動態顯示已選批次的贖回約當市值合計）
 .batch-row--total {
   background: var(--color-bg-muted);
   border-top: 1px solid var(--color-border-default);
@@ -1209,13 +1279,13 @@ $batch-grid: 28px repeat(6, minmax(0, 1fr));
 
 .batch-row-cell--total-label {
   color: var(--color-text-heading);
-  font-weight: 700;
+  font-weight: 500;
 }
 
 .batch-row-cell--total-amount {
   color: var(--color-brand-primary-400);
-  font-size: 18px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 500;
 }
 
 .batch-row-check {
@@ -1237,12 +1307,58 @@ $batch-grid: 28px repeat(6, minmax(0, 1fr));
   font-size: 16px;
   font-weight: 500;
   line-height: 1.4;
-  word-break: break-word;
+  word-break: normal;
   min-width: 0;
+  font-variant-numeric: tabular-nums;
 
   // 漲跌色覆寫（component 範疇下，全域 .val-up/.val-down 會被 .batch-row-cell 蓋掉）
   &.val-up   { color: var(--color-price-up); }
   &.val-down { color: var(--color-price-down); }
+}
+
+.batch-row-group {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
+}
+
+.batch-row-cell--number,
+.batch-row-cell--return {
+  text-align: center;
+}
+
+.batch-row-cell--number {
+  justify-self: center;
+  white-space: nowrap;
+}
+
+.batch-row-main {
+  color: var(--color-text-heading);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.35;
+  white-space: nowrap;
+}
+
+.batch-row-sub {
+  color: var(--color-text-tertiary);
+  font-size: 13px;
+  font-weight: 400;
+  line-height: 1.35;
+  white-space: nowrap;
+
+  &.is-shortterm {
+    color: var(--color-brand-primary-400);
+    font-weight: 500;
+  }
+}
+
+.batch-row-cell--return {
+  justify-self: center;
+  font-size: 16px;
+  font-weight: 500;
+  white-space: nowrap;
 }
 
 .batch-row-cell--date {
@@ -1351,12 +1467,51 @@ $batch-grid: 28px repeat(6, minmax(0, 1fr));
     }
   }
 
+  .batch-row-group {
+    align-items: stretch;
+    gap: 4px;
+    text-align: left;
+
+    &::before {
+      margin-bottom: 2px;
+    }
+  }
+
+  .batch-row-group--trade {
+    flex-direction: row;
+    align-items: baseline;
+    gap: 8px;
+
+    &::before {
+      display: none;
+    }
+  }
+
+  .batch-row-cell--number {
+    justify-self: stretch;
+    justify-content: space-between;
+    text-align: left;
+    white-space: normal;
+  }
+
+  .batch-row-main,
+  .batch-row-sub {
+    white-space: normal;
+  }
+
+  .batch-row-cell--return {
+    justify-self: stretch;
+    justify-content: space-between;
+    text-align: left;
+    font-size: 15px;
+  }
+
   .batch-row-cell--date {
     flex-direction: row;
     align-items: baseline;
     gap: 4px;
     color: var(--color-text-heading);
-    font-weight: 700;
+    font-weight: 500;
 
     &::before { display: none; }
   }
