@@ -2,15 +2,15 @@ import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
-  OV_FUNDS, MOCK_ALT_ORDERS, MOCK_CHG_ORDERS, MOCK_RDM_ORDERS, MOCK_PROFITS,
-  OvSummary, OvFund, OvContract, AltOrder, ProfitRecord, DetailTxRecord, DetailChgRecord, DETAIL_TX_DETAIL, DETAIL_TX_CHANGE
+  OV_FUNDS, MOCK_ALT_ORDERS, MOCK_CHG_ORDERS, MOCK_RDM_ORDERS, MOCK_PROFITS, ALL_CHANGE_LOGS,
+  OvSummary, OvFund, OvContract, AltOrder, ProfitRecord, DetailTxRecord, DetailChgRecord, ChangeLogRecord, DETAIL_TX_DETAIL
 } from '../mock-data/overview';
 
-type OvTab = 'overview' | 'order' | 'profit';
+type OvTab = 'overview' | 'order' | 'profit' | 'change';
 type OrderFilter = 'all' | 'alt' | 'chg' | 'rdm';
 type DetailTxType = 'all' | 'A' | 'R' | 'RDM';
-type DetailChgType = 'all' | 'TAP' | 'AL' | 'P' | 'D' | 'DL';
 type DetailTimeType = '3M' | '6M' | '1Y' | 'YTD' | 'ALL' | 'CUSTOM';
+type ChangeSortKey = 'code' | 'effectDate' | 'ccy' | 'tradeType' | 'before' | 'after';
 
 const REFERENCE_DATE = new Date('2026-05-12T00:00:00');
 
@@ -25,6 +25,11 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   readonly chgOrders = MOCK_CHG_ORDERS;
   readonly rdmOrders = MOCK_RDM_ORDERS;
   readonly allProfits = MOCK_PROFITS;
+  readonly changeLogs = ALL_CHANGE_LOGS;
+  changeSearch = '';
+  changeView: 'history' | 'settings' = 'history';
+  changeSortKey: ChangeSortKey = 'effectDate';
+  changeSortDesc = true;
 
   sumCardIndex = 0;
   summaryDemoMode: 'multi' | 'single' = 'multi';
@@ -39,7 +44,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   ngOnInit(): void {
     this.routeSub = this.route.queryParamMap.subscribe(query => {
       const tab = query.get('tab');
-      if (tab === 'overview' || tab === 'order' || tab === 'profit') {
+      if (tab === 'overview' || tab === 'order' || tab === 'profit' || tab === 'change') {
         this.activeTab = tab;
       }
       const order = query.get('order');
@@ -93,7 +98,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
 
   detailFpNo: string | null = null;
   detailTxType: DetailTxType = 'all';
-  detailChgType: DetailChgType = 'all';
   detailTimeType: DetailTimeType = 'ALL';
   detailCustomStart: Date | null = null;
   detailCustomEnd: Date | null = null;
@@ -125,22 +129,76 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   // ── Profit ──
 
   get profitSummaryByCcy(): Array<{ ccy: string; paid: number; redeem: number; cost: number; profit: number; rate: number }> {
-    return ['TWD', 'USD']
-      .map(ccy => {
-        const list = this.allProfits.filter(r => r.ccy === ccy);
-        if (!list.length) return null;
-        const cost   = list.reduce((s, r) => s + r.cost, 0);
-        const redeem = list.reduce((s, r) => s + r.redeemAmount, 0);
-        const paid   = list.reduce((s, r) => s + r.totalPaid, 0);
-        const profit = list.reduce((s, r) => s + r.profit, 0);
-        return { ccy: ccy === 'TWD' ? '台幣' : '美元', paid, redeem, cost, profit, rate: cost ? (profit / cost) * 100 : 0 };
-      })
-      .filter((r): r is NonNullable<typeof r> => r !== null);
+    const grouped = new Map<string, { ccy: string; paid: number; redeem: number; cost: number; profit: number; rate: number }>();
+    for (const row of this.allProfits) {
+      const item = grouped.get(row.ccy) ?? { ccy: this.ccyText(row.ccy), paid: 0, redeem: 0, cost: 0, profit: 0, rate: 0 };
+      item.paid += row.totalPaid;
+      item.redeem += row.redeemAmount;
+      item.cost += row.cost;
+      item.profit += row.profit;
+      item.rate = item.cost ? (item.profit / item.cost) * 100 : 0;
+      grouped.set(row.ccy, item);
+    }
+    return Array.from(grouped.values());
   }
 
   // 已實現損益外層：每契約一行（一基金一交易幣一契約），依贖回日倒序
   get profitRows(): ProfitRecord[] {
     return [...this.allProfits].sort((a, b) => b.redeemDate.localeCompare(a.redeemDate));
+  }
+
+  expandedProfitRows = new Set<string>();
+
+  isProfitExpanded(id: string): boolean {
+    return this.expandedProfitRows.has(id);
+  }
+
+  toggleProfitRow(id: string): void {
+    this.expandedProfitRows.has(id) ? this.expandedProfitRows.delete(id) : this.expandedProfitRows.add(id);
+  }
+
+  // 設定調整：可異動契約（庫存>0），聚焦設定欄位
+  get settingsFunds(): OvFund[] {
+    return this.funds.filter(f => f.contracts[0] && f.contracts[0].marketUnits > 0);
+  }
+
+  // ── 異動紀錄：基金搜尋 + 每欄排序 ──
+  get filteredChangeLogs(): ChangeLogRecord[] {
+    const kw = this.changeSearch.trim().toLowerCase();
+    const arr = kw
+      ? this.changeLogs.filter(r => r.fund.toLowerCase().includes(kw) || r.code.toLowerCase().includes(kw))
+      : this.changeLogs;
+    const dir = this.changeSortDesc ? -1 : 1;
+    return [...arr].sort((a, b) =>
+      this.changeFieldValue(a, this.changeSortKey).localeCompare(this.changeFieldValue(b, this.changeSortKey)) * dir
+    );
+  }
+
+  setChangeSort(key: ChangeSortKey): void {
+    if (this.changeSortKey === key) this.changeSortDesc = !this.changeSortDesc;
+    else { this.changeSortKey = key; this.changeSortDesc = true; }
+  }
+
+  // 手機版卡片折疊：收合僅顯示代碼／名稱／生效日，點卡片展開其餘欄位
+  expandedChangeRows = new Set<string>();
+  isChangeExpanded(id: string): boolean { return this.expandedChangeRows.has(id); }
+  toggleChangeRow(id: string): void {
+    this.expandedChangeRows.has(id) ? this.expandedChangeRows.delete(id) : this.expandedChangeRows.add(id);
+  }
+
+  changeSortIcon(key: ChangeSortKey): string {
+    return this.changeSortKey === key && !this.changeSortDesc ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
+  }
+
+  private changeFieldValue(r: ChangeLogRecord, key: ChangeSortKey): string {
+    switch (key) {
+      case 'code':       return r.code;
+      case 'effectDate': return r.tDate;
+      case 'ccy':        return r.ccy;
+      case 'tradeType':  return this.chgTypeText(r.tradeType);
+      case 'before':     return this.fmtChgBefore(r);
+      case 'after':      return this.fmtChgAfter(r);
+    }
   }
 
   // ── Helpers ──
@@ -263,8 +321,8 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   fmtLimitMode(limitMode: string, limitVal: number | null): string {
-    if (limitMode === 'protect') return `市值守護・低於投入成本 ${this.fmtRate(limitVal ?? 0)} 暫停`;
-    if (limitMode === 'unlock') return `增值啟動・達投入成本 ${this.fmtRate(limitVal ?? 0)} 才 Pay`;
+    if (limitMode === 'protect') return `市值低於投入成本 ${this.fmtRate(limitVal ?? 0)} 暫停Pay出`;
+    if (limitMode === 'unlock') return `市值超過成本 ${this.fmtRate(limitVal ?? 0)} 開始Pay出`;
     return '不設門檻';
   }
 
@@ -285,7 +343,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   openDetail(fpNo: string): void {
     this.detailFpNo = fpNo;
     this.detailTxType = 'all';
-    this.detailChgType = 'all';
     this.detailTimeType = 'ALL';
     this.detailCustomStart = null;
     this.detailCustomEnd = null;
@@ -302,11 +359,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     // 已實現損益契約（已贖回、不在持倉）：fallback 到損益資料
     const p = this.allProfits.find(r => r.fpNo === this.detailFpNo);
     return p ? { name: p.fund, code: p.code, txCcy: this.ccyText(p.ccy) } : null;
-  }
-
-  // 當前明細彈窗是否為已實現損益契約（已結束、異動皆已完成，不顯示「委託結果」欄）
-  get isProfitDetail(): boolean {
-    return !!this.detailFpNo && this.allProfits.some(r => r.fpNo === this.detailFpNo);
   }
 
   get detailPanelTitle(): string {
@@ -342,12 +394,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     });
   }
 
-  get detailChgRecords(): DetailChgRecord[] {
-    if (!this.detailFpNo) return [];
-    const all = DETAIL_TX_CHANGE[this.detailFpNo] ?? [];
-    return all.filter(r => this.detailChgType === 'all' || r.tradeType === this.detailChgType);
-  }
-
   fmtDate(d: string): string {
     return d.replace(/-/g, '/');
   }
@@ -365,7 +411,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   txTypeText(t: string): string {
-    return t === 'A' ? '申購' : t === 'R' ? '自由Pay' : t === 'RDM' ? '贖回' : t;
+    return t === 'A' ? '申購' : t === 'R' ? '自由Pay出' : t === 'RDM' ? '贖回' : t;
   }
 
   chgTypeText(t: string): string {

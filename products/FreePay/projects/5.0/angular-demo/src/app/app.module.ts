@@ -12,7 +12,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatSliderModule } from '@angular/material/slider';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTabsModule } from '@angular/material/tabs';
@@ -24,6 +23,7 @@ import { AccountOverviewComponent } from './account-overview/account-overview.co
 import { FundSelectComponent } from './fund-select/fund-select.component';
 import { FreepayIntroComponent } from './freepay-intro/freepay-intro.component';
 import { FooterComponent } from './footer/footer.component';
+import { ThousandsDirective } from './thousands.directive';
 
 @NgModule({
   declarations: [
@@ -32,7 +32,8 @@ import { FooterComponent } from './footer/footer.component';
     AccountOverviewComponent,
     FundSelectComponent,
     FreepayIntroComponent,
-    FooterComponent
+    FooterComponent,
+    ThousandsDirective
   ],
   imports: [
     BrowserModule,
@@ -50,7 +51,6 @@ import { FooterComponent } from './footer/footer.component';
     MatMenuModule,
     MatNativeDateModule,
     MatRadioModule,
-    MatSliderModule,
     MatSlideToggleModule,
     MatStepperModule,
     MatTabsModule

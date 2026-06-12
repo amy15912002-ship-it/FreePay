@@ -128,7 +128,6 @@ $freepay-theme: mat.define-light-theme((
 @include mat.menu-theme($freepay-theme);
 @include mat.radio-theme($freepay-theme);
 @include mat.slide-toggle-theme($freepay-theme);
-@include mat.slider-theme($freepay-theme);
 @include mat.stepper-theme($freepay-theme);
 @include mat.tabs-theme($freepay-theme);
 
@@ -175,10 +174,10 @@ $freepay-theme: mat.define-light-theme((
   --color-bg-muted: var(--color-neutral-100);
   --color-bg-brand-subtle: var(--color-brand-primary-50);
   --color-bg-info-subtle: var(--color-brand-tertiary-50);
-  --color-text-heading: var(--color-neutral-850);
-  --color-text-primary: var(--color-neutral-800);
+  --color-text-heading: var(--color-neutral-900);
+  --color-text-primary: var(--color-neutral-900);
   --color-text-secondary: var(--color-neutral-600);
-  --color-text-tertiary: var(--color-neutral-400);
+  --color-text-tertiary: var(--color-neutral-600);
   --color-text-on-brand: var(--color-neutral-0);
   --color-border-default: var(--color-neutral-150);
   --color-border-strong: var(--color-neutral-200);
@@ -191,7 +190,7 @@ $freepay-theme: mat.define-light-theme((
   --color-input-border-focus: var(--color-brand-tertiary-300);
   --color-input-border-error: var(--color-brand-primary-400);
   --color-input-border-disabled: var(--color-neutral-150);
-  --color-input-text: var(--color-neutral-800);
+  --color-input-text: var(--color-neutral-900);
   --color-input-placeholder: var(--color-neutral-400);
   --color-input-text-disabled: var(--color-neutral-250);
   --color-input-label: var(--color-neutral-600);
@@ -348,8 +347,8 @@ textarea {
   gap: 24px;
   min-height: 72px;
   padding: 0 48px;
-  background: #2f2f2f;
-  box-shadow: 0 1px 0 rgba(255, 255, 255, 0.08);
+  background: var(--color-neutral-850);
+  box-shadow: 0 1px 0 color-mix(in srgb, var(--color-neutral-0) 8%, transparent);
 }
 
 .fp-site-brand {
@@ -371,7 +370,7 @@ textarea {
 .fp-site-brand-divider {
   width: 1px;
   height: 28px;
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--color-neutral-0) 70%, transparent);
 }
 
 .fp-site-brand-product {
@@ -436,7 +435,7 @@ textarea {
 
   &:hover,
   &:focus-visible {
-    background: rgba(250, 166, 52, 0.12);
+    background: color-mix(in srgb, var(--color-brand-secondary-400) 12%, transparent);
     color: var(--color-brand-secondary-300);
   }
 }
@@ -458,7 +457,7 @@ textarea {
   justify-content: center;
   width: 40px;
   height: 40px;
-  border: 1px solid rgba(255, 255, 255, 0.35);
+  border: 1px solid color-mix(in srgb, var(--color-neutral-0) 35%, transparent);
   border-radius: 4px;
   background: transparent;
   color: var(--color-neutral-0);
@@ -537,9 +536,9 @@ textarea {
     align-items: stretch;
     gap: 0;
     padding: 8px 16px 16px;
-    border-top: 1px solid rgba(255, 255, 255, 0.08);
-    background: #2f2f2f;
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.18);
+    border-top: 1px solid color-mix(in srgb, var(--color-neutral-0) 8%, transparent);
+    background: var(--color-neutral-850);
+    box-shadow: var(--shadow-lg);
 
     &.is-open {
       display: flex;
@@ -548,7 +547,7 @@ textarea {
     a {
       font-size: 14px;
       padding: 12px 0;
-      border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+      border-bottom: 1px solid color-mix(in srgb, var(--color-neutral-0) 8%, transparent);
     }
   }
 

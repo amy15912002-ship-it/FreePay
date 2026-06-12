@@ -80,8 +80,8 @@ function contractSetting(c: HoldingContract): string {
 }
 
 function contractThreshold(c: HoldingContract): string {
-  if (c.thresholdMode === 'protect') return `市值守護・低於投入成本 ${c.thresholdValue}% 暫停`;
-  if (c.thresholdMode === 'unlock') return `增值啟動・達投入成本 ${c.thresholdValue}% 才 Pay`;
+  if (c.thresholdMode === 'protect') return `市值低於投入成本 ${c.thresholdValue}% 暫停Pay出`;
+  if (c.thresholdMode === 'unlock') return `市值超過成本 ${c.thresholdValue}% 開始Pay出`;
   return '不設門檻';
 }
 
@@ -151,7 +151,7 @@ export const MOCK_ALT_ORDERS: AltOrder[] = [
 ];
 
 export const MOCK_CHG_ORDERS: ChgOrder[] = [
-  { id: 'C20260505001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', ccy: 'USD', oldPay: '依金額・80', newPay: '依比例・年化 6%', oldDay: '15', newDay: '15', oldLimit: '增值啟動・達投入成本 150% 才 Pay', newLimit: '增值啟動・達投入成本 130% 才 Pay', effectDate: '2026/05/06', date: '2026/05/05', time: '11:20:18', status: '成功' },
+  { id: 'C20260505001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', ccy: 'USD', oldPay: '依金額・80', newPay: '依比例・年化 6%', oldDay: '15', newDay: '15', oldLimit: '市值超過成本 150% 開始Pay出', newLimit: '市值超過成本 130% 開始Pay出', effectDate: '2026/05/06', date: '2026/05/05', time: '11:20:18', status: '成功' },
 ];
 
 export const MOCK_RDM_ORDERS: RdmOrder[] = [
@@ -159,8 +159,8 @@ export const MOCK_RDM_ORDERS: RdmOrder[] = [
 ];
 
 export const MOCK_PROFITS: ProfitRecord[] = [
-  { id: 'hp-001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024001', ccy: 'TWD', fundCcy: 'USD', redeemDate: '2026/04/18', totalPaid: 12000, paySetting: '依金額・15日',    threshold: '市值守護・低於投入成本 80% 暫停',  cost: 300000, redeemAmount: 318000, profit:  30000, returnRate:  10.00, status: '已完成' },
-  { id: 'hp-002', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024002', ccy: 'USD', fundCcy: 'USD', redeemDate: '2026/03/22', totalPaid:   240, paySetting: '依金額・15日',    threshold: '增值啟動・達投入成本 130% 才 Pay', cost:   8000, redeemAmount:   8420, profit:    660, returnRate:   8.25, status: '已完成' },
+  { id: 'hp-001', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024001', ccy: 'TWD', fundCcy: 'USD', redeemDate: '2026/04/18', totalPaid: 12000, paySetting: '依金額・15日',    threshold: '市值低於投入成本 80% 暫停Pay出',  cost: 300000, redeemAmount: 318000, profit:  30000, returnRate:  10.00, status: '已完成' },
+  { id: 'hp-002', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2024002', ccy: 'USD', fundCcy: 'USD', redeemDate: '2026/03/22', totalPaid:   240, paySetting: '依金額・15日',    threshold: '市值超過成本 130% 開始Pay出', cost:   8000, redeemAmount:   8420, profit:    660, returnRate:   8.25, status: '已完成' },
   { id: 'hp-003', fund: '統一大滿貫台灣平衡基金',       code: 'TA123456', fpNo: 'FP2025002', ccy: 'TWD', fundCcy: 'TWD', redeemDate: '2026/02/10', totalPaid: 18000, paySetting: '依比例・6%・5日', threshold: '不設門檻',         cost: 150000, redeemAmount: 162000, profit:  30000, returnRate:  20.00, status: '已完成' },
   { id: 'hp-004', fund: '施羅德環球收益基金 A',         code: 'TU778899', fpNo: 'FP2025001', ccy: 'USD', fundCcy: 'USD', redeemDate: '2025/12/19', totalPaid:   150, paySetting: '依金額・10日',    threshold: '不設門檻',         cost:   5000, redeemAmount:   4860, profit:     10, returnRate:   0.20, status: '已完成' },
   { id: 'hp-005', fund: '貝萊德全球股票收益基金 A2', code: 'AS778899', fpNo: 'FP2023008', ccy: 'TWD', fundCcy: 'USD', redeemDate: '2025/10/06', totalPaid:  6000, paySetting: '依金額・20日',    threshold: '不設門檻',         cost: 200000, redeemAmount: 188000, profit:  -6000, returnRate:  -3.00, status: '已完成' },
@@ -307,3 +307,28 @@ export const DETAIL_TX_CHANGE: Record<string, DetailChgRecord[]> = {
     { orderDate: '2026-01-08', orderTime: '09:55:20', tDate: '2026-01-12', tradeType: 'AL', status: '已完成', orgPayType: 'A', orgRDMAmt: 4000, orgPayRate: 0, payType: 'A', rdmAmt: 5000, payRate: 0, orgRDMDay: 20, rdmDay: 20, orgLimitMode: 'none', orgLimitVal: null, limitMode: 'none', limitVal: null },
   ],
 };
+
+// ── 異動紀錄獨立入口：所有契約的設定變更履歷平鋪（持倉＋已實現），依異動日倒序 ──
+export interface ChangeLogRecord extends DetailChgRecord {
+  id: string; fpNo: string; fund: string; code: string; ccy: string; // ccy = 交易幣別（中文）
+}
+
+const CONTRACT_INDEX: Map<string, { fund: string; code: string; ccy: string }> = (() => {
+  const idx = new Map<string, { fund: string; code: string; ccy: string }>();
+  for (const c of HOLDINGS) {
+    const fund = findFund(c.fundId);
+    idx.set(c.fpNo, { fund: fund?.name ?? c.fundId, code: c.fundId, ccy: CCY_NAME[c.currencyCode] ?? c.currencyCode });
+  }
+  for (const p of MOCK_PROFITS) {
+    if (!idx.has(p.fpNo)) idx.set(p.fpNo, { fund: p.fund, code: p.code, ccy: CCY_NAME[p.ccy] ?? p.ccy });
+  }
+  return idx;
+})();
+
+export const ALL_CHANGE_LOGS: ChangeLogRecord[] = Object.entries(DETAIL_TX_CHANGE)
+  .flatMap(([fpNo, recs]) => {
+    const meta = CONTRACT_INDEX.get(fpNo);
+    if (!meta) return [];  // 無對應契約（mock 殘留）的紀錄不顯示
+    return recs.map(r => ({ ...r, id: `${fpNo}-${r.orderDate}-${r.orderTime}`, fpNo, ...meta }));
+  })
+  .sort((a, b) => b.orderDate.localeCompare(a.orderDate));

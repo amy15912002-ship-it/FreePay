@@ -189,8 +189,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   private contractThresholdText(c: HoldingContract): string {
-    if (c.thresholdMode === 'protect') return `市值守護・低於投入成本 ${c.thresholdValue}% 暫停`;
-    if (c.thresholdMode === 'unlock') return `增值啟動・達投入成本 ${c.thresholdValue}% 才 Pay`;
+    if (c.thresholdMode === 'protect') return `市值低於投入成本 ${c.thresholdValue}% 暫停Pay出`;
+    if (c.thresholdMode === 'unlock') return `市值超過成本 ${c.thresholdValue}% 開始Pay出`;
     return '不設門檻';
   }
 
@@ -233,16 +233,22 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   get steps(): Array<{ key: DemoStep; label: string; description: string }> {
     if (this.isRedeemMode) {
       return [
-        { key: 'settings', label: '贖回設定', description: '選擇贖回方式' },
-        { key: 'confirm', label: '確認送出', description: '確認試算與送出' },
+        { key: 'settings', label: '設定', description: '選擇贖回方式' },
+        { key: 'confirm', label: '確認', description: '確認試算與送出' },
         { key: 'done', label: '完成', description: '委託完成' }
       ];
     }
     return [
-      { key: 'settings', label: '申購設定', description: '金額、Pay 設定' },
-      { key: 'confirm', label: '確認送出', description: '確認摘要並送出' },
+      { key: 'settings', label: '設定', description: '金額、Pay 設定' },
+      { key: 'confirm', label: '確認', description: '確認摘要並送出' },
       { key: 'done', label: '完成', description: '委託完成' }
     ];
+  }
+
+  get flowPageTitle(): string {
+    if (this.isRedeemMode) return '自由Pay-基金贖回';
+    if (this.isModifyMode) return '自由Pay-設定異動';
+    return '自由Pay-基金申購';
   }
 
   get stepIndex(): number {
@@ -327,18 +333,23 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return Math.floor(this.amount * 0.15 / 12);
   }
 
+  get ratioSliderProgress(): number {
+    const value = Number(this.form.controls.ratio.value || 1);
+    return ((value - 1) / 14) * 100;
+  }
+
   get thresholdText(): string {
     if (!this.thresholdEnabled) return '不設門檻';
-    if (this.thresholdMode === 'protect') return `市值守護・低於投入成本 ${this.thresholdValue}% 暫停`;
-    return `增值啟動・達投入成本 ${this.thresholdValue}% 才 Pay`;
+    if (this.thresholdMode === 'protect') return `市值低於投入成本 ${this.thresholdValue}% 暫停Pay出`;
+    return `市值超過成本 ${this.thresholdValue}% 開始Pay出`;
   }
 
   get thresholdPreviewLead(): string {
-    return this.thresholdMode === 'protect' ? '市值低於投入成本' : '市值達投入成本';
+    return this.thresholdMode === 'protect' ? '市值低於投入成本' : '市值超過投入成本';
   }
 
   get thresholdPreviewSuffix(): string {
-    return this.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時才 Pay 出';
+    return this.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時，開始Pay出';
   }
 
   get thresholdPreviewAmount(): number {
@@ -351,7 +362,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     const pct = this.thresholdValue;
     return this.thresholdMode === 'protect'
       ? `每月基準日依當時市值重新判斷；以投入成本 ${cost}、門檻 ${pct}% 估算，市值低於 ${line} 時暫停 Pay 出。`
-      : `每月基準日依當時市值重新判斷；以投入成本 ${cost}、門檻 ${pct}% 估算，市值達 ${line} 的月份才 Pay 出，未達暫停。`;
+      : `每月基準日依當時市值重新判斷；以投入成本 ${cost}、門檻 ${pct}% 估算，市值超過 ${line} 的月份開始Pay出。`;
   }
 
   get showThresholdPreview(): boolean {
@@ -841,6 +852,10 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   formatRate(value: number): string {
     // 平台通規 §4.4：千分位、最多 2 位、不補零
     return `${Number(value || 0).toLocaleString('en-US', { maximumFractionDigits: 2 })}%`;
+  }
+
+  formatAnnualPayRate(value: number): string {
+    return `${Number(value || 0).toLocaleString('en-US', { maximumFractionDigits: 1 })}%`;
   }
 
   rateClass(value: number): string {

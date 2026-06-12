@@ -44,7 +44,7 @@ export interface HoldingContract {
 
 export const HOLDINGS: HoldingContract[] = [
   {
-    // FP20240101 為「單一可選批次」示範：僅 1 筆 remainUnits > 0，贖回設定頁不顯示「指定」
+    // FP20240101 為「不顯示指定」示範：僅 1 筆 remainUnits > 0，不足以形成指定批次選擇
     fpNo: 'FP20240101', fundId: 'TA123456', currencyCode: 'TWD',
     startDate: '2024/01/01', payMode: 'amount', monthlyPay: 5000, annualRate: 0, payDay: 15,
     thresholdMode: 'none', thresholdValue: 0,
@@ -115,19 +115,6 @@ export const HOLDINGS: HoldingContract[] = [
         amount: 500000, units: 4878.0488, nav: 102.5, isPayTouched: false, remainUnits: 4878.0488, paidAmount: 0 },
       { batchId: 'BFP20240801-3', batchDate: '2025/12/05', orderTime: '13:55:02', tDate: '2025/12/09',
         amount: 300000, units: 2752.2936, nav: 109.0, isPayTouched: false, remainUnits: 2752.2936, paidAmount: 0 },
-    ],
-  },
-  {
-    // FP20261201 為「無可指定批次」示範：所有批次 remainUnits = 0，贖回設定頁不顯示「指定」
-    fpNo: 'FP20261201', fundId: 'TA800009', currencyCode: 'TWD',
-    startDate: '2025/03/10', payMode: 'amount', monthlyPay: 1500, annualRate: 0, payDay: 10,
-    thresholdMode: 'none', thresholdValue: 0,
-    costBasis: 160000, marketValue: 0, paidTotal: 160000, status: 'Y',
-    purchaseBatches: [
-      { batchId: 'BFP20261201-1', batchDate: '2025/03/10', orderTime: '10:18:22', tDate: '2025/03/12',
-        amount: 100000, units: 3790.7506, nav: 26.38, isPayTouched: true, remainUnits: 0, paidAmount: 100000 },
-      { batchId: 'BFP20261201-2', batchDate: '2025/10/15', orderTime: '11:42:08', tDate: '2025/10/17',
-        amount: 60000, units: 2274.4503, nav: 26.38, isPayTouched: true, remainUnits: 0, paidAmount: 60000 },
     ],
   },
 ];

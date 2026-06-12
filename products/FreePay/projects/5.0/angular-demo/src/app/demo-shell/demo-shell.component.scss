@@ -6,6 +6,17 @@
   background: var(--color-bg-base);
 }
 
+.flow-page-title {
+  width: min(800px, 100%);
+  margin: 0 auto 14px;
+  padding: 4px 0 0;
+  color: var(--color-text-heading);
+  font-size: 24px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
 .material-flow-stepper {
   width: min(800px, 100%);
   margin: 0 auto;
@@ -319,10 +330,6 @@
   padding: 12px 0 0;
 }
 
-.ratio-slider mat-slider {
-  width: 100%;
-}
-
 .ratio-summary {
   display: flex;
   align-items: baseline;
@@ -339,6 +346,85 @@
 .slider-hint {
   color: var(--color-input-helper);
   font-size: 14px;
+}
+
+.ratio-range-control {
+  --ratio-progress: 0%;
+  --ratio-track-active: var(--color-brand-primary-200);
+  margin-top: 16px;
+}
+
+.ratio-range {
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background:
+      linear-gradient(
+        90deg,
+        var(--ratio-track-active) 0 var(--ratio-progress),
+        var(--color-border-default) var(--ratio-progress) 100%
+      );
+  }
+
+  &::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    appearance: none;
+    border: 3px solid var(--color-brand-primary-400);
+    border-radius: 50%;
+    background: var(--color-bg-base);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:focus-visible::-webkit-slider-thumb {
+    box-shadow: var(--color-input-shadow-focus), var(--shadow-sm);
+  }
+
+  &::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--color-border-default);
+  }
+
+  &::-moz-range-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: var(--ratio-track-active);
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--color-brand-primary-400);
+    border-radius: 50%;
+    background: var(--color-bg-base);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:focus-visible::-moz-range-thumb {
+    box-shadow: var(--color-input-shadow-focus), var(--shadow-sm);
+  }
+}
+
+.ratio-range-scale {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 4px;
+  color: var(--color-input-helper);
+  font-size: 12px;
+  line-height: 1.4;
 }
 
 .date-grid {
@@ -565,7 +651,7 @@
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
   gap: 12px;
-  margin-bottom: 14px;
+  margin-bottom: 6px;
 }
 
 .redeem-result {
@@ -611,7 +697,11 @@
 }
 
 .redeem-sum-table {
-  margin-top: 4px;
+  margin-top: 0;
+
+  .sum-row:first-child {
+    border-bottom: 0;
+  }
 }
 
 .agree-label {
@@ -908,6 +998,14 @@
     font-size: 22px;
   }
 
+  .flow-page-title {
+    width: 100%;
+    margin: 0 0 8px;
+    padding: 0 15px;
+    font-size: 20px;
+    text-align: center;
+  }
+
   .material-flow-stepper {
     width: 100%;
     padding: 10px 15px 12px;
@@ -934,6 +1032,16 @@
     ::ng-deep .mat-horizontal-stepper-header::after {
       top: 12px;
     }
+  }
+
+  .fund-name {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  .fund-code {
+    margin-right: 0;
   }
 }
 
@@ -976,9 +1084,16 @@
   }
 
   .ratio-summary {
-    align-items: flex-start;
-    flex-direction: column;
-    gap: 4px;
+    align-items: baseline;
+    flex-direction: row;
+    flex-wrap: wrap;
+    gap: 4px 8px;
+    justify-content: space-between;
+  }
+
+  .slider-hint {
+    margin-left: auto;
+    text-align: right;
   }
 
   .sum-row {
@@ -1126,9 +1241,8 @@
 // ── 贖回參考資料（合併進 fund-card 內） ──
 
 .fund-card-redeem-ref {
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px dashed var(--color-border-default);
+  margin-top: 10px;
+  padding-top: 0;
 }
 
 .ref-meta {
@@ -1250,7 +1364,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
   }
 }
 
-// 合計列（footer，動態顯示已選批次的贖回約當市值合計）
+// 指定贖回合計：桌機使用表格 footer，手機使用獨立灰底參考資訊
 .batch-row--total {
   background: var(--color-bg-muted);
   border-top: 1px solid var(--color-border-default);
@@ -1260,8 +1374,21 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
   &:hover { background: var(--color-bg-muted); }
 }
 
+.redeem-batch-total-summary {
+  display: none;
+  margin-top: 16px;
+  background: var(--color-bg-base);
+}
+
 .batch-row-cell--total-label {
   color: var(--color-text-heading);
+  font-weight: 500;
+}
+
+.batch-row-total-title {
+  margin-bottom: 8px;
+  color: var(--color-text-heading);
+  font-size: 16px;
   font-weight: 500;
 }
 
@@ -1414,7 +1541,11 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
     font-size: 14px;
   }
 
-  // 合計列：label 在左、值在右
-  .batch-row--total .batch-row-cell--total-label::before { display: none; }
-  .batch-row--total .batch-row-cell:empty { display: none; }
+  .batch-row--total {
+    display: none;
+  }
+
+  .redeem-batch-total-summary {
+    display: block;
+  }
 }

@@ -6,11 +6,12 @@ import { FundSelectComponent } from './fund-select/fund-select.component';
 import { FreepayIntroComponent } from './freepay-intro/freepay-intro.component';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'demo/flow', pathMatch: 'full' },
+  { path: '', redirectTo: 'demo/freepay-intro', pathMatch: 'full' },
   { path: 'demo/freepay-intro', component: FreepayIntroComponent },
   { path: 'demo/overview', component: AccountOverviewComponent },
   { path: 'demo/search', component: FundSelectComponent },
-  { path: 'demo/flow', component: DemoShellComponent }
+  { path: 'demo/flow', component: DemoShellComponent },
+  { path: '**', redirectTo: 'demo/freepay-intro' }
 ];
 
 @NgModule({

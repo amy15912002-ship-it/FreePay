@@ -213,8 +213,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   }
 
   get activeFilterCount(): number {
+    // 關鍵字搜尋與篩選脫鉤，不計入篩選數
     return [
-      this.keyword.trim(),
       ...this.domicileFilters,
       ...this.categoryFilters,
       ...this.pricingCcyFilters,
@@ -362,7 +362,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   }
 
   clearFilters(): void {
-    this.keyword = '';
+    // 關鍵字搜尋與篩選脫鉤：清除篩選不動關鍵字（要清用搜尋框的 ⊗）
     this.brandKeyword = '';
     this.brandSearchOpen = false;
     this.groupKeyword = '';

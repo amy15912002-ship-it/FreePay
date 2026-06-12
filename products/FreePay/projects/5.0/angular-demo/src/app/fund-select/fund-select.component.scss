@@ -216,7 +216,7 @@
   display: block;
   min-width: 0;
 
-  .bi {
+  > .bi {
     position: absolute;
     left: 0;
     top: 50%;
@@ -230,6 +230,34 @@
   .fs-keyword {
     width: 100%;
     padding-left: 24px;
+    padding-right: 24px;
+  }
+
+  .fs-search-clear {
+    position: absolute;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0;
+    border: none;
+    background: transparent;
+    color: var(--color-text-tertiary);
+    line-height: 1;
+    cursor: pointer;
+
+    .bi {
+      position: static;
+      transform: none;
+      color: inherit;
+      font-size: 16px;
+      pointer-events: none;
+    }
+
+    &:hover,
+    &:focus-visible { color: var(--color-text-secondary); outline: none; }
   }
 }
 
@@ -680,21 +708,10 @@
     font-size: 15px;
     font-weight: 700;
 
-    strong {
-      position: absolute;
-      top: -6px;
-      right: -6px;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      min-width: 18px;
-      height: 18px;
-      padding: 0 5px;
-      border-radius: 9px;
+    // 有篩選：整顆按鈕填滿品牌色 + 白色實心漏斗（不用數字）
+    &.is-active {
       background: var(--color-action-primary);
       color: var(--color-text-on-brand);
-      font-size: 12px;
-      line-height: 1;
     }
   }
 
