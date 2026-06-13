@@ -258,18 +258,21 @@
         </div>
 
         <ng-container *ngIf="payActive">
-        <div class="pay-setting-group">
-          <div class="form-label">
-            Pay 出方式
-            <button
-              class="hint-icon"
-              type="button"
-              aria-label="Pay 出方式說明"
-              [attr.aria-expanded]="payModeHintOpen"
-              (click)="toggleHint('payMode')"
-            >
-              <i class="bi bi-info-circle"></i>
-            </button>
+        <div class="pay-setting-group pay-setting-step">
+          <div class="pay-setting-step-title">
+            <span class="pay-setting-step-no">1</span>
+            <div class="form-label">
+              Pay 出方式
+              <button
+                class="hint-icon"
+                type="button"
+                aria-label="Pay 出方式說明"
+                [attr.aria-expanded]="payModeHintOpen"
+                (click)="toggleHint('payMode')"
+              >
+                <i class="bi bi-info-circle"></i>
+              </button>
+            </div>
           </div>
           <div class="hint-panel" [class.is-open]="payModeHintOpen">
             <strong>依金額</strong>：每月固定提領設定之金額。<br>
@@ -278,16 +281,23 @@
           </div>
           <div class="pay-setting-panel pay-setting-panel--mode">
           <div class="form-group">
-          <mat-button-toggle-group class="mode-toggle mode-toggle-fill" [value]="payMode" (change)="setPayMode($event.value)" aria-label="Pay 出方式">
-            <mat-button-toggle value="amount">依金額</mat-button-toggle>
-            <mat-button-toggle value="ratio">依比例</mat-button-toggle>
-          </mat-button-toggle-group>
+          <mat-radio-group
+            class="choice-radio-group"
+            [ngModel]="payMode"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="setPayMode($event)"
+            aria-label="Pay 出方式"
+          >
+            <mat-radio-button color="primary" value="amount">依金額</mat-radio-button>
+            <mat-radio-button color="primary" value="ratio">依比例</mat-radio-button>
+          </mat-radio-group>
         </div>
 
         <div *ngIf="payMode === 'amount'" class="pay-mode-panel">
-          <mat-form-field appearance="standard" color="accent" class="full-field">
+          <mat-form-field appearance="standard" color="accent" class="full-field pay-amount-field">
             <mat-label>每月 Pay 金額</mat-label>
             <input matInput type="text" inputmode="numeric" formControlName="monthlyPay" appThousands required>
+            <mat-hint *ngIf="!hasPayInput">{{ monthlyPayRangeHint }}</mat-hint>
             <mat-hint *ngIf="hasPayInput && annualRate <= 15">年化約 {{ formatAnnualPayRate(annualRate) }}</mat-hint>
             <mat-error *ngIf="form.controls.monthlyPay.hasError('required')">請輸入每月 Pay 金額</mat-error>
             <mat-error *ngIf="form.controls.monthlyPay.hasError('pattern')">請輸入數字</mat-error>
@@ -302,7 +312,10 @@
               <div class="ratio-value">年化 Pay 比例 {{ form.controls.ratio.value || 0 }}%</div>
               <div class="slider-hint" *ngIf="hasPayInput">試算每月 Pay {{ formatMoney(monthlyPay) }}</div>
             </div>
-            <div class="ratio-range-control" [style.--ratio-progress]="ratioSliderProgress + '%'">
+            <div class="ratio-range-control">
+              <div class="ratio-track" aria-hidden="true">
+                <span [style.width.%]="ratioSliderProgress"></span>
+              </div>
               <input
                 class="ratio-range"
                 type="range"
@@ -313,10 +326,10 @@
                 aria-label="年化 Pay 比例"
               >
               <div class="ratio-range-scale" aria-hidden="true">
-                <span>1%</span>
-                <span>5%</span>
-                <span>10%</span>
-                <span>15%</span>
+                <span style="left: 0%">1%</span>
+                <span style="left: 28.571%">5%</span>
+                <span style="left: 64.286%">10%</span>
+                <span style="left: 100%">15%</span>
               </div>
             </div>
           </div>
@@ -324,18 +337,21 @@
         </div>
         </div>
 
-        <div class="pay-setting-group">
-          <div class="form-label">
-            自由 Pay 基準日
-            <button
-              class="hint-icon"
-              type="button"
-              aria-label="自由 Pay 基準日說明"
-              [attr.aria-expanded]="dateHintOpen"
-              (click)="toggleHint('date')"
-            >
-              <i class="bi bi-info-circle"></i>
-            </button>
+        <div class="pay-setting-group pay-setting-step pay-setting-step--date">
+          <div class="pay-setting-step-title">
+            <span class="pay-setting-step-no">2</span>
+            <div class="form-label">
+              自由 Pay 基準日
+              <button
+                class="hint-icon"
+                type="button"
+                aria-label="自由 Pay 基準日說明"
+                [attr.aria-expanded]="dateHintOpen"
+                (click)="toggleHint('date')"
+              >
+                <i class="bi bi-info-circle"></i>
+              </button>
+            </div>
           </div>
           <div class="hint-panel" [class.is-open]="dateHintOpen">
             自由 Pay 基準日為贖回申請日，實際入帳時間視基金公司付款作業而定，一般而言平均約 7～10 個營業日入帳。<br><br>
@@ -390,22 +406,29 @@
           [class.is-protect]="thresholdMode === 'protect'"
           [class.is-unlock]="thresholdMode === 'unlock'"
         >
-          <mat-button-toggle-group
-            class="mode-toggle mode-toggle-fill threshold-mode-toggle"
-            [value]="thresholdMode"
-            (change)="setThresholdMode($event.value)"
+          <mat-radio-group
+            class="choice-radio-group threshold-mode-radio-group"
+            [ngModel]="thresholdMode"
+            [ngModelOptions]="{ standalone: true }"
+            (ngModelChange)="setThresholdMode($event)"
             aria-label="觸發門檻類型"
           >
-            <mat-button-toggle value="protect">市值守護</mat-button-toggle>
-            <mat-button-toggle value="unlock">增值啟動</mat-button-toggle>
-          </mat-button-toggle-group>
+            <mat-radio-button color="primary" value="protect">市值守護</mat-radio-button>
+            <mat-radio-button color="primary" value="unlock">增值啟動</mat-radio-button>
+          </mat-radio-group>
 
           <div class="threshold-selector-panel">
               <div class="threshold-preview">
                 <div class="threshold-preview-label" *ngIf="showThresholdPreview">
-                {{ thresholdPreviewLead }} <span class="threshold-preview-emphasis">{{ thresholdValue }}%</span>{{ thresholdPreviewSuffix }}
-              </div>
-
+                  {{ thresholdPreviewLead }} <span class="threshold-preview-emphasis">{{ thresholdValue }}%</span> {{ thresholdPreviewSuffix }}
+                </div>
+                <div class="threshold-estimate" *ngIf="showThresholdPreview">
+                  <strong>
+                    以投入成本 <span>{{ thresholdCostText }}</span>、門檻 <span>{{ thresholdValue }}%</span> 估算，市值{{ thresholdMode === 'protect' ? '低於' : '超過' }}
+                    <span>{{ thresholdPreviewAmountText }}</span>
+                    {{ thresholdMode === 'protect' ? '時暫停 Pay 出。' : '的月份開始 Pay 出。' }}
+                  </strong>
+                </div>
               <div class="threshold-option-area">
               <div class="threshold-option-grid" *ngIf="thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
                 <button
@@ -484,8 +507,7 @@
               </mat-form-field>
               </div>
             </div>
-
-            <div class="threshold-note" *ngIf="showThresholdPreview">{{ thresholdNote }}</div>
+            <div class="threshold-note" *ngIf="showThresholdPreview">每月基準日依當時市值重新判斷。</div>
           </div>
         </div>
       </section>

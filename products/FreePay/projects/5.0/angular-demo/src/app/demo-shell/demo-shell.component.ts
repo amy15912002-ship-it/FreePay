@@ -189,8 +189,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   private contractThresholdText(c: HoldingContract): string {
-    if (c.thresholdMode === 'protect') return `市值低於投入成本 ${c.thresholdValue}% 暫停Pay出`;
-    if (c.thresholdMode === 'unlock') return `市值超過成本 ${c.thresholdValue}% 開始Pay出`;
+    if (c.thresholdMode === 'protect') return `市值低於投入成本 ${c.thresholdValue}% 暫停 Pay 出`;
+    if (c.thresholdMode === 'unlock') return `市值超過成本 ${c.thresholdValue}% 開始 Pay 出`;
     return '不設門檻';
   }
 
@@ -333,6 +333,11 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return Math.floor(this.amount * 0.15 / 12);
   }
 
+  get monthlyPayRangeHint(): string {
+    if (this.monthlyPayAnnualLimitAmount <= 0) return '請先輸入申購金額';
+    return `可輸入範圍 ${this.currencyName()} 1–${this.formatNumber(this.monthlyPayAnnualLimitAmount)}`;
+  }
+
   get ratioSliderProgress(): number {
     const value = Number(this.form.controls.ratio.value || 1);
     return ((value - 1) / 14) * 100;
@@ -340,8 +345,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   get thresholdText(): string {
     if (!this.thresholdEnabled) return '不設門檻';
-    if (this.thresholdMode === 'protect') return `市值低於投入成本 ${this.thresholdValue}% 暫停Pay出`;
-    return `市值超過成本 ${this.thresholdValue}% 開始Pay出`;
+    if (this.thresholdMode === 'protect') return `市值低於投入成本 ${this.thresholdValue}% 暫停 Pay 出`;
+    return `市值超過成本 ${this.thresholdValue}% 開始 Pay 出`;
   }
 
   get thresholdPreviewLead(): string {
@@ -349,20 +354,19 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get thresholdPreviewSuffix(): string {
-    return this.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時，開始Pay出';
+    return this.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時，開始 Pay 出';
   }
 
   get thresholdPreviewAmount(): number {
     return Math.round(this.amount * (this.thresholdValue / 100));
   }
 
-  get thresholdNote(): string {
-    const cost = this.formatMoney(this.amount);
-    const line = this.formatMoney(this.thresholdPreviewAmount);
-    const pct = this.thresholdValue;
-    return this.thresholdMode === 'protect'
-      ? `每月基準日依當時市值重新判斷；以投入成本 ${cost}、門檻 ${pct}% 估算，市值低於 ${line} 時暫停 Pay 出。`
-      : `每月基準日依當時市值重新判斷；以投入成本 ${cost}、門檻 ${pct}% 估算，市值超過 ${line} 的月份開始Pay出。`;
+  get thresholdCostText(): string {
+    return this.formatMoney(this.amount);
+  }
+
+  get thresholdPreviewAmountText(): string {
+    return this.formatMoney(this.thresholdPreviewAmount);
   }
 
   get showThresholdPreview(): boolean {

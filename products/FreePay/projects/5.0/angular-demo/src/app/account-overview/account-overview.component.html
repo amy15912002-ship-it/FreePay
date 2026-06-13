@@ -85,14 +85,18 @@
           <div class="ov-detail-head">
             <div class="ov-head-name">基金名稱</div>
             <div class="ov-metric-grid">
-              <div class="ov-metric-head"><span>交易/計價幣別</span><span class="ov-line"></span><span>月 Pay 金額</span></div>
-              <div class="ov-metric-head">
+              <div class="ov-metric-row ov-metric-row--top">
+                <span>交易/計價幣別</span>
                 <span>約當市值</span>
-                <span class="ov-line"></span>
-                <span>投入成本</span>
+                <span>持有損益</span>
+                <span>含 Pay 報酬率</span>
               </div>
-              <div class="ov-metric-head"><span>持有損益</span><span class="ov-line"></span><span>已 Pay 金額</span></div>
-              <div class="ov-metric-head"><span>含 Pay 報酬率</span><span class="ov-line"></span><span>不含 Pay 報酬率</span></div>
+              <div class="ov-metric-row ov-metric-row--bottom">
+                <span>月 Pay 金額</span>
+                <span>投入成本</span>
+                <span>已 Pay 金額</span>
+                <span>不含 Pay 報酬率</span>
+              </div>
             </div>
             <div></div>
           </div>
@@ -120,27 +124,16 @@
                 <strong>{{ f.name }}</strong>
               </div>
               <div class="ov-metric-grid ov-metric-grid--2col">
-                <div class="ov-metric">
+                <div class="ov-metric-row ov-metric-row--top">
                   <div class="ov-kv ov-kv--ccy"><span class="ov-kv-lbl">交易/計價幣別</span><span>{{ f.txCcy }} / {{ f.buyCcy }}</span></div>
-                  <span class="ov-line"></span>
-                  <div class="ov-kv ov-kv--monthly"><span class="ov-kv-lbl">月 Pay 金額</span><span>{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of alertsOf(f.id)">{{ m }}</p></div></span></span></div>
-                </div>
-                <div class="ov-metric">
-                  <div class="ov-kv ov-kv--market">
-                    <span class="ov-kv-lbl">約當市值</span>
-                    <span>{{ fmtN(f.market) }}</span>
-                  </div>
-                  <span class="ov-line"></span>
-                  <div class="ov-kv ov-kv--cost"><span class="ov-kv-lbl">投入成本</span><span>{{ fmtN(f.cost) }}</span></div>
-                </div>
-                <div class="ov-metric">
+                  <div class="ov-kv ov-kv--market"><span class="ov-kv-lbl">約當市值</span><span>{{ fmtN(f.market) }}</span></div>
                   <div class="ov-kv ov-kv--profit"><span class="ov-kv-lbl">持有損益</span><span [ngClass]="numClass(f.profit)">{{ fmtN(f.profit) }}</span></div>
-                  <span class="ov-line"></span>
-                  <div class="ov-kv ov-kv--paid"><span class="ov-kv-lbl">已 Pay 金額</span><span>{{ fmtN(f.paid) }}</span></div>
-                </div>
-                <div class="ov-metric">
                   <div class="ov-kv ov-kv--return-with"><span class="ov-kv-lbl">含 Pay 報酬率</span><span [ngClass]="numClass(returnWithPay(f))">{{ fmtRate(returnWithPay(f)) }}</span></div>
-                  <span class="ov-line"></span>
+                </div>
+                <div class="ov-metric-row ov-metric-row--bottom">
+                  <div class="ov-kv ov-kv--monthly"><span class="ov-kv-lbl">月 Pay 金額</span><span>{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of alertsOf(f.id)">{{ m }}</p></div></span></span></div>
+                  <div class="ov-kv ov-kv--cost"><span class="ov-kv-lbl">投入成本</span><span>{{ fmtN(f.cost) }}</span></div>
+                  <div class="ov-kv ov-kv--paid"><span class="ov-kv-lbl">已 Pay 金額</span><span>{{ fmtN(f.paid) }}</span></div>
                   <div class="ov-kv ov-kv--return-no-pay"><span class="ov-kv-lbl">不含 Pay 報酬率</span><span [ngClass]="numClass(returnWithoutPay(f))">{{ fmtRate(returnWithoutPay(f)) }}</span></div>
                 </div>
               </div>
@@ -241,45 +234,45 @@
           <h3 class="block-title">申購</h3>
           <span class="ov-order-count">{{ altOrders.length }} 筆</span>
         </div>
-        <div class="ov-table-wrap ov-mobile-card-wrap">
-          <table class="ov-table ov-order-table ov-order-card">
-            <thead>
-              <tr>
-                <th class="col-check">選取</th>
-                <th class="col-fund">基金名稱</th>
-                <th class="col-time">委託 / 生效日</th>
-                <th class="col-amount">申購金額</th>
-                <th>Pay 出方式</th>
-                <th>基準日</th>
-                <th>觸發門檻</th>
-                <th>委託結果</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of altOrders; trackBy: trackById">
-                <td class="col-check" data-label="選取">
-                  <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
-                </td>
-                <td class="col-fund ov-desktop-only-cell" data-label="基金名稱">
-                  <div class="ov-cell-code">{{ item.code }}</div>
-                  <div class="ov-cell-name">{{ item.fund }}</div>
-                </td>
-                <td class="ov-mobile-only-cell oc-code" data-label="基金代碼">{{ item.code }}</td>
-                <td class="ov-mobile-only-cell oc-name" data-label="基金名稱">{{ item.fund }}</td>
-                <td class="col-time ov-desktop-only-cell" data-label="委託 / 生效日">
-                  <div class="ov-order-date">{{ item.date }} {{ item.time }}</div>
-                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-value">{{ item.effectDate }}</span></div>
-                </td>
-                <td class="ov-mobile-only-cell ov-order-date-mobile oc-body oc-body-first" data-label="委託日">{{ item.date }} {{ item.time }}</td>
-                <td class="ov-mobile-only-cell ov-order-effect-mobile oc-body" data-label="生效日">{{ item.effectDate }}</td>
-                <td class="col-amount oc-body" data-label="申購金額">{{ ccyText(item.ccy) }} {{ fmtN(item.amount) }}</td>
-                <td class="oc-body" data-label="Pay 出方式">{{ fmtOrderPayMethod(item) }}</td>
-                <td class="oc-body" data-label="基準日">{{ fmtOrderPayDay(item) }}</td>
-                <td class="oc-body" data-label="觸發門檻">{{ fmtLimitMode(item.limitMode, item.limitVal) }}</td>
-                <td class="oc-body oc-body-last" data-label="委託結果">{{ item.status }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="grid-table grid-table--order grid-table--order-alt">
+          <div class="grid-head">
+            <span class="grid-select-head" aria-hidden="true"></span>
+            <span class="grid-id-head">基金名稱</span>
+            <div class="grid-body">
+              <span>生效 / 委託日</span>
+              <span>申購金額</span>
+              <span>Pay 出方式</span>
+              <span>基準日</span>
+              <span>觸發門檻</span>
+              <span>委託結果</span>
+            </div>
+          </div>
+          <div class="grid-row" *ngFor="let item of altOrders; trackBy: trackById">
+            <div class="grid-main">
+              <div class="grid-select">
+                <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
+              </div>
+              <div class="grid-id">
+                <span class="grid-code">{{ item.code }}</span>
+                <span class="grid-name">{{ item.fund }}</span>
+              </div>
+              <div class="grid-body">
+                <span class="grid-only-desktop" data-label="生效 / 委託日">
+                  <span class="grid-stack">
+                    <span>{{ item.effectDate }}</span>
+                    <span class="grid-sub">委託 {{ item.date }} {{ item.time }}</span>
+                  </span>
+                </span>
+                <span class="grid-only-mobile" data-label="委託日">{{ item.date }} {{ item.time }}</span>
+                <span class="grid-only-mobile" data-label="生效日">{{ item.effectDate }}</span>
+                <span data-label="申購金額">{{ ccyText(item.ccy) }} {{ fmtN(item.amount) }}</span>
+                <span data-label="Pay 出方式">{{ fmtOrderPayMethod(item) }}</span>
+                <span data-label="基準日">{{ fmtOrderPayDay(item) }}</span>
+                <span data-label="觸發門檻">{{ fmtLimitMode(item.limitMode, item.limitVal) }}</span>
+                <span data-label="委託結果">{{ item.status }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -288,60 +281,60 @@
           <h3 class="block-title">異動</h3>
           <span class="ov-order-count">{{ chgOrders.length }} 筆</span>
         </div>
-        <div class="ov-table-wrap ov-mobile-card-wrap">
-          <table class="ov-table ov-order-table ov-order-card">
-            <thead>
-              <tr>
-                <th class="col-check">選取</th>
-                <th class="col-fund">基金名稱</th>
-                <th class="col-time">委託 / 生效日</th>
-                <th>交易幣別</th>
-                <th>Pay 出方式</th>
-                <th>基準日</th>
-                <th>觸發門檻</th>
-                <th>委託結果</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of chgOrders; trackBy: trackById">
-                <td class="col-check" data-label="選取">
-                  <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
-                </td>
-                <td class="col-fund ov-desktop-only-cell" data-label="基金名稱">
-                  <div class="ov-cell-code">{{ item.code }}</div>
-                  <div class="ov-cell-name">{{ item.fund }}</div>
-                </td>
-                <td class="ov-mobile-only-cell oc-code" data-label="基金代碼">{{ item.code }}</td>
-                <td class="ov-mobile-only-cell oc-name" data-label="基金名稱">{{ item.fund }}</td>
-                <td class="col-time ov-desktop-only-cell" data-label="委託 / 生效日">
-                  <div class="ov-order-date">{{ item.date }} {{ item.time }}</div>
-                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-value">{{ item.effectDate }}</span></div>
-                </td>
-                <td class="ov-mobile-only-cell ov-order-date-mobile oc-body oc-body-first" data-label="委託日">{{ item.date }} {{ item.time }}</td>
-                <td class="ov-mobile-only-cell ov-order-effect-mobile oc-body" data-label="生效日">{{ item.effectDate }}</td>
-                <td class="oc-body" data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
-                <td class="oc-body" data-label="Pay 出方式">
-                  <div class="ov-card-value">
+        <div class="grid-table grid-table--order grid-table--order-chg">
+          <div class="grid-head">
+            <span class="grid-select-head" aria-hidden="true"></span>
+            <span class="grid-id-head">基金名稱</span>
+            <div class="grid-body">
+              <span>生效 / 委託日</span>
+              <span>交易幣別</span>
+              <span>Pay 出方式</span>
+              <span>基準日</span>
+              <span>觸發門檻</span>
+              <span>委託結果</span>
+            </div>
+          </div>
+          <div class="grid-row" *ngFor="let item of chgOrders; trackBy: trackById">
+            <div class="grid-main">
+              <div class="grid-select">
+                <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
+              </div>
+              <div class="grid-id">
+                <span class="grid-code">{{ item.code }}</span>
+                <span class="grid-name">{{ item.fund }}</span>
+              </div>
+              <div class="grid-body">
+                <span class="grid-only-desktop" data-label="生效 / 委託日">
+                  <span class="grid-stack">
+                    <span>{{ item.effectDate }}</span>
+                    <span class="grid-sub">委託 {{ item.date }} {{ item.time }}</span>
+                  </span>
+                </span>
+                <span class="grid-only-mobile" data-label="委託日">{{ item.date }} {{ item.time }}</span>
+                <span class="grid-only-mobile" data-label="生效日">{{ item.effectDate }}</span>
+                <span data-label="交易幣別">{{ ccyText(item.ccy) }}</span>
+                <span data-label="Pay 出方式">
+                  <span class="grid-stack">
                     <span class="ov-cell-old">{{ item.oldPay }}</span>
-                    <br><span class="ov-cell-new">{{ item.newPay }}</span>
-                  </div>
-                </td>
-                <td class="oc-body" data-label="基準日">
-                  <div class="ov-card-value">
+                    <span class="ov-cell-new">{{ item.newPay }}</span>
+                  </span>
+                </span>
+                <span data-label="基準日">
+                  <span class="grid-stack">
                     <span class="ov-cell-old">每月 {{ item.oldDay }} 日</span>
-                    <br><span class="ov-cell-new">每月 {{ item.newDay }} 日</span>
-                  </div>
-                </td>
-                <td class="oc-body" data-label="觸發門檻">
-                  <div class="ov-card-value">
+                    <span class="ov-cell-new">每月 {{ item.newDay }} 日</span>
+                  </span>
+                </span>
+                <span data-label="觸發門檻">
+                  <span class="grid-stack">
                     <span class="ov-cell-old">{{ item.oldLimit }}</span>
-                    <br><span class="ov-cell-new">{{ item.newLimit }}</span>
-                  </div>
-                </td>
-                <td class="oc-body oc-body-last" data-label="委託結果">{{ item.status }}</td>
-              </tr>
-            </tbody>
-          </table>
+                    <span class="ov-cell-new">{{ item.newLimit }}</span>
+                  </span>
+                </span>
+                <span data-label="委託結果">{{ item.status }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 
@@ -350,43 +343,43 @@
           <h3 class="block-title">贖回</h3>
           <span class="ov-order-count">{{ rdmOrders.length }} 筆</span>
         </div>
-        <div class="ov-table-wrap ov-mobile-card-wrap">
-          <table class="ov-table ov-order-table ov-order-card">
-            <thead>
-              <tr>
-                <th class="col-check">選取</th>
-                <th class="col-fund">基金名稱</th>
-                <th class="col-time">委託 / 生效日</th>
-                <th>交易幣別</th>
-                <th>贖回單位數</th>
-                <th class="col-amount">約當市值</th>
-                <th>委託結果</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr *ngFor="let item of rdmOrders; trackBy: trackById">
-                <td class="col-check" data-label="選取">
-                  <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
-                </td>
-                <td class="col-fund ov-desktop-only-cell" data-label="基金名稱">
-                  <div class="ov-cell-code">{{ item.code }}</div>
-                  <div class="ov-cell-name">{{ item.fund }}</div>
-                </td>
-                <td class="ov-mobile-only-cell oc-code" data-label="基金代碼">{{ item.code }}</td>
-                <td class="ov-mobile-only-cell oc-name" data-label="基金名稱">{{ item.fund }}</td>
-                <td class="col-time ov-desktop-only-cell" data-label="委託 / 生效日">
-                  <div class="ov-order-date">{{ item.date }} {{ item.time }}</div>
-                  <div class="ov-cell-sub ov-order-effect-date"><span class="ov-order-effect-value">{{ item.effectDate }}</span></div>
-                </td>
-                <td class="ov-mobile-only-cell ov-order-date-mobile oc-body oc-body-first" data-label="委託日">{{ item.date }} {{ item.time }}</td>
-                <td class="ov-mobile-only-cell ov-order-effect-mobile oc-body" data-label="生效日">{{ item.effectDate }}</td>
-                <td class="oc-body" data-label="交易幣別">{{ ccyText(item.ccy) }}</td>
-                <td class="oc-body" data-label="贖回單位數">{{ item.unit }}</td>
-                <td class="col-amount oc-body" data-label="約當市值">{{ fmtN(item.amount) }}</td>
-                <td class="oc-body oc-body-last" data-label="委託結果">{{ item.status }}</td>
-              </tr>
-            </tbody>
-          </table>
+        <div class="grid-table grid-table--order grid-table--order-rdm">
+          <div class="grid-head">
+            <span class="grid-select-head" aria-hidden="true"></span>
+            <span class="grid-id-head">基金名稱</span>
+            <div class="grid-body">
+              <span>生效 / 委託日</span>
+              <span>交易幣別</span>
+              <span>贖回單位數</span>
+              <span>約當市值</span>
+              <span>委託結果</span>
+            </div>
+          </div>
+          <div class="grid-row" *ngFor="let item of rdmOrders; trackBy: trackById">
+            <div class="grid-main">
+              <div class="grid-select">
+                <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
+              </div>
+              <div class="grid-id">
+                <span class="grid-code">{{ item.code }}</span>
+                <span class="grid-name">{{ item.fund }}</span>
+              </div>
+              <div class="grid-body">
+                <span class="grid-only-desktop" data-label="生效 / 委託日">
+                  <span class="grid-stack">
+                    <span>{{ item.effectDate }}</span>
+                    <span class="grid-sub">委託 {{ item.date }} {{ item.time }}</span>
+                  </span>
+                </span>
+                <span class="grid-only-mobile" data-label="委託日">{{ item.date }} {{ item.time }}</span>
+                <span class="grid-only-mobile" data-label="生效日">{{ item.effectDate }}</span>
+                <span data-label="交易幣別">{{ ccyText(item.ccy) }}</span>
+                <span data-label="贖回單位數">{{ item.unit }}</span>
+                <span data-label="約當市值">{{ fmtN(item.amount) }}</span>
+                <span data-label="委託結果">{{ item.status }}</span>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
 

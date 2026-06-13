@@ -479,13 +479,40 @@
 }
 
 .ov-metric-grid {
+  display: flex;
+  flex-direction: column;
+}
+
+// 雙排內容：上排 + 一條 border + 下排（取代每欄 ov-line span，分隔線一條式、crisp 一致）
+.ov-metric-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  align-items: stretch;
+  align-items: center;
+}
+
+.ov-metric-row > span,
+.ov-metric-row > .ov-kv {
+  min-width: 0;
+  text-align: center;
+}
+
+.ov-metric-row > .ov-kv { font-size: 16px; }
+
+.ov-metric-row--top {
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--color-neutral-250);
+}
+
+.ov-metric-row--bottom { padding-top: 8px; }
+
+.ov-detail-head .ov-metric-row > span {
+  font-size: 14px;
+  color: var(--color-text-secondary);
 }
 
 // 已實現損益：metric 單行平鋪（每欄一值，不上下並列；空間足夠）
 .ov-metric-grid--row {
+  display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
 
   > span {
@@ -510,7 +537,6 @@
   }
 }
 
-.ov-metric-head,
 .ov-metric {
   display: flex;
   flex-direction: column;
@@ -519,11 +545,6 @@
   text-align: center;
   line-height: normal;
   min-width: 0;
-}
-
-.ov-metric-head {
-  font-size: 14px;
-  color: var(--color-text-secondary);
 }
 
 .ov-head-label--info,
@@ -648,12 +669,6 @@
   }
 }
 
-.ov-line {
-  width: 100%;
-  height: 1px;
-  flex-shrink: 0;
-  background: var(--color-neutral-250);
-}
 
 
 // ── Fund row ──────────────────────────────────────────────
@@ -1368,13 +1383,10 @@
     padding: 0;
   }
 
-  .ov-metric { display: contents; }
-
-  .ov-metric .ov-line { display: none; }
-
-  .ov-metric:last-child > .ov-kv:last-child { border-bottom: none; }
+  .ov-metric-row { display: contents; }
 
   .ov-metric-grid--2col {
+    display: grid;
     grid-template-columns: repeat(3, 1fr);
     row-gap: 18px;
     padding: 2px 0 0;
@@ -1401,8 +1413,7 @@
     }
 
     .ov-kv--ccy,
-    .ov-kv--monthly,
-    > .ov-metric:first-child > .ov-line {
+    .ov-kv--monthly {
       display: none;
     }
 
@@ -1494,6 +1505,7 @@
     grid-area: factions;
     justify-self: end;
     justify-content: flex-end;
+    padding-right: 0;
   }
 
   .ov-fund-extra {
@@ -1944,9 +1956,10 @@
 .grid-head {
   display: grid;
   align-items: center;
+  gap: 20px;
   padding: 12px 0;
-  background: var(--color-bg-muted);
-  border-bottom: 2px solid var(--color-border-default);
+  background: var(--color-neutral-150);
+  border-bottom: 2px solid var(--color-neutral-250);
   color: var(--color-text-secondary);
   font-size: 14px;
 }
@@ -2004,16 +2017,21 @@
 
   .grid-id { grid-area: id; padding-left: 0; }
 
+  // 資料區包白底圓角塊（對齊帳總 ov-fund-extra）：灰卡片頭 + 白底資料塊
   .grid-body {
     grid-area: body;
     grid-template-columns: 1fr !important;
     gap: 0;
+    padding: 0 14px;
+    background: var(--color-bg-base);
+    border-radius: 8px;
 
     > span {
       display: flex;
       justify-content: space-between;
-      align-items: baseline;
-      padding: 9px 0;
+      align-items: center;
+      min-height: 52px;
+      padding: 10px 0;
       border-bottom: 1px solid var(--color-border-default);
       text-align: right;
 
@@ -2033,4 +2051,41 @@
 @media (max-width: 1024px) {
   .grid-table--settings .grid-head,
   .grid-table--settings .grid-main { grid-template-columns: 200px 1fr 88px; }
+}
+
+// 前導選取欄（多選列表，如委託查詢）：桌機最左固定窄欄、手機卡片頭 id 行左側
+.grid-select { display: flex; align-items: center; justify-content: center; }
+.grid-select-head { display: block; }
+
+// 內容欄雙行值（如生效日 + 委託日）：桌機置中堆疊；手機改拆成獨立列（見 grid-only-*）
+.grid-stack { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.grid-stack .grid-sub { margin-top: 4px; font-size: 14px; color: var(--color-text-secondary); }
+
+// modifier：委託查詢（選取 36 / 識別 280→200 / 內容 1fr；無操作欄）
+.grid-table--order {
+  .grid-head, .grid-main { grid-template-columns: 36px 280px 1fr; }
+  .grid-id, .grid-id-head { padding-left: 0; }
+  .grid-select { justify-content: flex-end; }
+}
+.grid-table--order-alt .grid-body,
+.grid-table--order-chg .grid-body { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+.grid-table--order-rdm .grid-body { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+
+// 桌機合併欄、手機拆欄的切換（如「生效 / 委託日」桌機雙行、手機兩列）
+.grid-table--order .grid-only-mobile { display: none; }
+
+@media (max-width: 1024px) {
+  .grid-table--order .grid-head,
+  .grid-table--order .grid-main { grid-template-columns: 36px 200px 1fr; }
+}
+
+@media (max-width: 767px) {
+  .grid-table--order .grid-main {
+    grid-template-columns: auto 1fr !important;
+    grid-template-areas: "select id" "body body";
+  }
+  .grid-table--order .grid-select { grid-area: select; align-self: start; }
+  .grid-table--order .grid-only-desktop { display: none; }
+  .grid-table--order .grid-only-mobile { display: flex; }
+  .grid-table--order .grid-stack { align-items: flex-end; }  // old→new 雙值手機靠右堆疊
 }
