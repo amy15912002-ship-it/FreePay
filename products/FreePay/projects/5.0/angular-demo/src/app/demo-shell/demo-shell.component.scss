@@ -661,12 +661,6 @@
   font-weight: inherit;
 }
 
-.threshold-note {
-  color: var(--color-text-tertiary);
-  font-size: 14px;
-  line-height: 1.6;
-}
-
 .threshold-estimate {
   display: flex;
   flex-direction: column;
@@ -690,6 +684,10 @@
       font-weight: 500;
     }
   }
+}
+
+.threshold-body.is-unlock .threshold-estimate strong span {
+  color: var(--color-action-primary);
 }
 
 .confirm-block {

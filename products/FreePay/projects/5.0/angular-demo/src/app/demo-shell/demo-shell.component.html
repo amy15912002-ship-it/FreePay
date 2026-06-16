@@ -193,16 +193,7 @@
           </div>
         </div>
 
-        <div class="notes-block">
-          <div class="notes-title">注意事項</div>
-          <ul class="notes-list">
-            <li>贖回申請下單截止時間為每營業日下午 14:00 前截止，如逾時，則順延至次一營業日辦理；若遇基金為非營業日或非報價日，交易日將依基金公司規定順延。</li>
-            <li>實際贖回單位數依客戶基金帳上餘額為限，部分贖回單位數可能因未達交割日而導致交易失敗，請以基金最新公開說明書或投資人須知為準。</li>
-            <li>若贖回單位數過小，或本次贖回後剩餘庫存單位數過低，可能依各基金公司規定導致交易失敗或金額不足匯出。</li>
-            <li>贖回款項約 3-10 個工作天入帳於集保結算所留存之約定贖回帳戶，實際入帳時間仍依基金公司與集保作業為準。</li>
-            <li>約當市值係依最新淨值與參考匯率估算，非實際金額；實際金額將以基金公司回覆為準。</li>
-          </ul>
-        </div>
+        <fp-notes [notes]="redeemSettingNotes"></fp-notes>
       </ng-container>
 
       <ng-template #purchaseSettings>
@@ -299,10 +290,10 @@
             <input matInput type="text" inputmode="numeric" formControlName="monthlyPay" appThousands required>
             <mat-hint *ngIf="!hasPayInput">{{ monthlyPayRangeHint }}</mat-hint>
             <mat-hint *ngIf="hasPayInput && annualRate <= 15">年化約 {{ formatAnnualPayRate(annualRate) }}</mat-hint>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('required')">請輸入每月 Pay 金額</mat-error>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('pattern')">請輸入數字</mat-error>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('min') && !form.controls.monthlyPay.hasError('pattern')">每月 Pay 金額需大於 0</mat-error>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('annualRateExceeded') && !form.controls.monthlyPay.hasError('pattern')">年化提領率不可超過 15%，約可設定至 {{ formatMoney(monthlyPayAnnualLimitAmount) }} 以內。</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('required')">請輸入每月 Pay 金額，範圍為 {{ monthlyPayRangeValue }}</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('pattern')">請輸入數字，範圍為 {{ monthlyPayRangeValue }}</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('min') && !form.controls.monthlyPay.hasError('pattern')">請輸入 {{ monthlyPayRangeValue }} 的金額</mat-error>
+            <mat-error *ngIf="form.controls.monthlyPay.hasError('annualRateExceeded') && !form.controls.monthlyPay.hasError('pattern')">年化提領率不可超過 15%，請輸入 {{ monthlyPayRangeValue }} 的金額。</mat-error>
           </mat-form-field>
         </div>
 
@@ -422,13 +413,6 @@
                 <div class="threshold-preview-label" *ngIf="showThresholdPreview">
                   {{ thresholdPreviewLead }} <span class="threshold-preview-emphasis">{{ thresholdValue }}%</span> {{ thresholdPreviewSuffix }}
                 </div>
-                <div class="threshold-estimate" *ngIf="showThresholdPreview">
-                  <strong>
-                    以投入成本 <span>{{ thresholdCostText }}</span>、門檻 <span>{{ thresholdValue }}%</span> 估算，市值{{ thresholdMode === 'protect' ? '低於' : '超過' }}
-                    <span>{{ thresholdPreviewAmountText }}</span>
-                    {{ thresholdMode === 'protect' ? '時暫停 Pay 出。' : '的月份開始 Pay 出。' }}
-                  </strong>
-                </div>
               <div class="threshold-option-area">
               <div class="threshold-option-grid" *ngIf="thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
                 <button
@@ -506,8 +490,14 @@
                 </mat-error>
               </mat-form-field>
               </div>
+                <div class="threshold-estimate" *ngIf="showThresholdPreview">
+                  <strong>
+                    以投入成本 <span>{{ thresholdCostText }}</span>、門檻 <span>{{ thresholdValue }}%</span> 估算，市值{{ thresholdMode === 'protect' ? '低於' : '超過' }}
+                    <span>{{ thresholdPreviewAmountText }}</span>
+                    {{ thresholdMode === 'protect' ? '時暫停 Pay 出。' : '的月份開始 Pay 出。' }}每月基準日依當時市值重新判斷。
+                  </strong>
+                </div>
             </div>
-            <div class="threshold-note" *ngIf="showThresholdPreview">每月基準日依當時市值重新判斷。</div>
           </div>
         </div>
       </section>
@@ -636,15 +626,15 @@
           <h2 class="block-title">自由 Pay 理財服務條款</h2>
         </div>
         <div class="terms-content">
-          <p>當您同意開始使用鉅亨自由Pay功能(下稱本服務)或本服務之一部或全部功能，即視為您已詳細閱讀並同意遵守本條款。如果您經過考慮後不同意本條款的內容，請您不要使用或立即停止本服務。基於以上之充分認知，您同意使用本服務，並遵守以下之約定：</p>
-          <p><strong>一、 本服務之內容</strong><br>
-          二、 免責聲明</p>
+          <p>當您同意開始使用鉅亨自由 Pay 功能（下稱本服務）或本服務之一部或全部功能，即視為您已詳細閱讀並同意遵守本條款。如果您不同意本條款內容，請您不要使用或立即停止本服務。基於以上充分認知，您同意使用本服務，並遵守以下約定：</p>
           <p><strong>一、 本服務之內容</strong></p>
-          <p>1. 本服務是由本公司向您提供基金定期贖回之功能，非基金配息，每月之贖回金額係以基金最近一日淨值估算贖回單位數，故實際贖回金額可能與設定金額不同。舉例說明:若設定A基金每月於基準日贖回金額1,000元，本公司將於基準日前一日取得A基金最近一日淨值(假設淨值為10)，估算需贖回100個單位數(1,000/10)，假設實際贖回淨值為10.2，實際贖回金額將為1,020(100*10.2)；若設定B基金每月贖回比例15%/年，本公司將於基準日前一日取得最近一日淨值(假設淨值為10)推估約當台幣市值並計算預計贖回金額為12,500(假設市值為100萬元，100萬*15%/12)，估算需贖回單位數1250單位數(1,000,000*15%/12/10)，假設實際贖回淨值為10.2，實際贖回金額將為12,750(1,250*10.2)。</p>
-          <p>2. 定期贖回基準日以設定贖回日為基準日，贖回款項入帳日依各基金公司贖回規則而定，一般約於設定贖回日後7-10個營業日入帳。首次申購、加碼申購於營業日13:00前下單，視為當日申請，於13:00以後下單，則視為次一營業日申請。定期贖回設定或其餘變更設定於營業日14:00前設定視為當日申請，於14:00以後設定則視為次一營業日申請。</p>
-          <p>3. 本服務限制:<br>
-          A. 本服務可彈性選擇是否開啟投資本金80%下檔停扣機制。若開啟，基金於贖回基準日前一日約當市值低於總投入成本80%時將不執行本服務，當市值回升或計入加碼金額計算市值高於80%時始繼續執行本服務；若關閉，自動提領機制將自動執行至庫存單位數為0。當次提領後剩餘基金庫存單位數不足1個單位時，剩餘基金單位數將自動於當次併同贖回。<br>
-          B. 設定贖回基準日若距首次申購不足30個日曆日、加碼申購並調整贖回金額致首次申購剩餘之單位數不足最近一次設定贖回所需單位數(即含加碼申購)或因市值低於總投入成本80%所為之加碼申購而使市值高於80%時，均可能因相關異動距贖回基準日過短，贖回程序將無法立即被執行或可能暫停交易乙次，需俟屆滿30日後之最近一次贖回基準日方開始執行定期贖回服務。</p>
+          <p>1. 本服務係由本公司提供基金定期贖回及相關設定服務，非基金配息。您可依本公司提供之設定方式，選擇每月 Pay 金額或年化 Pay 比例，系統將依基金最近可取得之淨值及參考匯率估算贖回單位數與約當金額；實際贖回單位數、成交淨值、匯率及入帳金額仍以基金公司、交易平台及集保結算所回覆資料為準。</p>
+          <p>2. 本服務支援依交易幣別設定與執行。同一基金不同交易幣別視為不同契約，各契約之投入成本、約當市值、Pay 設定、觸發門檻及贖回狀態均分別計算，不跨幣別合併。外幣交易可能受匯率變動影響，實際損益與入帳金額仍以交易確認資料為準。</p>
+          <p>3. 每月 Pay 金額或年化 Pay 比例不得超過本公司設定之年化提領率上限。依金額設定時，系統將以月 Pay 金額 × 12 ÷ 投入成本估算年化提領率；依比例設定時，系統將依您所選比例估算每月 Pay 金額。上述試算僅供交易前參考，實際執行結果可能因淨值、匯率、可用庫存或基金公司作業而不同。</p>
+          <p>4. 本服務可選擇設定觸發門檻。市值守護為約當市值低於投入成本指定比例時暫停 Pay 出，待市值回升至門檻後恢復；增值啟動為約當市值超過投入成本指定比例的月份開始 Pay 出。市值守護與增值啟動互斥，不可同時設定；若未設定觸發門檻，系統將依原 Pay 設定執行。觸發門檻係依 Pay 出基準日前一日最新可取得之市值資料判斷，並可能因淨值、匯率或資料時點不同而與實際成交結果有差異。</p>
+          <p>5. 您可依本服務提供之方式申請全部贖回、部分贖回或指定批次贖回。部分贖回可輸入贖回金額或贖回單位數，由系統依先進先出原則估算消耗批次；指定批次贖回由您勾選可贖回批次，勾選之批次將以該批次全部剩餘單位數申請贖回。短線交易資訊僅供提醒，不代表本公司保證交易必定成功或不產生相關費用。</p>
+          <p>6. 部分贖回或指定批次贖回後，契約投入成本將依剩餘單位數及已 Pay 單位數重新計算，並可能影響後續年化提領率及觸發門檻基準。若本次贖回後年化提領率超過建議上限，系統將顯示提醒；該提醒不代表交易失敗，亦不會自動調整您的 Pay 設定。若後續庫存不足以支應原設定 Pay 金額，最後一次 Pay 將以剩餘可用單位數全部 Pay 出。</p>
+          <p>7. 首次申購、加碼申購於營業日 13:00 前下單，視為當日申請；13:00 以後下單，則視為次一營業日申請。Pay 設定異動、贖回申請或其他變更設定於營業日 14:00 前送出，視為當日申請；14:00 以後送出，則視為次一營業日申請。贖回款項入帳日依各基金公司及集保結算所作業規則而定。</p>
           <p><strong>二、 免責聲明</strong></p>
           <p>1. 您瞭解本公司不保證本服務絕不發生中斷及錯誤等情況，您應確認並擔保係由您本人進行本服務相關功能之操作。所有您於本服務上執行之操作均由系統即時接收，並依相關指令即時或批次進行處理。</p>
           <p>2. 於發生下列情形之一時，本公司有權立即停止或中斷本服務，或被迫停止或中斷本服務之提供：<br>
@@ -696,17 +686,7 @@
           <button *ngIf="!isRedeemMode" mat-raised-button color="primary" type="button" (click)="reset()">繼續申購</button>
           <button *ngIf="isRedeemMode" mat-raised-button color="primary" type="button" (click)="goOverview()">帳戶總覽</button>
         </div>
-        <div class="notes-block">
-          <div class="notes-title">注意事項</div>
-          <ul class="notes-list">
-            <li *ngIf="isModifyMode">您的自由 Pay 異動委託已送出。設定將依委託查詢狀態生效。</li>
-            <li *ngIf="isRedeemMode">您的贖回委託已送出。若超過本營業日交易時間 14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。</li>
-            <li *ngIf="isRedeemMode && showRedeemAnnualRateNotice">本次贖回後您的剩餘市值約 {{ formatMoney(postRedeemMarketValue, selectedContract?.currencyCode) }}，依目前的月 Pay 金額 {{ formatMoney(selectedContract?.monthlyPay ?? 0, selectedContract?.currencyCode) }} 估算，年化提領率約 {{ formatRate(postRedeemAnnualRate) }}，超過建議上限 15%。</li>
-            <li *ngIf="!isAddOnMode && !isModifyMode && !isRedeemMode">您的自由 Pay 申購委託已送出。預計 3-4 個營業日後申購確認書入帳，首次 Pay 將於設定基準日（每月 {{ form.controls.day.value }} 日）執行；若距申購確認日不足 30 日，將順延至屆滿後的第一個基準日。</li>
-            <li *ngIf="isAddOnMode">您的加碼委託已送出。申購確認後金額將計入既有交易，Pay 設定維持既有交易不變。預計 3-4 個營業日後申購確認書入帳。</li>
-            <li *ngIf="!isRedeemMode">若超過本營業日交易時間 13:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。若您有任何疑問，請洽客服專線 02-27208126。</li>
-          </ul>
-        </div>
+        <fp-notes [notes]="doneNotes"></fp-notes>
       </section>
     </section>
   </main>
@@ -717,7 +697,7 @@
     <button mat-stroked-button type="button" (click)="previous()">上一步</button>
     <button mat-raised-button color="primary" type="button" [disabled]="actionDisabled" (click)="next()">
       {{ primaryActionLabel }}
-      <i class="bi" [class.bi-check-lg]="primaryActionIsSubmit" [class.bi-arrow-right]="!primaryActionIsSubmit"></i>
+      <i class="bi bi-check-lg" *ngIf="primaryActionIsSubmit"></i>
     </button>
   </div>
 </div>

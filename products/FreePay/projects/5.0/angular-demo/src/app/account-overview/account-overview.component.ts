@@ -91,6 +91,30 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   activeTab: OvTab = 'overview';
   orderFilter: OrderFilter = 'all';
 
+  get overviewNotes(): string[] {
+    return [
+      '約當市值 = 單位數 × 最新淨值 × 參考匯率，僅供參考，實際金額以基金公司回覆為準。',
+      '投資組合損益與報酬率為試算資料，若資料不符，仍以交易平台與集保紀錄為準。',
+      '觸發門檻依 Pay 出基準日前一日最新市值判斷；市值守護為低於門檻暫停 Pay 出，增值啟動為超過門檻開始 Pay 出。'
+    ];
+  }
+
+  get orderNotes(): string[] {
+    return [
+      '當日申購、加碼委託可於 13:00 前取消；逾時則視為次一營業日交易。',
+      '當日異動、贖回委託可於 14:00 前取消；逾時則視為次一營業日交易。',
+      '委託狀態以交易平台實際處理結果為準。'
+    ];
+  }
+
+  get profitNotes(): string[] {
+    return [
+      '已實現損益為已完成贖回或 Pay 出交易後之試算結果。',
+      '含 Pay 報酬率已納入已 Pay 金額；不含 Pay 報酬率僅以贖回金額計算。',
+      '外幣交易可能受匯率影響，實際損益仍以交易確認書與平台紀錄為準。'
+    ];
+  }
+
   expandedFundRows = new Set<string>();
   selectedOrders = new Set<string>();
   cancelPwd = '';

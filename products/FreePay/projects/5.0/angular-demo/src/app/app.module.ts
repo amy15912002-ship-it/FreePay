@@ -23,6 +23,7 @@ import { AccountOverviewComponent } from './account-overview/account-overview.co
 import { FundSelectComponent } from './fund-select/fund-select.component';
 import { FreepayIntroComponent } from './freepay-intro/freepay-intro.component';
 import { FooterComponent } from './footer/footer.component';
+import { SharedNotesComponent } from './shared-notes/shared-notes.component';
 import { ThousandsDirective } from './thousands.directive';
 
 @NgModule({
@@ -33,6 +34,7 @@ import { ThousandsDirective } from './thousands.directive';
     FundSelectComponent,
     FreepayIntroComponent,
     FooterComponent,
+    SharedNotesComponent,
     ThousandsDirective
   ],
   imports: [

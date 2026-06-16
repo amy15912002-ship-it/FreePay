@@ -1,0 +1,6 @@
+<div class="notes-block" *ngIf="notes.length">
+  <div class="notes-title">{{ title }}</div>
+  <ul class="notes-list">
+    <li *ngFor="let note of notes">{{ note }}</li>
+  </ul>
+</div>

@@ -94,21 +94,15 @@
 
 .ov-sum-dots { display: none; }
 
-.ov-profit-summary-cards {
+
+.grid-extra--profit {
   display: none;
 }
 
-.ov-profit-extra {
+.grid-table--fund .grid-body.grid-profit-mobile-metrics {
   display: none;
 }
 
-.ov-metric-grid.ov-profit-mobile-metrics {
-  display: none;
-}
-
-.ov-profit-summary-empty-mobile {
-  display: none;
-}
 
 // 標題列：總覽 + demo 切換鈕
 .ov-sum-title-row {
@@ -184,102 +178,6 @@
   .ov-sum-tile--pay { order: 3; }
   .ov-sum-tile--paid { order: 4; }
 
-  .ov-profit-summary-table-wrap {
-    display: none;
-  }
-
-  .ov-profit-summary-empty-mobile {
-    display: block;
-  }
-
-  .ov-profit-summary-cards {
-    display: flex;
-    gap: 12px;
-    overflow-x: auto;
-    scroll-snap-type: x mandatory;
-    scroll-behavior: smooth;
-    padding-bottom: 4px;
-    scrollbar-width: none;
-
-    &::-webkit-scrollbar {
-      display: none;
-    }
-  }
-
-  .ov-profit-summary-card {
-    flex: 0 0 calc(100% - 32px);
-    scroll-snap-align: start;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    padding: 16px;
-    border: 1px solid var(--color-border-default);
-    border-radius: 8px;
-    background: var(--color-bg-base);
-    box-shadow: var(--shadow-sm);
-
-    &:only-child {
-      flex-basis: 100%;
-    }
-  }
-
-  .ov-profit-summary-head {
-    display: flex;
-    justify-content: space-between;
-    align-items: baseline;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--color-border-default);
-
-    span {
-      color: var(--color-text-secondary);
-      font-size: 14px;
-    }
-
-    strong {
-      color: var(--color-text-primary);
-      font-size: 18px;
-      font-weight: 500;
-    }
-  }
-
-  .ov-profit-summary-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 8px;
-  }
-
-  .ov-profit-summary-kv {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-width: 0;
-    padding: 10px 12px;
-    border-radius: 8px;
-    background: var(--color-bg-muted);
-
-    span {
-      color: var(--color-text-secondary);
-      font-size: 14px;
-    }
-
-    strong {
-      color: var(--color-text-primary);
-      font-size: 16px;
-      font-weight: 400;
-
-      &.val-up {
-        color: var(--color-price-up);
-      }
-
-      &.val-down {
-        color: var(--color-price-down);
-      }
-    }
-  }
-
-  .ov-profit-summary-kv--wide {
-    grid-column: 1 / -1;
-  }
 }
 
 .ov-sum-ccy-row {
@@ -412,57 +310,21 @@
   }
 }
 
-// Table shared
-
-.ov-table-wrap {
-  width: 100%;
-  overflow-x: auto;
-}
-
-.ov-table {
-  width: 100%;
-  border-collapse: collapse;
-  table-layout: fixed;
-  font-size: 16px;
-
-  th {
-    height: 60px;
-    padding: 12px 8px;
-    background: var(--color-bg-muted);
-    border-bottom: 2px solid var(--color-border-default);
-    color: var(--color-text-secondary);
-    text-align: center;
-    vertical-align: middle;
-    font-weight: 400;
-    line-height: 1.45;
-  }
-
-  td {
-    height: 60px;
-    padding: 12px 8px;
-    border-bottom: 1px solid var(--color-border-default);
-    text-align: center;
-    vertical-align: middle;
-    font-weight: 400;
-    line-height: 1.45;
-    word-break: break-word;
-  }
-
-  tbody tr:nth-child(even) td {
-    background: var(--color-bg-subtle);
-  }
-}
 
 // ── Fund table wrapper ────────────────────────────────────
 
-.ov-fund-table {
+// ════════════════════════════════════════════════════════════
+// 帳戶總覽／已實現損益：grid-table 的「基金列」變體
+//   共用樣式掛 .grid-table--fund；holdings/profit 差異各掛 --holdings/--profit
+//   特有樣式以 --fund 作用域提高 specificity，覆蓋 grid-table 基底
+// ════════════════════════════════════════════════════════════
+.grid-table--fund {
   display: flex;
   flex-direction: column;
 }
 
-// ── Fund detail grid ──────────────────────────────────────
-
-.ov-detail-head {
+// ── 表頭 ──────────────────────────────────────────────────
+.grid-table--fund .grid-head {
   display: grid;
   grid-template-columns: 280px 1fr 172px;
   gap: 20px;
@@ -472,46 +334,48 @@
   align-items: center;
 }
 
-.ov-head-name {
+.grid-table--fund .grid-id-head {
   padding-left: 20px;
   color: var(--color-text-secondary);
   font-size: 14px;
 }
 
-.ov-metric-grid {
+.grid-table--fund .grid-body {
   display: flex;
   flex-direction: column;
+  align-items: stretch; // 覆蓋基底 .grid-body 的 align-items: center，讓雙排撐滿內容欄
 }
 
-// 雙排內容：上排 + 一條 border + 下排（取代每欄 ov-line span，分隔線一條式、crisp 一致）
-.ov-metric-row {
+// 雙排內容：上排 + 一條 border + 下排（分隔線一條式、crisp 一致）
+.grid-body-row {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   align-items: center;
 }
 
-.ov-metric-row > span,
-.ov-metric-row > .ov-kv {
+.grid-body-row > span,
+.grid-body-row > .grid-kv {
   min-width: 0;
   text-align: center;
 }
 
-.ov-metric-row > .ov-kv { font-size: 16px; }
+.grid-body-row > .grid-kv { font-size: 16px; }
 
-.ov-metric-row--top {
+.grid-body-row--top {
   padding-bottom: 8px;
   border-bottom: 1px solid var(--color-neutral-250);
 }
 
-.ov-metric-row--bottom { padding-top: 8px; }
+.grid-body-row--bottom { padding-top: 8px; }
 
-.ov-detail-head .ov-metric-row > span {
+.grid-table--fund .grid-head .grid-body-row > span {
   font-size: 14px;
   color: var(--color-text-secondary);
 }
 
 // 已實現損益：metric 單行平鋪（每欄一值，不上下並列；空間足夠）
-.ov-metric-grid--row {
+// 加 --profit 作用域確保覆蓋 .grid-table--fund .grid-body 的 flex column
+.grid-table--profit .grid-body--row {
   display: grid;
   grid-template-columns: repeat(7, minmax(0, 1fr));
 
@@ -521,23 +385,37 @@
     color: var(--color-text-secondary);
   }
 
-  .ov-kv {
+  .grid-kv {
     align-items: center;
     text-align: center;
   }
 }
 
-// 已實現損益：無操作按鈕，桌機去掉 actions 欄、metric 撐滿右側（避免右側留白、欄寬不均）
+// 已實現損益：無操作按鈕，桌機去掉 actions 欄、metric 撐滿右側
 @media (min-width: 1025px) {
-  .ov-fund-table--profit {
-    .ov-detail-head,
-    .ov-fund-main {
+  // 複合 class 提高 specificity，蓋過位置在後的基底 .grid-table--fund .grid-main（280 1fr 172）
+  // profit 無操作欄，最後一欄是內容，補 padding-right 20 與左側 grid-id padding-left 20 對稱
+  .grid-table--fund.grid-table--profit {
+    .grid-head,
+    .grid-main {
       grid-template-columns: 280px 1fr;
+      padding-right: 20px;
     }
   }
 }
 
-.ov-metric {
+// profit 中屏（768–1024）同樣去掉 172 空操作欄、補右 padding 20（識別欄此斷點為 200）
+@media (min-width: 768px) and (max-width: 1024px) {
+  .grid-table--fund.grid-table--profit {
+    .grid-head,
+    .grid-main {
+      grid-template-columns: 200px 1fr;
+      padding-right: 20px;
+    }
+  }
+}
+
+.grid-metric {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -547,8 +425,8 @@
   min-width: 0;
 }
 
-.ov-head-label--info,
-.ov-kv-lbl--info {
+.grid-head-label--info,
+.grid-kv-lbl--info {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -660,10 +538,10 @@
   }
 }
 
-.ov-metric {
+.grid-metric {
   font-size: 16px;
 
-  > .ov-kv > span,
+  > .grid-kv > span,
   > span {
     white-space: nowrap;
   }
@@ -673,18 +551,18 @@
 
 // ── Fund row ──────────────────────────────────────────────
 
-.ov-fund {
+.grid-table--fund .grid-row {
   display: flex;
   flex-direction: column;
   border-bottom: 1px solid var(--color-border-default);
 }
 
-.ov-fund:nth-of-type(even) .ov-fund-main,
-.ov-fund:nth-of-type(even) .ov-fund-extra {
+.grid-table--fund .grid-row:nth-of-type(even) .grid-main,
+.grid-table--fund .grid-row:nth-of-type(even) .grid-extra {
   background: var(--color-bg-subtle);
 }
 
-.ov-fund-main {
+.grid-table--fund .grid-main {
   display: grid;
   grid-template-columns: 280px 1fr 172px;
   gap: 20px;
@@ -693,15 +571,15 @@
   cursor: pointer;
 }
 
-.ov-fund-main > .ov-fund-name {
+.grid-table--fund .grid-main > .grid-id {
   grid-column: 1;
 }
 
-.ov-fund-main > .ov-metric-grid {
+.grid-table--fund .grid-main > .grid-body {
   grid-column: 2;
 }
 
-.ov-fund-main > .ov-fund-actions {
+.grid-table--fund .grid-main > .grid-actions {
   grid-column: 3;
   grid-row: 1;
   justify-self: center;
@@ -711,7 +589,7 @@
   display: none;
 }
 
-.ov-fund-expand-btn {
+.grid-expand-btn {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -732,11 +610,11 @@
   }
 }
 
-.ov-fund-expand-btn--mobile {
+.grid-expand-btn--mobile {
   display: none;
 }
 
-.ov-fund-extra {
+.grid-extra {
   display: grid;
   grid-template-columns: 280px 1fr 172px;
   align-items: center;
@@ -747,11 +625,11 @@
   color: var(--color-text-secondary);
 }
 
-.ov-fund-extra.ov-profit-extra {
+.grid-extra.grid-extra--profit {
   display: none;
 }
 
-.ov-fund-extra-content {
+.grid-extra-content {
   grid-column: 2;
   display: flex;
   align-items: center;
@@ -759,11 +637,11 @@
   gap: 26px;
 }
 
-.ov-fund-extra-content > .ov-extra-kv--ccy {
+.grid-extra-content > .grid-extra-kv--ccy {
   display: none;
 }
 
-.ov-extra-kv {
+.grid-extra-kv {
   display: inline-flex;
   align-items: baseline;
   gap: 6px;
@@ -799,12 +677,12 @@
   }
 }
 
-.ov-extra-kv--info > span:first-child {
+.grid-extra-kv--info > span:first-child {
   display: inline;
   gap: 4px;
 }
 
-.ov-extra-kv--info {
+.grid-extra-kv--info {
   align-items: baseline;
 
   > span:first-child,
@@ -814,7 +692,7 @@
   }
 }
 
-.ov-fund-toggle {
+.grid-fund-toggle {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -825,22 +703,15 @@
   user-select: none;
 }
 
-.ov-fund-name {
+.grid-table--fund .grid-id {
   padding-left: 20px;
   color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.5;
   min-width: 0;
-
-  strong {
-    display: block;
-    color: var(--color-text-primary);
-    font-size: 16px;
-    font-weight: 500;
-  }
 }
 
-.ov-fund-code {
+.grid-table--fund .grid-code {
   display: block;
   font-size: 14px;
   color: var(--color-text-secondary);
@@ -848,7 +719,7 @@
 
 // ── Contract rows ──────────────────────────────────────────
 
-.ov-fund-actions {
+.grid-table--fund .grid-actions {
   position: relative;
   display: flex;
   align-items: center;
@@ -857,13 +728,13 @@
   padding-right: 20px;
 }
 
-.ov-fund-code-row {
+.grid-code-row {
   display: flex;
   align-items: center;
   gap: 6px;
 }
 
-.ov-fund-detail-btn {
+.grid-detail-btn {
   flex-shrink: 0;
 }
 
@@ -883,10 +754,6 @@
   white-space: nowrap;
 }
 
-.ov-mobile-only-cell {
-  display: none !important;
-}
-
 // ── Order section ──────────────────────────────────────────
 
 .ov-order-count {
@@ -894,42 +761,10 @@
   font-size: 14px;
 }
 
-.ov-order-table {
-  // col-check 56px、col-fund 200px 給基金名稱足夠寬度；其餘欄位讓 table-layout: fixed 平均分配
-  th.col-check, td.col-check { width: 56px; }
-  th.col-fund,  td.col-fund  { width: 200px; text-align: left; }
-}
-
 // ── Order cell helpers ─────────────────────────────────────
 
-.ov-cell-code { color: var(--color-text-secondary); font-size: 14px; }
-.ov-cell-name { color: var(--color-text-primary); font-size: 16px; }
-.ov-cell-sub  { color: var(--color-text-secondary); font-size: 14px; margin-top: 4px; }
 .ov-cell-old  { color: var(--color-text-secondary); text-decoration: line-through; font-size: 14px; }
 .ov-cell-new  { color: var(--color-action-primary); font-weight: 500; }
-
-// 異動紀錄：可排序表頭 + 基金搜尋框
-.ov-order-table th.sortable {
-  cursor: pointer;
-  white-space: nowrap;
-
-  > i {
-    font-size: 12px;
-    margin-left: 2px;
-    color: var(--color-text-tertiary);
-  }
-
-  &:hover > i { color: var(--color-text-secondary); }
-  > i.is-active { color: var(--color-action-primary); }
-}
-
-.ov-change-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 12px;
-}
 
 .ov-change-search {
   display: flex;
@@ -971,91 +806,6 @@
   }
 }
 
-// 異動紀錄：基金名稱欄加寬，對齊帳戶總覽（其餘欄由 fixed layout 平均分配）
-.ov-change-table {
-  th.col-fund, td.col-fund { width: 280px; }
-}
-
-// 異動紀錄手機版：代碼／名稱為白底卡片頭，生效日起的明細包灰底塊（對齊帳總展開區）
-@media (max-width: 767px) {
-  .ov-change-table tr { cursor: pointer; }
-  .ov-change-table td { margin-left: 14px; margin-right: 14px; }
-  .ov-change-table td.change-more { display: none; }
-  .ov-change-table tr.is-expanded td.change-more { display: flex; }
-
-  // 卡片頭：代碼（左灰）＋箭頭（右），隱藏 label、與名稱間無線
-  .ov-change-table td.change-head { border-bottom: none; padding-bottom: 0; }
-  .ov-change-table td.change-head::before { display: none; }
-  .change-head-val {
-    display: flex;
-    width: 100%;
-    align-items: center;
-    justify-content: space-between;
-    color: var(--color-text-secondary);
-  }
-  .change-chevron { color: var(--color-text-secondary); font-size: 16px; }
-
-  // 基金名稱：黑色大字、左對齊，隱藏 label、下方不畫線
-  .ov-change-table td.change-name {
-    justify-content: flex-start;
-    padding-top: 2px;
-    text-align: left;
-    color: var(--color-text-primary);
-    font-size: 16px;
-    font-weight: 500;
-    border-bottom: none;
-
-    &::before { display: none; }
-  }
-
-  // 明細區（生效日／項目／幣別／前／後）包灰底塊
-  // nth-child(n) 提高 specificity，蓋過手機斑馬紋（偶數列白底）規則
-  .ov-change-table tbody tr:nth-child(n) td.change-effectdate,
-  .ov-change-table tbody tr:nth-child(n) td.change-item,
-  .ov-change-table tbody tr:nth-child(n) td.change-more {
-    padding-left: 14px;
-    padding-right: 14px;
-    background: var(--color-bg-subtle);
-  }
-  // 首項（生效日）上圓角 + 與卡片頭留白
-  .ov-change-table td.change-effectdate {
-    margin-top: 4px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-  }
-  // 末項下圓角：收合＝異動項目、展開＝異動後
-  .ov-change-table tr:not(.is-expanded) td.change-item,
-  .ov-change-table tr.is-expanded td.change-more:last-child {
-    margin-bottom: 16px;
-    border-bottom: none;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-}
-.ov-order-date,
-.ov-order-date-mobile {
-  white-space: nowrap;
-  font-size: 14px;
-}
-
-// 委託結果 / 委託日 合併欄：結果主要、日期次要
-.ov-order-result {
-  color: var(--color-text-primary);
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.4;
-}
-
-.ov-order-date-sub {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  white-space: nowrap;
-}
-.ov-order-effect-date .ov-order-effect-value,
-.ov-order-effect-mobile {
-  color: var(--color-action-primary);
-  font-weight: 500;
-}
 
 // ── Cancel bar ────────────────────────────────────────────
 
@@ -1248,21 +998,6 @@
   }
 }
 
-.detail-tx-table {
-  th:nth-child(1), td:nth-child(1) { width: 150px; }
-  th:nth-child(2), td:nth-child(2) { width: 90px; }
-  th:nth-child(3), td:nth-child(3) { width: 100px; }
-  th:nth-child(4), td:nth-child(4) { width: 120px; }
-  th:nth-child(5), td:nth-child(5) { width: 90px; }
-  th:nth-child(6), td:nth-child(6) { width: 120px; }
-  th:nth-child(7), td:nth-child(7) { width: 80px; }
-  th:nth-child(8), td:nth-child(8) { width: 110px; }
-}
-
-.detail-chg-table {
-  table-layout: auto;   // 欄數會變（已實現損益隱藏委託結果），改內容自適應，避免單欄暴寬
-  th:nth-child(1), td:nth-child(1) { width: 150px; white-space: nowrap; }   // 異動日期/時間
-}
 
 // ── Empty state ─────────────────────────────────────────────
 
@@ -1275,18 +1010,18 @@
 
 // ── Key-Value (桌機隱藏標籤、手機 row 顯示) ───────────────────
 
-.ov-kv {
+.grid-kv {
   display: flex;
   flex-direction: column;
-  .ov-kv-lbl { display: none; }
+  .grid-kv-lbl { display: none; }
 }
 
 // ── RWD ─────────────────────────────────────────────────────
 
 @media (max-width: 1024px) {
-  .ov-detail-head { grid-template-columns: 200px 1fr 172px; }
-  .ov-fund-main   { grid-template-columns: 200px 1fr 172px; }
-  .ov-fund-extra  { grid-template-columns: 200px 1fr 172px; }
+  .grid-table--fund .grid-head { grid-template-columns: 200px 1fr 172px; }
+  .grid-table--fund .grid-main   { grid-template-columns: 200px 1fr 172px; }
+  .grid-extra  { grid-template-columns: 200px 1fr 172px; }
 
 }
 
@@ -1306,16 +1041,16 @@
   }
 
   // ── 桌機欄位標頭：疊排後無意義，直接隱藏 ───────────────────
-  .ov-detail-head {
+  .grid-table--fund .grid-head {
     display: none;
   }
 
   // ── 基金列：名稱 + toggle 同行，指標 2×2 往下 ────────────────
-  .ov-fund-table {
+  .grid-table--fund {
     gap: 24px;
   }
 
-  .ov-fund {
+  .grid-table--fund .grid-row {
     position: relative;
     border-bottom: 0;
     border-radius: 12px;
@@ -1323,11 +1058,11 @@
     overflow: hidden;
   }
 
-  .ov-fund:nth-of-type(even) .ov-fund-main {
+  .grid-table--fund .grid-row:nth-of-type(even) .grid-main {
     background: transparent;
   }
 
-  .ov-fund-main {
+  .grid-table--fund .grid-main {
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto auto;
     grid-template-areas:
@@ -1340,7 +1075,7 @@
     background: var(--color-bg-subtle);
   }
 
-  .ov-fund-main > .ov-fund-name {
+  .grid-table--fund .grid-main > .grid-id {
     grid-area: fname;
     padding: 0;
 
@@ -1351,31 +1086,31 @@
     }
   }
 
-  .ov-fund-main > .ov-metric-grid {
+  .grid-table--fund .grid-main > .grid-body {
     grid-area: fmetrics;
   }
 
-  .ov-fund-main > .ov-fund-actions {
+  .grid-table--fund .grid-main > .grid-actions {
     grid-area: factions;
   }
 
-  .ov-fund-expand-btn--desktop {
+  .grid-expand-btn--desktop {
     display: none;
   }
 
-  .ov-fund-expand-btn--mobile {
+  .grid-expand-btn--mobile {
     display: inline-flex;
     margin-left: auto;
   }
 
-  .ov-fund-expand-btn {
+  .grid-expand-btn {
     position: static;
     width: 28px;
     height: 28px;
     font-size: 16px;
   }
 
-  .ov-metric-grid {
+  .grid-table--fund .grid-body {
     grid-area: fmetrics;
     grid-template-columns: repeat(3, minmax(0, 1fr));
     background: transparent;
@@ -1383,15 +1118,15 @@
     padding: 0;
   }
 
-  .ov-metric-row { display: contents; }
+  .grid-body-row { display: contents; }
 
-  .ov-metric-grid--2col {
+  .grid-table--fund .grid-body--2col {
     display: grid;
-    grid-template-columns: repeat(3, 1fr);
+    grid-template-columns: repeat(3, 1fr) !important; // 蓋過基底手機 .grid-body 的 1fr !important
     row-gap: 18px;
     padding: 2px 0 0;
 
-    .ov-kv {
+    .grid-kv {
       flex-direction: column;
       align-items: center;
       padding: 0;
@@ -1400,6 +1135,8 @@
       width: auto;
       text-align: center;
 
+      .grid-kv-lbl { padding-right: 0; } // metric 置中排版，不需 row 版的 label 右 padding
+
       > span:last-child {
         text-align: center;
         font-size: 16px;
@@ -1407,81 +1144,84 @@
       }
     }
 
-    .ov-kv--market,
-    .ov-kv--cost {
+    .grid-kv--market,
+    .grid-kv--cost {
       border-left: 0;
     }
 
-    .ov-kv--ccy,
-    .ov-kv--monthly {
+    .grid-kv--ccy,
+    .grid-kv--monthly {
       display: none;
     }
 
-    .ov-kv--market { order: 1; }
-    .ov-kv--profit { order: 2; }
-    .ov-kv--return-with { order: 3; }
-    .ov-kv--cost { order: 4; }
-    .ov-kv--paid { order: 5; }
-    .ov-kv--return-no-pay { order: 6; }
+    .grid-kv--market { order: 1; }
+    .grid-kv--profit { order: 2; }
+    .grid-kv--return-with { order: 3; }
+    .grid-kv--cost { order: 4; }
+    .grid-kv--paid { order: 5; }
+    .grid-kv--return-no-pay { order: 6; }
   }
 
-  .ov-fund-table--profit {
-    .ov-fund {
+  .grid-table--profit {
+    .grid-table--fund .grid-row {
       background: var(--color-bg-subtle);
     }
 
-    .ov-fund-main {
+    .grid-table--fund .grid-main {
       display: flex;
       flex-direction: column;
       align-items: stretch;
       gap: 14px;
     }
 
-    .ov-fund-name {
+    .grid-table--fund .grid-id {
       width: 100%;
     }
 
-    .ov-fund-code-row {
+    .grid-code-row {
       gap: 8px;
     }
 
-    .ov-fund-detail-btn {
+    .grid-detail-btn {
       width: 28px;
       height: 28px;
       margin-left: 0;
       color: var(--color-text-secondary);
     }
 
-    .ov-metric-grid--row {
+    .grid-body--row {
       display: none;
     }
 
-    .ov-profit-mobile-metrics {
+    .grid-body.grid-profit-mobile-metrics {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
+      grid-template-columns: repeat(3, minmax(0, 1fr)) !important; // 蓋過基底手機 .grid-body 的 1fr !important
       width: 100%;
       row-gap: 18px;
       padding: 2px 0 0;
 
-      .ov-kv--redeem {
+      // 展平 grid-metric wrapper，讓 grid-kv 成為 grid item（order/border-left 才生效，對齊帳總）
+      .grid-metric { display: contents; }
+
+      .grid-kv--redeem {
         order: 1;
         border-left: 0;
       }
 
-      .ov-kv--profit {
+      .grid-kv--profit {
         order: 2;
       }
 
-      .ov-kv--return-no-pay {
+      .grid-kv--return-no-pay {
         order: 3;
       }
     }
 
-    .ov-profit-extra {
+    .grid-extra--profit {
       display: grid;
     }
 
-    .ov-profit-extra .ov-fund-extra-content {
+    .grid-extra--profit .grid-extra-content {
       grid-column: auto;
     }
   }
@@ -1501,14 +1241,14 @@
     }
   }
 
-  .ov-fund-actions {
+  .grid-table--fund .grid-actions {
     grid-area: factions;
     justify-self: end;
     justify-content: flex-end;
     padding-right: 0;
   }
 
-  .ov-fund-extra {
+  .grid-extra {
     display: grid;
     grid-template-columns: 1fr;
     gap: 0;
@@ -1519,7 +1259,7 @@
     background: var(--color-bg-base);
   }
 
-  .ov-fund-extra-content {
+  .grid-extra-content {
     grid-column: auto;
     display: grid;
     grid-template-columns: 1fr;
@@ -1527,21 +1267,21 @@
     width: 100%;
   }
 
-  .ov-fund-extra-content > .ov-extra-kv--ccy {
+  .grid-extra-content > .grid-extra-kv--ccy {
     display: flex;
   }
 
-  .ov-fund-extra-content > .ov-extra-kv {
+  .grid-extra-content > .grid-extra-kv {
     grid-column: auto;
     grid-row: auto;
   }
 
-  .ov-fund-extra-content > .ov-extra-kv:nth-of-type(3),
-  .ov-fund-extra-content > .ov-extra-kv:nth-of-type(4) {
+  .grid-extra-content > .grid-extra-kv:nth-of-type(3),
+  .grid-extra-content > .grid-extra-kv:nth-of-type(4) {
     justify-self: stretch;
   }
 
-  .ov-extra-kv {
+  .grid-extra-kv {
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1555,15 +1295,15 @@
     }
   }
 
-  .ov-extra-kv--info {
+  .grid-extra-kv--info {
     flex-wrap: nowrap;
   }
 
-  .ov-extra-kv--info .ov-trigger-info {
+  .grid-extra-kv--info .ov-trigger-info {
     position: relative;
   }
 
-  .ov-extra-kv--info .ov-info-popover {
+  .grid-extra-kv--info .ov-info-popover {
     position: fixed;
     left: 50%;
     top: 50%;
@@ -1586,9 +1326,9 @@
     }
   }
 
-  .ov-extra-kv--info .ov-trigger-info:hover .ov-info-popover,
-  .ov-extra-kv--info .ov-trigger-info:focus-within .ov-info-popover,
-  .ov-extra-kv--info .ov-info-popover.is-open {
+  .grid-extra-kv--info .ov-trigger-info:hover .ov-info-popover,
+  .grid-extra-kv--info .ov-trigger-info:focus-within .ov-info-popover,
+  .grid-extra-kv--info .ov-info-popover.is-open {
     opacity: 1;
     transform: translate(-50%, -50%);
     pointer-events: auto;
@@ -1596,7 +1336,7 @@
 
 
   // ── 合約指標：kv 清單 ─────────────────────────────────────────
-  .ov-kv {
+  .grid-kv {
     width: 100%;
     flex-direction: row;
     justify-content: space-between;
@@ -1604,27 +1344,27 @@
     padding: 9px 4px;
     border-bottom: 1px solid var(--color-border-default);
 
-    .ov-kv-lbl { display: block; }
+    .grid-kv-lbl { display: block; }
 
     > span:last-child { text-align: right; }
   }
 
 
-  .ov-kv-lbl {
+  .grid-kv-lbl {
     color: var(--color-text-secondary);
     font-size: 14px;
     flex-shrink: 0;
     padding-right: 8px;
   }
 
-  .ov-kv-lbl--info {
+  .grid-kv-lbl--info {
     display: inline-flex;
     align-items: center;
     justify-content: flex-start;
     gap: 4px;
   }
 
-  .ov-kv-lbl--info .ov-info-popover {
+  .grid-kv-lbl--info .ov-info-popover {
     left: 0;
     width: min(280px, calc(100vw - 56px));
     transform: translate(-12px, 4px);
@@ -1634,14 +1374,14 @@
     }
   }
 
-  .ov-kv-lbl--info .ov-trigger-info:hover .ov-info-popover,
-  .ov-kv-lbl--info .ov-trigger-info:focus-within .ov-info-popover,
-  .ov-kv-lbl--info .ov-info-popover.is-open {
+  .grid-kv-lbl--info .ov-trigger-info:hover .ov-info-popover,
+  .grid-kv-lbl--info .ov-trigger-info:focus-within .ov-info-popover,
+  .grid-kv-lbl--info .ov-info-popover.is-open {
     transform: translate(-12px, 0);
   }
 
-  .ov-metric-grid--2col {
-    .ov-kv {
+  .grid-body--2col {
+    .grid-kv {
       flex-direction: column;
       justify-content: flex-start;
       align-items: center;
@@ -1657,188 +1397,9 @@
       }
     }
 
-    .ov-kv--market,
-    .ov-kv--cost {
+    .grid-kv--market,
+    .grid-kv--cost {
       border-left: 0;
-    }
-  }
-
-  // ── 真正 table 的手機卡片版型：委託查詢 / 已實現損益 ────────
-  .ov-mobile-card-wrap {
-    overflow-x: visible;
-  }
-
-  .ov-order-table,
-  .ov-profit-summary-table,
-  .detail-tx-table,
-  .detail-chg-table {
-    display: block;
-    table-layout: auto;
-
-    thead {
-      display: none;
-    }
-
-    tbody {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    tr {
-      display: block;
-      overflow: hidden;
-      border: 1px solid var(--color-border-default);
-      border-radius: 8px;
-      background: var(--color-bg-base);
-    }
-
-    td {
-      display: flex;
-      justify-content: space-between;
-      align-items: baseline;
-      gap: 12px;
-      width: auto;
-      height: auto;
-      min-height: 0;
-      margin: 0 12px;
-      padding: 9px 4px;
-      border-bottom: 1px solid var(--color-border-default);
-      background: var(--color-bg-base);
-      text-align: right;
-      white-space: normal;
-      font-size: 14px;
-      line-height: 1.5;
-
-      &::before {
-        content: attr(data-label);
-        flex: 0 0 auto;
-        max-width: 44%;
-        padding-right: 8px;
-        color: var(--color-text-secondary);
-        font-size: 14px;
-        text-align: left;
-      }
-
-      &:last-child {
-        border-bottom: none;
-      }
-
-      > .ov-card-value {
-        text-align: right;
-      }
-    }
-
-    tbody tr:nth-child(even) td {
-      background: var(--color-bg-base);
-    }
-
-    td.col-check,
-    td.col-fund,
-    td.col-time,
-    td.col-date,
-    td.col-amount,
-    td.col-status,
-    td.col-result {
-      width: auto;
-      padding-left: 4px;
-      padding-right: 4px;
-      text-align: right;
-    }
-
-    td.ov-desktop-only-cell {
-      display: none;
-    }
-
-    td.ov-mobile-only-cell {
-      display: flex !important;
-    }
-
-    td.ov-profit-toggle-cell {
-      justify-content: center;
-      align-items: center;
-      padding-top: 4px;
-      padding-bottom: 4px;
-
-      &::before {
-        content: none;
-      }
-
-      button {
-        width: 32px;
-        height: 32px;
-        line-height: 32px;
-        color: var(--color-text-secondary);
-      }
-
-      .bi {
-        font-size: 14px;
-      }
-    }
-  }
-
-  .ov-profit-summary-table .ov-table-empty-row {
-    border: none;
-    border-radius: 0;
-
-    .ov-empty {
-      display: block;
-      margin: 0;
-      border-bottom: none;
-      text-align: center;
-
-      &::before {
-        content: none;
-      }
-    }
-  }
-
-  .detail-panel .ov-table-wrap {
-    width: 100%;
-    overflow-x: visible;
-  }
-
-  .detail-tx-table,
-  .detail-chg-table {
-    width: 100%;
-
-    tr {
-      width: 100%;
-      border: 1px solid var(--color-border-default);
-      border-radius: 8px;
-      background: var(--color-bg-base);
-      box-shadow: none;
-      overflow: hidden;
-    }
-
-    td {
-      width: auto !important;
-      margin: 0 12px;
-      padding: 9px 4px;
-      text-align: right;
-      word-break: keep-all;
-      overflow-wrap: normal;
-
-      &::before {
-        flex: 0 0 112px;
-        max-width: 112px;
-      }
-    }
-
-    td:first-child {
-      background: var(--color-bg-base);
-      font-weight: 500;
-    }
-
-    .ov-empty {
-      display: block;
-      margin: 0;
-      border-bottom: none;
-      text-align: center;
-
-      &::before {
-        content: none;
-      }
     }
   }
 
@@ -1868,60 +1429,6 @@
   }
 }
 
-
-// 委託查詢手機卡片：對齊異動紀錄（checkbox 左、代碼/名稱白底頭、明細包灰底）
-@media (max-width: 767px) {
-  .ov-order-card tr { position: relative; }
-  .ov-order-card td.col-check {
-    position: absolute;
-    top: 9px;
-    left: 12px;
-    width: auto;
-    min-height: 0;
-    margin: 0;
-    padding: 0;
-    border: none;
-    line-height: 0;
-  }
-  .ov-order-card td.col-check::before { display: none; }
-  .ov-order-card td.col-check ::ng-deep .mat-mdc-checkbox-touch-target { display: none; }
-  .ov-order-card td.oc-code {
-    padding-left: 46px;
-    padding-bottom: 0;
-    border-bottom: none;
-    color: var(--color-text-secondary);
-  }
-  .ov-order-card td.oc-code::before { display: none; }
-  .ov-order-card td.oc-name {
-    justify-content: flex-start;
-    padding-top: 2px;
-    padding-left: 44px;
-    text-align: left;
-    border-bottom: none;
-    color: var(--color-text-primary);
-    font-size: 16px;
-    font-weight: 500;
-  }
-  .ov-order-card td.oc-name::before { display: none; }
-  .ov-order-card tbody tr:nth-child(n) td.oc-body {
-    margin-left: 14px;
-    margin-right: 14px;
-    padding-left: 14px;
-    padding-right: 14px;
-    background: var(--color-bg-subtle);
-  }
-  .ov-order-card td.oc-body-first {
-    margin-top: 6px;
-    border-top-left-radius: 8px;
-    border-top-right-radius: 8px;
-  }
-  .ov-order-card td.oc-body-last {
-    margin-bottom: 16px;
-    border-bottom: none;
-    border-bottom-left-radius: 8px;
-    border-bottom-right-radius: 8px;
-  }
-}
 
 
 .ov-change-topbar {
@@ -1984,6 +1491,8 @@
 }
 .grid-code { font-size: 14px; color: var(--color-text-secondary); }
 .grid-name { font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--color-text-heading); }
+// 帳總/profit/異動歷史用 <strong> 當基金名（非 .grid-name span），統一 500、避免瀏覽器預設 700
+.grid-id strong { display: block; font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--color-text-heading); }
 
 .grid-body {
   display: grid;
@@ -2052,20 +1561,31 @@
   .grid-table--settings .grid-head,
   .grid-table--settings .grid-main { grid-template-columns: 200px 1fr 88px; }
 }
+// 手機：設定齒輪移到識別頭右上角（取代孤立在卡片底部），與帳總手機識別頭右側操作一致
+@media (max-width: 767px) {
+  .grid-table--settings .grid-main { grid-template-areas: "id actions" "body body"; }
+  .grid-table--settings .grid-actions { grid-area: actions; justify-self: end; align-self: start; }
+}
 
 // 前導選取欄（多選列表，如委託查詢）：桌機最左固定窄欄、手機卡片頭 id 行左側
 .grid-select { display: flex; align-items: center; justify-content: center; }
+.grid-select ::ng-deep .mat-mdc-checkbox-touch-target { display: none; } // 去 44px 觸控區，避免溢出窄欄、ripple 偏移
 .grid-select-head { display: block; }
 
 // 內容欄雙行值（如生效日 + 委託日）：桌機置中堆疊；手機改拆成獨立列（見 grid-only-*）
 .grid-stack { display: flex; flex-direction: column; align-items: center; min-width: 0; }
 .grid-stack .grid-sub { margin-top: 4px; font-size: 14px; color: var(--color-text-secondary); }
 
-// modifier：委託查詢（選取 36 / 識別 280→200 / 內容 1fr；無操作欄）
+// modifier：委託查詢（選取 40 / 識別 280→200 / 內容 1fr；無操作欄）
+// 選取欄 40 = MDC checkbox state-layer 寬，checkbox 填滿並置中、ripple 與方框對齊
 .grid-table--order {
-  .grid-head, .grid-main { grid-template-columns: 36px 280px 1fr; }
+  .grid-head, .grid-main { grid-template-columns: 40px 280px 1fr; }
   .grid-id, .grid-id-head { padding-left: 0; }
-  .grid-select { justify-content: flex-end; }
+}
+// 最左是選取欄、最右是內容欄，左右都補 padding 20（桌機/中屏；手機用卡片內距）
+@media (min-width: 768px) {
+  .grid-table--order .grid-head,
+  .grid-table--order .grid-main { padding-left: 20px; padding-right: 20px; }
 }
 .grid-table--order-alt .grid-body,
 .grid-table--order-chg .grid-body { grid-template-columns: repeat(6, minmax(0, 1fr)); }
@@ -2076,7 +1596,7 @@
 
 @media (max-width: 1024px) {
   .grid-table--order .grid-head,
-  .grid-table--order .grid-main { grid-template-columns: 36px 200px 1fr; }
+  .grid-table--order .grid-main { grid-template-columns: 40px 200px 1fr; }
 }
 
 @media (max-width: 767px) {
@@ -2089,3 +1609,87 @@
   .grid-table--order .grid-only-mobile { display: flex; }
   .grid-table--order .grid-stack { align-items: flex-end; }  // old→new 雙值手機靠右堆疊
 }
+
+// modifier：交易明細（純數據表，無識別／操作欄；grid-main 單段、grid-body N 欄）
+.grid-table--tx {
+  .grid-head, .grid-main { grid-template-columns: 1fr; }
+  .grid-body { grid-template-columns: repeat(7, minmax(0, 1fr)); }
+}
+// 斑馬紋（純數據多行表，助橫向閱讀）；grid-row 為 <article>，nth-of-type 不含 grid-head(div)
+.grid-table--tx .grid-row:nth-of-type(even) .grid-main { background: var(--color-bg-subtle); }
+
+// modifier：已實現損益總覽（純數據 6 欄彙總，按幣別）
+.grid-table--profit-sum {
+  .grid-head, .grid-main { grid-template-columns: 1fr; }
+  .grid-body { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+}
+.grid-table--profit-sum .grid-row:nth-of-type(even) .grid-main { background: var(--color-bg-subtle); }
+// 漲跌色（numClass 回傳 val-up/val-down，全域無對應色，此處補上）
+.grid-table--profit-sum .grid-body span.val-up { color: var(--color-price-up); }
+.grid-table--profit-sum .grid-body span.val-down { color: var(--color-price-down); }
+
+// 純數據表手機：單層灰卡（grid-row 維持灰底，去掉 grid-body 白塊那層，不浪費空間）
+// 純數據表無識別頭，不需要「灰卡頭 + 白數據塊」的二級層次
+@media (max-width: 767px) {
+  // 純數據表無 id/actions 段，grid-main 簡化為單一 body area，清掉空軌道與多餘 gap
+  .grid-table--tx .grid-main,
+  .grid-table--profit-sum .grid-main {
+    grid-template-columns: 1fr !important;
+    grid-template-areas: "body" !important;
+    gap: 0;
+  }
+  .grid-table--tx .grid-body,
+  .grid-table--profit-sum .grid-body {
+    background: transparent;
+    border-radius: 0;
+    padding: 0;
+  }
+}
+
+// modifier：異動歷史（識別 280 / 5 內容欄 / 無操作欄 padding-right 20；表頭排序；手機折疊看後三欄）
+.grid-table--change {
+  .grid-head, .grid-main { grid-template-columns: 280px 1fr; }
+  .grid-body { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+  .grid-row { cursor: pointer; }
+  .change-chevron { display: none; } // 桌機不顯示折疊箭頭（全欄已顯示）
+}
+// 無操作欄，最後一欄補右 padding 20（桌機/中屏；手機用卡片內距）
+@media (min-width: 768px) {
+  .grid-table--change .grid-head,
+  .grid-table--change .grid-main { padding-right: 20px; }
+}
+@media (min-width: 768px) and (max-width: 1024px) {
+  .grid-table--change .grid-head,
+  .grid-table--change .grid-main { grid-template-columns: 200px 1fr; }
+}
+// 可排序表頭
+.grid-table--change .grid-sortable {
+  cursor: pointer;
+  white-space: nowrap;
+
+  > i { margin-left: 2px; font-size: 12px; color: var(--color-text-tertiary); }
+  &:hover > i { color: var(--color-text-secondary); }
+  > i.is-active { color: var(--color-action-primary); }
+}
+// 手機折疊：收合顯示生效日/異動項目，展開才顯示交易幣別/異動前/異動後
+@media (max-width: 767px) {
+  .grid-table--change .grid-code-row { display: flex; align-items: center; }
+  .grid-table--change .change-chevron {
+    display: inline-flex;
+    margin-left: auto;
+    color: var(--color-text-secondary);
+    font-size: 16px;
+  }
+  .grid-table--change .change-more { display: none; }
+  .grid-table--change .grid-row.is-expanded .change-more { display: flex; }
+  // 收合時最後可見是「異動項目」（change-more 隱藏），清掉它的底線
+  .grid-table--change .grid-row:not(.is-expanded) .grid-body > span:nth-child(2) { border-bottom: none; }
+  // 搜尋框手機填滿容器寬（topbar 換行後獨占整列）
+  .ov-change-search { max-width: none; flex-basis: 100%; }
+}
+
+// 斑馬紋：委託查詢／異動歷史／設定調整 偶數列灰底（多列數據表助橫向閱讀，與帳總/交易明細/總覽一致）
+// grid-row 皆為 <article>，nth-of-type 不含 grid-head(div)
+.grid-table--order .grid-row:nth-of-type(even) .grid-main,
+.grid-table--change .grid-row:nth-of-type(even) .grid-main,
+.grid-table--settings .grid-row:nth-of-type(even) .grid-main { background: var(--color-bg-subtle); }

@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit } from '@angular/core';
+import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -269,6 +269,49 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.isAddOnMode ? '加碼' : '新申購';
   }
 
+  get redeemSettingNotes(): string[] {
+    return [
+      '約當市值依最新淨值與參考匯率估算，實際贖回金額以基金公司回覆為準。',
+      '實際贖回單位數以客戶基金帳上可用單位數為限。',
+      '指定批次僅顯示可贖回批次；無可贖回批次時不提供指定贖回。'
+    ];
+  }
+
+  get doneNotes(): string[] {
+    if (this.isRedeemMode) {
+      const notes = [
+        '您的贖回委託已送出，若超過本營業日 14:00，將視為次一營業日交易。',
+        '贖回款項入帳時間依各基金公司作業而定。'
+      ];
+      if (this.showRedeemAnnualRateNotice) {
+        notes.push('若本次贖回後年化提領率超過建議上限，畫面將顯示年化提領率提醒；此提醒不影響贖回委託送出。');
+      }
+      return notes;
+    }
+
+    if (this.isModifyMode) {
+      return [
+        '您的自由 Pay 設定異動委託已送出，若超過本營業日 14:00，將視為次一營業日交易。',
+        '設定生效狀態可至「委託查詢 / 取消」查看。',
+        '異動生效後，後續 Pay 出將依新的設定執行。'
+      ];
+    }
+
+    if (this.isAddOnMode) {
+      return [
+        '您的加碼委託已送出，若超過本營業日 13:00，將視為次一營業日交易。',
+        '預計 3–4 個營業日後申購確認書入帳。',
+        '加碼確認後將計入既有契約，Pay 設定維持既有契約設定。'
+      ];
+    }
+
+    return [
+      '您的自由 Pay 申購委託已送出，若超過本營業日 13:00，將視為次一營業日交易。',
+      '預計 3–4 個營業日後申購確認書入帳。',
+      `首次 Pay 將於設定基準日（每月 ${this.form.controls.day.value} 日）執行；若距申購確認日不足 30 日，將順延至屆滿後的第一個基準日。`
+    ];
+  }
+
   get addOnPaySettingSummary(): string {
     const contract = this.selectedContract ?? this.contractForSelectedCurrency;
     if (!contract) return '加碼至既有契約，Pay 設定維持既有設定。';
@@ -338,6 +381,11 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return `可輸入範圍 ${this.currencyName()} 1–${this.formatNumber(this.monthlyPayAnnualLimitAmount)}`;
   }
 
+  get monthlyPayRangeValue(): string {
+    if (this.monthlyPayAnnualLimitAmount <= 0) return this.currencyName();
+    return `${this.currencyName()} 1–${this.formatNumber(this.monthlyPayAnnualLimitAmount)}`;
+  }
+
   get ratioSliderProgress(): number {
     const value = Number(this.form.controls.ratio.value || 1);
     return ((value - 1) / 14) * 100;
@@ -370,7 +418,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get showThresholdPreview(): boolean {
-    return !this.thresholdCustomActive || this.form.controls.thresholdCustom.valid;
+    return true;
   }
 
   get selectedDay(): number {
@@ -785,6 +833,14 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     } else {
       this.dateHintOpen = !this.dateHintOpen;
     }
+  }
+
+  @HostListener('document:click', ['$event'])
+  closeHintsOnOutsideClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement | null;
+    if (!target || target.closest('.hint-icon, .hint-panel')) return;
+    this.payModeHintOpen = false;
+    this.dateHintOpen = false;
   }
 
   toggleThreshold(enabled: boolean): void {
