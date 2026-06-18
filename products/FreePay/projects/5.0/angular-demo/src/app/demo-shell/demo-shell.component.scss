@@ -211,13 +211,7 @@
   p { margin: 0; }
 }
 
-.full-field {
-  width: 100%;
-}
-
-:host ::ng-deep .pay-amount-field.mat-form-field-appearance-standard .mat-form-field-flex {
-  padding-top: 0;
-}
+// Input（輸入框）元件樣式已移至全域 styles.scss（DesignSystem §2.1）
 
 .form-group,
 .date-section {
@@ -1292,10 +1286,6 @@
     margin-bottom: 24px;
   }
 
-  .redeem-partial-value-field {
-    width: 100%;
-  }
-
   .redeem-partial-reference {
     margin-top: 4px;
   }
@@ -1540,7 +1530,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
 
 .batch-row-sub {
   color: var(--color-text-tertiary);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 400;
   line-height: 1.35;
   white-space: nowrap;

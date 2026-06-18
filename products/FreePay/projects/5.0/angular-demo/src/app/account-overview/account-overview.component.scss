@@ -19,35 +19,6 @@
 
 // ── Tab nav bar ─────────────────────────────────────────────
 
-.ov-nav-row {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 16px;
-  border-bottom: 1px solid var(--color-border-default);
-
-  ::ng-deep .mat-tab-nav-bar {
-    flex: 1;
-    min-width: 0;
-    border-bottom: none;
-  }
-
-  // Material 內部 class — 需 ::ng-deep 穿透 view encapsulation
-  ::ng-deep .mat-tab-link {
-    height: 64px;
-    min-width: 0;
-    padding: 0 32px;
-    font-family: var(--font-primary);
-    font-size: 20px;
-    opacity: 1;
-
-    &.mat-tab-label-active {
-      color: var(--color-action-primary);
-      font-weight: 700;
-    }
-  }
-}
-
 .ov-tab-panel {
   display: flex;
   flex-direction: column;
@@ -326,7 +297,7 @@
 // ── 表頭 ──────────────────────────────────────────────────
 .grid-table--fund .grid-head {
   display: grid;
-  grid-template-columns: 280px 1fr 172px;
+  grid-template-columns: 280px 1fr 220px;
   gap: 20px;
   padding: 12px 0;
   background: var(--color-neutral-150);
@@ -564,7 +535,7 @@
 
 .grid-table--fund .grid-main {
   display: grid;
-  grid-template-columns: 280px 1fr 172px;
+  grid-template-columns: 280px 1fr 220px;
   gap: 20px;
   padding: 24px 0;
   align-items: center;
@@ -616,7 +587,7 @@
 
 .grid-extra {
   display: grid;
-  grid-template-columns: 280px 1fr 172px;
+  grid-template-columns: 280px 1fr 220px;
   align-items: center;
   gap: 20px;
   padding: 18px 0;
@@ -892,7 +863,7 @@
   flex-shrink: 0;
 }
 
-// 已實現損益彈窗內容區（期間篩選＋各筆贖回表）；padding 對齊帳總 mat-tab-body-content
+// 已實現損益彈窗內容區（期間篩選＋各筆贖回表）
 .detail-panel-body {
   flex: 1;
   overflow-y: auto;
@@ -980,25 +951,6 @@
   max-width: 100%;
 }
 
-::ng-deep .detail-panel {
-  .mat-tab-group {
-    flex: 1;
-    min-height: 0;
-    display: flex;
-    flex-direction: column;
-  }
-  .mat-tab-body-wrapper {
-    flex: 1;
-    overflow-y: auto;
-  }
-  .mat-tab-body-content {
-    display: flex;
-    flex-direction: column;
-    padding: 0 24px 24px;
-  }
-}
-
-
 // ── Empty state ─────────────────────────────────────────────
 
 .ov-empty {
@@ -1019,9 +971,9 @@
 // ── RWD ─────────────────────────────────────────────────────
 
 @media (max-width: 1024px) {
-  .grid-table--fund .grid-head { grid-template-columns: 200px 1fr 172px; }
-  .grid-table--fund .grid-main   { grid-template-columns: 200px 1fr 172px; }
-  .grid-extra  { grid-template-columns: 200px 1fr 172px; }
+  .grid-table--fund .grid-head { grid-template-columns: 200px 1fr 220px; }
+  .grid-table--fund .grid-main   { grid-template-columns: 200px 1fr 220px; }
+  .grid-extra  { grid-template-columns: 200px 1fr 220px; }
 
 }
 
@@ -1029,15 +981,6 @@
   .ov-shell {
     padding: 0 15px;
     gap: 24px;
-  }
-
-  // ── Nav：手機版 tab 尺寸縮減 ────────
-  .ov-nav-row {
-    ::ng-deep .mat-tab-link {
-      padding: 0 14px;
-      height: 48px;
-      font-size: 14px;
-    }
   }
 
   // ── 桌機欄位標頭：疊排後無意義，直接隱藏 ───────────────────
@@ -1569,7 +1512,6 @@
 
 // 前導選取欄（多選列表，如委託查詢）：桌機最左固定窄欄、手機卡片頭 id 行左側
 .grid-select { display: flex; align-items: center; justify-content: center; }
-.grid-select ::ng-deep .mat-mdc-checkbox-touch-target { display: none; } // 去 44px 觸控區，避免溢出窄欄、ripple 偏移
 .grid-select-head { display: block; }
 
 // 內容欄雙行值（如生效日 + 委託日）：桌機置中堆疊；手機改拆成獨立列（見 grid-only-*）
@@ -1577,7 +1519,7 @@
 .grid-stack .grid-sub { margin-top: 4px; font-size: 14px; color: var(--color-text-secondary); }
 
 // modifier：委託查詢（選取 40 / 識別 280→200 / 內容 1fr；無操作欄）
-// 選取欄 40 = MDC checkbox state-layer 寬，checkbox 填滿並置中、ripple 與方框對齊
+// 選取欄 40px 保留 checkbox 操作區與欄位對齊空間。
 .grid-table--order {
   .grid-head, .grid-main { grid-template-columns: 40px 280px 1fr; }
   .grid-id, .grid-id-head { padding-left: 0; }

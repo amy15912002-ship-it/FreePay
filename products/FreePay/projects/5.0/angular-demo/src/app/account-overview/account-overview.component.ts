@@ -27,7 +27,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   readonly allProfits = MOCK_PROFITS;
   readonly changeLogs = ALL_CHANGE_LOGS;
   changeSearch = '';
-  changeView: 'history' | 'settings' = 'history';
+  changeView: 'history' | 'settings' = 'settings';
   changeSortKey: ChangeSortKey = 'effectDate';
   changeSortDesc = true;
 
@@ -435,7 +435,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   txTypeText(t: string): string {
-    return t === 'A' ? '申購' : t === 'R' ? '自由Pay出' : t === 'RDM' ? '贖回' : t;
+    return t === 'A' ? '申購' : t === 'R' ? 'Pay出' : t === 'RDM' ? '贖回' : t;
   }
 
   chgTypeText(t: string): string {

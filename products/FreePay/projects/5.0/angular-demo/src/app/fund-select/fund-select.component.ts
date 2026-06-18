@@ -11,13 +11,13 @@ import { Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
   FUNDS, Fund, FundCategory, FundRegion,
-  FUND_CATEGORIES, FUND_REGIONS, FUND_BRANDS, FUND_PRICING_CCY, FUND_GROUPS, LIPPER_RATINGS,
+  FUND_CATEGORIES, FUND_REGIONS, FUND_BRANDS, FUND_PRICING_CCY, FUND_GROUPS, LIPPER_RATINGS, RISK_LEVELS,
 } from '../mock-data/funds';
 
 type DomicileOption = Fund['domicile'];
 type PricingCcyOption = string;
 type FundTab = 'perf' | 'roi' | 'drop' | 'nav';
-type CollapsibleFilter = 'category' | 'pricingCcy' | 'brand' | 'region' | 'group' | 'lipper';
+type CollapsibleFilter = 'category' | 'pricingCcy' | 'brand' | 'region' | 'group' | 'lipper' | 'risk';
 
 type SortKey =
   | 'fundId' | 'name'
@@ -43,6 +43,11 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   readonly brands = FUND_BRANDS;
   readonly groups = FUND_GROUPS;
   readonly lipperRatings = LIPPER_RATINGS;
+  readonly riskLevels = RISK_LEVELS;
+  readonly searchNotes = [
+    '波動度以近 1 年年化標準差表示，數值越大代表淨值波動程度越高。',
+    '各項績效、淨值與年度報酬率為過去資料，不代表未來績效表現。'
+  ];
   readonly domiciles: DomicileOption[] = ['境內', '境外'];
   readonly years = [2021, 2022, 2023, 2024, 2025];
   pageSize = 20;
@@ -54,7 +59,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     { key: 'perf.y2', label: '2年' },
     { key: 'perf.y3', label: '3年' },
     { key: 'perf.y5', label: '5年' },
-    { key: 'stdDev', label: '標準差' },
+    { key: 'stdDev', label: '波動度' },
     { key: 'fundId', label: '代碼' },
     { key: 'name', label: '名稱' }
   ];
@@ -84,19 +89,21 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     return FUND_PRICING_CCY;
   }
 
-  keyword = '';
+  keyword = '';            // 輸入中的字（驅動建議下拉）
+  appliedKeyword = '';     // 已套用的搜尋字（驅動主結果列）
   searchFocused = false;
+  searchMatches: Fund[] = [];
+  readonly searchMinChars = 2;
+  private searchDebounce: any;   // setTimeout handle（瀏覽器/Node 型別歧義，用 any 簡化）
   brandKeyword = '';
-  brandSearchOpen = false;
-  groupKeyword = '';
-  groupSearchOpen = false;
   expandedFilters: Record<CollapsibleFilter, boolean> = {
     category: false,
     pricingCcy: false,
     brand: false,
     region: false,
     group: false,
-    lipper: false
+    lipper: false,
+    risk: false
   };
   domicileFilters: DomicileOption[] = [];
   categoryFilters: FundCategory[] = [];
@@ -105,6 +112,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   regionFilters: FundRegion[] = [];
   groupFilters: string[] = [];
   lipperFilters: number[] = [];
+  riskFilters: string[] = [];
 
   activeTab: FundTab = 'perf';
   sortKey: SortKey = 'perf.m6';
@@ -121,7 +129,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     brand: false,
     region: false,
     group: false,
-    lipper: false
+    lipper: false,
+    risk: false
   };
 
   private chipObservers: ResizeObserver[] = [];
@@ -133,7 +142,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   ) {}
 
   get filteredFunds(): Fund[] {
-    const kw = this.keyword.trim().toLowerCase();
+    const kw = this.appliedKeyword.trim().toLowerCase();
     return this.funds.filter(f => {
       if (kw && !f.fundId.toLowerCase().includes(kw) && !f.name.toLowerCase().includes(kw)) return false;
       if (this.domicileFilters.length && !this.domicileFilters.includes(f.domicile)) return false;
@@ -143,17 +152,19 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
       if (this.regionFilters.length && !this.regionFilters.includes(f.region)) return false;
       if (this.groupFilters.length && !this.groupFilters.includes(f.group)) return false;
       if (this.lipperFilters.length && !this.lipperFilters.includes(f.lipper)) return false;
+      if (this.riskFilters.length && !this.riskFilters.includes(f.risk)) return false;
       return true;
     });
   }
 
-  // 基金搜尋即時下拉：匹配代碼或名稱，開頭匹配優先、組內按名稱排序，上限 20 筆
-  get searchMatches(): Fund[] {
+  // 基金搜尋建議：匹配代碼或名稱，開頭匹配優先、組內按名稱排序，上限 20 筆
+  // 正式區為後端 typeahead，故經 onKeywordInput debounce 後才更新 searchMatches
+  private refreshSearchMatches(): void {
     const kw = this.keyword.trim().toLowerCase();
-    if (!kw) return [];
+    if (kw.length < this.searchMinChars) { this.searchMatches = []; return; }
     const startsWith = (f: Fund) =>
       f.fundId.toLowerCase().startsWith(kw) || f.name.toLowerCase().startsWith(kw);
-    return this.funds
+    this.searchMatches = this.funds
       .filter(f => f.fundId.toLowerCase().includes(kw) || f.name.toLowerCase().includes(kw))
       .sort((a, b) => {
         const diff = (startsWith(a) ? 0 : 1) - (startsWith(b) ? 0 : 1);
@@ -221,7 +232,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
       ...this.brandFilters,
       ...this.regionFilters,
       ...this.groupFilters,
-      ...this.lipperFilters
+      ...this.lipperFilters,
+      ...this.riskFilters
     ].filter(Boolean).length;
   }
 
@@ -229,12 +241,6 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     const kw = this.brandKeyword.trim().toLowerCase();
     if (!kw) return this.brands;
     return this.brands.filter(brand => brand.toLowerCase().includes(kw));
-  }
-
-  get filteredGroups(): string[] {
-    const kw = this.groupKeyword.trim().toLowerCase();
-    if (!kw) return this.groups;
-    return this.groups.filter(group => group.toLowerCase().includes(kw));
   }
 
   get visibleCategories(): FundCategory[] {
@@ -250,7 +256,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   }
 
   get visibleGroups(): string[] {
-    return this.filteredGroups;
+    return this.groups;
   }
 
   get emptyStateMessage(): string {
@@ -336,10 +342,6 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.onFilterChange();
   }
 
-  onGroupKeywordChange(): void {
-    this.scheduleOverflowCheck();
-  }
-
   toggleRegionFilter(value: FundRegion): void {
     this.regionFilters = this.toggleFilterValue(this.regionFilters, value);
     this.onFilterChange();
@@ -350,23 +352,26 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.onFilterChange();
   }
 
-  clearFilterGroup(group: 'domicile' | 'category' | 'pricingCcy' | 'brand' | 'region' | 'group' | 'lipper'): void {
+  toggleRiskFilter(value: string): void {
+    this.riskFilters = this.toggleFilterValue(this.riskFilters, value);
+    this.onFilterChange();
+  }
+
+  clearFilterGroup(group: 'domicile' | 'category' | 'pricingCcy' | 'brand' | 'region' | 'group' | 'lipper' | 'risk'): void {
     if (group === 'domicile') this.domicileFilters = [];
     else if (group === 'category') this.categoryFilters = [];
     else if (group === 'pricingCcy') this.pricingCcyFilters = [];
     else if (group === 'brand') this.brandFilters = [];
     else if (group === 'region') this.regionFilters = [];
     else if (group === 'group') this.groupFilters = [];
-    else this.lipperFilters = [];
+    else if (group === 'lipper') this.lipperFilters = [];
+    else this.riskFilters = [];
     this.onFilterChange();
   }
 
   clearFilters(): void {
     // 關鍵字搜尋與篩選脫鉤：清除篩選不動關鍵字（要清用搜尋框的 ⊗）
     this.brandKeyword = '';
-    this.brandSearchOpen = false;
-    this.groupKeyword = '';
-    this.groupSearchOpen = false;
     this.filterPanelOpen = false;
     this.expandedFilters = {
       category: false,
@@ -374,7 +379,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
       brand: false,
       region: false,
       group: false,
-      lipper: false
+      lipper: false,
+      risk: false
     };
     this.domicileFilters = [];
     this.categoryFilters = [];
@@ -383,6 +389,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.regionFilters = [];
     this.groupFilters = [];
     this.lipperFilters = [];
+    this.riskFilters = [];
     this.page = 1;
     this.scheduleOverflowCheck();
   }
@@ -393,6 +400,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    clearTimeout(this.searchDebounce);
     this.chipAreaChangesSub?.unsubscribe();
     this.disconnectChipObservers();
   }
@@ -412,28 +420,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   toggleFilterExpanded(group: CollapsibleFilter): void {
     this.expandedFilters[group] = !this.expandedFilters[group];
     if (group === 'brand' && !this.expandedFilters.brand) {
-      this.brandSearchOpen = false;
       this.brandKeyword = '';
-    }
-    if (group === 'group' && !this.expandedFilters.group) {
-      this.groupSearchOpen = false;
-      this.groupKeyword = '';
-    }
-    this.scheduleOverflowCheck();
-  }
-
-  toggleBrandSearch(): void {
-    this.brandSearchOpen = !this.brandSearchOpen;
-    if (!this.brandSearchOpen) {
-      this.brandKeyword = '';
-    }
-    this.scheduleOverflowCheck();
-  }
-
-  toggleGroupSearch(): void {
-    this.groupSearchOpen = !this.groupSearchOpen;
-    if (!this.groupSearchOpen) {
-      this.groupKeyword = '';
     }
     this.scheduleOverflowCheck();
   }
@@ -451,8 +438,15 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.scheduleOverflowCheck();
   }
 
+  // 打字：debounce 後更新建議下拉（模擬正式區後端 typeahead）；主結果列不即時篩
+  onKeywordInput(): void {
+    clearTimeout(this.searchDebounce);
+    this.searchDebounce = setTimeout(() => this.refreshSearchMatches(), 300);
+  }
+
   onSearchFocus(): void {
     this.searchFocused = true;
+    this.refreshSearchMatches();
   }
 
   onSearchBlur(): void {
@@ -461,15 +455,30 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   }
 
   selectSearchFund(fund: Fund): void {
+    clearTimeout(this.searchDebounce);
     this.keyword = fund.name;
+    this.appliedKeyword = fund.name;
     this.searchFocused = false;
-    this.onFilterChange();
+    this.page = 1;
+    this.scheduleOverflowCheck();
   }
 
-  // 以目前關鍵字搜尋全部（不指定單一基金）：收起下拉，表格保留關鍵字篩選（可顯示多檔）
+  // 明確搜尋：把目前關鍵字套用到主結果列（正式區才打後端，避免每按鍵查詢）
   applyKeywordSearch(): void {
+    clearTimeout(this.searchDebounce);
+    this.appliedKeyword = this.keyword.trim();
     this.searchFocused = false;
-    this.onFilterChange();
+    this.page = 1;
+    this.scheduleOverflowCheck();
+  }
+
+  clearKeyword(): void {
+    clearTimeout(this.searchDebounce);
+    this.keyword = '';
+    this.appliedKeyword = '';
+    this.searchMatches = [];
+    this.page = 1;
+    this.scheduleOverflowCheck();
   }
 
   goPage(p: number): void {

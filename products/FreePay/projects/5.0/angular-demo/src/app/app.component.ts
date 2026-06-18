@@ -5,15 +5,22 @@ import { Router } from '@angular/router';
   selector: 'fp-root',
   template: `
     <header class="fp-site-header" [class.is-menu-open]="isMobileMenuOpen" role="banner">
-      <a class="fp-site-brand" routerLink="/demo/freepay-intro" aria-label="鉅亨自由 Pay" (click)="closeMobileMenu()">
-        <img
-          class="fp-site-logo"
-          src="assets/logo.png"
-          alt="鉅亨買基金"
+      <div class="fp-site-brand" aria-label="鉅亨自由 Pay">
+        <a
+          class="fp-site-brand-logo"
+          href="https://www.anuefund.com/fund/newsearch?tabname=%E7%A7%91%E6%8A%80%E7%8E%8B"
+          aria-label="鉅亨買基金"
+          (click)="closeMobileMenu()"
         >
+          <img
+            class="fp-site-logo"
+            src="assets/logo.png"
+            alt="鉅亨買基金"
+          >
+        </a>
         <span class="fp-site-brand-divider" aria-hidden="true"></span>
-        <span class="fp-site-brand-product">鉅亨自由 Pay</span>
-      </a>
+        <a class="fp-site-brand-product" routerLink="/demo/freepay-intro" (click)="closeMobileMenu()">鉅亨自由 Pay</a>
+      </div>
 
       <button
         class="fp-site-menu-btn"
@@ -27,7 +34,7 @@ import { Router } from '@angular/router';
       </button>
 
       <nav id="fp-site-nav" class="fp-site-nav" [class.is-open]="isMobileMenuOpen" aria-label="主要導覽">
-        <a routerLink="/demo/freepay-intro" routerLinkActive="is-active" (click)="closeMobileMenu()">什麼是自由Pay?</a>
+        <a routerLink="/demo/freepay-intro" routerLinkActive="is-active" (click)="closeMobileMenu()">自由 Pay 介紹</a>
         <a *ngIf="isLoggedIn" routerLink="/demo/overview" routerLinkActive="is-active" (click)="closeMobileMenu()">帳戶總覽</a>
         <button
           class="fp-site-login"
@@ -36,7 +43,7 @@ import { Router } from '@angular/router';
           type="button"
           (click)="toggleLoginState()"
         >{{ isLoggedIn ? '登出' : '登入' }}</button>
-        <a class="fp-site-nav-action" routerLink="/demo/search" (click)="closeMobileMenu()">立即申購</a>
+        <a class="fp-site-nav-action" href="https://www.anuefund.com/FundSpec/OpenAcct/" (click)="closeMobileMenu()">立即開戶</a>
       </nav>
     </header>
     <main class="fp-site-main">

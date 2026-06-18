@@ -76,31 +76,39 @@
           <!-- 部分贖回模式：依金額或單位數試算 -->
           <div class="redeem-all-summary redeem-partial-summary" *ngIf="redeemMode === 'partial'">
             <div class="redeem-partial-input-grid">
-              <mat-form-field appearance="standard" color="accent" class="redeem-partial-value-field">
-                <mat-label>贖回單位數</mat-label>
-                <input
-                  matInput
-                  type="text"
-                  inputmode="decimal"
-                  placeholder="輸入單位數"
-                  formControlName="redeemUnits" appThousands
-                  (input)="setPartialRedeemInputMode('units'); clearPartialRedeemCounterpart('units'); limitPartialRedeemInput('units')"
-                >
-                <mat-hint>可贖回 {{ formatUnits(redeemableUnits) }} 單位</mat-hint>
-              </mat-form-field>
+              <div class="fp-field">
+                <label class="fp-field-label" for="redeem-units">贖回單位數</label>
+                <div class="fp-input-box fp-input-box--line">
+                  <input
+                    id="redeem-units"
+                    class="fp-input"
+                    type="text"
+                    inputmode="decimal"
+                    placeholder="輸入單位數"
+                    formControlName="redeemUnits"
+                    appThousands
+                    (input)="setPartialRedeemInputMode('units'); clearPartialRedeemCounterpart('units'); limitPartialRedeemInput('units')"
+                  >
+                </div>
+                <div class="fp-field-hint">可贖回 {{ formatUnits(redeemableUnits) }} 單位</div>
+              </div>
 
-              <mat-form-field appearance="standard" color="accent" class="redeem-partial-value-field">
-                <mat-label>贖回金額</mat-label>
-                <input
-                  matInput
-                  type="text"
-                  inputmode="numeric"
-                  placeholder="輸入金額"
-                  formControlName="redeemAmount" appThousands
-                  (input)="setPartialRedeemInputMode('amount'); clearPartialRedeemCounterpart('amount'); limitPartialRedeemInput('amount')"
-                >
-                <mat-hint>可贖回約當市值 {{ formatNumber(redeemableReferenceAmount, selectedContract?.currencyCode) }}，依最新淨值與參考匯率估算</mat-hint>
-              </mat-form-field>
+              <div class="fp-field">
+                <label class="fp-field-label" for="redeem-amount">贖回金額</label>
+                <div class="fp-input-box fp-input-box--line">
+                  <input
+                    id="redeem-amount"
+                    class="fp-input"
+                    type="text"
+                    inputmode="numeric"
+                    placeholder="輸入金額"
+                    formControlName="redeemAmount"
+                    appThousands
+                    (input)="setPartialRedeemInputMode('amount'); clearPartialRedeemCounterpart('amount'); limitPartialRedeemInput('amount')"
+                  >
+                </div>
+                <div class="fp-field-hint">可贖回約當市值 {{ formatNumber(redeemableReferenceAmount, selectedContract?.currencyCode) }}，依最新淨值與參考匯率估算</div>
+              </div>
             </div>
 
             <div class="redeem-partial-reference redeem-reference-summary">
@@ -148,7 +156,7 @@
               </span>
               <span class="batch-row-cell batch-row-group batch-row-group--trade" data-label="交易資訊">
                 <span class="batch-row-main">{{ batch.tDate }}</span>
-                <span class="batch-row-sub" [class.is-shortterm]="isShortTerm(batch)">短線交易：{{ isShortTerm(batch) ? '是' : '否' }}</span>
+                <span class="batch-row-sub is-shortterm" *ngIf="isShortTerm(batch)">短線交易</span>
               </span>
               <span class="batch-row-cell batch-row-cell--number" data-label="投入成本">{{ formatNumber(batch.amount, selectedContract?.currencyCode) }}</span>
               <span class="batch-row-cell batch-row-cell--number" data-label="剩餘單位數">{{ formatUnits(batch.remainUnits) }}</span>
@@ -214,14 +222,25 @@
             [value]="c.currencyCode"
           >{{ c.currency }}</mat-button-toggle>
         </mat-button-toggle-group>
-        <mat-form-field appearance="standard" color="accent" class="full-field">
-          <mat-label>金額</mat-label>
-          <input matInput type="text" inputmode="numeric" formControlName="amount" appThousands required>
-          <mat-hint>{{ minAmountHint }}</mat-hint>
-          <mat-error *ngIf="form.controls.amount.hasError('required')">請輸入金額</mat-error>
-          <mat-error *ngIf="form.controls.amount.hasError('pattern')">請輸入數字</mat-error>
-          <mat-error *ngIf="form.controls.amount.hasError('min') && !form.controls.amount.hasError('pattern')">{{ minAmountErrorMsg }}</mat-error>
-        </mat-form-field>
+        <div class="fp-field" [class.is-error]="form.controls.amount.touched && form.controls.amount.invalid">
+          <label class="fp-field-label" for="buy-amount">金額</label>
+          <div class="fp-input-box fp-input-box--line">
+            <input
+              id="buy-amount"
+              class="fp-input"
+              type="text"
+              inputmode="numeric"
+              formControlName="amount"
+              appThousands
+              required
+              placeholder="輸入金額"
+            >
+          </div>
+          <div class="fp-field-hint" *ngIf="!(form.controls.amount.touched && form.controls.amount.invalid)">{{ minAmountHint }}</div>
+          <div class="fp-field-error" *ngIf="form.controls.amount.touched && form.controls.amount.hasError('required')">請輸入金額</div>
+          <div class="fp-field-error" *ngIf="form.controls.amount.touched && form.controls.amount.hasError('pattern')">請輸入數字</div>
+          <div class="fp-field-error" *ngIf="form.controls.amount.touched && form.controls.amount.hasError('min') && !form.controls.amount.hasError('pattern')">{{ minAmountErrorMsg }}</div>
+        </div>
       </section>
 
       <!-- 加碼模式：Pay 設定維持既有，顯示說明 -->
@@ -245,7 +264,7 @@
 
         <div class="pay-paused-box" *ngIf="!payActive">
           <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
-          <span>已設定為暫停 Pay 出，申購後不執行自動提領。</span>
+          <span>已設定為暫停 Pay 出。</span>
         </div>
 
         <ng-container *ngIf="payActive">
@@ -285,16 +304,27 @@
         </div>
 
         <div *ngIf="payMode === 'amount'" class="pay-mode-panel">
-          <mat-form-field appearance="standard" color="accent" class="full-field pay-amount-field">
-            <mat-label>每月 Pay 金額</mat-label>
-            <input matInput type="text" inputmode="numeric" formControlName="monthlyPay" appThousands required>
-            <mat-hint *ngIf="!hasPayInput">{{ monthlyPayRangeHint }}</mat-hint>
-            <mat-hint *ngIf="hasPayInput && annualRate <= 15">年化約 {{ formatAnnualPayRate(annualRate) }}</mat-hint>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('required')">請輸入每月 Pay 金額，範圍為 {{ monthlyPayRangeValue }}</mat-error>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('pattern')">請輸入數字，範圍為 {{ monthlyPayRangeValue }}</mat-error>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('min') && !form.controls.monthlyPay.hasError('pattern')">請輸入 {{ monthlyPayRangeValue }} 的金額</mat-error>
-            <mat-error *ngIf="form.controls.monthlyPay.hasError('annualRateExceeded') && !form.controls.monthlyPay.hasError('pattern')">年化提領率不可超過 15%，請輸入 {{ monthlyPayRangeValue }} 的金額。</mat-error>
-          </mat-form-field>
+          <div class="fp-field" [class.is-error]="form.controls.monthlyPay.touched && form.controls.monthlyPay.invalid">
+            <label class="fp-field-label" for="monthly-pay">每月 Pay 金額</label>
+            <div class="fp-input-box fp-input-box--line">
+              <input
+                id="monthly-pay"
+                class="fp-input"
+                type="text"
+                inputmode="numeric"
+                formControlName="monthlyPay"
+                appThousands
+                required
+                placeholder="輸入金額"
+              >
+            </div>
+            <div class="fp-field-hint" *ngIf="!(form.controls.monthlyPay.touched && form.controls.monthlyPay.invalid) && !hasPayInput">{{ monthlyPayRangeHint }}</div>
+            <div class="fp-field-hint" *ngIf="!(form.controls.monthlyPay.touched && form.controls.monthlyPay.invalid) && hasPayInput && annualRate <= 15">年化約 {{ formatAnnualPayRate(annualRate) }}</div>
+            <div class="fp-field-error" *ngIf="form.controls.monthlyPay.touched && form.controls.monthlyPay.hasError('required')">請輸入金額，範圍為 {{ monthlyPayRangeValue }}</div>
+            <div class="fp-field-error" *ngIf="form.controls.monthlyPay.touched && form.controls.monthlyPay.hasError('pattern')">請輸入數字，範圍為 {{ monthlyPayRangeValue }}</div>
+            <div class="fp-field-error" *ngIf="form.controls.monthlyPay.touched && form.controls.monthlyPay.hasError('min') && !form.controls.monthlyPay.hasError('pattern')">請輸入 {{ monthlyPayRangeValue }} 的金額</div>
+            <div class="fp-field-error" *ngIf="form.controls.monthlyPay.touched && form.controls.monthlyPay.hasError('annualRateExceeded') && !form.controls.monthlyPay.hasError('pattern')">年化提領率不可超過 15%，請輸入 {{ monthlyPayRangeValue }} 的金額。</div>
+          </div>
         </div>
 
         <div *ngIf="payMode === 'ratio'" class="pay-mode-panel">
@@ -466,29 +496,29 @@
                 </button>
               </div>
 
-              <mat-form-field
+              <div
+                class="fp-field threshold-custom-field"
                 *ngIf="thresholdCustomActive"
-                appearance="standard"
-                color="accent"
-                class="threshold-custom-field"
+                [class.is-error]="form.controls.thresholdCustom.touched && form.controls.thresholdCustom.invalid"
               >
-                <mat-label>{{ thresholdMode === 'protect' ? '自訂守護比例' : '自訂增值比例' }}</mat-label>
-                <input
-                  matInput
-                  type="text"
-                  inputmode="numeric"
-                  formControlName="thresholdCustom"
-                  required
-                  (input)="setCustomThresholdValue(form.controls.thresholdCustom.value)"
-                >
-                <span matSuffix>%</span>
-                <mat-hint>{{ thresholdMode === 'protect' ? '可輸入 70–100 的整數' : '可輸入 101–200 的整數' }}</mat-hint>
-                <mat-error *ngIf="form.controls.thresholdCustom.hasError('required')">請輸入自訂比例</mat-error>
-                <mat-error *ngIf="form.controls.thresholdCustom.hasError('pattern')">請輸入整數</mat-error>
-                <mat-error *ngIf="form.controls.thresholdCustom.hasError('min') || form.controls.thresholdCustom.hasError('max')">
-                  {{ thresholdMode === 'protect' ? '請輸入 70–100 的數值' : '請輸入 101–200 的數值' }}
-                </mat-error>
-              </mat-form-field>
+                <label class="fp-field-label" for="threshold-custom">{{ thresholdMode === 'protect' ? '自訂守護比例' : '自訂增值比例' }}</label>
+                <div class="fp-input-box fp-input-box--line">
+                  <input
+                    id="threshold-custom"
+                    class="fp-input"
+                    type="text"
+                    inputmode="numeric"
+                    formControlName="thresholdCustom"
+                    required
+                    (input)="setCustomThresholdValue(form.controls.thresholdCustom.value)"
+                  >
+                  <span class="fp-input-suffix">%</span>
+                </div>
+                <div class="fp-field-hint" *ngIf="!(form.controls.thresholdCustom.touched && form.controls.thresholdCustom.invalid)">{{ thresholdMode === 'protect' ? '可輸入 70–100 的整數' : '可輸入 101–200 的整數' }}</div>
+                <div class="fp-field-error" *ngIf="form.controls.thresholdCustom.touched && form.controls.thresholdCustom.hasError('required')">請輸入自訂比例</div>
+                <div class="fp-field-error" *ngIf="form.controls.thresholdCustom.touched && form.controls.thresholdCustom.hasError('pattern')">請輸入整數</div>
+                <div class="fp-field-error" *ngIf="form.controls.thresholdCustom.touched && (form.controls.thresholdCustom.hasError('min') || form.controls.thresholdCustom.hasError('max'))">{{ thresholdMode === 'protect' ? '請輸入 70–100 的數值' : '請輸入 101–200 的數值' }}</div>
+              </div>
               </div>
                 <div class="threshold-estimate" *ngIf="showThresholdPreview">
                   <strong>
@@ -653,13 +683,14 @@
         <div class="block-header">
           <h2 class="block-title">交易密碼</h2>
         </div>
-        <mat-form-field appearance="standard" color="accent" class="full-field">
-          <mat-label>請輸入交易密碼</mat-label>
-          <input matInput [type]="pwdVisible ? 'text' : 'password'" [(ngModel)]="pwd" autocomplete="off">
-          <button mat-icon-button matSuffix type="button" (click)="pwdVisible = !pwdVisible" [attr.aria-label]="pwdVisible ? '隱藏密碼' : '顯示密碼'">
-            <i class="bi" [class.bi-eye]="!pwdVisible" [class.bi-eye-slash]="pwdVisible"></i>
-          </button>
-        </mat-form-field>
+        <div class="fp-field">
+          <div class="fp-input-box fp-input-box--line">
+            <input class="fp-input" [type]="pwdVisible ? 'text' : 'password'" [(ngModel)]="pwd" autocomplete="off" placeholder="輸入密碼" aria-label="交易密碼">
+            <button class="fp-input-affix" type="button" (click)="pwdVisible = !pwdVisible" [attr.aria-label]="pwdVisible ? '隱藏密碼' : '顯示密碼'">
+              <i class="bi" [class.bi-eye]="!pwdVisible" [class.bi-eye-slash]="pwdVisible"></i>
+            </button>
+          </div>
+        </div>
       </section>
     </section>
 

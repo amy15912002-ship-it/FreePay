@@ -322,6 +322,103 @@ textarea {
   color: var(--color-input-text);
 }
 
+// ── Input（輸入框）元件 — DesignSystem §2.1 ──
+// 原生 input + token；標題置頂；外框 / 底線兩變體（設計師依版面選用）
+.fp-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+}
+
+.fp-field-label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-input-label);
+}
+
+.fp-input-box {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color .12s, box-shadow .12s;
+}
+
+// 變體一：有框
+.fp-input-box--box {
+  height: 44px;
+  padding: 0 12px;
+  border: 1px solid var(--color-input-border-default);
+  border-radius: 8px;
+  background: var(--color-input-bg);
+
+  &:hover { border-color: var(--color-input-border-hover); }
+
+  &:focus-within {
+    border-color: var(--color-input-border-focus);
+    box-shadow: var(--color-input-shadow-focus);
+  }
+}
+
+.fp-field.is-error .fp-input-box--box {
+  border-color: var(--color-input-border-error);
+
+  &:focus-within { box-shadow: var(--color-input-shadow-error); }
+}
+
+// 變體二：底線
+.fp-input-box--line {
+  height: 40px;
+  border-bottom: 2px solid var(--color-input-border-default);
+
+  &:hover { border-bottom-color: var(--color-input-border-hover); }
+  &:focus-within { border-bottom-color: var(--color-input-border-focus); }
+}
+
+.fp-field.is-error .fp-input-box--line {
+  border-bottom-color: var(--color-input-border-error);
+}
+
+.fp-input {
+  flex: 1;
+  min-width: 0;
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: var(--font-primary);
+  font-size: 16px;
+  color: var(--color-input-text);
+
+  &::placeholder { color: var(--color-input-placeholder); }
+}
+
+// 後綴：icon 鈕（如密碼顯示切換）
+.fp-input-affix {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-text-secondary);
+  cursor: pointer;
+
+  &:hover { color: var(--color-text-primary); }
+}
+
+// 後綴：靜態單位（如 %）
+.fp-input-suffix {
+  flex: 0 0 auto;
+  color: var(--color-input-text);
+  font-size: 16px;
+}
+
+.fp-field-hint { font-size: 12px; color: var(--color-input-helper); }
+.fp-field-error { font-size: 12px; color: var(--color-input-helper-error); }
+
 .mat-hint {
   color: var(--color-input-helper);
 }
@@ -361,6 +458,12 @@ textarea {
   white-space: nowrap;
 }
 
+.fp-site-brand-logo {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .fp-site-logo {
   display: block;
   width: auto;
@@ -378,6 +481,7 @@ textarea {
   font-size: 20px;
   font-weight: 700;
   letter-spacing: .02em;
+  text-decoration: none;
   white-space: nowrap;
 }
 
@@ -609,6 +713,76 @@ table th { font-size: 14px; }
 .val-up   { color: var(--color-price-up); }
 .val-down { color: var(--color-price-down); }
 
+// Platform tab nav based on Angular Material v14 mat-tab-nav-bar.
+// Use .ds-tab-nav for page-level tab navigation across products.
+.ds-tab-nav {
+  display: flex;
+  align-items: stretch;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.ds-tab-nav .mat-tab-nav-bar {
+  flex: 1;
+  min-width: 0;
+  border-bottom: none;
+}
+
+.ds-tab-nav--page .mat-tab-link {
+  height: 64px;
+  min-width: 0;
+  padding: 0 32px;
+  font-family: var(--font-primary);
+  font-size: 20px;
+  opacity: 1;
+}
+
+.ds-tab-nav .mat-tab-link.mat-tab-label-active {
+  color: var(--color-action-primary);
+  font-weight: 700;
+}
+
+// 內容切換 tab：語意化 button tablist，不依賴 Material，跨版本零負擔。
+// 標準見 DesignSystem.md §3.7。fund-select 解凍後 fs-tab 收斂至此（僅改 class 名）。
+.ds-content-tab {
+  display: flex;
+  align-items: flex-end;
+  gap: 24px;
+  border-bottom: 1px solid var(--color-border-default);
+}
+
+.ds-content-tab__item {
+  padding: 10px 4px;
+  white-space: nowrap;
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: color .12s, border-color .12s;
+}
+
+.ds-content-tab__item:hover { color: var(--color-text-primary); }
+
+.ds-content-tab__item.is-active {
+  color: var(--color-action-primary);
+  border-bottom-color: var(--color-action-primary);
+  font-weight: 700;
+}
+
+@media (max-width: 767px) {
+  .ds-tab-nav--page .mat-tab-link {
+    height: 48px;
+    padding: 0 14px;
+    font-size: 14px;
+  }
+
+  .ds-content-tab { overflow-x: auto; }
+}
+
 // mat-button-toggle-group colour tokens (design system override)
 // .mode-toggle        — colours only; width is determined by context
 // .mode-toggle-fill   — adds full-width stretch (for form settings blocks)
@@ -674,7 +848,8 @@ table th { font-size: 14px; }
   min-height: 32px;
   padding: 6px 14px;
   border: 1px solid var(--color-neutral-200);
-  border-radius: 8px;
+  // 圓角膠囊（DesignSystem §3.9）
+  border-radius: 999px;
   background: var(--color-neutral-0);
   color: var(--color-neutral-600);
   font-size: 14px;
@@ -724,14 +899,16 @@ table th { font-size: 14px; }
 .circle-btn--sell {
   font-size: 12px;
   font-weight: 700;
+  line-height: 1;
 }
 
 .circle-btn--buy {
   border-color: var(--color-brand-primary-400);
   background: var(--color-brand-primary-400);
   color: var(--color-text-on-brand);
-  font-size: 14px;
+  font-size: 12px;
   font-weight: 700;
+  line-height: 1;
 }
 
 .circle-btn--buy:hover {
@@ -772,4 +949,10 @@ table th { font-size: 14px; }
   }
 
   li + li { margin-top: 4px; }
+}
+
+// Design system chip refinements.
+.filter-chips .mat-chip-list-wrapper {
+  margin-top: 0;
+  margin-bottom: 0;
 }

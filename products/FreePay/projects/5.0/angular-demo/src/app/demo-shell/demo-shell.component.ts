@@ -398,11 +398,11 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get thresholdPreviewLead(): string {
-    return this.thresholdMode === 'protect' ? '市值低於投入成本' : '市值超過投入成本';
+    return this.thresholdMode === 'protect' ? '市值低於投入成本' : '市值高於投入成本';
   }
 
   get thresholdPreviewSuffix(): string {
-    return this.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時，開始 Pay 出';
+    return this.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時，開始Pay出';
   }
 
   get thresholdPreviewAmount(): number {

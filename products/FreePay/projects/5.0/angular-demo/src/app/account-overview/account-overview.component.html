@@ -1,6 +1,6 @@
 <div class="ov-shell">
 
-  <div class="ov-nav-row">
+  <div class="ds-tab-nav ds-tab-nav--page">
     <nav mat-tab-nav-bar [tabPanel]="tabPanel" color="primary">
       <a mat-tab-link [active]="activeTab === 'overview'" (click)="activeTab = 'overview'">帳戶總覽</a>
       <a mat-tab-link [active]="activeTab === 'order'"   (click)="activeTab = 'order'">委託查詢/取消</a>
@@ -170,8 +170,8 @@
                   class="circle-btn circle-btn--buy"
                   type="button"
                   (click)="onAction('加碼', f.contracts[0].fpNo)"
-                  aria-label="申購"
-                  title="申購"
+                  aria-label="加碼"
+                  title="加碼"
                 >
                   BUY
                 </button>
@@ -378,13 +378,14 @@
       <div class="ov-cancel-bar" *ngIf="selectedCount > 0">
         <div class="ov-cancel-info">已選取 <strong>{{ selectedCount }}</strong> 筆委託</div>
         <div class="ov-cancel-pwd-row">
-          <span class="ov-cancel-label">交易密碼</span>
-          <mat-form-field appearance="standard" color="accent" class="ov-cancel-pwd-field">
-            <input matInput [type]="cancelPwdVisible ? 'text' : 'password'" [(ngModel)]="cancelPwd" autocomplete="off" placeholder="請輸入交易密碼">
-            <button mat-icon-button matSuffix type="button" (click)="cancelPwdVisible = !cancelPwdVisible" [attr.aria-label]="cancelPwdVisible ? '隱藏密碼' : '顯示密碼'">
-              <i class="bi" [class.bi-eye]="!cancelPwdVisible" [class.bi-eye-slash]="cancelPwdVisible"></i>
-            </button>
-          </mat-form-field>
+          <div class="fp-field ov-cancel-pwd-field">
+            <div class="fp-input-box fp-input-box--line">
+              <input class="fp-input" [type]="cancelPwdVisible ? 'text' : 'password'" [(ngModel)]="cancelPwd" autocomplete="off" placeholder="輸入交易密碼" aria-label="交易密碼">
+              <button class="fp-input-affix" type="button" (click)="cancelPwdVisible = !cancelPwdVisible" [attr.aria-label]="cancelPwdVisible ? '隱藏密碼' : '顯示密碼'">
+                <i class="bi" [class.bi-eye]="!cancelPwdVisible" [class.bi-eye-slash]="cancelPwdVisible"></i>
+              </button>
+            </div>
+          </div>
         </div>
         <div class="ov-cancel-actions">
           <button mat-stroked-button type="button" (click)="selectedOrders.clear()">清除選取</button>
@@ -535,8 +536,8 @@
         <div class="ov-change-topbar">
           <div class="ov-change-topbar-left">
             <mat-button-toggle-group class="mode-toggle" [(ngModel)]="changeView" aria-label="檢視切換">
+              <mat-button-toggle value="settings">設定</mat-button-toggle>
               <mat-button-toggle value="history">異動歷史</mat-button-toggle>
-              <mat-button-toggle value="settings">設定調整</mat-button-toggle>
             </mat-button-toggle-group>
             <span class="ov-order-count" *ngIf="changeView === 'history'">{{ filteredChangeLogs.length }} 筆</span>
             <span class="ov-order-count" *ngIf="changeView === 'settings'">{{ settingsFunds.length }} 筆可異動契約</span>
@@ -642,7 +643,7 @@
           <mat-chip-list class="filter-chips" aria-label="交易類型">
             <mat-chip [selectable]="false" [selected]="detailTxType==='all'" (click)="detailTxType='all'">全部</mat-chip>
             <mat-chip [selectable]="false" [selected]="detailTxType==='A'" (click)="detailTxType='A'">申購</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTxType==='R'" (click)="detailTxType='R'">自由Pay出</mat-chip>
+            <mat-chip [selectable]="false" [selected]="detailTxType==='R'" (click)="detailTxType='R'">Pay出</mat-chip>
             <mat-chip [selectable]="false" [selected]="detailTxType==='RDM'" (click)="detailTxType='RDM'">贖回</mat-chip>
           </mat-chip-list>
         </div>
