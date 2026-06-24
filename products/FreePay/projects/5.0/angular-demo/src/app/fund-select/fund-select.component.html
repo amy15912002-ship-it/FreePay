@@ -327,22 +327,42 @@
           <ng-container *ngIf="activeTab==='perf'">
             <div class="fs-fund-card-metric"><span class="m-lbl">今年</span><span class="m-val" [ngClass]="numClass(perfYtd(f))">{{ fmtPct(perfYtd(f)) }}</span></div>
             <div class="fs-fund-card-metric"><span class="m-lbl">3個月</span><span class="m-val" [ngClass]="numClass(f.perf.m3)">{{ fmtPct(f.perf.m3) }}</span></div>
-            <div class="fs-fund-card-metric"><span class="m-lbl">6個月</span><span class="m-val" [ngClass]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</span></div>
+            <ng-container *ngIf="mobileSortSummaryValue(f); else perfDefaultThirdMetric">
+              <div class="fs-fund-card-metric"><span class="m-lbl">{{ mobileSortSummaryLabel() }}</span><span class="m-val" [ngClass]="mobileSortSummaryClass(f)">{{ mobileSortSummaryValue(f) }}</span></div>
+            </ng-container>
+            <ng-template #perfDefaultThirdMetric>
+              <div class="fs-fund-card-metric"><span class="m-lbl">6個月</span><span class="m-val" [ngClass]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</span></div>
+            </ng-template>
           </ng-container>
           <ng-container *ngIf="activeTab==='nav'">
             <div class="fs-fund-card-metric"><span class="m-lbl">淨值</span><span class="m-val">{{ fmtNav(f.nav) }}</span></div>
             <div class="fs-fund-card-metric"><span class="m-lbl">日漲跌</span><span class="m-val" [ngClass]="numClass(f.navChange)">{{ fmtNav(f.navChange) }}</span></div>
-            <div class="fs-fund-card-metric"><span class="m-lbl">日漲跌幅</span><span class="m-val" [ngClass]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</span></div>
+            <ng-container *ngIf="mobileSortSummaryValue(f); else navDefaultThirdMetric">
+              <div class="fs-fund-card-metric"><span class="m-lbl">{{ mobileSortSummaryLabel() }}</span><span class="m-val" [ngClass]="mobileSortSummaryClass(f)">{{ mobileSortSummaryValue(f) }}</span></div>
+            </ng-container>
+            <ng-template #navDefaultThirdMetric>
+              <div class="fs-fund-card-metric"><span class="m-lbl">日漲跌幅</span><span class="m-val" [ngClass]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</span></div>
+            </ng-template>
           </ng-container>
           <ng-container *ngIf="activeTab==='roi'">
             <div class="fs-fund-card-metric"><span class="m-lbl">2025</span><span class="m-val" [ngClass]="numClass(f.yearRoi[4])">{{ fmtPct(f.yearRoi[4]) }}</span></div>
             <div class="fs-fund-card-metric"><span class="m-lbl">2024</span><span class="m-val" [ngClass]="numClass(f.yearRoi[3])">{{ fmtPct(f.yearRoi[3]) }}</span></div>
-            <div class="fs-fund-card-metric"><span class="m-lbl">2023</span><span class="m-val" [ngClass]="numClass(f.yearRoi[2])">{{ fmtPct(f.yearRoi[2]) }}</span></div>
+            <ng-container *ngIf="mobileSortSummaryValue(f); else roiDefaultThirdMetric">
+              <div class="fs-fund-card-metric"><span class="m-lbl">{{ mobileSortSummaryLabel() }}</span><span class="m-val" [ngClass]="mobileSortSummaryClass(f)">{{ mobileSortSummaryValue(f) }}</span></div>
+            </ng-container>
+            <ng-template #roiDefaultThirdMetric>
+              <div class="fs-fund-card-metric"><span class="m-lbl">2023</span><span class="m-val" [ngClass]="numClass(f.yearRoi[2])">{{ fmtPct(f.yearRoi[2]) }}</span></div>
+            </ng-template>
           </ng-container>
           <ng-container *ngIf="activeTab==='drop'">
             <div class="fs-fund-card-metric"><span class="m-lbl">2025</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[4])">{{ fmtPct(f.yearMaxDrop[4]) }}</span></div>
             <div class="fs-fund-card-metric"><span class="m-lbl">2024</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[3])">{{ fmtPct(f.yearMaxDrop[3]) }}</span></div>
-            <div class="fs-fund-card-metric"><span class="m-lbl">2023</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[2])">{{ fmtPct(f.yearMaxDrop[2]) }}</span></div>
+            <ng-container *ngIf="mobileSortSummaryValue(f); else dropDefaultThirdMetric">
+              <div class="fs-fund-card-metric"><span class="m-lbl">{{ mobileSortSummaryLabel() }}</span><span class="m-val" [ngClass]="mobileSortSummaryClass(f)">{{ mobileSortSummaryValue(f) }}</span></div>
+            </ng-container>
+            <ng-template #dropDefaultThirdMetric>
+              <div class="fs-fund-card-metric"><span class="m-lbl">2023</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[2])">{{ fmtPct(f.yearMaxDrop[2]) }}</span></div>
+            </ng-template>
           </ng-container>
           <ng-container *ngIf="activeTab==='rating'">
             <div class="fs-fund-card-metric"><span class="m-lbl">風險等級</span><span class="m-val">{{ f.risk }}</span></div>
@@ -354,27 +374,28 @@
       <div class="fs-fund-card-foot">
         <span class="fs-fund-card-navdate">
           <ng-container *ngIf="activeTab === 'nav'"><span class="m-lbl">淨值日</span>{{ f.navDate }}</ng-container>
-          <ng-container *ngIf="activeTab !== 'nav' && mobileSortSummaryValue(f)">
-            <span class="m-lbl">{{ mobileSortSummaryLabel() }}</span><span [ngClass]="mobileSortSummaryClass(f)">{{ mobileSortSummaryValue(f) }}</span>
-          </ng-container>
         </span>
         <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">BUY</button>
       </div>
       <div class="fs-fund-card-detail" *ngIf="activeTab !== 'rating' && isCardExpanded(f.fundId)">
         <ng-container *ngIf="activeTab==='perf'">
+          <div class="fs-fund-card-row" *ngIf="mobileSortSummaryValue(f)"><span class="r-lbl">6個月</span><span class="r-val" [ngClass]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">1年</span><span class="r-val" [ngClass]="numClass(f.perf.y1)">{{ fmtPct(f.perf.y1) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">2年</span><span class="r-val" [ngClass]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">3年</span><span class="r-val" [ngClass]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">5年</span><span class="r-val" [ngClass]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</span></div>
         </ng-container>
         <ng-container *ngIf="activeTab==='nav'">
-          <div class="fs-fund-card-row"><span class="r-lbl">幣別</span><span class="r-val">{{ f.pricingCurrency }}</span></div>
+          <div class="fs-fund-card-row" *ngIf="mobileSortSummaryValue(f)"><span class="r-lbl">日漲跌幅</span><span class="r-val" [ngClass]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</span></div>
+          <div class="fs-fund-card-row" *ngIf="sortKey !== 'currency'"><span class="r-lbl">幣別</span><span class="r-val">{{ f.pricingCurrency }}</span></div>
         </ng-container>
         <ng-container *ngIf="activeTab==='roi'">
+          <div class="fs-fund-card-row" *ngIf="mobileSortSummaryValue(f)"><span class="r-lbl">2023</span><span class="r-val" [ngClass]="numClass(f.yearRoi[2])">{{ fmtPct(f.yearRoi[2]) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">2022</span><span class="r-val" [ngClass]="numClass(f.yearRoi[1])">{{ fmtPct(f.yearRoi[1]) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">2021</span><span class="r-val" [ngClass]="numClass(f.yearRoi[0])">{{ fmtPct(f.yearRoi[0]) }}</span></div>
         </ng-container>
         <ng-container *ngIf="activeTab==='drop'">
+          <div class="fs-fund-card-row" *ngIf="mobileSortSummaryValue(f)"><span class="r-lbl">2023</span><span class="r-val" [ngClass]="numClass(f.yearMaxDrop[2])">{{ fmtPct(f.yearMaxDrop[2]) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">2022</span><span class="r-val" [ngClass]="numClass(f.yearMaxDrop[1])">{{ fmtPct(f.yearMaxDrop[1]) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">2021</span><span class="r-val" [ngClass]="numClass(f.yearMaxDrop[0])">{{ fmtPct(f.yearMaxDrop[0]) }}</span></div>
         </ng-container>

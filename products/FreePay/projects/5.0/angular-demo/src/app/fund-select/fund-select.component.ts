@@ -361,9 +361,10 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   }
 
   private shouldShowMobileSortSummary(): boolean {
-    if (this.activeTab === 'nav') return false;
     if (!this.mobileSortOptions.some(opt => opt.key === this.sortKey)) return false;
+    if (this.sortKey === 'fundId' || this.sortKey === 'name') return false;
     if (this.activeTab === 'perf') return !['perf.ytd', 'perf.m3', 'perf.m6'].includes(this.sortKey);
+    if (this.activeTab === 'nav') return !['nav', 'navChange', 'navChangePct', 'navDate'].includes(this.sortKey);
     if (this.activeTab === 'roi') return !['roi.4', 'roi.3', 'roi.2'].includes(this.sortKey);
     if (this.activeTab === 'drop') return !['drop.4', 'drop.3', 'drop.2'].includes(this.sortKey);
     if (this.activeTab === 'rating') return false;
