@@ -245,6 +245,16 @@ textarea {
   letter-spacing: 0;
 }
 
+.ds-action-button.mat-button-base {
+  border-radius: 999px !important;
+  overflow: hidden;
+}
+
+.ds-action-button.mat-button-base .mat-button-focus-overlay,
+.ds-action-button.mat-button-base .mat-button-ripple {
+  border-radius: inherit;
+}
+
 .mat-raised-button.mat-primary,
 .mat-flat-button.mat-primary {
   background-color: var(--color-brand-primary-400);
@@ -416,8 +426,8 @@ textarea {
   font-size: 16px;
 }
 
-.fp-field-hint { font-size: 12px; color: var(--color-input-helper); }
-.fp-field-error { font-size: 12px; color: var(--color-input-helper-error); }
+.fp-field-hint { font-size: 14px; color: var(--color-input-helper); }
+.fp-field-error { font-size: 14px; color: var(--color-input-helper-error); }
 
 .mat-hint {
   color: var(--color-input-helper);
@@ -708,6 +718,12 @@ textarea {
 
 // Table header — design system §4.2: table headers use Body SM (14px)
 table th { font-size: 14px; }
+
+// 數字等寬 — design system §4.5：表格與資料列數字欄一律 tabular-nums，避免逐列跳動。
+// font-variant-numeric 會繼承，掛在容器即涵蓋內部數字（對非數字文字無副作用）。
+.grid-body,
+.grid-stack,
+table { font-variant-numeric: tabular-nums; }
 
 // Price direction — always use design-system tokens, never action-primary
 .val-up   { color: var(--color-price-up); }

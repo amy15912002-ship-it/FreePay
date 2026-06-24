@@ -16,7 +16,7 @@ import {
 
 type DomicileOption = Fund['domicile'];
 type PricingCcyOption = string;
-type FundTab = 'perf' | 'roi' | 'drop' | 'nav';
+type FundTab = 'perf' | 'roi' | 'drop' | 'nav' | 'rating';
 type CollapsibleFilter = 'category' | 'pricingCcy' | 'brand' | 'region' | 'group' | 'lipper' | 'risk';
 
 type SortKey =
@@ -24,7 +24,7 @@ type SortKey =
   | 'perf.m3' | 'perf.m6' | 'perf.y1' | 'perf.y2' | 'perf.y3' | 'perf.y5' | 'stdDev'
   | 'roi.0' | 'roi.1' | 'roi.2' | 'roi.3' | 'roi.4'
   | 'drop.0' | 'drop.1' | 'drop.2' | 'drop.3' | 'drop.4'
-  | 'navDate' | 'nav' | 'navChange' | 'navChangePct' | 'currency';
+  | 'navDate' | 'nav' | 'navChange' | 'navChangePct' | 'currency' | 'risk' | 'lipper';
 type PerfKey = keyof Fund['perf'];
 type SortOption = { key: SortKey; label: string };
 
@@ -59,7 +59,6 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     { key: 'perf.y2', label: '2年' },
     { key: 'perf.y3', label: '3年' },
     { key: 'perf.y5', label: '5年' },
-    { key: 'stdDev', label: '波動度' },
     { key: 'fundId', label: '代碼' },
     { key: 'name', label: '名稱' }
   ];
@@ -83,6 +82,11 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     { key: 'nav', label: '淨值' },
     { key: 'navDate', label: '日期' },
     { key: 'currency', label: '幣別' }
+  ];
+  readonly ratingSortOptions: SortOption[] = [
+    { key: 'risk', label: '風險等級' },
+    { key: 'lipper', label: '理柏總回報' },
+    { key: 'stdDev', label: '波動度' }
   ];
 
   get pricingCurrencies(): PricingCcyOption[] {
@@ -220,6 +224,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     if (this.activeTab === 'perf') return this.perfSortOptions;
     if (this.activeTab === 'roi') return this.roiSortOptions;
     if (this.activeTab === 'drop') return this.dropSortOptions;
+    if (this.activeTab === 'rating') return this.ratingSortOptions;
     return this.navSortOptions;
   }
 
@@ -281,6 +286,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     if (key === 'navChangePct') return f.navChangePct;
     if (key === 'navDate') return f.navDate;
     if (key === 'currency') return f.pricingCurrency;
+    if (key === 'risk') return f.risk;
+    if (key === 'lipper') return f.lipper;
     return 0;
   }
 
@@ -297,11 +304,10 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
 
   setTab(tab: FundTab): void {
     this.activeTab = tab;
-    if (tab === 'perf') this.sortKey = 'perf.m6';
-    else if (tab === 'roi') this.sortKey = 'roi.4';     // 預設依最新一年排序
-    else if (tab === 'drop') this.sortKey = 'drop.4';
-    else this.sortKey = 'navChangePct';                 // 最新淨值：預設依日漲跌幅排序
-    this.sortDesc = true;
+    if (tab === 'perf') {
+      this.sortKey = 'perf.m6';
+      this.sortDesc = true;
+    }
     this.page = 1;
   }
 

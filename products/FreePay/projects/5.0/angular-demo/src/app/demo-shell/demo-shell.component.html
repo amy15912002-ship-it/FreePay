@@ -713,9 +713,9 @@
           <div class="sum-row"><span>{{ isRedeemMode ? '收款帳號' : '扣款帳號' }}</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
         </div>
         <div class="done-actions">
-          <button mat-stroked-button type="button" (click)="queryTrade()">委託查詢</button>
-          <button *ngIf="!isRedeemMode" mat-raised-button color="primary" type="button" (click)="reset()">繼續申購</button>
-          <button *ngIf="isRedeemMode" mat-raised-button color="primary" type="button" (click)="goOverview()">帳戶總覽</button>
+          <button class="ds-action-button" mat-stroked-button type="button" (click)="queryTrade()">委託查詢</button>
+          <button class="ds-action-button" *ngIf="!isRedeemMode" mat-raised-button color="primary" type="button" (click)="reset()">繼續申購</button>
+          <button class="ds-action-button" *ngIf="isRedeemMode" mat-raised-button color="primary" type="button" (click)="goOverview()">帳戶總覽</button>
         </div>
         <fp-notes [notes]="doneNotes"></fp-notes>
       </section>
@@ -725,8 +725,8 @@
 
 <div class="action-bar" *ngIf="activeStep !== 'done'">
   <div class="action-inner">
-    <button mat-stroked-button type="button" (click)="previous()">上一步</button>
-    <button mat-raised-button color="primary" type="button" [disabled]="actionDisabled" (click)="next()">
+    <button class="ds-action-button" mat-stroked-button type="button" (click)="previous()">上一步</button>
+    <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="actionDisabled" (click)="next()">
       {{ primaryActionLabel }}
       <i class="bi bi-check-lg" *ngIf="primaryActionIsSubmit"></i>
     </button>

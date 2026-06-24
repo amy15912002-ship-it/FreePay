@@ -16,8 +16,12 @@
 }
 
 .fs-title {
+  margin: 0;
   text-align: center;
-  font-size: 22px;
+  color: var(--color-text-heading);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.4;
 }
 
 // ── 已篩條件 ─────────────────────────────────────────────
@@ -673,7 +677,7 @@
     gap: 12px;
     margin-top: -4px;
     color: var(--color-text-secondary);
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .fs-summary-result {
@@ -710,7 +714,7 @@
     background: var(--color-neutral-0);
     color: var(--color-action-primary);
     font-family: var(--font-primary);
-    font-size: 15px;
+    font-size: 14px;
     font-weight: 700;
 
     // 有篩選：整顆按鈕填滿品牌色 + 白色實心漏斗（不用數字）
@@ -936,7 +940,7 @@
   .fs-filter-more {
     height: 30px;
     padding: 0 8px;
-    font-size: 13px;
+    font-size: 14px;
   }
 
   .fs-filter-more--icon {

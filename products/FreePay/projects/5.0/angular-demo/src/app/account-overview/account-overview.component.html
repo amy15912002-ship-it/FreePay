@@ -78,7 +78,7 @@
       <section class="ov-section" aria-labelledby="ov-detail-title">
         <div class="block-header">
           <h2 class="block-title" id="ov-detail-title">明細</h2>
-          <a mat-stroked-button color="primary" routerLink="/demo/search">立即申購</a>
+          <a class="ds-action-button" mat-stroked-button color="primary" routerLink="/demo/search">立即申購</a>
         </div>
 
         <div class="grid-table grid-table--fund">
@@ -388,8 +388,8 @@
           </div>
         </div>
         <div class="ov-cancel-actions">
-          <button mat-stroked-button type="button" (click)="selectedOrders.clear()">清除選取</button>
-          <button mat-raised-button color="primary" type="button" [disabled]="cancelDisabled" (click)="submitCancel()">確認取消</button>
+          <button class="ds-action-button" mat-stroked-button type="button" (click)="selectedOrders.clear()">清除選取</button>
+          <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="cancelDisabled" (click)="submitCancel()">確認取消</button>
         </div>
       </div>
 
@@ -537,7 +537,7 @@
           <div class="ov-change-topbar-left">
             <mat-button-toggle-group class="mode-toggle" [(ngModel)]="changeView" aria-label="檢視切換">
               <mat-button-toggle value="settings">設定</mat-button-toggle>
-              <mat-button-toggle value="history">異動歷史</mat-button-toggle>
+              <mat-button-toggle value="history">歷史</mat-button-toggle>
             </mat-button-toggle-group>
             <span class="ov-order-count" *ngIf="changeView === 'history'">{{ filteredChangeLogs.length }} 筆</span>
             <span class="ov-order-count" *ngIf="changeView === 'settings'">{{ settingsFunds.length }} 筆可異動契約</span>

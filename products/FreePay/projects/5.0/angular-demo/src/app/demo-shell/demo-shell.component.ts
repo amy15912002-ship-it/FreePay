@@ -248,6 +248,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   get flowPageTitle(): string {
     if (this.isRedeemMode) return '自由Pay-基金贖回';
     if (this.isModifyMode) return '自由Pay-設定異動';
+    if (this.isAddOnMode) return '自由Pay-加碼申購';
     return '自由Pay-基金申購';
   }
 

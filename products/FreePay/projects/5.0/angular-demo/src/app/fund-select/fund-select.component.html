@@ -185,6 +185,7 @@
     <div class="fs-tabs" role="tablist">
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='perf'" (click)="setTab('perf')">績效表現</button>
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='nav'" (click)="setTab('nav')">最新淨值</button>
+      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='rating'" (click)="setTab('rating')">基金評等</button>
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='roi'" (click)="setTab('roi')">年度報酬率</button>
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
     </div>
@@ -239,7 +240,6 @@
             <th (click)="setSort('perf.y2')">2年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y2')" [class.is-active]="isSortActive('perf.y2')"></i></th>
             <th (click)="setSort('perf.y3')">3年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y3')" [class.is-active]="isSortActive('perf.y3')"></i></th>
             <th (click)="setSort('perf.y5')">5年<i class="bi fs-sort" [ngClass]="sortIconClass('perf.y5')" [class.is-active]="isSortActive('perf.y5')"></i></th>
-            <th (click)="setSort('stdDev')">波動度<i class="bi fs-sort" [ngClass]="sortIconClass('stdDev')" [class.is-active]="isSortActive('stdDev')"></i></th>
           </ng-container>
 
           <ng-container *ngIf="activeTab==='roi'">
@@ -258,6 +258,12 @@
             <th (click)="setSort('navChangePct')">日漲跌幅<i class="bi fs-sort" [ngClass]="sortIconClass('navChangePct')" [class.is-active]="isSortActive('navChangePct')"></i></th>
           </ng-container>
 
+          <ng-container *ngIf="activeTab==='rating'">
+            <th (click)="setSort('risk')">風險等級<i class="bi fs-sort" [ngClass]="sortIconClass('risk')" [class.is-active]="isSortActive('risk')"></i></th>
+            <th (click)="setSort('lipper')">理柏總回報<i class="bi fs-sort" [ngClass]="sortIconClass('lipper')" [class.is-active]="isSortActive('lipper')"></i></th>
+            <th (click)="setSort('stdDev')">波動度<i class="bi fs-sort" [ngClass]="sortIconClass('stdDev')" [class.is-active]="isSortActive('stdDev')"></i></th>
+          </ng-container>
+
           <th class="col-buy">申購</th>
         </tr>
       </thead>
@@ -273,7 +279,6 @@
             <td [class]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</td>
             <td [class]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</td>
             <td [class]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</td>
-            <td>{{ f.stdDev.toFixed(2) }}</td>
           </ng-container>
 
           <ng-container *ngIf="activeTab==='roi'">
@@ -290,6 +295,12 @@
             <td>{{ fmtNav(f.nav) }}</td>
             <td [class]="numClass(f.navChange)">{{ fmtNav(f.navChange) }}</td>
             <td [class]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</td>
+          </ng-container>
+
+          <ng-container *ngIf="activeTab==='rating'">
+            <td>{{ f.risk }}</td>
+            <td>{{ f.lipper }}</td>
+            <td>{{ f.stdDev.toFixed(2) }}</td>
           </ng-container>
 
           <td class="col-buy">
@@ -331,6 +342,11 @@
             <div class="fs-fund-card-metric"><span class="m-lbl">2024</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[3])">{{ fmtPct(f.yearMaxDrop[3]) }}</span></div>
             <div class="fs-fund-card-metric"><span class="m-lbl">2023</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[2])">{{ fmtPct(f.yearMaxDrop[2]) }}</span></div>
           </ng-container>
+          <ng-container *ngIf="activeTab==='rating'">
+            <div class="fs-fund-card-metric"><span class="m-lbl">風險等級</span><span class="m-val">{{ f.risk }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">理柏總回報</span><span class="m-val">{{ f.lipper }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">波動度</span><span class="m-val">{{ f.stdDev.toFixed(2) }}</span></div>
+          </ng-container>
         </div>
       </button>
       <div class="fs-fund-card-foot">
@@ -344,7 +360,6 @@
           <div class="fs-fund-card-row"><span class="r-lbl">2年績效</span><span class="r-val" [ngClass]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">3年績效</span><span class="r-val" [ngClass]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</span></div>
           <div class="fs-fund-card-row"><span class="r-lbl">5年績效</span><span class="r-val" [ngClass]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">波動度</span><span class="r-val">{{ f.stdDev.toFixed(2) }}</span></div>
         </ng-container>
         <ng-container *ngIf="activeTab==='nav'">
           <div class="fs-fund-card-row"><span class="r-lbl">幣別</span><span class="r-val">{{ f.pricingCurrency }}</span></div>

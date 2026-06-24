@@ -11,7 +11,7 @@
   margin: 0 auto 14px;
   padding: 4px 0 0;
   color: var(--color-text-heading);
-  font-size: 24px;
+  font-size: 20px;
   font-weight: 700;
   line-height: 1.35;
   text-align: center;
@@ -258,7 +258,7 @@
   border-radius: 50%;
   background: var(--color-bg-info-subtle);
   color: var(--color-brand-tertiary-600);
-  font-size: 13px;
+  font-size: 14px;
   font-weight: 700;
   line-height: 1;
 }
@@ -474,7 +474,7 @@
   height: 18px;
   margin-top: 4px;
   color: var(--color-input-helper);
-  font-size: 12px;
+  font-size: 14px;
   line-height: 1.4;
 
   span {
@@ -744,7 +744,7 @@
     display: block;
     margin-top: 6px;
     color: var(--color-action-primary);
-    font-size: 24px;
+    font-size: 20px;
     font-weight: 700;
     line-height: 1.2;
   }
@@ -753,7 +753,7 @@
     display: block;
     margin-top: 6px;
     color: var(--color-text-secondary);
-    font-size: 12px;
+    font-size: 14px;
     line-height: 1.5;
   }
 }
@@ -1083,7 +1083,7 @@
     width: 100%;
     margin: 0 0 8px;
     padding: 0 15px;
-    font-size: 20px;
+    font-size: 18px;
     text-align: center;
   }
 
@@ -1530,7 +1530,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
 
 .batch-row-sub {
   color: var(--color-text-tertiary);
-  font-size: 12px;
+  font-size: 14px;
   font-weight: 400;
   line-height: 1.35;
   white-space: nowrap;
