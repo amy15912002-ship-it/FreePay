@@ -21,7 +21,7 @@ type CollapsibleFilter = 'category' | 'pricingCcy' | 'brand' | 'region' | 'group
 
 type SortKey =
   | 'fundId' | 'name'
-  | 'perf.m3' | 'perf.m6' | 'perf.y1' | 'perf.y2' | 'perf.y3' | 'perf.y5' | 'stdDev'
+  | 'perf.ytd' | 'perf.m3' | 'perf.m6' | 'perf.y1' | 'perf.y2' | 'perf.y3' | 'perf.y5' | 'stdDev'
   | 'roi.0' | 'roi.1' | 'roi.2' | 'roi.3' | 'roi.4'
   | 'drop.0' | 'drop.1' | 'drop.2' | 'drop.3' | 'drop.4'
   | 'navDate' | 'nav' | 'navChange' | 'navChangePct' | 'currency' | 'risk' | 'lipper';
@@ -50,9 +50,11 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   ];
   readonly domiciles: DomicileOption[] = ['境內', '境外'];
   readonly years = [2021, 2022, 2023, 2024, 2025];
+  readonly yearsDesc = this.years.map((year, index) => ({ year, index })).reverse();
   pageSize = 20;
   readonly pageSizeOptions = [20, 50, 100];
   readonly perfSortOptions: SortOption[] = [
+    { key: 'perf.ytd', label: '今年' },
     { key: 'perf.m3', label: '3個月' },
     { key: 'perf.m6', label: '6個月' },
     { key: 'perf.y1', label: '1年' },
@@ -121,6 +123,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   activeTab: FundTab = 'perf';
   sortKey: SortKey = 'perf.m6';
   sortDesc = true;
+  pendingSortKey: SortKey = this.sortKey;
+  pendingSortDesc = this.sortDesc;
   page = 1;
   sortPanelOpen = false;
   expandedCards = new Set<string>();
@@ -277,6 +281,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   private fieldValue(f: Fund, key: SortKey): number | string {
     if (key === 'fundId') return f.fundId;
     if (key === 'name') return f.name;
+    if (key === 'perf.ytd') return this.perfYtd(f);
     if (key.startsWith('perf.')) return f.perf[key.split('.')[1] as PerfKey];
     if (key === 'stdDev') return f.stdDev;
     if (key.startsWith('roi.')) return f.yearRoi[Number(key.split('.')[1])];
@@ -297,9 +302,31 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.page = 1;
   }
 
+  openSortPanel(): void {
+    this.pendingSortKey = this.sortKey;
+    this.pendingSortDesc = this.sortDesc;
+    this.sortPanelOpen = true;
+  }
+
+  selectPendingSort(key: SortKey): void {
+    if (this.pendingSortKey === key) this.pendingSortDesc = !this.pendingSortDesc;
+    else { this.pendingSortKey = key; this.pendingSortDesc = true; }
+  }
+
+  applyPendingSort(): void {
+    this.sortKey = this.pendingSortKey;
+    this.sortDesc = this.pendingSortDesc;
+    this.page = 1;
+    this.closeSortPanel();
+  }
+
   toggleSortDirection(): void {
     this.sortDesc = !this.sortDesc;
     this.page = 1;
+  }
+
+  togglePendingSortDirection(): void {
+    this.pendingSortDesc = !this.pendingSortDesc;
   }
 
   setTab(tab: FundTab): void {
@@ -309,6 +336,56 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
       this.sortDesc = true;
     }
     this.page = 1;
+  }
+
+  perfYtd(f: Fund): number {
+    return f.yearRoi[this.years.length - 1] ?? 0;
+  }
+
+  mobileSortSummaryLabel(): string {
+    if (!this.shouldShowMobileSortSummary()) return '';
+    const option = this.mobileSortOptions.find(opt => opt.key === this.sortKey);
+    if (!option) return '';
+    return option.label;
+  }
+
+  mobileSortSummaryValue(f: Fund): string {
+    if (!this.shouldShowMobileSortSummary()) return '';
+    return this.formatSortValue(f, this.sortKey);
+  }
+
+  mobileSortSummaryClass(f: Fund): string {
+    if (!this.shouldShowMobileSortSummary()) return '';
+    if (!this.isSignedSortKey(this.sortKey)) return '';
+    return this.numClass(Number(this.fieldValue(f, this.sortKey)));
+  }
+
+  private shouldShowMobileSortSummary(): boolean {
+    if (this.activeTab === 'nav') return false;
+    if (!this.mobileSortOptions.some(opt => opt.key === this.sortKey)) return false;
+    if (this.activeTab === 'perf') return !['perf.ytd', 'perf.m3', 'perf.m6'].includes(this.sortKey);
+    if (this.activeTab === 'roi') return !['roi.4', 'roi.3', 'roi.2'].includes(this.sortKey);
+    if (this.activeTab === 'drop') return !['drop.4', 'drop.3', 'drop.2'].includes(this.sortKey);
+    if (this.activeTab === 'rating') return false;
+    return false;
+  }
+
+  private isSignedSortKey(key: SortKey): boolean {
+    return key.startsWith('perf.')
+      || key.startsWith('roi.')
+      || key.startsWith('drop.')
+      || key === 'navChange'
+      || key === 'navChangePct';
+  }
+
+  private formatSortValue(f: Fund, key: SortKey): string {
+    const value = this.fieldValue(f, key);
+    if (key === 'currency' || key === 'navDate' || key === 'fundId' || key === 'name' || key === 'risk') {
+      return String(value);
+    }
+    if (key === 'nav' || key === 'navChange') return this.fmtNav(Number(value));
+    if (key === 'lipper' || key === 'stdDev') return String(value);
+    return this.fmtPct(Number(value));
   }
 
   roiSortKey(index: number): SortKey {
