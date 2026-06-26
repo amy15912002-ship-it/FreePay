@@ -30,10 +30,10 @@
   <ng-template #filterControls>
     <div class="fs-filter-row">
       <span class="fs-filter-label">境內境外</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="境內境外篩選">
-        <mat-chip [selectable]="true" [selected]="domicileFilters.length===0" (click)="clearFilterGroup('domicile')">全部</mat-chip>
-        <mat-chip *ngFor="let item of domiciles" [selectable]="true" [selected]="domicileFilters.includes(item)" (click)="toggleDomicileFilter(item)">{{ item }}</mat-chip>
-      </mat-chip-list>
+      <div class="filter-chips fs-filter-options" role="group" aria-label="境內境外篩選">
+        <button type="button" class="chip" [class.is-selected]="domicileFilters.length===0" (click)="clearFilterGroup('domicile')">全部</button>
+        <button type="button" class="chip" *ngFor="let item of domiciles" [class.is-selected]="domicileFilters.includes(item)" (click)="toggleDomicileFilter(item)">{{ item }}</button>
+      </div>
       <button type="button" class="fs-clear" (click)="clearFilters()" aria-label="清空條件">
         <i class="bi bi-trash3" aria-hidden="true"></i>
         <span>清空條件</span>
@@ -42,10 +42,10 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('category')">
       <span class="fs-filter-label">基金類型</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金類型篩選" #chipArea data-filter-group="category">
-        <mat-chip [selectable]="true" [selected]="categoryFilters.length===0" (click)="clearFilterGroup('category')">全部</mat-chip>
-        <mat-chip *ngFor="let c of visibleCategories; trackBy: trackByValue" [selectable]="true" [selected]="categoryFilters.includes(c)" (click)="toggleCategoryFilter(c)">{{ c }}</mat-chip>
-      </mat-chip-list>
+      <div class="filter-chips fs-filter-options" role="group" aria-label="基金類型篩選" #chipArea data-filter-group="category">
+        <button type="button" class="chip" [class.is-selected]="categoryFilters.length===0" (click)="clearFilterGroup('category')">全部</button>
+        <button type="button" class="chip" *ngFor="let c of visibleCategories; trackBy: trackByValue" [class.is-selected]="categoryFilters.includes(c)" (click)="toggleCategoryFilter(c)">{{ c }}</button>
+      </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('category') || isFilterExpanded('category')">
         <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('category')" [attr.aria-label]="isFilterExpanded('category') ? '收合基金類型' : '展開基金類型'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('category')" [class.bi-chevron-down]="!isFilterExpanded('category')"></i>
@@ -55,10 +55,10 @@
 
     <div class="fs-filter-row fs-filter-row--compact fs-filter-row--pricing" [class.is-expanded]="isFilterExpanded('pricingCcy')">
       <span class="fs-filter-label">計價幣別</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="計價幣別篩選" #chipArea data-filter-group="pricingCcy">
-        <mat-chip [selectable]="true" [selected]="pricingCcyFilters.length===0" (click)="clearFilterGroup('pricingCcy')">全部</mat-chip>
-        <mat-chip *ngFor="let ccy of visiblePricingCurrencies; trackBy: trackByValue" [selectable]="true" [selected]="pricingCcyFilters.includes(ccy)" (click)="togglePricingCcyFilter(ccy)">{{ ccy }}</mat-chip>
-      </mat-chip-list>
+      <div class="filter-chips fs-filter-options" role="group" aria-label="計價幣別篩選" #chipArea data-filter-group="pricingCcy">
+        <button type="button" class="chip" [class.is-selected]="pricingCcyFilters.length===0" (click)="clearFilterGroup('pricingCcy')">全部</button>
+        <button type="button" class="chip" *ngFor="let ccy of visiblePricingCurrencies; trackBy: trackByValue" [class.is-selected]="pricingCcyFilters.includes(ccy)" (click)="togglePricingCcyFilter(ccy)">{{ ccy }}</button>
+      </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('pricingCcy') || isFilterExpanded('pricingCcy')">
         <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('pricingCcy')" [attr.aria-label]="isFilterExpanded('pricingCcy') ? '收合計價幣別' : '展開計價幣別'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('pricingCcy')" [class.bi-chevron-down]="!isFilterExpanded('pricingCcy')"></i>
@@ -72,15 +72,16 @@
         <input class="fs-brand-keyword" [(ngModel)]="brandKeyword" (input)="onBrandKeywordChange()" placeholder="輸入品牌關鍵字快速搜尋" autocomplete="off">
       </div>
       <div #brandFilterArea class="fs-brand-filter">
-        <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金品牌篩選" #chipArea data-filter-group="brand">
-          <mat-chip [selectable]="true" [selected]="brandFilters.length===0" (click)="clearFilterGroup('brand')">全部</mat-chip>
-          <mat-chip
+        <div class="filter-chips fs-filter-options" role="group" aria-label="基金品牌篩選" #chipArea data-filter-group="brand">
+          <button type="button" class="chip" [class.is-selected]="brandFilters.length===0" (click)="clearFilterGroup('brand')">全部</button>
+          <button
+            type="button"
+            class="chip"
             *ngFor="let b of visibleBrands; trackBy: trackByValue"
-            [selectable]="true"
-            [selected]="brandFilters.includes(b)"
+            [class.is-selected]="brandFilters.includes(b)"
             (click)="toggleBrandFilter(b)"
-          >{{ b }}</mat-chip>
-        </mat-chip-list>
+          >{{ b }}</button>
+        </div>
       </div>
       <div class="fs-filter-actions">
         <button class="fs-filter-more fs-filter-more--icon" type="button" *ngIf="hasHiddenOptions('brand') || isFilterExpanded('brand')" (click)="toggleFilterExpanded('brand')" [attr.aria-label]="isFilterExpanded('brand') ? '收合基金品牌' : '展開基金品牌'">
@@ -91,10 +92,10 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('region')">
       <span class="fs-filter-label">投資區域</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="投資區域篩選" #chipArea data-filter-group="region">
-        <mat-chip [selectable]="true" [selected]="regionFilters.length===0" (click)="clearFilterGroup('region')">全部</mat-chip>
-        <mat-chip *ngFor="let r of visibleRegions; trackBy: trackByValue" [selectable]="true" [selected]="regionFilters.includes(r)" (click)="toggleRegionFilter(r)">{{ r }}</mat-chip>
-      </mat-chip-list>
+      <div class="filter-chips fs-filter-options" role="group" aria-label="投資區域篩選" #chipArea data-filter-group="region">
+        <button type="button" class="chip" [class.is-selected]="regionFilters.length===0" (click)="clearFilterGroup('region')">全部</button>
+        <button type="button" class="chip" *ngFor="let r of visibleRegions; trackBy: trackByValue" [class.is-selected]="regionFilters.includes(r)" (click)="toggleRegionFilter(r)">{{ r }}</button>
+      </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('region') || isFilterExpanded('region')">
         <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('region')" [attr.aria-label]="isFilterExpanded('region') ? '收合投資區域' : '展開投資區域'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('region')" [class.bi-chevron-down]="!isFilterExpanded('region')"></i>
@@ -104,10 +105,10 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('group')">
       <span class="fs-filter-label">基金組別</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="基金組別篩選" #chipArea data-filter-group="group">
-        <mat-chip [selectable]="true" [selected]="groupFilters.length===0" (click)="clearFilterGroup('group')">全部</mat-chip>
-        <mat-chip *ngFor="let g of visibleGroups; trackBy: trackByValue" [selectable]="true" [selected]="groupFilters.includes(g)" (click)="toggleGroupFilter(g)">{{ g }}</mat-chip>
-      </mat-chip-list>
+      <div class="filter-chips fs-filter-options" role="group" aria-label="基金組別篩選" #chipArea data-filter-group="group">
+        <button type="button" class="chip" [class.is-selected]="groupFilters.length===0" (click)="clearFilterGroup('group')">全部</button>
+        <button type="button" class="chip" *ngFor="let g of visibleGroups; trackBy: trackByValue" [class.is-selected]="groupFilters.includes(g)" (click)="toggleGroupFilter(g)">{{ g }}</button>
+      </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('group') || isFilterExpanded('group')">
         <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('group')" [attr.aria-label]="isFilterExpanded('group') ? '收合基金組別' : '展開基金組別'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('group')" [class.bi-chevron-down]="!isFilterExpanded('group')"></i>
@@ -117,10 +118,10 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('lipper')">
       <span class="fs-filter-label">理柏總回報</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="理柏總回報篩選" #chipArea data-filter-group="lipper">
-        <mat-chip [selectable]="true" [selected]="lipperFilters.length===0" (click)="clearFilterGroup('lipper')">全部</mat-chip>
-        <mat-chip *ngFor="let r of lipperRatings" [selectable]="true" [selected]="lipperFilters.includes(r)" (click)="toggleLipperFilter(r)">{{ r }}</mat-chip>
-      </mat-chip-list>
+      <div class="filter-chips fs-filter-options" role="group" aria-label="理柏總回報篩選" #chipArea data-filter-group="lipper">
+        <button type="button" class="chip" [class.is-selected]="lipperFilters.length===0" (click)="clearFilterGroup('lipper')">全部</button>
+        <button type="button" class="chip" *ngFor="let r of lipperRatings" [class.is-selected]="lipperFilters.includes(r)" (click)="toggleLipperFilter(r)">{{ r }}</button>
+      </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('lipper') || isFilterExpanded('lipper')">
         <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('lipper')" [attr.aria-label]="isFilterExpanded('lipper') ? '收合理柏總回報' : '展開理柏總回報'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('lipper')" [class.bi-chevron-down]="!isFilterExpanded('lipper')"></i>
@@ -130,10 +131,10 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('risk')">
       <span class="fs-filter-label">風險等級</span>
-      <mat-chip-list class="filter-chips fs-filter-options" [multiple]="true" aria-label="風險等級篩選" #chipArea data-filter-group="risk">
-        <mat-chip [selectable]="true" [selected]="riskFilters.length===0" (click)="clearFilterGroup('risk')">全部</mat-chip>
-        <mat-chip *ngFor="let r of riskLevels" [selectable]="true" [selected]="riskFilters.includes(r)" (click)="toggleRiskFilter(r)">{{ r }}</mat-chip>
-      </mat-chip-list>
+      <div class="filter-chips fs-filter-options" role="group" aria-label="風險等級篩選" #chipArea data-filter-group="risk">
+        <button type="button" class="chip" [class.is-selected]="riskFilters.length===0" (click)="clearFilterGroup('risk')">全部</button>
+        <button type="button" class="chip" *ngFor="let r of riskLevels" [class.is-selected]="riskFilters.includes(r)" (click)="toggleRiskFilter(r)">{{ r }}</button>
+      </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('risk') || isFilterExpanded('risk')">
         <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('risk')" [attr.aria-label]="isFilterExpanded('risk') ? '收合風險等級' : '展開風險等級'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('risk')" [class.bi-chevron-down]="!isFilterExpanded('risk')"></i>
@@ -159,8 +160,8 @@
         <ng-container *ngTemplateOutlet="filterControls"></ng-container>
       </div>
       <div class="fs-filter-sheet-actions">
-        <button mat-stroked-button color="primary" type="button" (click)="clearFilters()">清空條件</button>
-        <button mat-raised-button color="primary" type="button" (click)="closeFilterPanel()">套用篩選</button>
+        <button class="ds-action-button" mat-stroked-button color="primary" type="button" (click)="clearFilters()">清空條件</button>
+        <button class="ds-action-button" mat-raised-button color="primary" type="button" (click)="closeFilterPanel()">套用篩選</button>
       </div>
     </section>
   </div>
@@ -205,14 +206,15 @@
       </div>
       <div class="fs-sort-panel-body">
         <span class="fs-sort-panel-label">排序欄位</span>
-        <mat-chip-list class="filter-chips fs-sort-chips" aria-label="排序欄位">
-          <mat-chip
+        <div class="filter-chips fs-sort-chips" role="group" aria-label="排序欄位">
+          <button
+            type="button"
+            class="chip"
             *ngFor="let opt of mobileSortOptions; trackBy: trackBySortKey"
-            [selectable]="false"
-            [selected]="pendingSortKey === opt.key"
+            [class.is-selected]="pendingSortKey === opt.key"
             (click)="selectPendingSort(opt.key)"
-          >{{ opt.label }}</mat-chip>
-        </mat-chip-list>
+          >{{ opt.label }}</button>
+        </div>
         <span class="fs-sort-panel-label">排序方向</span>
         <button class="fs-sort-dir" type="button" (click)="togglePendingSortDirection()">
           <i class="bi" [class.bi-caret-down-fill]="pendingSortDesc" [class.bi-caret-up-fill]="!pendingSortDesc"></i>
@@ -220,7 +222,7 @@
         </button>
       </div>
       <div class="fs-sort-panel-actions">
-        <button mat-raised-button color="primary" type="button" (click)="applyPendingSort()">套用排序</button>
+        <button class="ds-action-button" mat-raised-button color="primary" type="button" (click)="applyPendingSort()">套用排序</button>
       </div>
     </section>
   </div>

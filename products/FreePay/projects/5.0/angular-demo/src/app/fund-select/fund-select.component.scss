@@ -248,7 +248,7 @@
   padding: 0;
   border: none;
   background: transparent;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   cursor: pointer;
 
   .bi { font-size: 16px; line-height: 1; }
@@ -310,12 +310,18 @@
 .fs-filter-more--icon {
   width: 32px;
   padding: 0;
+  border: none;
+  background: transparent;
   border-radius: 50%;
 
   .bi {
     margin-right: 0;
     font-size: 14px;
     line-height: 1;
+  }
+
+  &:hover {
+    color: var(--color-text-primary);
   }
 }
 
@@ -349,8 +355,9 @@
     grid-row: 2;
   }
 
-  // 收合時：chip 單行，裁切溢出避免蓋住展開鈕
+  // 收合時：chip 單行（= label 高，與標題垂直置中對齊），裁切溢出避免蓋住展開鈕
   &:not(.is-expanded) .fs-brand-filter {
+    max-height: 32px;
     overflow: hidden;
   }
 }
@@ -376,8 +383,9 @@
 }
 
 // chip 收合成一行、超出裁切；展開或品牌搜尋時全顯示
+// 高度恰一行（= label 32px），讓裁切後的可見行與標題垂直置中對齊
 .fs-filter-row--compact .fs-filter-options {
-  max-height: 38px;
+  max-height: 32px;
   overflow: hidden;
 }
 
@@ -435,17 +443,6 @@
 
 .fs-filter-options {
   min-width: 0;
-}
-
-::ng-deep .fs-filter-options .mat-chip.mat-standard-chip {
-  padding-left: 10px;
-  padding-right: 10px;
-}
-
-// 抵消 Material chip-list-wrapper 預設的上下負邊距，避免 chip 在列內偏上、下方留白
-::ng-deep .fs-filter-options .mat-chip-list-wrapper {
-  margin-top: 0;
-  margin-bottom: 0;
 }
 
 .fs-filter-more {
@@ -552,7 +549,7 @@
   display: inline-flex;
   align-items: center;
   margin-left: 4px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 12px;
   line-height: 1;
   vertical-align: -1px;
@@ -785,8 +782,12 @@
     padding: 2px 18px 16px;
 
     // 篩選頁預設收合（露第一行 + 展開鈕，與桌機列表一致）；chip 改換行避免單行被截斷
-    .fs-filter-row--compact:not(.is-expanded) .fs-filter-options ::ng-deep > .mat-chip-list-wrapper {
+    // overflow: hidden 裁掉收合時溢出的多餘行（壓回通用收合態的 overflow: visible，避免疊到下一組）
+    // max-height 恰一行 sheet chip（30px），不露出第二行 chip 的上緣邊框
+    .fs-filter-row--compact:not(.is-expanded) .fs-filter-options {
       flex-wrap: wrap;
+      overflow: hidden;
+      max-height: 30px;
     }
   }
 
@@ -795,7 +796,7 @@
       gap: 6px;
     }
 
-    .filter-chips .mat-chip.mat-standard-chip {
+    .filter-chips .chip {
       min-height: 30px;
       padding: 6px 7px;
       font-size: 12px;
@@ -864,11 +865,11 @@
     }
 
     &:not(.is-expanded) {
-      .fs-filter-options ::ng-deep > .mat-chip-list-wrapper {
+      .fs-filter-options {
         flex-wrap: nowrap;
         overflow: visible;
 
-        .mat-chip {
+        .chip {
           flex: 0 0 auto;
         }
       }
@@ -878,7 +879,7 @@
       max-height: none;
     }
 
-    &.is-expanded .fs-filter-options ::ng-deep > .mat-chip-list-wrapper {
+    &.is-expanded .fs-filter-options {
       flex-wrap: wrap;
     }
   }

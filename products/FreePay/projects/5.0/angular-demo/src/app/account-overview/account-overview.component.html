@@ -211,12 +211,12 @@
       <div class="ov-filters">
         <div class="ov-filter-row">
           <span class="ov-filter-label">類型</span>
-          <mat-chip-list class="filter-chips" aria-label="篩選類型">
-            <mat-chip [selectable]="false" [selected]="orderFilter==='all'" (click)="orderFilter='all'">全部</mat-chip>
-            <mat-chip [selectable]="false" [selected]="orderFilter==='alt'" (click)="orderFilter='alt'">申購</mat-chip>
-            <mat-chip [selectable]="false" [selected]="orderFilter==='chg'" (click)="orderFilter='chg'">異動</mat-chip>
-            <mat-chip [selectable]="false" [selected]="orderFilter==='rdm'" (click)="orderFilter='rdm'">贖回</mat-chip>
-          </mat-chip-list>
+          <div class="filter-chips" role="group" aria-label="篩選類型">
+            <button type="button" class="chip" [class.is-selected]="orderFilter==='all'" (click)="orderFilter='all'">全部</button>
+            <button type="button" class="chip" [class.is-selected]="orderFilter==='alt'" (click)="orderFilter='alt'">申購</button>
+            <button type="button" class="chip" [class.is-selected]="orderFilter==='chg'" (click)="orderFilter='chg'">異動</button>
+            <button type="button" class="chip" [class.is-selected]="orderFilter==='rdm'" (click)="orderFilter='rdm'">贖回</button>
+          </div>
         </div>
       </div>
 
@@ -640,23 +640,23 @@
       <div class="ov-filters">
         <div class="ov-filter-row">
           <span class="ov-filter-label">類型</span>
-          <mat-chip-list class="filter-chips" aria-label="交易類型">
-            <mat-chip [selectable]="false" [selected]="detailTxType==='all'" (click)="detailTxType='all'">全部</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTxType==='A'" (click)="detailTxType='A'">申購</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTxType==='R'" (click)="detailTxType='R'">Pay出</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTxType==='RDM'" (click)="detailTxType='RDM'">贖回</mat-chip>
-          </mat-chip-list>
+          <div class="filter-chips" role="group" aria-label="交易類型">
+            <button type="button" class="chip" [class.is-selected]="detailTxType==='all'" (click)="detailTxType='all'">全部</button>
+            <button type="button" class="chip" [class.is-selected]="detailTxType==='A'" (click)="detailTxType='A'">申購</button>
+            <button type="button" class="chip" [class.is-selected]="detailTxType==='R'" (click)="detailTxType='R'">Pay出</button>
+            <button type="button" class="chip" [class.is-selected]="detailTxType==='RDM'" (click)="detailTxType='RDM'">贖回</button>
+          </div>
         </div>
         <div class="ov-filter-row">
           <span class="ov-filter-label">期間</span>
-          <mat-chip-list class="filter-chips" aria-label="資料期間">
-            <mat-chip [selectable]="false" [selected]="detailTimeType==='ALL'" (click)="detailTimeType='ALL'">全部</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTimeType==='YTD'" (click)="detailTimeType='YTD'">今年</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTimeType==='3M'" (click)="detailTimeType='3M'">3個月</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTimeType==='6M'" (click)="detailTimeType='6M'">6個月</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTimeType==='1Y'" (click)="detailTimeType='1Y'">1年</mat-chip>
-            <mat-chip [selectable]="false" [selected]="detailTimeType==='CUSTOM'" (click)="detailTimeType='CUSTOM'">自訂</mat-chip>
-          </mat-chip-list>
+          <div class="filter-chips" role="group" aria-label="資料期間">
+            <button type="button" class="chip" [class.is-selected]="detailTimeType==='ALL'" (click)="detailTimeType='ALL'">全部</button>
+            <button type="button" class="chip" [class.is-selected]="detailTimeType==='YTD'" (click)="detailTimeType='YTD'">今年</button>
+            <button type="button" class="chip" [class.is-selected]="detailTimeType==='3M'" (click)="detailTimeType='3M'">3個月</button>
+            <button type="button" class="chip" [class.is-selected]="detailTimeType==='6M'" (click)="detailTimeType='6M'">6個月</button>
+            <button type="button" class="chip" [class.is-selected]="detailTimeType==='1Y'" (click)="detailTimeType='1Y'">1年</button>
+            <button type="button" class="chip" [class.is-selected]="detailTimeType==='CUSTOM'" (click)="detailTimeType='CUSTOM'">自訂</button>
+          </div>
           <ng-container *ngIf="detailTimeType === 'CUSTOM'">
             <mat-form-field appearance="standard" color="accent" class="date-range-field">
               <mat-label>期間</mat-label>

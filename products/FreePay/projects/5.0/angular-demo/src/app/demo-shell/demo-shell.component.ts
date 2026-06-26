@@ -61,6 +61,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   pwdVisible = false;
   payModeHintOpen = false;
   dateHintOpen = false;
+  lowPayNoticeOpen = false;
   selectedContract: Contract | null = null;
   selectedCurrency: CurrencyOption | null = null;
   thresholdCustomActive = false;
@@ -91,6 +92,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   private routeSub?: Subscription;
   private amountSub?: Subscription;
+  private monthlyPaySub?: Subscription;
+  private lowPayNoticeAcknowledged = false;
 
   constructor(
     private readonly fb: FormBuilder,
@@ -100,6 +103,11 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.applyPayModeValidators();
     this.amountSub = this.form.controls.amount.valueChanges.subscribe(() => {
       this.form.controls.monthlyPay.updateValueAndValidity({ emitEvent: false });
+    });
+    this.monthlyPaySub = this.form.controls.monthlyPay.valueChanges.subscribe(() => {
+      if (!this.isLowMonthlyPayTransferNoticeActive()) {
+        this.lowPayNoticeAcknowledged = false;
+      }
     });
   }
 
@@ -120,6 +128,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   ngOnDestroy(): void {
     this.routeSub?.unsubscribe();
     this.amountSub?.unsubscribe();
+    this.monthlyPaySub?.unsubscribe();
   }
 
   private loadFlow(ctx: FlowContext): void {
@@ -752,6 +761,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   selectCurrency(currencyCode: string): void {
     if (!this.canSwitchCurrency) return;
     this.selectedCurrency = this.scenario?.availableCurrencies.find(c => c.currencyCode === currencyCode) ?? null;
+    this.lowPayNoticeAcknowledged = false;
+    this.lowPayNoticeOpen = false;
     // 5.0 起：幣別切換器整合到設定頁；切換後即時更新該幣別契約狀態（決定加碼/新申購模式）
     this.syncSelectedContractForCurrency();
     // 幣別改變後，門檻與金額單位都會跟著變，強制重設為新幣別的最低值
@@ -761,6 +772,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   setPayMode(mode: PayMode): void {
     this.payMode = mode;
+    this.lowPayNoticeAcknowledged = false;
+    this.lowPayNoticeOpen = false;
     if (mode === 'ratio' && this.form.controls.ratio.value === null) {
       this.form.controls.ratio.setValue(1);
     }
@@ -769,6 +782,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   togglePayActive(enabled: boolean): void {
     this.payActive = enabled;
+    this.lowPayNoticeAcknowledged = false;
+    this.lowPayNoticeOpen = false;
     if (!enabled) {
       this.toggleThreshold(false);
       this.form.controls.monthlyPay.clearValidators();
@@ -789,6 +804,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       }
       this.form.markAllAsTouched();
       if (this.form.invalid) return;
+      if (this.maybeOpenLowPayNotice()) return;
       this.activeStep = 'confirm';
       return;
     }
@@ -826,6 +842,21 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   pickDate(day: number): void {
     this.form.controls.day.setValue(day);
+  }
+
+  maybeOpenLowPayNotice(): boolean {
+    if (this.isLowMonthlyPayTransferNoticeActive() && !this.lowPayNoticeAcknowledged) {
+      this.lowPayNoticeOpen = true;
+      return true;
+    }
+    return false;
+  }
+
+  closeLowPayNotice(): void {
+    this.lowPayNoticeOpen = false;
+    if (this.isLowMonthlyPayTransferNoticeActive()) {
+      this.lowPayNoticeAcknowledged = true;
+    }
   }
 
   toggleHint(type: 'payMode' | 'date'): void {
@@ -993,6 +1024,18 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return (monthlyPay * 12 / amount) * 100 > 15 ? { annualRateExceeded: true } : null;
   };
 
+  private isLowMonthlyPayTransferNoticeActive(): boolean {
+    const monthlyPay = Number(this.form.controls.monthlyPay.value || 0);
+    return !this.isRedeemMode
+      && !this.isAddOnMode
+      && this.payActive
+      && this.payMode === 'amount'
+      && (this.selectedCurrency?.currencyCode ?? 'TWD') === 'TWD'
+      && monthlyPay > 0
+      && monthlyPay < 30
+      && !this.form.controls.monthlyPay.hasError('pattern');
+  }
+
   private resetThresholdState(): void {
     this.thresholdCustomActive = false;
     this.thresholdMode = 'protect';
@@ -1045,6 +1088,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.resetThresholdState();
     this.payModeHintOpen = false;
     this.dateHintOpen = false;
+    this.lowPayNoticeOpen = false;
+    this.lowPayNoticeAcknowledged = false;
     this.applyPayModeValidators();
     this.redeemMode = null;
     this.partialRedeemInputMode = 'amount';

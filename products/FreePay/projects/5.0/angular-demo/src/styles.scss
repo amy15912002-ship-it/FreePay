@@ -134,6 +134,9 @@ $freepay-theme: mat.define-light-theme((
 :root {
   --font-primary: 'Noto Sans TC', sans-serif;
   --color-brand-primary-50: #FFF0EC;
+  --color-brand-primary-100: #FCCFBE;
+  --color-brand-primary-200: #F9A98F;
+  --color-brand-primary-300: #F47355;
   --color-brand-primary-400: #F04D29;
   --color-brand-primary-600: #C23B1A;
   --color-brand-primary-800: #8C240D;
@@ -177,7 +180,6 @@ $freepay-theme: mat.define-light-theme((
   --color-text-heading: var(--color-neutral-900);
   --color-text-primary: var(--color-neutral-900);
   --color-text-secondary: var(--color-neutral-600);
-  --color-text-tertiary: var(--color-neutral-600);
   --color-text-on-brand: var(--color-neutral-0);
   --color-border-default: var(--color-neutral-150);
   --color-border-strong: var(--color-neutral-200);
@@ -246,8 +248,17 @@ textarea {
 }
 
 .ds-action-button.mat-button-base {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   border-radius: 999px !important;
   overflow: hidden;
+  height: 44px;
+  line-height: 1;
+  padding: 0 24px;
+  min-width: 88px;
+  font-size: 14px;
+  font-weight: 500;
 }
 
 .ds-action-button.mat-button-base .mat-button-focus-overlay,
@@ -271,9 +282,45 @@ textarea {
   background-color: var(--color-brand-primary-800);
 }
 
+/* Outline·品牌：透明底＋橙紅 2px 描邊與字，hover 淺品牌底 */
 .mat-stroked-button.mat-primary {
+  border-width: 2px;
   border-color: var(--color-brand-primary-400);
   color: var(--color-brand-primary-400);
+}
+
+.mat-stroked-button.mat-primary:hover {
+  background-color: var(--color-bg-brand-subtle);
+}
+
+/* Outline·中性：透明底＋灰 1.5px 描邊與灰字（不含 mat-primary；排除 threshold-option 等選取按鈕） */
+.ds-action-button.mat-stroked-button:not(.mat-primary) {
+  border-width: 1.5px;
+  border-color: var(--color-border-strong);
+  color: var(--color-neutral-600);
+}
+
+.ds-action-button.mat-stroked-button:not(.mat-primary):hover {
+  border-color: var(--color-neutral-300);
+  color: var(--color-neutral-800);
+}
+
+.ds-action-button.mat-stroked-button:not(.mat-primary):active {
+  background-color: var(--color-neutral-150);
+}
+
+/* Disabled：三變體統一——填充底/描邊皆 neutral-150、字 neutral-250 */
+.ds-action-button.mat-button-disabled {
+  color: var(--color-neutral-250);
+}
+
+.ds-action-button.mat-raised-button.mat-button-disabled,
+.ds-action-button.mat-flat-button.mat-button-disabled {
+  background-color: var(--color-neutral-150);
+}
+
+.ds-action-button.mat-stroked-button.mat-button-disabled {
+  border-color: var(--color-neutral-150);
 }
 
 .mat-form-field {
@@ -522,9 +569,9 @@ textarea {
   justify-content: center;
   min-height: 40px;
   padding: 0 18px;
-  border: 1px solid var(--color-brand-secondary-400);
+  border: 1px solid var(--color-brand-primary-400);
   border-radius: 4px;
-  background: var(--color-brand-secondary-400);
+  background: var(--color-brand-primary-400);
   color: var(--color-neutral-0) !important;
   font-weight: 700;
 }
@@ -853,41 +900,54 @@ table { font-variant-numeric: tabular-nums; }
   flex: 1 1 0;
 }
 
-// mat-chip used as a single-select filter control (design system §3.6 選取類 pill)
+// Filter chips：原生 button 篩選 pill（DesignSystem §3.7）
 .filter-chips {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
 
-.filter-chips .mat-chip.mat-standard-chip {
+.filter-chips .chip {
+  display: inline-flex;
+  align-items: center;
   min-height: 32px;
-  padding: 6px 14px;
+  padding: 6px 10px;
   border: 1px solid var(--color-neutral-200);
-  // 圓角膠囊（DesignSystem §3.9）
   border-radius: 999px;
   background: var(--color-neutral-0);
   color: var(--color-neutral-600);
+  font-family: var(--font-primary);
   font-size: 14px;
+  line-height: 1;
+  white-space: nowrap;
   cursor: pointer;
+  transition: border-color .12s, color .12s, background .12s;
 }
 
-// 移除 Material chip 預設 hover/focus ::after 疊加層，避免點擊後 focus 殘留；
-// hover 回饋改由下方自訂 :hover 樣式提供
-.filter-chips .mat-chip.mat-standard-chip::after {
-  display: none;
-}
-
-.filter-chips .mat-chip.mat-standard-chip:hover {
+.filter-chips .chip:hover {
   border-color: var(--color-neutral-300);
   color: var(--color-neutral-800);
 }
 
-.filter-chips .mat-chip.mat-standard-chip.mat-chip-selected {
+.filter-chips .chip.is-selected {
   background: var(--color-bg-brand-subtle);
   border-color: var(--color-action-primary);
   color: var(--color-action-primary);
   font-weight: 700;
+}
+
+// 選中態 hover：品牌身份走品牌軸，底色再深一階（不套中性 Hover 列）
+.filter-chips .chip.is-selected:hover {
+  background: var(--color-brand-primary-100);
+}
+
+// 手機 bottom sheet：更小尺寸（DesignSystem §3.7）
+.filter-chips--sheet { gap: 6px; }
+
+.filter-chips--sheet .chip {
+  min-height: 30px;
+  padding: 6px 7px;
+  font-size: 12px;
 }
 
 // 圓形操作按鈕 — 平台通用 pattern（列表內聯操作；詳 DesignSystem §3.7）
@@ -952,7 +1012,7 @@ table { font-variant-numeric: tabular-nums; }
   font-size: 14px;
   font-weight: 500;
 
-  i { color: var(--color-text-tertiary); }
+  i { color: var(--color-text-secondary); }
 }
 
 .notes-list {
@@ -967,8 +1027,3 @@ table { font-variant-numeric: tabular-nums; }
   li + li { margin-top: 4px; }
 }
 
-// Design system chip refinements.
-.filter-chips .mat-chip-list-wrapper {
-  margin-top: 0;
-  margin-bottom: 0;
-}

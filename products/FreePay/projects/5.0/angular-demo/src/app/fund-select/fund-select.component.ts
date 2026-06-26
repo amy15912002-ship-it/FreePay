@@ -668,7 +668,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   }
 
   private isChipWrapped(container: HTMLElement): boolean {
-    const chips = container.querySelectorAll<HTMLElement>('.mat-chip');
+    const chips = container.querySelectorAll<HTMLElement>('.chip');
     if (chips.length < 2) return false;
     return chips[chips.length - 1].offsetTop > chips[0].offsetTop;
   }

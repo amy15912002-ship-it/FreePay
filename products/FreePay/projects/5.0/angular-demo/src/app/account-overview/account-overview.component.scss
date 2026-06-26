@@ -767,7 +767,7 @@
     padding: 0;
     border: none;
     background: transparent;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     font-size: 16px;
     line-height: 1;
     cursor: pointer;
@@ -1609,7 +1609,7 @@
   cursor: pointer;
   white-space: nowrap;
 
-  > i { margin-left: 2px; font-size: 12px; color: var(--color-text-tertiary); }
+  > i { margin-left: 2px; font-size: 12px; color: var(--color-text-secondary); }
   &:hover > i { color: var(--color-text-secondary); }
   > i.is-active { color: var(--color-action-primary); }
 }

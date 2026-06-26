@@ -43,7 +43,8 @@ import { Router } from '@angular/router';
           type="button"
           (click)="toggleLoginState()"
         >{{ isLoggedIn ? '登出' : '登入' }}</button>
-        <a class="fp-site-nav-action" href="https://www.anuefund.com/FundSpec/OpenAcct/" (click)="closeMobileMenu()">立即開戶</a>
+        <a *ngIf="!isLoggedIn" class="fp-site-nav-action" href="https://www.anuefund.com/FundSpec/OpenAcct/" (click)="closeMobileMenu()">立即開戶</a>
+        <a *ngIf="isLoggedIn" class="fp-site-nav-action" routerLink="/demo/search" (click)="closeMobileMenu()">立即申購</a>
       </nav>
     </header>
     <main class="fp-site-main">

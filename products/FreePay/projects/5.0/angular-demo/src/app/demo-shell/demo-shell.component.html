@@ -210,18 +210,20 @@
           <h2 class="block-title">{{ amountSectionTitle }}</h2>
         </div>
         <!-- 基金型入口：多幣別時可切換；契約型入口（帳總加碼）鎖定契約交易幣別 -->
-        <mat-button-toggle-group
+        <mat-radio-group
           *ngIf="canSwitchCurrency"
-          class="mode-toggle mode-toggle-fill ccy-selector"
-          [value]="selectedCurrency?.currencyCode"
-          (change)="selectCurrency($event.value)"
+          class="choice-radio-group ccy-selector"
+          [ngModel]="selectedCurrency?.currencyCode"
+          [ngModelOptions]="{ standalone: true }"
+          (ngModelChange)="selectCurrency($event)"
           aria-label="申購幣別"
         >
-          <mat-button-toggle
+          <mat-radio-button
             *ngFor="let c of scenario?.availableCurrencies"
+            color="primary"
             [value]="c.currencyCode"
-          >{{ c.currency }}</mat-button-toggle>
-        </mat-button-toggle-group>
+          >{{ c.currency }}</mat-radio-button>
+        </mat-radio-group>
         <div class="fp-field" [class.is-error]="form.controls.amount.touched && form.controls.amount.invalid">
           <label class="fp-field-label" for="buy-amount">金額</label>
           <div class="fp-input-box fp-input-box--line">
@@ -270,7 +272,6 @@
         <ng-container *ngIf="payActive">
         <div class="pay-setting-group pay-setting-step">
           <div class="pay-setting-step-title">
-            <span class="pay-setting-step-no">1</span>
             <div class="form-label">
               Pay 出方式
               <button
@@ -316,6 +317,7 @@
                 appThousands
                 required
                 placeholder="輸入金額"
+                (blur)="maybeOpenLowPayNotice()"
               >
             </div>
             <div class="fp-field-hint" *ngIf="!(form.controls.monthlyPay.touched && form.controls.monthlyPay.invalid) && !hasPayInput">{{ monthlyPayRangeHint }}</div>
@@ -360,7 +362,6 @@
 
         <div class="pay-setting-group pay-setting-step pay-setting-step--date">
           <div class="pay-setting-step-title">
-            <span class="pay-setting-step-no">2</span>
             <div class="form-label">
               自由 Pay 基準日
               <button
@@ -605,6 +606,7 @@
                 <strong class="hl">年化 {{ form.controls.ratio.value }}%</strong>
               </div>
               <div class="sum-row"><span>自由 Pay 基準日</span><strong>每月 {{ form.controls.day.value }} 日</strong></div>
+              <div class="sum-row" *ngIf="!isModifyMode"><span>預計首次基準日</span><strong>{{ scenario?.firstRdmDate }}</strong></div>
               <div class="sum-row"><span>觸發門檻</span><strong>{{ thresholdText }}</strong></div>
             </ng-container>
           </div>
@@ -731,4 +733,15 @@
       <i class="bi bi-check-lg" *ngIf="primaryActionIsSubmit"></i>
     </button>
   </div>
+</div>
+
+<div class="low-pay-notice-overlay" *ngIf="lowPayNoticeOpen" (click)="closeLowPayNotice()">
+  <section class="low-pay-notice-dialog" role="dialog" aria-modal="true" aria-labelledby="low-pay-notice-title" (click)="$event.stopPropagation()">
+    <button class="low-pay-notice-close" type="button" aria-label="關閉提醒" (click)="closeLowPayNotice()">
+      <i class="bi bi-x-lg"></i>
+    </button>
+    <h2 id="low-pay-notice-title">提醒</h2>
+    <p>每次自由 Pay 執行匯出款項時將被扣匯費 30 元（非集保簽約銀行），故自由 Pay 金額設定低於 30 元將累積在集保，累積至 30 元以上再一併匯出。</p>
+    <button class="low-pay-notice-primary" type="button" (click)="closeLowPayNotice()">我知道了</button>
+  </section>
 </div>

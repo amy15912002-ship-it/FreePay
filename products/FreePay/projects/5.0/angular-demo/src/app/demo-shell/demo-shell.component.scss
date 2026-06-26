@@ -52,7 +52,7 @@
     margin: 0;
     border: 2px solid var(--color-border-strong);
     background: var(--color-bg-base);
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     font-size: 14px;
     font-weight: 700;
   }
@@ -66,7 +66,7 @@
   }
 
   ::ng-deep .mat-step-label {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     font-family: var(--font-primary);
     font-size: 14px;
     font-weight: 500;
@@ -248,21 +248,6 @@
   gap: 8px;
 }
 
-.pay-setting-step-no {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 22px;
-  width: 22px;
-  height: 22px;
-  border-radius: 50%;
-  background: var(--color-bg-info-subtle);
-  color: var(--color-brand-tertiary-600);
-  font-size: 14px;
-  font-weight: 700;
-  line-height: 1;
-}
-
 .pay-setting-panel {
   display: flex;
   flex-direction: column;
@@ -299,7 +284,7 @@
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
@@ -661,14 +646,14 @@
   gap: 2px;
 
   span {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     font-size: 14px;
     font-weight: 400;
     line-height: 1.6;
   }
 
   strong {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     font-size: 14px;
     font-weight: 400;
     line-height: 1.6;
@@ -827,7 +812,7 @@
 
   i {
     font-size: 14px;
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     flex: 0 0 14px;
   }
 
@@ -935,7 +920,7 @@
   &:disabled {
     border-color: var(--color-border-default);
     background: var(--color-bg-muted);
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     cursor: not-allowed;
   }
 }
@@ -956,7 +941,7 @@
   }
 
   .decision-card:disabled & {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
   }
 }
 
@@ -1015,7 +1000,7 @@
 .contract-card-check {
   flex: 0 0 20px;
   padding-top: 2px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 18px;
   line-height: 1;
 
@@ -1038,7 +1023,7 @@
 
 .contract-meta {
   margin-top: 2px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 14px;
   line-height: 1.5;
 }
@@ -1051,13 +1036,8 @@
   line-height: 1.5;
 }
 
+// 桌機：動作列回到內容流，緊貼表單末端
 .action-bar {
-  position: fixed;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  z-index: 20;
-  border-top: 1px solid var(--color-border-default);
   background: var(--color-bg-base);
 }
 
@@ -1066,13 +1046,95 @@
   justify-content: center;
   gap: 12px;
   width: min(800px, 100%);
-  margin: 0 auto;
+  margin: 24px auto 0;
   padding: 14px 0;
+}
+
+.low-pay-notice-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--color-overlay-scrim);
+}
+
+.low-pay-notice-dialog {
+  position: relative;
+  width: min(512px, 100%);
+  padding: 22px 28px 22px;
+  border-radius: 8px;
+  background: var(--color-bg-base);
+  box-shadow: var(--shadow-lg);
+  text-align: center;
+
+  h2 {
+    margin: 0 0 28px;
+    color: var(--color-text-heading);
+    font-size: 20px;
+    font-weight: 700;
+    line-height: 1.4;
+  }
+
+  p {
+    margin: 0 auto 24px;
+    color: var(--color-text-primary);
+    font-size: 16px;
+    line-height: 1.75;
+    text-align: left;
+  }
+}
+
+.low-pay-notice-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 20px;
+  cursor: pointer;
+}
+
+.low-pay-notice-primary {
+  min-width: 136px;
+  min-height: 44px;
+  padding: 0 28px;
+  border: 0;
+  border-radius: 999px;
+  background: var(--color-action-primary);
+  color: var(--color-text-on-brand);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
 }
 
 @media (max-width: 767px) {
   :host {
     padding-bottom: 0;
+  }
+
+  // 手機：動作列維持固定底部 CTA（全寬、上緣分隔線）
+  .action-bar {
+    position: fixed;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 20;
+    border-top: 1px solid var(--color-border-default);
+  }
+
+  .action-inner {
+    margin-top: 0;
   }
 
   .success-block h2 {
@@ -1324,7 +1386,7 @@
 
 .ref-meta {
   margin-left: 4px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 14px;
   font-weight: 400;
 }
@@ -1370,7 +1432,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 18px;
   line-height: 1;
   cursor: pointer;
@@ -1389,7 +1451,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
   }
 
   &:disabled {
-    color: var(--color-text-tertiary);
+    color: var(--color-text-secondary);
     cursor: not-allowed;
     opacity: 0.5;
   }
@@ -1480,7 +1542,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
   justify-content: center;
   align-items: center;
   width: 28px;
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 18px;
   line-height: 1;
 
@@ -1529,7 +1591,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
 }
 
 .batch-row-sub {
-  color: var(--color-text-tertiary);
+  color: var(--color-text-secondary);
   font-size: 14px;
   font-weight: 400;
   line-height: 1.35;

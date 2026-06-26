@@ -5,7 +5,6 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatChipsModule } from '@angular/material/chips';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -46,7 +45,6 @@ import { ThousandsDirective } from './thousands.directive';
     MatButtonModule,
     MatButtonToggleModule,
     MatCheckboxModule,
-    MatChipsModule,
     MatDatepickerModule,
     MatFormFieldModule,
     MatInputModule,
