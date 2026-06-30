@@ -52,23 +52,17 @@
   display: none;
 }
 
+// 文字按鈕外觀走 .ds-text-button（全域）；此處只留版面特化
 .fs-clear {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  background: transparent;
-  border: none;
   padding: 0;
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  cursor: pointer;
 
   .bi {
     font-size: 14px;
     line-height: 1;
   }
-
-  &:hover { color: var(--color-text-primary); }
 }
 
 // 境內境外列右側內聯的清空條件：手機篩選 sheet 內改用底部「清空條件」，sheet 中隱藏此顆
@@ -237,24 +231,9 @@
   }
 }
 
-// 清除 ×（框內透明 icon 鈕）
+// 清除 ×：外觀走 .ds-icon-button（全域）；此處只留搜尋框內高度
 .fs-search-clear {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 32px;
   height: 40px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-
-  .bi { font-size: 16px; line-height: 1; }
-
-  &:hover,
-  &:focus-visible { color: var(--color-text-secondary); outline: none; }
 }
 
 // 搜尋鈕：輸入框內右側 attached icon action
@@ -316,7 +295,7 @@
 
   .bi {
     margin-right: 0;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1;
   }
 
@@ -485,14 +464,6 @@
     border-bottom-color: var(--color-action-primary);
     font-weight: 700;
   }
-}
-
-.fs-sort-trigger {
-  display: none;
-}
-
-.fs-sort-overlay {
-  display: none;
 }
 
 // ── 表格 ────────────────────────────────────────────────
@@ -699,27 +670,7 @@
     }
   }
 
-  .fs-mobile-filter-btn {
-    position: relative;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: 1px solid var(--color-action-primary);
-    border-radius: 50%;
-    background: var(--color-neutral-0);
-    color: var(--color-action-primary);
-    font-family: var(--font-primary);
-    font-size: 14px;
-    font-weight: 700;
-
-    // 有篩選：整顆按鈕填滿品牌色 + 白色實心漏斗（不用數字）
-    &.is-active {
-      background: var(--color-action-primary);
-      color: var(--color-text-on-brand);
-    }
-  }
+  // 篩選鈕已改用全域 .circle-btn（有篩選 --buy 實心／無篩選 --brand-outline 描邊）
 
   .fs-filters {
     display: none;
@@ -771,8 +722,8 @@
     height: 32px;
     border: none;
     background: transparent;
-    color: var(--color-text-primary);
-    font-size: 20px;
+    color: var(--color-text-secondary);
+    font-size: 16px;
   }
 
   .fs-filter-sheet-body {
@@ -971,117 +922,6 @@
     gap: 16px;
   }
 
-  .fs-sort-trigger {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: 1px solid var(--color-action-primary);
-    border-radius: 50%;
-    background: var(--color-neutral-0);
-    color: var(--color-action-primary);
-    font-family: var(--font-primary);
-    font-size: 14px;
-    font-weight: 700;
-
-    .bi {
-      font-size: 14px;
-      line-height: 1;
-    }
-  }
-
-  .fs-sort-overlay {
-    position: fixed;
-    inset: 0;
-    z-index: 950;
-    display: flex;
-    align-items: flex-end;
-    background: var(--color-overlay-scrim);
-  }
-
-  .fs-sort-panel {
-    width: 100%;
-    max-height: 72vh;
-    display: flex;
-    flex-direction: column;
-    border-radius: 12px 12px 0 0;
-    background: var(--color-bg-base);
-    box-shadow: var(--shadow-lg);
-    overflow: hidden;
-  }
-
-  .fs-sort-panel-head {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 16px 18px;
-    border-bottom: 1px solid var(--color-border-default);
-
-    h2 {
-      margin: 0;
-      color: var(--color-text-primary);
-      font-size: 18px;
-      font-weight: 500;
-    }
-  }
-
-  .fs-sort-close {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border: none;
-    background: transparent;
-    color: var(--color-text-secondary);
-    font-size: 16px;
-  }
-
-  .fs-sort-panel-body {
-    flex: 1;
-    overflow-y: auto;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 16px 18px;
-  }
-
-  .fs-sort-panel-label {
-    color: var(--color-text-secondary);
-    font-size: 14px;
-  }
-
-  .fs-sort-panel-actions {
-    display: flex;
-    justify-content: stretch;
-    gap: 8px;
-    padding: 12px 18px 18px;
-    border-top: 1px solid var(--color-border-default);
-    background: var(--color-bg-base);
-
-    button {
-      width: 100%;
-    }
-  }
-
-  .fs-sort-dir {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 32px;
-    padding: 0 10px;
-    border: none;
-    border-radius: 16px;
-    background: var(--color-neutral-0);
-    color: var(--color-action-primary);
-    font-family: var(--font-primary);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
   // 手機資料區：卡片（預設）／列表切換鈕
   .fs-view-toggle {
     display: inline-flex;
@@ -1091,25 +931,7 @@
     align-self: center;
   }
 
-  .fs-view-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex: 0 0 auto;
-    width: 32px;
-    height: 32px;
-    padding: 0;
-    border: 1px solid var(--color-action-primary);
-    border-radius: 50%;
-    background: var(--color-neutral-0);
-    color: var(--color-action-primary);
-    cursor: pointer;
-
-    .bi {
-      font-size: 14px;
-      line-height: 1;
-    }
-  }
+  // .fs-view-btn 已改用全域 .circle-btn（作用中 --buy 實心／未選 --brand-outline 描邊）
 
   // 卡片視圖（預設）：顯示卡片、隱藏表格
   .fs-table-wrap {

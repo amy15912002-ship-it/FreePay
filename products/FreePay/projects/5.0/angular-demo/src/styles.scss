@@ -266,36 +266,43 @@ textarea {
   border-radius: inherit;
 }
 
-.mat-raised-button.mat-primary,
-.mat-flat-button.mat-primary {
+/* SM 尺寸（§3.2）：區塊標題列等密集場景，其餘繼承 base */
+.ds-action-button--sm.mat-button-base {
+  height: 36px;
+  padding: 0 20px;
+}
+
+/* Filled：橙紅實心，hover/pressed 加深一階 */
+.ds-action-button.mat-raised-button.mat-primary,
+.ds-action-button.mat-flat-button.mat-primary {
   background-color: var(--color-brand-primary-400);
   color: var(--color-neutral-0);
 }
 
-.mat-raised-button.mat-primary:hover,
-.mat-flat-button.mat-primary:hover {
+.ds-action-button.mat-raised-button.mat-primary:hover,
+.ds-action-button.mat-flat-button.mat-primary:hover {
   background-color: var(--color-brand-primary-600);
 }
 
-.mat-raised-button.mat-primary:active,
-.mat-flat-button.mat-primary:active {
+.ds-action-button.mat-raised-button.mat-primary:active,
+.ds-action-button.mat-flat-button.mat-primary:active {
   background-color: var(--color-brand-primary-800);
 }
 
-/* Outline·品牌：透明底＋橙紅 2px 描邊與字，hover 淺品牌底 */
-.mat-stroked-button.mat-primary {
-  border-width: 2px;
+/* Outline·品牌：透明底＋橙紅 1px 描邊與字，hover 淺品牌底（醒目靠顏色，不靠粗細）*/
+.ds-action-button.mat-stroked-button.mat-primary {
+  border-width: 1px;
   border-color: var(--color-brand-primary-400);
   color: var(--color-brand-primary-400);
 }
 
-.mat-stroked-button.mat-primary:hover {
+.ds-action-button.mat-stroked-button.mat-primary:hover {
   background-color: var(--color-bg-brand-subtle);
 }
 
-/* Outline·中性：透明底＋灰 1.5px 描邊與灰字（不含 mat-primary；排除 threshold-option 等選取按鈕） */
+/* Outline·中性：透明底＋灰 1px 描邊與灰字（不含 mat-primary；排除 threshold-option 等選取按鈕） */
 .ds-action-button.mat-stroked-button:not(.mat-primary) {
-  border-width: 1.5px;
+  border-width: 1px;
   border-color: var(--color-border-strong);
   color: var(--color-neutral-600);
 }
@@ -312,15 +319,149 @@ textarea {
 /* Disabled：三變體統一——填充底/描邊皆 neutral-150、字 neutral-250 */
 .ds-action-button.mat-button-disabled {
   color: var(--color-neutral-250);
+  cursor: not-allowed;
 }
 
 .ds-action-button.mat-raised-button.mat-button-disabled,
-.ds-action-button.mat-flat-button.mat-button-disabled {
+.ds-action-button.mat-flat-button.mat-button-disabled,
+.ds-action-button.mat-raised-button.mat-button-disabled:hover,
+.ds-action-button.mat-flat-button.mat-button-disabled:hover {
   background-color: var(--color-neutral-150);
+  color: var(--color-neutral-250);
 }
 
-.ds-action-button.mat-stroked-button.mat-button-disabled {
+.ds-action-button.mat-stroked-button.mat-button-disabled,
+.ds-action-button.mat-stroked-button.mat-button-disabled:hover {
   border-color: var(--color-neutral-150);
+  background-color: transparent;
+  color: var(--color-neutral-250);
+}
+
+/* §3.2 Text 變體（內容區/淺底）：純文字動作，無框、hover 加深至主要文字色。
+   共用類，各頁文字按鈕（清除等）掛此類，不再各自重寫。 */
+.ds-text-button {
+  background: transparent;
+  border: none;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.ds-text-button:hover {
+  color: var(--color-text-primary);
+}
+
+/* §3.2 無框圖示鈕：純 icon、無框無底（揭露/展開、關閉、內聯小動作）＝Text 變體的圖示版。
+   觸控目標 32（內聯密集場景可掛 --sm=24）；icon 16；hover 加深至主要文字色 */
+.ds-icon-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.ds-icon-button:hover {
+  color: var(--color-text-primary);
+}
+
+.ds-icon-button--sm {
+  width: 24px;
+  height: 24px;
+}
+
+/* ── 排序底部彈出面板（共用：fund-select 列表、帳總明細等）──
+   觸發鈕＝圓形按鈕「描邊·品牌」（見 .circle-btn--brand-outline / §3.2），僅手機（表頭隱藏時）顯示；面板預設隱藏 */
+.circle-btn.ds-sort-trigger,
+.ds-sort-overlay {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .circle-btn.ds-sort-trigger { display: inline-flex; }
+
+  .ds-sort-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 950;
+    display: flex;
+    align-items: flex-end;
+    background: var(--color-overlay-scrim);
+  }
+
+  .ds-sort-sheet {
+    width: 100%;
+    max-height: 72vh;
+    display: flex;
+    flex-direction: column;
+    border-radius: 12px 12px 0 0;
+    background: var(--color-bg-base);
+    box-shadow: var(--shadow-lg);
+    overflow: hidden;
+  }
+
+  .ds-sort-sheet-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 16px 18px;
+    border-bottom: 1px solid var(--color-border-default);
+
+    h2 {
+      margin: 0;
+      color: var(--color-text-primary);
+      font-size: 18px;
+      font-weight: 500;
+    }
+  }
+
+  .ds-sort-sheet-body {
+    flex: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 16px 18px;
+  }
+
+  .ds-sort-label {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+  }
+
+  .ds-sort-dir {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    min-height: 32px;
+    padding: 0 10px;
+    border: none;
+    border-radius: 16px;
+    background: var(--color-neutral-0);
+    color: var(--color-action-primary);
+    font-family: var(--font-primary);
+    font-size: 14px;
+    font-weight: 500;
+  }
+
+  .ds-sort-sheet-actions {
+    display: flex;
+    justify-content: stretch;
+    gap: 8px;
+    padding: 12px 18px 18px;
+    border-top: 1px solid var(--color-border-default);
+    background: var(--color-bg-base);
+
+    button { width: 100%; }
+  }
 }
 
 .mat-form-field {
@@ -563,48 +704,60 @@ textarea {
   }
 }
 
+// 頁首 CTA：沿用 §3.2 變體與 token（nav=Filled、login outline=Outline·白、登出=Text 深底版），
+// 尺寸取自尺度 SM 36／字重 500；圓角 8px 為頁首脈絡（內容區用 999px 膠囊）。
 .fp-site-nav-action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
+  min-height: 36px;
   padding: 0 18px;
   border: 1px solid var(--color-brand-primary-400);
-  border-radius: 4px;
+  border-radius: 8px;
   background: var(--color-brand-primary-400);
   color: var(--color-neutral-0) !important;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.fp-site-nav-action:hover,
+.fp-site-nav-action:focus-visible {
+  background: var(--color-brand-primary-600);
+  border-color: var(--color-brand-primary-600);
 }
 
 .fp-site-login {
-  min-height: 40px;
+  min-height: 36px;
   padding: 0 18px;
   border: 0;
-  border-radius: 4px;
+  border-radius: 8px;
   background: transparent;
   color: var(--color-neutral-150);
   font-family: var(--font-primary);
-  font-size: 16px;
-  font-weight: 700;
+  font-size: 14px;
+  font-weight: 500;
   white-space: nowrap;
   cursor: pointer;
 }
 
 .fp-site-login--outline {
-  border: 1px solid var(--color-brand-secondary-400);
-  color: var(--color-brand-secondary-400);
+  border: 1px solid var(--color-neutral-0);
+  color: var(--color-neutral-0);
 
   &:hover,
   &:focus-visible {
-    background: color-mix(in srgb, var(--color-brand-secondary-400) 12%, transparent);
-    color: var(--color-brand-secondary-300);
+    background: color-mix(in srgb, var(--color-neutral-0) 10%, transparent);
+    color: var(--color-neutral-0);
   }
 }
 
-.fp-site-login--ghost {
+// 登出是「文字連結」非按鈕，字級回到 nav 連結那一級（16/700），不吃 base 的按鈕尺寸
+.fp-site-login--text {
   padding: 0;
   background: transparent;
   color: var(--color-neutral-150);
+  font-size: 16px;
+  font-weight: 700;
 
   &:hover,
   &:focus-visible {
@@ -714,7 +867,7 @@ textarea {
 
   .fp-site-nav-action,
   .fp-site-login {
-    min-height: 34px;
+    min-height: 36px;
     margin-top: 12px;
     padding: 0 12px;
     font-size: 14px;
@@ -724,7 +877,7 @@ textarea {
     color: var(--color-neutral-0) !important;
   }
 
-  .fp-site-login--ghost {
+  .fp-site-login--text {
     min-height: auto;
     padding: 8px 0 0;
     border: 0;
@@ -807,7 +960,7 @@ table { font-variant-numeric: tabular-nums; }
 }
 
 // 內容切換 tab：語意化 button tablist，不依賴 Material，跨版本零負擔。
-// 標準見 DesignSystem.md §3.7。fund-select 解凍後 fs-tab 收斂至此（僅改 class 名）。
+// 標準見 DesignSystem.md §3.5 Tabs。fund-select 解凍後 fs-tab 收斂至此（僅改 class 名）。
 .ds-content-tab {
   display: flex;
   align-items: flex-end;
@@ -900,7 +1053,7 @@ table { font-variant-numeric: tabular-nums; }
   flex: 1 1 0;
 }
 
-// Filter chips：原生 button 篩選 pill（DesignSystem §3.7）
+// Filter chips：原生 button 篩選 pill（DesignSystem §3.3）
 .filter-chips {
   display: flex;
   flex-wrap: wrap;
@@ -941,7 +1094,7 @@ table { font-variant-numeric: tabular-nums; }
   background: var(--color-brand-primary-100);
 }
 
-// 手機 bottom sheet：更小尺寸（DesignSystem §3.7）
+// 手機 bottom sheet：更小尺寸（DesignSystem §3.3）
 .filter-chips--sheet { gap: 6px; }
 
 .filter-chips--sheet .chip {
@@ -950,7 +1103,7 @@ table { font-variant-numeric: tabular-nums; }
   font-size: 12px;
 }
 
-// 圓形操作按鈕 — 平台通用 pattern（列表內聯操作；詳 DesignSystem §3.7）
+// 圓形操作按鈕 — 平台通用 pattern（列表內聯操作；詳 DesignSystem §3.2 圓形按鈕）
 .circle-btn {
   display: inline-flex;
   align-items: center;
@@ -969,7 +1122,7 @@ table { font-variant-numeric: tabular-nums; }
 
 .circle-btn:hover {
   border-color: var(--color-neutral-300);
-  color: var(--color-text-primary);
+  color: var(--color-neutral-800);
 }
 
 .circle-btn--sell {
@@ -991,6 +1144,18 @@ table { font-variant-numeric: tabular-nums; }
   border-color: var(--color-brand-primary-600);
   background: var(--color-brand-primary-600);
   color: var(--color-text-on-brand);
+}
+
+// 描邊·品牌（§3.2 圓形按鈕變體）：白底＋橙紅描邊與 icon，hover 淺品牌底。排序鈕用之
+.circle-btn--brand-outline {
+  border-color: var(--color-brand-primary-400);
+  color: var(--color-brand-primary-400);
+}
+
+.circle-btn--brand-outline:hover {
+  border-color: var(--color-brand-primary-400);
+  background: var(--color-bg-brand-subtle);
+  color: var(--color-brand-primary-400);
 }
 
 // Notes / disclaimer block (注意事項)
@@ -1026,4 +1191,3 @@ table { font-variant-numeric: tabular-nums; }
 
   li + li { margin-top: 4px; }
 }
-

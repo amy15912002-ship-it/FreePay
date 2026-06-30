@@ -7,7 +7,7 @@
     <span class="fs-filter-label">基金搜尋</span>
     <label class="fs-search-field">
       <input class="fs-keyword" [(ngModel)]="keyword" (input)="onKeywordInput()" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keyup.enter)="applyKeywordSearch()" placeholder="請輸入基金名稱或品牌關鍵字" autocomplete="off">
-      <button type="button" class="fs-search-clear" *ngIf="keyword" (mousedown)="$event.preventDefault()" (click)="clearKeyword()" aria-label="清除搜尋"><i class="bi bi-x-circle-fill"></i></button>
+      <button type="button" class="ds-icon-button fs-search-clear" *ngIf="keyword" (mousedown)="$event.preventDefault()" (click)="clearKeyword()" aria-label="清除搜尋"><i class="bi bi-x-circle-fill"></i></button>
       <button type="button" class="fs-search-go" (mousedown)="$event.preventDefault()" (click)="applyKeywordSearch()" aria-label="搜尋"><i class="bi bi-search" aria-hidden="true"></i></button>
       <div class="fs-search-suggest" *ngIf="searchFocused && keyword.trim().length >= searchMinChars">
         <button type="button" class="fs-search-suggest-all" (click)="applyKeywordSearch()">
@@ -34,7 +34,7 @@
         <button type="button" class="chip" [class.is-selected]="domicileFilters.length===0" (click)="clearFilterGroup('domicile')">全部</button>
         <button type="button" class="chip" *ngFor="let item of domiciles" [class.is-selected]="domicileFilters.includes(item)" (click)="toggleDomicileFilter(item)">{{ item }}</button>
       </div>
-      <button type="button" class="fs-clear" (click)="clearFilters()" aria-label="清空條件">
+      <button type="button" class="ds-text-button fs-clear" (click)="clearFilters()" aria-label="清空條件">
         <i class="bi bi-trash3" aria-hidden="true"></i>
         <span>清空條件</span>
       </button>
@@ -172,11 +172,11 @@
       <span>【相關結果共有 <strong>{{ filteredFunds.length }}</strong> 檔】</span>
     </div>
     <div class="fs-summary-actions">
-      <button class="fs-mobile-filter-btn" type="button" (click)="openFilterPanel()" aria-label="篩選" [class.is-active]="activeFilterCount > 0">
+      <button class="circle-btn circle-btn--brand-outline" type="button" (click)="openFilterPanel()" aria-label="篩選">
         <i class="bi" [ngClass]="activeFilterCount > 0 ? 'bi-funnel-fill' : 'bi-funnel'"></i>
       </button>
-      <button *ngIf="viewMode==='card'" class="fs-view-btn" type="button" (click)="setViewMode('table')" aria-label="切換為列表檢視"><i class="bi bi-list-ul"></i></button>
-      <button *ngIf="viewMode==='table'" class="fs-view-btn" type="button" (click)="setViewMode('card')" aria-label="切換為卡片檢視"><i class="bi bi-grid-1x2-fill"></i></button>
+      <button *ngIf="viewMode==='card'" class="circle-btn circle-btn--brand-outline" type="button" (click)="setViewMode('table')" aria-label="切換為列表檢視"><i class="bi bi-list-ul"></i></button>
+      <button *ngIf="viewMode==='table'" class="circle-btn circle-btn--brand-outline" type="button" (click)="setViewMode('card')" aria-label="切換為卡片檢視"><i class="bi bi-grid-1x2"></i></button>
     </div>
   </div>
 
@@ -190,23 +190,23 @@
       <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
     </div>
     <div class="fs-view-toggle">
-      <button class="fs-sort-trigger" type="button" (click)="openSortPanel()" aria-label="開啟排序">
+      <button class="circle-btn circle-btn--brand-outline ds-sort-trigger" type="button" (click)="openSortPanel()" aria-label="開啟排序">
         <i class="bi bi-arrow-down-up"></i>
       </button>
     </div>
   </div>
 
-  <div class="fs-sort-overlay" *ngIf="sortPanelOpen" (click)="closeSortPanel()">
-    <section class="fs-sort-panel" (click)="$event.stopPropagation()" aria-label="排序設定">
-      <div class="fs-sort-panel-head">
+  <div class="ds-sort-overlay" *ngIf="sortPanelOpen" (click)="closeSortPanel()">
+    <section class="ds-sort-sheet" (click)="$event.stopPropagation()" aria-label="排序設定">
+      <div class="ds-sort-sheet-head">
         <h2>排序</h2>
-        <button class="fs-sort-close" type="button" (click)="closeSortPanel()" aria-label="關閉排序">
+        <button class="ds-icon-button" type="button" (click)="closeSortPanel()" aria-label="關閉排序">
           <i class="bi bi-x-lg"></i>
         </button>
       </div>
-      <div class="fs-sort-panel-body">
-        <span class="fs-sort-panel-label">排序欄位</span>
-        <div class="filter-chips fs-sort-chips" role="group" aria-label="排序欄位">
+      <div class="ds-sort-sheet-body">
+        <span class="ds-sort-label">排序欄位</span>
+        <div class="filter-chips" role="group" aria-label="排序欄位">
           <button
             type="button"
             class="chip"
@@ -215,13 +215,13 @@
             (click)="selectPendingSort(opt.key)"
           >{{ opt.label }}</button>
         </div>
-        <span class="fs-sort-panel-label">排序方向</span>
-        <button class="fs-sort-dir" type="button" (click)="togglePendingSortDirection()">
+        <span class="ds-sort-label">排序方向</span>
+        <button class="ds-sort-dir" type="button" (click)="togglePendingSortDirection()">
           <i class="bi" [class.bi-caret-down-fill]="pendingSortDesc" [class.bi-caret-up-fill]="!pendingSortDesc"></i>
           {{ pendingSortDesc ? '高到低' : '低到高' }}
         </button>
       </div>
-      <div class="fs-sort-panel-actions">
+      <div class="ds-sort-sheet-actions">
         <button class="ds-action-button" mat-raised-button color="primary" type="button" (click)="applyPendingSort()">套用排序</button>
       </div>
     </section>

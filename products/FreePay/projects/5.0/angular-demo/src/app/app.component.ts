@@ -39,7 +39,7 @@ import { Router } from '@angular/router';
         <button
           class="fp-site-login"
           [class.fp-site-login--outline]="!isLoggedIn"
-          [class.fp-site-login--ghost]="isLoggedIn"
+          [class.fp-site-login--text]="isLoggedIn"
           type="button"
           (click)="toggleLoginState()"
         >{{ isLoggedIn ? '登出' : '登入' }}</button>

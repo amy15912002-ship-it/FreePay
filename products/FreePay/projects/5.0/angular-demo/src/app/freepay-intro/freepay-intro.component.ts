@@ -41,7 +41,7 @@ import { Component } from '@angular/core';
       border-radius: 50%;
       background: var(--color-bg-muted);
       color: var(--color-text-secondary);
-      font-size: 26px;
+      font-size: 24px;
     }
 
     h1 {

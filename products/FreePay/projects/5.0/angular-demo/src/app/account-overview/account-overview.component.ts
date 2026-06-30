@@ -11,6 +11,22 @@ type OrderFilter = 'all' | 'alt' | 'chg' | 'rdm';
 type DetailTxType = 'all' | 'A' | 'R' | 'RDM';
 type DetailTimeType = '3M' | '6M' | '1Y' | 'YTD' | 'ALL' | 'CUSTOM';
 type ChangeSortKey = 'code' | 'effectDate' | 'ccy' | 'tradeType' | 'before' | 'after';
+type FundSortKey = 'name' | 'ccy' | 'market' | 'profit' | 'retWith' | 'pay' | 'cost' | 'paid' | 'retWithout';
+type SettingsEditView = 'single' | 'expanded';
+type ExpandedSettingStep = 'edit' | 'confirm' | 'done';
+type PayEditMode = 'amount' | 'ratio';
+type ThresholdEditMode = 'none' | 'protect' | 'unlock';
+
+interface SettingDraft {
+  fpNo: string;
+  payActive: boolean;
+  payMode: PayEditMode;
+  monthlyPay: number;
+  annualRate: number;
+  payDay: number;
+  thresholdMode: ThresholdEditMode;
+  thresholdValue: number;
+}
 
 const REFERENCE_DATE = new Date('2026-05-12T00:00:00');
 
@@ -26,10 +42,27 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   readonly rdmOrders = MOCK_RDM_ORDERS;
   readonly allProfits = MOCK_PROFITS;
   readonly changeLogs = ALL_CHANGE_LOGS;
+  readonly dateOptions = Array.from({ length: 31 }, (_, i) => i + 1);
+  readonly protectThresholdOptions = [95, 90, 80];
+  readonly unlockThresholdOptions = [105, 110, 120];
+  readonly expandedSettingSteps = [
+    { key: 'edit' as ExpandedSettingStep, label: '設定' },
+    { key: 'confirm' as ExpandedSettingStep, label: '確認' },
+    { key: 'done' as ExpandedSettingStep, label: '完成' },
+  ];
   changeSearch = '';
   changeView: 'history' | 'settings' = 'settings';
+  settingsEditView: SettingsEditView = 'single';
+  expandedSettingStep: ExpandedSettingStep = 'edit';
+  expandedSettingAgreedTerms = false;
+  expandedSettingPwd = '';
+  expandedSettingPwdVisible = false;
   changeSortKey: ChangeSortKey = 'effectDate';
   changeSortDesc = true;
+
+  // 明細排序（桌機表頭 + 手機面板）；預設 null = 首次交易日自然序（陣列舊→新）
+  fundSortKey: FundSortKey | null = null;
+  fundSortDesc = true;
 
   sumCardIndex = 0;
   summaryDemoMode: 'multi' | 'single' = 'multi';
@@ -116,6 +149,8 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   expandedFundRows = new Set<string>();
+  expandedSettingRows = new Set<string>();
+  settingDrafts: Record<string, SettingDraft> = {};
   selectedOrders = new Set<string>();
   cancelPwd = '';
   cancelPwdVisible = false;
@@ -186,6 +221,268 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     return this.funds.filter(f => f.contracts[0] && f.contracts[0].marketUnits > 0);
   }
 
+  get modifiedSettingDrafts(): Array<{ fund: OvFund; draft: SettingDraft; contract: OvContract }> {
+    const rows: Array<{ fund: OvFund; draft: SettingDraft; contract: OvContract }> = [];
+    for (const fund of this.settingsFunds) {
+      const contract = fund.contracts[0];
+      const draft = this.settingDraftOf(contract);
+      if (this.isSettingDraftModified(contract, draft)) rows.push({ fund, draft, contract });
+    }
+    return rows;
+  }
+
+  get modifiedSettingCount(): number {
+    return this.modifiedSettingDrafts.length;
+  }
+
+  get hasInvalidSettingDraft(): boolean {
+    return Object.values(this.settingDrafts).some(draft => this.settingDraftError(draft) !== '');
+  }
+
+  get canSubmitExpandedSettings(): boolean {
+    return this.modifiedSettingCount > 0 && !this.hasInvalidSettingDraft;
+  }
+
+  get expandedSettingSubmitDisabled(): boolean {
+    return this.modifiedSettingCount === 0 || !this.expandedSettingAgreedTerms || this.expandedSettingPwd.trim() === '';
+  }
+
+  get expandedSettingSubmitHint(): string {
+    if (!this.expandedSettingAgreedTerms) return '請勾選同意服務條款';
+    if (this.expandedSettingPwd.trim() === '') return '請輸入交易密碼';
+    return '';
+  }
+
+  get expandedSettingStepIndex(): number {
+    return this.expandedSettingSteps.findIndex(step => step.key === this.expandedSettingStep);
+  }
+
+  get expandedSettingLastStepIndex(): number {
+    return this.expandedSettingSteps.length - 1;
+  }
+
+  isSettingExpanded(id: string): boolean {
+    return this.expandedSettingRows.has(id);
+  }
+
+  toggleSettingRow(id: string): void {
+    this.expandedSettingRows.has(id) ? this.expandedSettingRows.delete(id) : this.expandedSettingRows.add(id);
+  }
+
+  settingDraftOf(contract: OvContract): SettingDraft {
+    if (!this.settingDrafts[contract.fpNo]) {
+      this.settingDrafts[contract.fpNo] = this.buildSettingDraft(contract);
+    }
+    return this.settingDrafts[contract.fpNo];
+  }
+
+  resetSettingDraft(contract: OvContract): void {
+    this.settingDrafts[contract.fpNo] = this.buildSettingDraft(contract);
+  }
+
+  clearAllSettingDrafts(): void {
+    this.settingDrafts = {};
+  }
+
+  setDraftPayMode(draft: SettingDraft, mode: PayEditMode): void {
+    draft.payMode = mode;
+    draft.payActive = true;
+  }
+
+  setDraftThresholdMode(draft: SettingDraft, mode: ThresholdEditMode): void {
+    draft.thresholdMode = mode;
+    if (mode === 'protect' && (draft.thresholdValue < 70 || draft.thresholdValue > 100)) draft.thresholdValue = 80;
+    if (mode === 'unlock' && (draft.thresholdValue < 101 || draft.thresholdValue > 200)) draft.thresholdValue = 110;
+  }
+
+  toggleDraftThreshold(draft: SettingDraft, enabled: boolean): void {
+    this.setDraftThresholdMode(draft, enabled ? 'protect' : 'none');
+  }
+
+  pickDraftDate(draft: SettingDraft, day: number): void {
+    draft.payDay = day;
+  }
+
+  setDraftThresholdValue(draft: SettingDraft, value: number): void {
+    draft.thresholdValue = value;
+  }
+
+  selectDraftCustomThreshold(draft: SettingDraft): void {
+    if (draft.thresholdMode === 'protect') draft.thresholdValue = 70;
+    if (draft.thresholdMode === 'unlock') draft.thresholdValue = 101;
+  }
+
+  draftThresholdCustomActive(draft: SettingDraft): boolean {
+    if (draft.thresholdMode === 'protect') return !this.protectThresholdOptions.includes(Number(draft.thresholdValue));
+    if (draft.thresholdMode === 'unlock') return !this.unlockThresholdOptions.includes(Number(draft.thresholdValue));
+    return false;
+  }
+
+  draftRatioSliderProgress(draft: SettingDraft): number {
+    const ratio = Math.min(15, Math.max(1, Number(draft.annualRate || 1)));
+    return ((ratio - 1) / 14) * 100;
+  }
+
+  settingDraftError(draft: SettingDraft): string {
+    return this.settingMonthlyPayError(draft)
+      || this.settingAnnualRateError(draft)
+      || this.settingPayDayError(draft)
+      || this.settingThresholdError(draft);
+  }
+
+  settingMonthlyPayError(draft: SettingDraft): string {
+    if (!draft.payActive || draft.payMode !== 'amount') return '';
+    return !Number.isFinite(Number(draft.monthlyPay)) || Number(draft.monthlyPay) < 1
+      ? '請輸入月 Pay 金額'
+      : '';
+  }
+
+  settingAnnualRateError(draft: SettingDraft): string {
+    if (!draft.payActive || draft.payMode !== 'ratio') return '';
+    return !Number.isFinite(Number(draft.annualRate)) || Number(draft.annualRate) < 1 || Number(draft.annualRate) > 15
+      ? '年化 Pay 比例需為 1%–15%'
+      : '';
+  }
+
+  settingPayDayError(draft: SettingDraft): string {
+    if (!draft.payActive) return '';
+    return !Number.isFinite(Number(draft.payDay)) || Number(draft.payDay) < 1 || Number(draft.payDay) > 31
+      ? '基準日需為 1–31 日'
+      : '';
+  }
+
+  settingThresholdError(draft: SettingDraft): string {
+    if (!draft.payActive) return '';
+    if (draft.thresholdMode === 'protect' && (Number(draft.thresholdValue) < 70 || Number(draft.thresholdValue) > 100)) {
+      return '市值守護門檻需為 70%–100%';
+    }
+    if (draft.thresholdMode === 'unlock' && (Number(draft.thresholdValue) < 101 || Number(draft.thresholdValue) > 200)) {
+      return '增值啟動門檻需為 101%–200%';
+    }
+    return '';
+  }
+
+  isSettingDraftModified(contract: OvContract, draft: SettingDraft = this.settingDraftOf(contract)): boolean {
+    return this.expandedSettingSummary(contract) !== this.draftSettingSummary(draft)
+      || contract.threshold !== this.draftThresholdSummary(draft);
+  }
+
+  expandedSettingSummary(contract: OvContract): string {
+    return `${this.payMethodText(contract)}・${this.fmtN(contract.pay)}・${this.payDayText(contract)}`;
+  }
+
+  draftSettingSummary(draft: SettingDraft): string {
+    if (!draft.payActive) return '暫停';
+    const method = draft.payMode === 'ratio' ? `依比例 ${this.fmtRate(Number(draft.annualRate))}` : '依金額';
+    const value = draft.payMode === 'ratio' ? this.estimatedMonthlyPay(draft) : this.fmtN(Number(draft.monthlyPay));
+    return `${method}・${value}・${Number(draft.payDay)}日`;
+  }
+
+  draftThresholdSummary(draft: SettingDraft): string {
+    if (draft.thresholdMode === 'protect') return `市值低於投入成本 ${this.fmtRate(Number(draft.thresholdValue))} 暫停Pay出`;
+    if (draft.thresholdMode === 'unlock') return `市值超過成本 ${this.fmtRate(Number(draft.thresholdValue))} 開始Pay出`;
+    return '不設門檻';
+  }
+
+  estimatedMonthlyPay(draft: SettingDraft): string {
+    const fund = this.settingsFunds.find(f => f.contracts[0]?.fpNo === draft.fpNo);
+    const cost = fund?.contracts[0]?.cost ?? 0;
+    const amount = Math.round(cost * Number(draft.annualRate || 0) / 100 / 12);
+    return this.fmtN(amount);
+  }
+
+  openExpandedSettingsConfirm(): void {
+    if (!this.canSubmitExpandedSettings) return;
+    this.expandedSettingStep = 'confirm';
+    this.expandedSettingAgreedTerms = false;
+    this.expandedSettingPwd = '';
+    this.expandedSettingPwdVisible = false;
+  }
+
+  backToExpandedSettingEdit(): void {
+    this.expandedSettingStep = 'edit';
+  }
+
+  submitExpandedSettings(): void {
+    if (this.expandedSettingSubmitDisabled) return;
+    this.expandedSettingStep = 'done';
+  }
+
+  queryTrade(): void {
+    this.activeTab = 'order';
+    this.orderFilter = 'chg';
+  }
+
+  resetExpandedSettingFlow(): void {
+    this.expandedSettingStep = 'edit';
+    this.expandedSettingAgreedTerms = false;
+    this.expandedSettingPwd = '';
+    this.expandedSettingPwdVisible = false;
+    this.clearAllSettingDrafts();
+  }
+
+  setExpandedSettingStep(step: ExpandedSettingStep): void {
+    if (step === 'edit') {
+      this.backToExpandedSettingEdit();
+      return;
+    }
+    if (step === 'confirm' && this.canSubmitExpandedSettings) {
+      this.openExpandedSettingsConfirm();
+    }
+  }
+
+  onExpandedSettingStepperChange(index: number): void {
+    const step = this.expandedSettingSteps[index];
+    if (!step) return;
+    this.setExpandedSettingStep(step.key);
+  }
+
+  trackExpandedSettingStep(_: number, step: { key: ExpandedSettingStep }): string {
+    return step.key;
+  }
+
+  settingChangeItems(contract: OvContract, draft: SettingDraft): Array<{ label: string; before: string; after: string }> {
+    const original = this.buildSettingDraft(contract);
+    const items: Array<{ label: string; before: string; after: string }> = [];
+    if (original.payActive !== draft.payActive) {
+      items.push({ label: 'Pay 出狀態', before: this.payActiveText(original.payActive), after: this.payActiveText(draft.payActive) });
+    }
+    if (!draft.payActive) return items;
+    if (original.payMode !== draft.payMode) {
+      items.push({ label: 'Pay 出方式', before: this.payEditModeText(original.payMode), after: this.payEditModeText(draft.payMode) });
+    }
+    if (draft.payMode === 'amount' && Number(original.monthlyPay) !== Number(draft.monthlyPay)) {
+      items.push({ label: '每月 Pay 金額', before: this.fmtN(original.monthlyPay), after: this.fmtN(Number(draft.monthlyPay)) });
+    }
+    if (draft.payMode === 'ratio' && Number(original.annualRate) !== Number(draft.annualRate)) {
+      items.push({ label: '年化 Pay 比例', before: this.fmtRate(original.annualRate), after: this.fmtRate(Number(draft.annualRate)) });
+    }
+    if (Number(original.payDay) !== Number(draft.payDay)) {
+      items.push({ label: '自由 Pay 基準日', before: `${original.payDay}日`, after: `${Number(draft.payDay)}日` });
+    }
+    if (original.thresholdMode !== draft.thresholdMode) {
+      items.push({ label: '觸發門檻', before: this.thresholdEditModeText(original.thresholdMode), after: this.thresholdEditModeText(draft.thresholdMode) });
+    }
+    if (draft.thresholdMode !== 'none' && Number(original.thresholdValue) !== Number(draft.thresholdValue)) {
+      items.push({ label: this.thresholdEditModeText(draft.thresholdMode), before: this.fmtRate(original.thresholdValue), after: this.fmtRate(Number(draft.thresholdValue)) });
+    }
+    return items;
+  }
+
+  private payActiveText(active: boolean): string {
+    return active ? '啟用' : '停用';
+  }
+
+  private payEditModeText(mode: PayEditMode): string {
+    return mode === 'ratio' ? '依比例' : '依金額';
+  }
+
+  private thresholdEditModeText(mode: ThresholdEditMode): string {
+    if (mode === 'protect') return '市值守護';
+    if (mode === 'unlock') return '增值啟動';
+    return '不設門檻';
+  }
+
   // ── 異動紀錄：基金搜尋 + 每欄排序 ──
   get filteredChangeLogs(): ChangeLogRecord[] {
     const kw = this.changeSearch.trim().toLowerCase();
@@ -213,6 +510,77 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   changeSortIcon(key: ChangeSortKey): string {
     return this.changeSortKey === key && !this.changeSortDesc ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
   }
+
+  // ── 明細：每欄排序（桌機表頭點擊；同 key 再點切換升降）──
+  get sortedFunds(): OvFund[] {
+    if (!this.fundSortKey) return this.funds;
+    const key = this.fundSortKey;
+    const dir = this.fundSortDesc ? -1 : 1;
+    return [...this.funds].sort((a, b) => {
+      const va = this.fundFieldValue(a, key);
+      const vb = this.fundFieldValue(b, key);
+      return (typeof va === 'number' && typeof vb === 'number'
+        ? va - vb
+        : String(va).localeCompare(String(vb))) * dir;
+    });
+  }
+
+  setFundSort(key: FundSortKey): void {
+    if (this.fundSortKey === key) this.fundSortDesc = !this.fundSortDesc;
+    else { this.fundSortKey = key; this.fundSortDesc = true; }
+  }
+
+  fundSortIcon(key: FundSortKey): string {
+    return this.fundSortKey === key && !this.fundSortDesc ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
+  }
+
+  private fundFieldValue(f: OvFund, key: FundSortKey): number | string {
+    switch (key) {
+      case 'name':       return f.name;
+      case 'ccy':        return f.txCcy;
+      case 'market':     return f.market;
+      case 'profit':     return f.profit;
+      case 'retWith':    return this.returnWithPay(f);
+      case 'pay':        return f.pay;
+      case 'cost':       return f.cost;
+      case 'paid':       return f.paid;
+      case 'retWithout': return this.returnWithoutPay(f);
+    }
+  }
+
+  // 明細手機排序面板（複用全域 .ds-sort-* 殼）
+  fundSortPanelOpen = false;
+  pendingFundSortKey: FundSortKey = 'market';
+  pendingFundSortDesc = true;
+  readonly fundSortOptions: { key: FundSortKey; label: string }[] = [
+    { key: 'name', label: '基金名稱' },
+    { key: 'ccy', label: '交易/計價幣別' },
+    { key: 'market', label: '約當市值' },
+    { key: 'profit', label: '持有損益' },
+    { key: 'retWith', label: '含 Pay 報酬率' },
+    { key: 'pay', label: '月 Pay 金額' },
+    { key: 'cost', label: '投入成本' },
+    { key: 'paid', label: '已 Pay 金額' },
+    { key: 'retWithout', label: '不含 Pay 報酬率' },
+  ];
+
+  openFundSortPanel(): void {
+    this.pendingFundSortKey = this.fundSortKey ?? 'market';
+    this.pendingFundSortDesc = this.fundSortDesc;
+    this.fundSortPanelOpen = true;
+  }
+  closeFundSortPanel(): void { this.fundSortPanelOpen = false; }
+  selectPendingFundSort(key: FundSortKey): void {
+    if (this.pendingFundSortKey === key) this.pendingFundSortDesc = !this.pendingFundSortDesc;
+    else { this.pendingFundSortKey = key; this.pendingFundSortDesc = true; }
+  }
+  togglePendingFundSortDir(): void { this.pendingFundSortDesc = !this.pendingFundSortDesc; }
+  applyFundSort(): void {
+    this.fundSortKey = this.pendingFundSortKey;
+    this.fundSortDesc = this.pendingFundSortDesc;
+    this.fundSortPanelOpen = false;
+  }
+  trackByFundSortKey(_: number, opt: { key: FundSortKey }): string { return opt.key; }
 
   private changeFieldValue(r: ChangeLogRecord, key: ChangeSortKey): string {
     switch (key) {
@@ -469,6 +837,29 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
       case 'DL':  return this.fmtLimitMode(r.limitMode, r.limitVal);
       default:    return '-';
     }
+  }
+
+  private buildSettingDraft(contract: OvContract): SettingDraft {
+    const payMode: PayEditMode = contract.setting.includes('依比例') ? 'ratio' : 'amount';
+    const rateMatch = contract.setting.match(/(\d+(?:\.\d+)?)%/);
+    const dayMatch = contract.setting.match(/(\d+)日/);
+    const thresholdMatch = contract.threshold.match(/(\d+(?:\.\d+)?)%/);
+    const thresholdMode: ThresholdEditMode = contract.threshold.includes('市值低於')
+      ? 'protect'
+      : contract.threshold.includes('市值超過')
+        ? 'unlock'
+        : 'none';
+
+    return {
+      fpNo: contract.fpNo,
+      payActive: true,
+      payMode,
+      monthlyPay: contract.pay,
+      annualRate: payMode === 'ratio' ? Number(rateMatch?.[1] ?? 1) : 1,
+      payDay: Number(dayMatch?.[1] ?? 15),
+      thresholdMode,
+      thresholdValue: thresholdMode === 'none' ? 0 : Number(thresholdMatch?.[1] ?? (thresholdMode === 'protect' ? 80 : 110)),
+    };
   }
 
   trackById(_: number, item: { id: string }): string { return item.id; }

@@ -78,31 +78,64 @@
       <section class="ov-section" aria-labelledby="ov-detail-title">
         <div class="block-header">
           <h2 class="block-title" id="ov-detail-title">明細</h2>
-          <a class="ds-action-button" mat-stroked-button color="primary" routerLink="/demo/search">立即申購</a>
+          <div class="ov-detail-head-actions">
+            <button class="circle-btn circle-btn--brand-outline ds-sort-trigger" type="button" (click)="openFundSortPanel()" aria-label="開啟排序">
+              <i class="bi bi-arrow-down-up"></i>
+            </button>
+            <a class="ds-action-button ds-action-button--sm" mat-stroked-button color="primary" routerLink="/demo/search">立即申購</a>
+          </div>
+        </div>
+
+        <div class="ds-sort-overlay" *ngIf="fundSortPanelOpen" (click)="closeFundSortPanel()">
+          <section class="ds-sort-sheet" (click)="$event.stopPropagation()" aria-label="明細排序">
+            <div class="ds-sort-sheet-head">
+              <h2>排序</h2>
+              <button class="ds-icon-button" type="button" (click)="closeFundSortPanel()" aria-label="關閉排序">
+                <i class="bi bi-x-lg"></i>
+              </button>
+            </div>
+            <div class="ds-sort-sheet-body">
+              <span class="ds-sort-label">排序欄位</span>
+              <div class="filter-chips" role="group" aria-label="排序欄位">
+                <button type="button" class="chip"
+                  *ngFor="let opt of fundSortOptions; trackBy: trackByFundSortKey"
+                  [class.is-selected]="pendingFundSortKey === opt.key"
+                  (click)="selectPendingFundSort(opt.key)">{{ opt.label }}</button>
+              </div>
+              <span class="ds-sort-label">排序方向</span>
+              <button class="ds-sort-dir" type="button" (click)="togglePendingFundSortDir()">
+                <i class="bi" [class.bi-caret-down-fill]="pendingFundSortDesc" [class.bi-caret-up-fill]="!pendingFundSortDesc"></i>
+                {{ pendingFundSortDesc ? '高到低' : '低到高' }}
+              </button>
+            </div>
+            <div class="ds-sort-sheet-actions">
+              <button class="ds-action-button" mat-raised-button color="primary" type="button" (click)="applyFundSort()">套用排序</button>
+            </div>
+          </section>
         </div>
 
         <div class="grid-table grid-table--fund">
           <div class="grid-head">
-            <div class="grid-id-head">基金名稱</div>
+            <div class="grid-id-head grid-sortable" (click)="setFundSort('name')">基金名稱 <i class="bi" [ngClass]="fundSortIcon('name')" [class.is-active]="fundSortKey === 'name'"></i></div>
             <div class="grid-body">
               <div class="grid-body-row grid-body-row--top">
-                <span>交易/計價幣別</span>
-                <span>約當市值</span>
-                <span>持有損益</span>
-                <span>含 Pay 報酬率</span>
+                <span class="grid-sortable" (click)="setFundSort('ccy')">交易/計價幣別 <i class="bi" [ngClass]="fundSortIcon('ccy')" [class.is-active]="fundSortKey === 'ccy'"></i></span>
+                <span class="grid-sortable" (click)="setFundSort('market')">約當市值 <i class="bi" [ngClass]="fundSortIcon('market')" [class.is-active]="fundSortKey === 'market'"></i></span>
+                <span class="grid-sortable" (click)="setFundSort('profit')">持有損益 <i class="bi" [ngClass]="fundSortIcon('profit')" [class.is-active]="fundSortKey === 'profit'"></i></span>
+                <span class="grid-sortable" (click)="setFundSort('retWith')">含 Pay 報酬率 <i class="bi" [ngClass]="fundSortIcon('retWith')" [class.is-active]="fundSortKey === 'retWith'"></i></span>
               </div>
               <div class="grid-body-row grid-body-row--bottom">
-                <span>月 Pay 金額</span>
-                <span>投入成本</span>
-                <span>已 Pay 金額</span>
-                <span>不含 Pay 報酬率</span>
+                <span class="grid-sortable" (click)="setFundSort('pay')">月 Pay 金額 <i class="bi" [ngClass]="fundSortIcon('pay')" [class.is-active]="fundSortKey === 'pay'"></i></span>
+                <span class="grid-sortable" (click)="setFundSort('cost')">投入成本 <i class="bi" [ngClass]="fundSortIcon('cost')" [class.is-active]="fundSortKey === 'cost'"></i></span>
+                <span class="grid-sortable" (click)="setFundSort('paid')">已 Pay 金額 <i class="bi" [ngClass]="fundSortIcon('paid')" [class.is-active]="fundSortKey === 'paid'"></i></span>
+                <span class="grid-sortable" (click)="setFundSort('retWithout')">不含 Pay 報酬率 <i class="bi" [ngClass]="fundSortIcon('retWithout')" [class.is-active]="fundSortKey === 'retWithout'"></i></span>
               </div>
             </div>
             <div></div>
           </div>
 
           <!-- 5.0 起：一基金一幣別一列，無雙層展開；f.contracts 永遠長度 1 -->
-          <article class="grid-row" *ngFor="let f of funds; trackBy: trackByFund" [class.is-expanded]="isFundExpanded(f.id)">
+          <article class="grid-row" *ngFor="let f of sortedFunds; trackBy: trackByFund" [class.is-expanded]="isFundExpanded(f.id)">
             <div class="grid-main">
               <div class="grid-id">
                 <div class="grid-code-row">
@@ -112,7 +145,7 @@
                     <i class="bi bi-file-text"></i>
                   </button>
                   <button
-                    class="grid-expand-btn grid-expand-btn--mobile"
+                    class="ds-icon-button grid-expand-btn grid-expand-btn--mobile"
                     type="button"
                     [attr.aria-expanded]="isFundExpanded(f.id)"
                     (click)="toggleFund(f.id)"
@@ -140,7 +173,7 @@
               <div class="ov-mobile-pay-summary"><span>月 Pay 金額</span><strong>{{ fmtN(f.pay) }}<span class="ov-alert" *ngIf="hasContractAlert(f)" (click)="$event.stopPropagation()"><button type="button" class="ov-info-button ov-alert-icon" [class.is-active]="isAlertOpen(f.id)" (click)="toggleAlert(f.id)" aria-label="Pay 提醒"><i class="bi bi-exclamation-circle-fill"></i></button><div class="ov-info-popover ov-alert-popover" [class.is-open]="isAlertOpen(f.id)"><p class="ov-alert-pop-item" *ngFor="let m of alertsOf(f.id)">{{ m }}</p></div></span></strong></div>
               <div class="grid-actions">
                 <button
-                  class="grid-expand-btn grid-expand-btn--desktop"
+                  class="ds-icon-button grid-expand-btn grid-expand-btn--desktop"
                   type="button"
                   [attr.aria-expanded]="isFundExpanded(f.id)"
                   (click)="toggleFund(f.id)"
@@ -458,7 +491,7 @@
                     <i class="bi bi-file-text"></i>
                   </button>
                   <button
-                    class="grid-expand-btn grid-expand-btn--mobile"
+                    class="ds-icon-button grid-expand-btn grid-expand-btn--mobile"
                     type="button"
                     [attr.aria-expanded]="isProfitExpanded(item.id)"
                     (click)="toggleProfitRow(item.id)"
@@ -540,7 +573,17 @@
               <mat-button-toggle value="history">歷史</mat-button-toggle>
             </mat-button-toggle-group>
             <span class="ov-order-count" *ngIf="changeView === 'history'">{{ filteredChangeLogs.length }} 筆</span>
-            <span class="ov-order-count" *ngIf="changeView === 'settings'">{{ settingsFunds.length }} 筆可異動契約</span>
+            <span class="ov-order-count" *ngIf="changeView === 'settings' && settingsEditView === 'single'">{{ settingsFunds.length }} 筆可異動契約</span>
+            <span class="ov-order-count" *ngIf="changeView === 'settings' && settingsEditView === 'expanded'">
+              {{ settingsFunds.length }} 筆可異動契約・已修改 {{ modifiedSettingCount }} 筆
+            </span>
+          </div>
+          <div class="ov-demo-switch ov-change-demo-switch" *ngIf="changeView === 'settings'">
+            <span class="ov-demo-tag">DEMO</span>
+            <mat-button-toggle-group class="mode-toggle mode-toggle--sub" [(ngModel)]="settingsEditView" aria-label="Demo 設定模式">
+              <mat-button-toggle value="single">單筆</mat-button-toggle>
+              <mat-button-toggle value="expanded">批次</mat-button-toggle>
+            </mat-button-toggle-group>
           </div>
           <div class="ov-change-search" *ngIf="changeView === 'history'">
             <i class="bi bi-search" aria-hidden="true"></i>
@@ -582,7 +625,7 @@
           </div>
         </section>
 
-        <section class="ov-order-section" aria-label="設定調整" *ngIf="changeView === 'settings'">
+        <section class="ov-order-section" aria-label="設定調整" *ngIf="changeView === 'settings' && settingsEditView === 'single'">
           <div class="grid-table grid-table--settings">
             <div class="grid-head">
               <div class="grid-id-head">基金名稱</div>
@@ -616,6 +659,345 @@
             <div class="grid-empty" *ngIf="settingsFunds.length === 0">查無可異動契約</div>
           </div>
         </section>
+
+        <mat-horizontal-stepper
+          *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep !== 'done'"
+          class="material-flow-stepper setting-flow-stepper"
+          labelPosition="bottom"
+          [linear]="false"
+          [selectedIndex]="expandedSettingStepIndex"
+          (selectionChange)="onExpandedSettingStepperChange($event.selectedIndex)"
+        >
+          <ng-template matStepperIcon="number" let-index="index">
+            <span *ngIf="index < expandedSettingLastStepIndex">{{ index + 1 }}</span>
+            <i *ngIf="index === expandedSettingLastStepIndex" class="bi bi-check"></i>
+          </ng-template>
+          <ng-template matStepperIcon="edit" let-index="index">
+            <i class="bi bi-check"></i>
+          </ng-template>
+          <ng-template matStepperIcon="done" let-index="index">
+            <i class="bi bi-check"></i>
+          </ng-template>
+
+          <mat-step *ngFor="let step of expandedSettingSteps; let i = index; trackBy: trackExpandedSettingStep" [completed]="i < expandedSettingStepIndex">
+            <ng-template matStepLabel>{{ step.label }}</ng-template>
+          </mat-step>
+        </mat-horizontal-stepper>
+
+        <section class="ov-order-section" aria-label="展開編輯設定" *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep === 'edit'">
+          <div class="setting-edit-list">
+            <article class="setting-edit-card"
+              *ngFor="let f of settingsFunds; trackBy: trackByFund"
+              [class.is-expanded]="isSettingExpanded(f.id)"
+              [class.is-modified]="isSettingDraftModified(f.contracts[0])">
+              <ng-container *ngIf="settingDraftOf(f.contracts[0]) as draft">
+                <button class="setting-edit-head" type="button" (click)="toggleSettingRow(f.id)" [attr.aria-expanded]="isSettingExpanded(f.id)">
+                  <span class="setting-edit-id">
+                    <span class="grid-code">{{ f.code }}・{{ f.txCcy }}</span>
+                    <strong>{{ f.name }}</strong>
+                  </span>
+                  <span class="setting-edit-state" *ngIf="isSettingDraftModified(f.contracts[0], draft)">
+                    已修改
+                  </span>
+                  <i class="bi" [ngClass]="isSettingExpanded(f.id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                  <span class="setting-edit-summary" *ngIf="!isSettingExpanded(f.id)">
+                    <span class="setting-edit-summary-kv">
+                      <span>Pay 出方式</span>
+                      <strong>{{ payMethodText(f.contracts[0]) }}</strong>
+                    </span>
+                    <span class="setting-edit-summary-kv">
+                      <span>月 Pay 金額</span>
+                      <strong>{{ fmtN(f.contracts[0].pay) }}</strong>
+                    </span>
+                    <span class="setting-edit-summary-kv">
+                      <span>基準日</span>
+                      <strong>{{ payDayText(f.contracts[0]) }}</strong>
+                    </span>
+                    <span class="setting-edit-summary-kv">
+                      <span>觸發門檻</span>
+                      <strong>{{ f.contracts[0].threshold }}</strong>
+                    </span>
+                  </span>
+                </button>
+
+                <div class="setting-edit-panel" *ngIf="isSettingExpanded(f.id)">
+                  <div class="setting-flow">
+                    <section class="setting-flow-block">
+                      <div class="block-header">
+                        <h3 class="block-title">Pay 出設定</h3>
+                      <mat-slide-toggle color="primary" [(ngModel)]="draft.payActive" [ngModelOptions]="{ standalone: true }">
+                        {{ draft.payActive ? '啟用' : '停用' }}
+                      </mat-slide-toggle>
+                      </div>
+
+                    <ng-container *ngIf="draft.payActive">
+                        <div class="pay-setting-group pay-setting-step">
+                          <div class="pay-setting-step-title">
+                            <div class="form-label">Pay 出方式</div>
+                          </div>
+                          <div class="pay-setting-panel pay-setting-panel--mode">
+                      <mat-radio-group class="choice-radio-group setting-radio-row" [(ngModel)]="draft.payMode" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setDraftPayMode(draft, $event)">
+                        <mat-radio-button color="primary" value="amount">依金額</mat-radio-button>
+                        <mat-radio-button color="primary" value="ratio">依比例</mat-radio-button>
+                      </mat-radio-group>
+
+                            <label class="setting-edit-field pay-mode-panel" *ngIf="draft.payMode === 'amount'" [class.is-error]="settingMonthlyPayError(draft)">
+                              <span>每月 Pay 金額</span>
+                              <input type="number" min="1" [(ngModel)]="draft.monthlyPay" [ngModelOptions]="{ standalone: true }">
+                      <small class="setting-edit-field-error" *ngIf="settingMonthlyPayError(draft)">{{ settingMonthlyPayError(draft) }}</small>
+                    </label>
+
+                            <div *ngIf="draft.payMode === 'ratio'" class="pay-mode-panel" [class.is-error]="settingAnnualRateError(draft)">
+                              <div class="ratio-slider">
+                                <div class="ratio-summary">
+                                  <div class="ratio-value">年化 Pay 比例 {{ draft.annualRate || 0 }}%</div>
+                                  <div class="slider-hint">試算每月 Pay {{ f.txCcy }} {{ estimatedMonthlyPay(draft) }}</div>
+                                </div>
+                                <div class="ratio-range-control">
+                                  <div class="ratio-track" aria-hidden="true">
+                                    <span [style.width.%]="draftRatioSliderProgress(draft)"></span>
+                                  </div>
+                                  <input
+                                    class="ratio-range"
+                                    type="range"
+                                    min="1"
+                                    max="15"
+                                    step="1"
+                                    [(ngModel)]="draft.annualRate"
+                                    [ngModelOptions]="{ standalone: true }"
+                                    aria-label="年化 Pay 比例"
+                                  >
+                                  <div class="ratio-range-scale" aria-hidden="true">
+                                    <span style="left: 0%">1%</span>
+                                    <span style="left: 28.571%">5%</span>
+                                    <span style="left: 64.286%">10%</span>
+                                    <span style="left: 100%">15%</span>
+                                  </div>
+                                </div>
+                              </div>
+                              <small class="setting-edit-field-error" *ngIf="settingAnnualRateError(draft)">{{ settingAnnualRateError(draft) }}</small>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div class="pay-setting-group pay-setting-step pay-setting-step--date">
+                          <div class="pay-setting-step-title">
+                            <div class="form-label">自由 Pay 基準日</div>
+                          </div>
+                          <div class="pay-setting-panel pay-setting-panel--date date-section">
+                            <div class="date-grid">
+                              <button
+                                *ngFor="let day of dateOptions"
+                                class="date-btn"
+                                type="button"
+                                [class.on]="draft.payDay === day"
+                                [class.long-month]="day >= 29"
+                                (click)="pickDraftDate(draft, day)"
+                              >
+                                {{ day }}
+                              </button>
+                            </div>
+                            <small class="setting-edit-field-error" *ngIf="settingPayDayError(draft)">{{ settingPayDayError(draft) }}</small>
+                          </div>
+                        </div>
+                      </ng-container>
+                    </section>
+
+                    <section class="setting-flow-block" *ngIf="draft.payActive">
+                      <div class="block-header threshold-head">
+                        <h3 class="block-title">觸發門檻</h3>
+                        <mat-slide-toggle color="primary" [checked]="draft.thresholdMode !== 'none'" (change)="toggleDraftThreshold(draft, $event.checked)">
+                          {{ draft.thresholdMode !== 'none' ? '啟用' : '停用' }}
+                        </mat-slide-toggle>
+                      </div>
+                      <div class="pay-paused-box" *ngIf="draft.thresholdMode === 'none'">
+                        <i class="bi bi-info-circle-fill" aria-hidden="true"></i>
+                        <span>每月按設定基準日正常執行 Pay 出，不設觸發條件。</span>
+                      </div>
+
+                      <div *ngIf="draft.thresholdMode !== 'none'" class="threshold-body" [class.is-protect]="draft.thresholdMode === 'protect'" [class.is-unlock]="draft.thresholdMode === 'unlock'">
+                        <mat-radio-group class="choice-radio-group threshold-mode-radio-group" [(ngModel)]="draft.thresholdMode" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setDraftThresholdMode(draft, $event)">
+                        <mat-radio-button color="primary" value="protect">市值守護</mat-radio-button>
+                        <mat-radio-button color="primary" value="unlock">增值啟動</mat-radio-button>
+                      </mat-radio-group>
+
+                        <div class="threshold-selector-panel">
+                          <div class="threshold-preview">
+                            <div class="threshold-preview-label">
+                              {{ draft.thresholdMode === 'protect' ? '市值低於投入成本' : '市值高於投入成本' }}
+                              <span class="threshold-preview-emphasis">{{ draft.thresholdValue }}%</span>
+                              {{ draft.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時，開始 Pay 出' }}
+                            </div>
+                            <div class="threshold-option-area">
+                              <div class="threshold-option-grid" *ngIf="draft.thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
+                                <button
+                                  *ngFor="let value of protectThresholdOptions"
+                                  mat-stroked-button
+                                  class="threshold-option"
+                                  type="button"
+                                  [class.is-active]="!draftThresholdCustomActive(draft) && draft.thresholdValue === value"
+                                  (click)="setDraftThresholdValue(draft, value)"
+                                >
+                                  {{ value }}%
+                                </button>
+                                <button mat-stroked-button class="threshold-option" type="button" [class.is-active]="draftThresholdCustomActive(draft)" (click)="selectDraftCustomThreshold(draft)">自訂</button>
+                              </div>
+                              <div class="threshold-option-grid" *ngIf="draft.thresholdMode === 'unlock'" role="radiogroup" aria-label="增值啟動門檻">
+                                <button
+                                  *ngFor="let value of unlockThresholdOptions"
+                                  mat-stroked-button
+                                  class="threshold-option"
+                                  type="button"
+                                  [class.is-active]="!draftThresholdCustomActive(draft) && draft.thresholdValue === value"
+                                  (click)="setDraftThresholdValue(draft, value)"
+                                >
+                                  {{ value }}%
+                                </button>
+                                <button mat-stroked-button class="threshold-option" type="button" [class.is-active]="draftThresholdCustomActive(draft)" (click)="selectDraftCustomThreshold(draft)">自訂</button>
+                              </div>
+                              <label class="setting-edit-field threshold-custom-field" *ngIf="draftThresholdCustomActive(draft)" [class.is-error]="settingThresholdError(draft)">
+                                <span>{{ draft.thresholdMode === 'protect' ? '市值守護門檻' : '增值啟動門檻' }}</span>
+                                <input type="number"
+                                  [min]="draft.thresholdMode === 'protect' ? 70 : 101"
+                                  [max]="draft.thresholdMode === 'protect' ? 100 : 200"
+                                  [(ngModel)]="draft.thresholdValue"
+                                  [ngModelOptions]="{ standalone: true }">
+                                <small class="setting-edit-field-error" *ngIf="settingThresholdError(draft)">{{ settingThresholdError(draft) }}</small>
+                              </label>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </section>
+                  </div>
+
+                  <div class="setting-edit-actions">
+                    <button class="ds-action-button ds-action-button--ghost" type="button" *ngIf="isSettingDraftModified(f.contracts[0], draft)" (click)="resetSettingDraft(f.contracts[0])">取消此筆修改</button>
+                  </div>
+                </div>
+              </ng-container>
+            </article>
+          </div>
+
+          <div class="setting-edit-bar" *ngIf="modifiedSettingCount > 0">
+            <span>已修改 {{ modifiedSettingCount }} 筆</span>
+            <button class="ds-action-button ds-action-button--ghost" type="button" (click)="clearAllSettingDrafts()">取消全部修改</button>
+            <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="!canSubmitExpandedSettings" (click)="openExpandedSettingsConfirm()">下一步</button>
+          </div>
+        </section>
+
+        <section class="setting-confirm" aria-label="設定異動確認" *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep === 'confirm'">
+          <div class="setting-confirm-block">
+            <div class="block-header">
+              <h2 class="block-title">確認設定異動</h2>
+            </div>
+            <div class="setting-confirm-list">
+              <article class="setting-confirm-card" *ngFor="let item of modifiedSettingDrafts">
+                <div class="setting-confirm-id">
+                  <span class="grid-code">{{ item.fund.code }}・{{ item.fund.txCcy }}</span>
+                  <strong>{{ item.fund.name }}</strong>
+                </div>
+                <div class="setting-change-table">
+                  <div class="setting-change-head">
+                    <span>異動項目</span>
+                    <span>異動前</span>
+                    <span>異動後</span>
+                  </div>
+                  <div class="setting-change-row" *ngFor="let change of settingChangeItems(item.contract, item.draft)">
+                    <span>{{ change.label }}</span>
+                    <span>{{ change.before }}</span>
+                    <strong>{{ change.after }}</strong>
+                  </div>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="setting-confirm-block">
+            <div class="block-header">
+              <h2 class="block-title">相關文件</h2>
+            </div>
+            <div class="doc-list setting-doc-list">
+              <a class="doc-item" href="#" target="_blank">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                <span>簡式公開說明書</span>
+              </a>
+              <a class="doc-item" href="#" target="_blank">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                <span>公開說明書</span>
+              </a>
+              <a class="doc-item" href="#" target="_blank">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                <span>投資人須知</span>
+              </a>
+              <a class="doc-item" href="#" target="_blank">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                <span>風險預告</span>
+              </a>
+              <a class="doc-item" href="#" target="_blank">
+                <i class="bi bi-file-earmark-pdf-fill"></i>
+                <span>通路報酬資訊</span>
+              </a>
+            </div>
+          </div>
+
+          <div class="setting-confirm-block">
+            <div class="block-header">
+              <h2 class="block-title">自由 Pay 理財服務條款</h2>
+            </div>
+            <div class="terms-content setting-terms-content">
+              <p>當您同意使用鉅亨自由 Pay 功能，即視為您已詳細閱讀並同意遵守本服務條款。</p>
+              <p><strong>一、 本服務之內容</strong></p>
+              <p>1. 本服務係由本公司提供基金定期贖回及相關設定服務，非基金配息。您可選擇每月 Pay 金額或年化 Pay 比例，系統將依基金最近可取得之淨值及參考匯率估算贖回單位數與約當金額；實際資料仍以基金公司、交易平台及集保結算所回覆資料為準。</p>
+              <p>2. 同一基金不同交易幣別視為不同契約，各契約之投入成本、約當市值、Pay 設定、觸發門檻及贖回狀態均分別計算，不跨幣別合併。</p>
+              <p>3. 每月 Pay 金額或年化 Pay 比例不得超過本公司設定之年化提領率上限。觸發門檻依 Pay 出基準日前一日最新可取得之市值資料判斷。</p>
+              <p>4. 設定異動於營業日 14:00 前送出，視為當日申請；14:00 以後送出，則視為次一營業日申請。異動生效後，後續 Pay 出將依新的設定執行。</p>
+              <p><strong>二、 免責聲明</strong></p>
+              <p>本公司不保證本服務絕不發生中斷及錯誤等情況；所有設定與交易結果仍以交易平台、基金公司及集保結算所實際處理結果為準。</p>
+            </div>
+            <mat-checkbox color="primary" class="agree-label" [(ngModel)]="expandedSettingAgreedTerms">
+              本人已於交易前詳閱並同意以上相關文件及服務條款，且已閱讀及了解基金通路報酬揭露及風險預告，經充分評估符合投資需求。
+            </mat-checkbox>
+          </div>
+
+          <div class="setting-confirm-block">
+            <div class="block-header">
+              <h2 class="block-title">交易密碼</h2>
+            </div>
+            <div class="fp-field ov-cancel-pwd-field">
+              <div class="fp-input-box fp-input-box--line">
+                <input class="fp-input" [type]="expandedSettingPwdVisible ? 'text' : 'password'" [(ngModel)]="expandedSettingPwd" autocomplete="off" placeholder="輸入交易密碼" aria-label="交易密碼">
+                <button class="fp-input-affix" type="button" (click)="expandedSettingPwdVisible = !expandedSettingPwdVisible" [attr.aria-label]="expandedSettingPwdVisible ? '隱藏密碼' : '顯示密碼'">
+                  <i class="bi" [class.bi-eye]="!expandedSettingPwdVisible" [class.bi-eye-slash]="expandedSettingPwdVisible"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div class="setting-edit-bar">
+            <span>共 {{ modifiedSettingCount }} 筆設定異動</span>
+            <small class="setting-submit-hint" *ngIf="expandedSettingSubmitDisabled">{{ expandedSettingSubmitHint }}</small>
+            <button class="ds-action-button ds-action-button--ghost" type="button" (click)="backToExpandedSettingEdit()">上一步</button>
+            <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="expandedSettingSubmitDisabled" (click)="submitExpandedSettings()">確認送出</button>
+          </div>
+        </section>
+
+        <section class="setting-confirm setting-confirm--done" aria-label="設定異動完成" *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep === 'done'">
+          <div class="success-block setting-done-block">
+            <div class="success-ring"><i class="bi bi-check-circle-fill"></i></div>
+            <h2>委託已成功送出</h2>
+            <div class="order-box">
+              <div class="sum-row"><span>委託時間</span><strong>2026/05/12 14:30</strong></div>
+              <div class="sum-row"><span>交易類型</span><strong>設定異動</strong></div>
+              <div class="sum-row"><span>異動筆數</span><strong>{{ modifiedSettingCount }} 筆</strong></div>
+              <div class="sum-row"><span>狀態說明</span><strong>設定生效狀態可至「委託查詢 / 取消」查看。</strong></div>
+            </div>
+            <div class="done-actions">
+              <button class="ds-action-button" mat-stroked-button type="button" (click)="queryTrade()">委託查詢</button>
+              <button class="ds-action-button" mat-raised-button color="primary" type="button" (click)="resetExpandedSettingFlow()">返回設定</button>
+            </div>
+          </div>
+        </section>
       </div>
     </ng-container>
 
@@ -630,7 +1012,7 @@
         <span class="detail-title-text">{{ detailPanelTitle }}</span>
         <span class="detail-title-meta">{{ detailPanelMeta }}</span>
       </div>
-      <button class="detail-close" type="button" (click)="closeDetail()" aria-label="關閉">
+      <button class="ds-icon-button" type="button" (click)="closeDetail()" aria-label="關閉">
         <i class="bi bi-x-lg"></i>
       </button>
     </div>
@@ -700,4 +1082,3 @@
     </div>
   </div>
 </div>
-
