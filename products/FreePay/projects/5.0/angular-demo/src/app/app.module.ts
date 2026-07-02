@@ -11,7 +11,6 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { MatStepperModule } from '@angular/material/stepper';
 import { MatTabsModule } from '@angular/material/tabs';
 
@@ -51,7 +50,6 @@ import { ThousandsDirective } from './thousands.directive';
     MatMenuModule,
     MatNativeDateModule,
     MatRadioModule,
-    MatSlideToggleModule,
     MatStepperModule,
     MatTabsModule
   ],

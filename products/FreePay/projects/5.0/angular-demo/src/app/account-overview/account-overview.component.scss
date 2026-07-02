@@ -1484,6 +1484,41 @@
   gap: 12px;
 }
 
+.setting-edit-toolbar {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.setting-edit-toggle-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 32px;
+  padding: 0 4px;
+  border: 0;
+  background: transparent;
+  color: var(--color-text-secondary);
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+
+  i {
+    font-size: 16px;
+    line-height: 1;
+  }
+
+  &:hover,
+  &:focus-visible {
+    color: var(--color-text-primary);
+    outline: none;
+  }
+
+  &:disabled {
+    color: var(--color-neutral-250);
+    cursor: not-allowed;
+  }
+}
+
 .setting-flow-stepper {
   width: min(800px, 100%);
   margin: 0 auto 4px;
@@ -1967,16 +2002,16 @@
   height: 36px;
   border-color: var(--color-border-strong);
   background: var(--color-bg-base);
-  color: var(--color-text-secondary);
+  color: var(--color-neutral-800);
   font-size: 14px;
   font-weight: 500;
 }
 
+// 高對比原則（長輩友善）：預設已深字 #333333，hover/focus 只收緊邊框
 .threshold-option:hover,
 .threshold-option:focus-visible {
   border-color: var(--color-neutral-300);
   background: var(--color-bg-base);
-  color: var(--color-neutral-800);
   outline: none;
 }
 
@@ -2368,6 +2403,10 @@
 
   .mode-toggle--sub .mat-button-toggle {
     flex: 1 1 0;
+  }
+
+  .setting-edit-toolbar {
+    justify-content: flex-end;
   }
 
   .setting-flow-stepper {

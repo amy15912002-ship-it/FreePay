@@ -127,7 +127,6 @@ $freepay-theme: mat.define-light-theme((
 @include mat.input-theme($freepay-theme);
 @include mat.menu-theme($freepay-theme);
 @include mat.radio-theme($freepay-theme);
-@include mat.slide-toggle-theme($freepay-theme);
 @include mat.stepper-theme($freepay-theme);
 @include mat.tabs-theme($freepay-theme);
 
@@ -266,7 +265,7 @@ textarea {
   border-radius: inherit;
 }
 
-/* SM 尺寸（§3.2）：區塊標題列等密集場景，其餘繼承 base */
+/* SM 尺寸（§3.1）：區塊標題列等密集場景，其餘繼承 base */
 .ds-action-button--sm.mat-button-base {
   height: 36px;
   padding: 0 20px;
@@ -304,12 +303,12 @@ textarea {
 .ds-action-button.mat-stroked-button:not(.mat-primary) {
   border-width: 1px;
   border-color: var(--color-border-strong);
-  color: var(--color-neutral-600);
+  color: var(--color-neutral-800);
 }
 
+/* 高對比原則（長輩友善）：預設已深字 #333333，hover 只收緊邊框 */
 .ds-action-button.mat-stroked-button:not(.mat-primary):hover {
   border-color: var(--color-neutral-300);
-  color: var(--color-neutral-800);
 }
 
 .ds-action-button.mat-stroked-button:not(.mat-primary):active {
@@ -337,12 +336,12 @@ textarea {
   color: var(--color-neutral-250);
 }
 
-/* §3.2 Text 變體（內容區/淺底）：純文字動作，無框、hover 加深至主要文字色。
+/* §3.1 Text 變體（內容區/淺底）：純文字動作，無框、hover 加深至主要文字色。
    共用類，各頁文字按鈕（清除等）掛此類，不再各自重寫。 */
 .ds-text-button {
   background: transparent;
   border: none;
-  color: var(--color-text-secondary);
+  color: var(--color-neutral-800);
   font-size: 14px;
   cursor: pointer;
 }
@@ -363,7 +362,7 @@ textarea {
   padding: 0;
   border: 0;
   background: transparent;
-  color: var(--color-text-secondary);
+  color: var(--color-neutral-800);
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
@@ -704,54 +703,35 @@ textarea {
   }
 }
 
-// 頁首 CTA：沿用 §3.2 變體與 token（nav=Filled、login outline=Outline·白、登出=Text 深底版），
-// 尺寸取自尺度 SM 36／字重 500；圓角 8px 為頁首脈絡（內容區用 999px 膠囊）。
+// Header action links are text-style navigation items, not CTA buttons.
 .fp-site-nav-action {
   display: inline-flex;
   align-items: center;
-  justify-content: center;
-  min-height: 36px;
-  padding: 0 18px;
-  border: 1px solid var(--color-brand-primary-400);
-  border-radius: 8px;
-  background: var(--color-brand-primary-400);
-  color: var(--color-neutral-0) !important;
-  font-size: 14px;
-  font-weight: 500;
+  color: var(--color-neutral-150) !important;
+  font-size: 16px;
+  font-weight: 700;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .fp-site-nav-action:hover,
 .fp-site-nav-action:focus-visible {
-  background: var(--color-brand-primary-600);
-  border-color: var(--color-brand-primary-600);
+  color: var(--color-neutral-0) !important;
 }
 
 .fp-site-login {
-  min-height: 36px;
-  padding: 0 18px;
+  min-height: auto;
+  padding: 0;
   border: 0;
-  border-radius: 8px;
   background: transparent;
   color: var(--color-neutral-150);
   font-family: var(--font-primary);
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 700;
   white-space: nowrap;
   cursor: pointer;
 }
 
-.fp-site-login--outline {
-  border: 1px solid var(--color-neutral-0);
-  color: var(--color-neutral-0);
-
-  &:hover,
-  &:focus-visible {
-    background: color-mix(in srgb, var(--color-neutral-0) 10%, transparent);
-    color: var(--color-neutral-0);
-  }
-}
-
-// 登出是「文字連結」非按鈕，字級回到 nav 連結那一級（16/700），不吃 base 的按鈕尺寸
 .fp-site-login--text {
   padding: 0;
   background: transparent;
@@ -867,20 +847,21 @@ textarea {
 
   .fp-site-nav-action,
   .fp-site-login {
-    min-height: 36px;
-    margin-top: 12px;
-    padding: 0 12px;
+    margin-top: 0;
     font-size: 14px;
   }
 
   .fp-site-nav-action {
-    color: var(--color-neutral-0) !important;
+    padding: 12px 0;
+    border-bottom: 1px solid color-mix(in srgb, var(--color-neutral-0) 8%, transparent);
+    color: var(--color-neutral-150) !important;
   }
 
   .fp-site-login--text {
     min-height: auto;
-    padding: 8px 0 0;
+    padding: 12px 0;
     border: 0;
+    text-align: left;
   }
 
   .fp-site-main {
@@ -999,6 +980,121 @@ table { font-variant-numeric: tabular-nums; }
   .ds-content-tab { overflow-x: auto; }
 }
 
+// ── Switch（開關）─────────────────────────────────────
+// 原生 <button role="switch">，結構與樣式照 v20 slide-toggle（MDC switch），只換平台顏色；零 Material 依賴、升級無負擔。
+// 用途：即時啟用／停用某功能（Pay 出、觸發門檻）；切換即生效、非表單送出型才用 switch。
+.ds-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  cursor: pointer;
+  font: inherit;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.ds-switch__track {
+  position: relative;
+  flex: 0 0 auto;
+  box-sizing: border-box;
+  width: 52px;
+  height: 32px;
+  border-radius: 16px;
+  background: var(--color-neutral-100);
+  border: 2px solid var(--color-neutral-300);
+  transition: background .2s cubic-bezier(.4, 0, .2, 1), border-color .2s cubic-bezier(.4, 0, .2, 1);
+}
+
+// thumb（handle）：照 v20 預設（顯示 icon 版），兩態皆 24px；translateY(-50%) 置中、translateX 平移、不縮放
+.ds-switch__thumb {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-neutral-500);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, .3), 0 1px 1px rgba(0, 0, 0, .14);
+  transform: translate(2px, -50%);
+  transition: transform .2s cubic-bezier(.4, 0, .2, 1),
+              background .2s cubic-bezier(.4, 0, .2, 1);
+}
+
+// state layer：hover／focus 時 thumb 周圍淡圓（照 M3）
+.ds-switch__thumb::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  background: var(--color-neutral-500);
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  transition: opacity .15s ease, background .2s ease;
+  pointer-events: none;
+}
+
+// thumb 內 icon：off（未選·淺色橫線）／on（選中·橙勾）疊放同位，以 opacity 切換
+.ds-switch__icon {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  transform: translate(-50%, -50%);
+  line-height: 1;
+  transition: opacity .1s ease;
+}
+
+.ds-switch__icon--off {
+  font-size: 16px;
+  color: var(--color-neutral-0);
+  opacity: 1;
+}
+
+.ds-switch__icon--on {
+  font-size: 16px;
+  color: var(--color-action-primary);
+  opacity: 0;
+}
+
+// 選中
+.ds-switch.is-on .ds-switch__track {
+  background: var(--color-action-primary);
+  border-color: var(--color-action-primary);
+}
+
+.ds-switch.is-on .ds-switch__thumb {
+  background: var(--color-neutral-0);
+  transform: translate(22px, -50%);
+}
+
+.ds-switch.is-on .ds-switch__thumb::before {
+  background: var(--color-action-primary);
+}
+
+.ds-switch.is-on .ds-switch__icon--off { opacity: 0; }
+.ds-switch.is-on .ds-switch__icon--on { opacity: 1; }
+
+// hover／focus state layer（focus 即「焦點可見」替代樣式，見 §3 章首）
+.ds-switch:hover:not(:disabled) .ds-switch__thumb::before { opacity: .08; }
+.ds-switch:focus-visible { outline: none; }
+.ds-switch:focus-visible .ds-switch__thumb::before { opacity: .12; }
+
+.ds-switch:disabled {
+  cursor: not-allowed;
+  opacity: .5;
+}
+
+.ds-switch__label {
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--color-text-primary);
+}
+
 // mat-button-toggle-group colour tokens (design system override)
 // .mode-toggle        — colours only; width is determined by context
 // .mode-toggle-fill   — adds full-width stretch (for form settings blocks)
@@ -1068,18 +1164,18 @@ table { font-variant-numeric: tabular-nums; }
   border: 1px solid var(--color-neutral-200);
   border-radius: 999px;
   background: var(--color-neutral-0);
-  color: var(--color-neutral-600);
+  color: var(--color-neutral-800);
   font-family: var(--font-primary);
   font-size: 14px;
   line-height: 1;
   white-space: nowrap;
   cursor: pointer;
-  transition: border-color .12s, color .12s, background .12s;
+  transition: border-color .12s, background .12s;
 }
 
+// 高對比原則（長輩友善）：預設已深字 #333333，hover 只收緊邊框
 .filter-chips .chip:hover {
   border-color: var(--color-neutral-300);
-  color: var(--color-neutral-800);
 }
 
 .filter-chips .chip.is-selected {
@@ -1114,15 +1210,15 @@ table { font-variant-numeric: tabular-nums; }
   border: 1px solid var(--color-neutral-200);
   border-radius: 50%;
   background: var(--color-neutral-0);
-  color: var(--color-text-secondary);
+  color: var(--color-neutral-800);
   font-size: 16px;
   cursor: pointer;
-  transition: border-color .12s, background .12s, color .12s;
+  transition: border-color .12s, background .12s;
 }
 
+/* 高對比原則：預設已深字 #333333，hover 只收緊邊框 */
 .circle-btn:hover {
   border-color: var(--color-neutral-300);
-  color: var(--color-neutral-800);
 }
 
 .circle-btn--sell {

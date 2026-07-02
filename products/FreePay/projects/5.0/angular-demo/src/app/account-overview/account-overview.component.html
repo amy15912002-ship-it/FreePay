@@ -685,6 +685,18 @@
         </mat-horizontal-stepper>
 
         <section class="ov-order-section" aria-label="展開編輯設定" *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep === 'edit'">
+          <div class="setting-edit-toolbar">
+            <button
+              class="setting-edit-toggle-all"
+              type="button"
+              [disabled]="settingsFunds.length === 0"
+              (click)="toggleAllSettingRows()"
+              [attr.aria-label]="allSettingRowsExpanded ? '全部收合' : '全部展開'"
+            >
+              <span>全部</span>
+              <i class="bi" [ngClass]="allSettingRowsExpanded ? 'bi-chevron-up' : 'bi-chevron-down'" aria-hidden="true"></i>
+            </button>
+          </div>
           <div class="setting-edit-list">
             <article class="setting-edit-card"
               *ngFor="let f of settingsFunds; trackBy: trackByFund"
@@ -725,9 +737,12 @@
                     <section class="setting-flow-block">
                       <div class="block-header">
                         <h3 class="block-title">Pay 出設定</h3>
-                      <mat-slide-toggle color="primary" [(ngModel)]="draft.payActive" [ngModelOptions]="{ standalone: true }">
-                        {{ draft.payActive ? '啟用' : '停用' }}
-                      </mat-slide-toggle>
+                      <button type="button" role="switch" class="ds-switch"
+                        [class.is-on]="draft.payActive" [attr.aria-checked]="draft.payActive"
+                        (click)="draft.payActive = !draft.payActive">
+                        <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="bi bi-check2 ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
+                        <span class="ds-switch__label">{{ draft.payActive ? '啟用' : '停用' }}</span>
+                      </button>
                       </div>
 
                     <ng-container *ngIf="draft.payActive">
@@ -806,9 +821,12 @@
                     <section class="setting-flow-block" *ngIf="draft.payActive">
                       <div class="block-header threshold-head">
                         <h3 class="block-title">觸發門檻</h3>
-                        <mat-slide-toggle color="primary" [checked]="draft.thresholdMode !== 'none'" (change)="toggleDraftThreshold(draft, $event.checked)">
-                          {{ draft.thresholdMode !== 'none' ? '啟用' : '停用' }}
-                        </mat-slide-toggle>
+                        <button type="button" role="switch" class="ds-switch"
+                          [class.is-on]="draft.thresholdMode !== 'none'" [attr.aria-checked]="draft.thresholdMode !== 'none'"
+                          (click)="toggleDraftThreshold(draft, draft.thresholdMode === 'none')">
+                          <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="bi bi-check2 ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
+                          <span class="ds-switch__label">{{ draft.thresholdMode !== 'none' ? '啟用' : '停用' }}</span>
+                        </button>
                       </div>
                       <div class="pay-paused-box" *ngIf="draft.thresholdMode === 'none'">
                         <i class="bi bi-info-circle-fill" aria-hidden="true"></i>

@@ -594,16 +594,16 @@
   height: 36px;
   border-color: var(--color-border-strong);
   background: var(--color-bg-base);
-  color: var(--color-text-secondary);
+  color: var(--color-neutral-800);
   font-size: 14px;
   font-weight: 500;
 }
 
+// 高對比原則（長輩友善）：預設已深字 #333333，hover/focus 只收緊邊框
 .threshold-option:hover,
 .threshold-option:focus-visible {
   border-color: var(--color-neutral-300);
   background: var(--color-bg-base);
-  color: var(--color-neutral-800);
   outline: none;
 }
 

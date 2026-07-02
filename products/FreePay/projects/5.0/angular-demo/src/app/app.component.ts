@@ -34,17 +34,14 @@ import { Router } from '@angular/router';
       </button>
 
       <nav id="fp-site-nav" class="fp-site-nav" [class.is-open]="isMobileMenuOpen" aria-label="主要導覽">
-        <a routerLink="/demo/freepay-intro" routerLinkActive="is-active" (click)="closeMobileMenu()">自由 Pay 介紹</a>
+        <a routerLink="/demo/freepay-intro" routerLinkActive="is-active" (click)="closeMobileMenu()">自由 Pay 首頁</a>
+        <a *ngIf="isLoggedIn" class="fp-site-nav-action" routerLink="/demo/search" (click)="closeMobileMenu()">立即申購</a>
         <a *ngIf="isLoggedIn" routerLink="/demo/overview" routerLinkActive="is-active" (click)="closeMobileMenu()">帳戶總覽</a>
         <button
-          class="fp-site-login"
-          [class.fp-site-login--outline]="!isLoggedIn"
-          [class.fp-site-login--text]="isLoggedIn"
+          class="fp-site-login fp-site-login--text"
           type="button"
           (click)="toggleLoginState()"
         >{{ isLoggedIn ? '登出' : '登入' }}</button>
-        <a *ngIf="!isLoggedIn" class="fp-site-nav-action" href="https://www.anuefund.com/FundSpec/OpenAcct/" (click)="closeMobileMenu()">立即開戶</a>
-        <a *ngIf="isLoggedIn" class="fp-site-nav-action" routerLink="/demo/search" (click)="closeMobileMenu()">立即申購</a>
       </nav>
     </header>
     <main class="fp-site-main">

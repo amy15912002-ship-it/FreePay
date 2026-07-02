@@ -255,13 +255,12 @@
       <section class="block" id="pay-settings-block" *ngIf="!isAddOnMode">
         <div class="block-header">
           <h2 class="block-title">Pay 出設定</h2>
-          <mat-slide-toggle
-            color="primary"
-            [checked]="payActive"
-            (change)="togglePayActive($event.checked)"
-          >
-            {{ payActive ? '啟用' : '停用' }}
-          </mat-slide-toggle>
+          <button type="button" role="switch" class="ds-switch"
+            [class.is-on]="payActive" [attr.aria-checked]="payActive"
+            (click)="togglePayActive(!payActive)">
+            <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="bi bi-check2 ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
+            <span class="ds-switch__label">{{ payActive ? '啟用' : '停用' }}</span>
+          </button>
         </div>
 
         <div class="pay-paused-box" *ngIf="!payActive">
@@ -407,14 +406,13 @@
           <div>
             <h2 class="block-title">觸發門檻</h2>
           </div>
-          <mat-slide-toggle
-            color="primary"
-            [checked]="thresholdEnabled"
+          <button type="button" role="switch" class="ds-switch"
+            [class.is-on]="thresholdEnabled" [attr.aria-checked]="thresholdEnabled"
             [disabled]="!payActive"
-            (change)="toggleThreshold($event.checked)"
-          >
-            {{ thresholdEnabled ? '啟用' : '停用' }}
-          </mat-slide-toggle>
+            (click)="toggleThreshold(!thresholdEnabled)">
+            <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="bi bi-check2 ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
+            <span class="ds-switch__label">{{ thresholdEnabled ? '啟用' : '停用' }}</span>
+          </button>
         </div>
 
         <div class="pay-paused-box" *ngIf="!thresholdEnabled">
@@ -662,10 +660,10 @@
           <p><strong>一、 本服務之內容</strong></p>
           <p>1. 本服務係由本公司提供基金定期贖回及相關設定服務，非基金配息。您可依本公司提供之設定方式，選擇每月 Pay 金額或年化 Pay 比例，系統將依基金最近可取得之淨值及參考匯率估算贖回單位數與約當金額；實際贖回單位數、成交淨值、匯率及入帳金額仍以基金公司、交易平台及集保結算所回覆資料為準。</p>
           <p>2. 本服務支援依交易幣別設定與執行。同一基金不同交易幣別視為不同契約，各契約之投入成本、約當市值、Pay 設定、觸發門檻及贖回狀態均分別計算，不跨幣別合併。外幣交易可能受匯率變動影響，實際損益與入帳金額仍以交易確認資料為準。</p>
-          <p>3. 每月 Pay 金額或年化 Pay 比例不得超過本公司設定之年化提領率上限。依金額設定時，系統將以月 Pay 金額 × 12 ÷ 投入成本估算年化提領率；依比例設定時，系統將依您所選比例估算每月 Pay 金額。上述試算僅供交易前參考，實際執行結果可能因淨值、匯率、可用庫存或基金公司作業而不同。</p>
-          <p>4. 本服務可選擇設定觸發門檻。市值守護為約當市值低於投入成本指定比例時暫停 Pay 出，待市值回升至門檻後恢復；增值啟動為約當市值超過投入成本指定比例的月份開始 Pay 出。市值守護與增值啟動互斥，不可同時設定；若未設定觸發門檻，系統將依原 Pay 設定執行。觸發門檻係依 Pay 出基準日前一日最新可取得之市值資料判斷，並可能因淨值、匯率或資料時點不同而與實際成交結果有差異。</p>
-          <p>5. 您可依本服務提供之方式申請全部贖回、部分贖回或指定批次贖回。部分贖回可輸入贖回金額或贖回單位數，由系統依先進先出原則估算消耗批次；指定批次贖回由您勾選可贖回批次，勾選之批次將以該批次全部剩餘單位數申請贖回。短線交易資訊僅供提醒，不代表本公司保證交易必定成功或不產生相關費用。</p>
-          <p>6. 部分贖回或指定批次贖回後，契約投入成本將依剩餘單位數及已 Pay 單位數重新計算，並可能影響後續年化提領率及觸發門檻基準。若本次贖回後年化提領率超過建議上限，系統將顯示提醒；該提醒不代表交易失敗，亦不會自動調整您的 Pay 設定。若後續庫存不足以支應原設定 Pay 金額，最後一次 Pay 將以剩餘可用單位數全部 Pay 出。</p>
+          <p>3. 依金額設定時，系統將以月 Pay 金額 × 12 ÷ 投入成本估算年化提領率；依比例設定時，系統將依您所選比例估算每月 Pay 金額。上述試算僅供交易前參考，實際執行結果可能因淨值、匯率、可用庫存或基金公司作業而不同。</p>
+          <p>4. 本服務可選擇設定觸發門檻。市值守護為約當市值低於投入成本指定比例時暫停 Pay 出，待市值回升至門檻後恢復；增值啟動為約當市值超過投入成本指定比例的月份開始 Pay 出，若市值跌回門檻以下則暫停。市值守護與增值啟動互斥，不可同時設定；若未設定觸發門檻，系統將依原 Pay 設定執行。觸發門檻係依 Pay 出基準日前一日最新可取得之市值資料判斷，並可能因淨值、匯率或資料時點不同而與實際成交結果有差異。</p>
+          <p>5. 您可依本服務提供之方式申請全部贖回、部分贖回或指定批次贖回。部分贖回可輸入贖回金額或贖回單位數，由系統依先進先出原則計算。</p>
+          <p>6. 部分贖回或指定贖回後，契約投入成本將依剩餘單位數及已 Pay 單位數重新計算，並可能影響後續年化提領率及觸發門檻基準。若本次贖回後年化提領率超過建議上限，系統不會自動調整您的 Pay 設定。若後續庫存不足以支應原設定 Pay 金額，最後一次 Pay 將以剩餘可用單位數全部 Pay 出。</p>
           <p>7. 首次申購、加碼申購於營業日 13:00 前下單，視為當日申請；13:00 以後下單，則視為次一營業日申請。Pay 設定異動、贖回申請或其他變更設定於營業日 14:00 前送出，視為當日申請；14:00 以後送出，則視為次一營業日申請。贖回款項入帳日依各基金公司及集保結算所作業規則而定。</p>
           <p><strong>二、 免責聲明</strong></p>
           <p>1. 您瞭解本公司不保證本服務絕不發生中斷及錯誤等情況，您應確認並擔保係由您本人進行本服務相關功能之操作。所有您於本服務上執行之操作均由系統即時接收，並依相關指令即時或批次進行處理。</p>

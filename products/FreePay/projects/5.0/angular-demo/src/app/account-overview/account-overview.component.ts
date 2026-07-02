@@ -265,8 +265,18 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     return this.expandedSettingRows.has(id);
   }
 
+  get allSettingRowsExpanded(): boolean {
+    return this.settingsFunds.length > 0 && this.settingsFunds.every(fund => this.expandedSettingRows.has(fund.id));
+  }
+
   toggleSettingRow(id: string): void {
     this.expandedSettingRows.has(id) ? this.expandedSettingRows.delete(id) : this.expandedSettingRows.add(id);
+  }
+
+  toggleAllSettingRows(): void {
+    this.expandedSettingRows = this.allSettingRowsExpanded
+      ? new Set<string>()
+      : new Set(this.settingsFunds.map(fund => fund.id));
   }
 
   settingDraftOf(contract: OvContract): SettingDraft {
