@@ -18,7 +18,7 @@
 
 - [0.1 適用對象與文件定位](#01-適用對象與文件定位)
 - [0.2 設計系統化原則](#02-設計系統化原則)
-- [0.3 元件選型與 Angular Material 使用原則](#03-元件選型與-angular-material-使用原則)
+- [0.3 元件實作選型原則](#03-元件實作選型原則)
 - [0.4 強制遵循規則](#04-強制遵循規則)
 - [0.5 新增或修改規範的流程](#05-新增或修改規範的流程)
 
@@ -49,37 +49,26 @@
 4. **共用規範要能跨專案維護**：新增規則時需考量 Angular Material v14、未來 V15 / MDC 升級、RWD、可及性與既有元件影響。
 5. **產品規格不混入設計系統**：設計系統只定義 UI 表達、互動行為與工程結構；產品公式、門檻、條件與商業文案放在產品 spec。
 
-### 0.3 元件選型與 Angular Material 使用原則
+### 0.3 元件實作選型原則
 
 #### 元件選型三層框架
 
-設計與工程討論新元件時，先依三層框架判斷，不直接以「看起來像哪個元件」決定實作方式。
+新元件先依三層框架決定實作方式，不以外觀相似度判斷。
 
 | 層級 | 選型 | 適用情境 | 原則 |
 |---|---|---|---|
-| 1 | 原生 HTML + token | 外觀為主、互動單純，例如卡片、資料列、badge、chip、搜尋 input、提示區塊、靜態標題 | 不引入 Material 依賴；用語意化 HTML、設計 token 與平台 class 控制外觀 |
-| 2 | Angular Material + 設計系統 class | 需要 Material 協助互動、狀態或可及性，例如 button、radio、checkbox、toggle group、tab nav、dialog、tooltip、select、date picker | 使用 Material 官方元件標籤、directive 與 input API，保留 disabled、focus、keyboard、ripple、ARIA 等內建行為；平台外觀加在語意 class 或外層 wrapper，不直接改壞 Material 基底或深層 DOM |
-| 3 | 自訂設計系統元件 | 跨頁重複、Material 不符合產品語意或結構，例如資料表格、基金卡、底部 action bar、注意事項、年化提醒卡 | 抽成平台 class 或 Angular component，讓結構、RWD、狀態與文案規則可跨專案重用 |
+| 1 | 原生 HTML + token | 外觀為主、互動單純 | 不引入 Material；語意化 HTML ＋ token ＋ 平台 class 控外觀 |
+| 2 | Angular Material + 設計系統 class | 需 Material 協助複雜互動／狀態／可及性，且無需深度改動視覺 | 用官方標籤與狀態 API；平台外觀只加語意 class 或外層 wrapper |
+| 3 | 自訂設計系統元件 | 跨頁重複、Material 不合產品語意或結構 | 抽成平台 class／component，結構、RWD、狀態、文案可跨專案重用 |
 
-簡化判斷：**複雜互動用 Material，純視覺結構用原生，跨頁重複且 Material 不合語意時抽成自訂設計系統元件。**
+各元件實際層級見 §3 各章「實作層」標注。
 
-#### 第 2 層：Angular Material v14 使用原則
+#### 第 2 層 Material 使用與升級護欄
 
-Angular Material v14 只用於需要複雜行為的元件，不是所有 UI 的預設基底。採第 2 層時遵守：
+Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（本專案現況 v14，原則不綁版本；前端寫法另見工程約定）。護欄：
 
-1. 先確認 Material v14 是否已有符合語意的元件與官方結構。
-2. 優先使用官方 input、appearance、color、disabled、selected 等狀態 API。
-3. 若需要平台視覺樣式，優先加在外層 wrapper 或設計系統 class，不直接鎖定 Material 內部 DOM。
-4. 若必須覆寫 Material 內部 selector，需在設計或工程評估中標註原因、作用範圍與未來 V15 / MDC 升級風險。
-5. 不得因單一 demo 畫面需要，新增會影響全平台的全域 selector。
-
-#### Material 升級風險與維護原則
-
-V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重組。設計系統需保留升級彈性：
-
-- 不深度覆寫 `.mat-*` 內部結構。
-- 平台外觀加在語意 class 或外層 wrapper，例如 `.ds-action-button`。
-- 純視覺結構優先用原生 HTML + token，不為外觀強行套 Material。
+- 平台視覺只加外層 wrapper 或設計系統 class（如 `.ds-action-button`），**不深層覆寫 `.mat-*`**。
+- 必須覆寫內部 selector 時，標註原因、範圍與 MDC 升級風險；不為單一 demo 新增全域 selector。
 
 ### 0.4 強制遵循規則
 
@@ -93,7 +82,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 | 按鈕層級遵循 §3 | 任何按鈕的角色與視覺樣式，須符合 §3 元件的按鈕規範，不得自創新層級 |
 | 字型遵循字體規範 | 所有中文介面文字一律使用 Noto Sans TC；字級與行高遵循 §2 Typography Scale |
 | 間距遵循 4px grid | 新增元件與頁型的 padding、margin、gap 原則上使用 4px 倍數，例外需能說明視覺或元件限制 |
-| 避免覆寫 Material 內部 class | 不直接覆寫 `.mat-*` 內部結構；若必須覆寫，需確認 v14 寫法、影響範圍與未來 MDC 風險 |
+| 避免覆寫 Material 內部 class | 不直接覆寫 `.mat-*` 內部結構；若必須覆寫，需確認當前 Material 版本寫法、影響範圍與未來 MDC 升級風險 |
 
 ### 0.5 新增或修改規範的流程
 
@@ -308,30 +297,15 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 
 ## 3. 元件
 
-### 3.1 共用狀態與互動行為
-
-> 所有互動元件共用同一套狀態語言。本節定義**共通行為**；各元件章只列「自己有哪些狀態、對應哪個 token」，不重複定義行為。
-
-| 狀態 | 共通行為 | 色（語意，詳 §1）|
-|---|---|---|
-| Default | 元件靜止樣式 | 依元件 |
-| Hover | 游標移入回饋；中性元件**收緊邊框、文字加深**，不主動上品牌色 | 邊框 `Neutral 300`、文字 `Neutral 800` |
-| Focus | 鍵盤／點擊聚焦；加**可見 focus ring**（無障礙必須，不得移除）| 邊框 `Tertiary 300` ＋ ring `0 0 0 3px Tertiary 50` |
-| Pressed | 按下瞬間，底色再加深一階 | 品牌類 `Primary 600 → 800` |
-| Selected／Active／Checked | 已選中；品牌色標示（邊框＋填色或淡底）| `Primary 400`（淡底 `Primary 50`）|
-| Disabled | 不可互動、降彩度；`cursor: not-allowed`，不觸發 hover／focus 回饋 | bg `Neutral 100/150`、文字 `Neutral 250` |
-| Error | 驗證失敗；紅框＋紅字＋紅光暈 | 邊框／字 `Primary 400/600` ＋ ring `0 0 0 3px Primary 50` |
-
-**跨元件規則**
-
-- **中性身份元件 hover 依 Hover 列**：segmented、卡片型單選、幣別／門檻選擇、篩選 pill、描邊圓鈕、Outline·中性按鈕等；**品牌身份按鈕（Filled、Outline·品牌）與導覽 tab 不受此限**（走品牌軸 hover，見 §3.2）。
-- **選取控制項（radio／checkbox）互動**：整個可點區（含 label）一律 `cursor: pointer`；hover 以 ripple 圓形光暈（外擴 `8px`、不擴及文字列）回饋、不改邊框色；Material v14 預設與本規則不一致時以本規則覆寫。
+> **焦點可見（無障礙必須）**：所有互動元件在鍵盤／點擊聚焦時，焦點必須清楚可見，不得 `outline: none` 而無替代焦點樣式。具體 focus 樣式由各元件章自訂（如 §3.7 Input 的 Tertiary 光暈）。
 
 ---
 
-### 3.2 按鈕
+### 3.1 按鈕
 
 **用途**：一顆按鈕 ＝ 變體（顏色層級）＋ 形態（外形）＋ 尺寸，三者對應下面三表自由組合；變體顏色與狀態跨形態、跨表面共用。
+
+**實作層**：§0.3 第 2 層（Angular Material `mat-flat`／`mat-stroked-button` ＋ `.ds-action-button`）。
 
 **HTML**
 
@@ -343,7 +317,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 <button class="ds-text-button">清除</button>                                        <!-- 最低 Text -->
 ```
 
-**形態**（同一表面內形態一致；圖示鈕——圓形、無框——獨立見 §3.3）
+**形態**（同一表面內形態一致；圖示鈕——圓形、無框——獨立見 §3.2）
 
 | 形態 | 圓角 |
 |---|---|
@@ -374,9 +348,11 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 
 ---
 
-### 3.3 圖示鈕（Icon Button）
+### 3.2 圖示鈕（Icon Button）
 
-**用途**：以 icon 表達動作或狀態的按鈕。三形態依用途選，沿用 §3.2 變體配色（顏色與狀態見 §3.2）。
+**用途**：以 icon 表達動作或狀態的按鈕。三形態依用途選，沿用 §3.1 變體配色（顏色與狀態見 §3.1）。
+
+**實作層**：§0.3 第 1 層（原生 button ＋ token；`.ds-icon-button`／`.circle-btn`）。
 
 **HTML**
 
@@ -390,7 +366,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 
 | 類型 | 外形 | 沿用變體 | 用途 |
 |---|---|---|---|
-| 無框圖示 | 無框無底 | Text（字 `#333333`、hover `#1A1A1A`）| 展開／收合、關閉、內聯小動作 |
+| 無框圖示 | 無框無底 | Text（字 `#333333`、hover `#1A1A1A`）| 展開／收合、關閉、內聯小動作、說明觸發（ⓘ 點開 §3.11）|
 | 描邊圓 | 圓框 `1px`、`50%` | Outline·中性／品牌 | 篩選 trigger、排序、次要圓形動作 |
 | 實心圓 | 填滿 `50%` | Filled（品牌）| 主要圓形動作、`BUY`／`SELL` 短字標 |
 
@@ -406,14 +382,19 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 | 排序 | `arrow-down-up` |
 | 更多 | `three-dots` |
 | 檢視切換 | `grid-1x2` / `list-ul` |
+| 說明／提示 | `info-circle` |
 
 **短字標例外**：實心圓可放 `BUY`／`SELL` 短字標——採英文（品牌慣例）；`14px` 溢出可用 `12px / 700`（僅此例覆寫「桌機不得 12px」）。
 
+**inline 說明 icon 例外**：嵌在文字標籤內的說明觸發 icon（§3.11），可縮為 `16×16`、icon `14px` 以對齊 label 文字；色彩與狀態同無框形態。
+
 ---
 
-### 3.4 Filter Chip（篩選 Pill）
+### 3.3 Filter Chip（篩選 Pill）
 
 **用途**：列表／搜尋／彈窗篩選，多選。
+
+**實作層**：§0.3 第 1 層（原生 button ＋ `.filter-chips`）。
 
 **HTML**
 
@@ -447,38 +428,88 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 
 ---
 
+### 3.4 Switch（開關）
+
+**用途**：即時**啟用／停用**單一功能（如 Pay 出、觸發門檻），切換**當下即生效**、不隨表單送出。與 Segmented（互斥選項）、Checkbox（表單多選）語意不同。
+
+**實作層**：§0.3 第 1 層（原生 `<button role="switch">` ＋ token，不用 Material slide-toggle）。
+
+**HTML**
+
+```html
+<button type="button" role="switch" class="ds-switch" aria-label="Pay 出設定"
+        [class.is-on]="on" [attr.aria-checked]="on" (click)="toggle()">
+  <span class="ds-switch__track"><span class="ds-switch__thumb">
+    <i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i>
+    <i class="ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i>
+  </span></span>
+</button>
+```
+
+**尺寸**
+
+| 部位 | 規格 |
+|---|---|
+| 軌道 track | `52 × 32px`、圓角 `16px` 全圓、`2px` 邊框 |
+| thumb | `24px` 正圓，兩態同尺寸（照 v20 顯示 icon 版），僅平移不縮放 |
+| state layer | `40px` 圓，hover／focus 於 thumb 周圍淡開 |
+| icon | off 橫線／on 手繪勾（`10 × 6px`、`2px`）|
+
+**狀態**
+
+| 狀態 | Track | Thumb | Icon |
+|---|---|---|---|
+| 未選 off | `--color-neutral-100` 底、`--color-neutral-300` 邊 | `--color-neutral-500` 灰、靠左 | 橫線（`--color-neutral-0`）|
+| 選中 on | `--color-action-primary` 填滿 | `--color-neutral-0` 白、滑至右 | 手繪勾（`--color-action-primary`）|
+| Hover／Focus | — | thumb 周圍 state layer 淡圓（focus 即「焦點可見」）| — |
+| Disabled | 整體 `opacity: .5`、`cursor: not-allowed` | — | — |
+
+**行為**
+
+- 點擊或鍵盤（button 原生 Space／Enter）切換；`aria-checked` 綁開關狀態、`aria-label` 描述所控功能，不用可見文字標示狀態。
+- 切換即時生效，不進表單送出流程。
+
+**維護**
+
+- 全域 `.ds-switch` 控制外觀狀態，頁面不得覆寫 track／thumb／icon 尺寸。
+- 選中勾以 CSS `border` 手繪（不用 icon 字形），粗細／大小在本元件調整。
+- 視覺與互動狀態對齊 **v20（Material 3）slide-toggle**；未來升級 Angular Material 至 v20 時，可評估改用官方 `mat-slide-toggle`（屆時回歸 §0.3 第 2 層）。
+
+---
+
 ### 3.5 Segmented Control（Toggle 選取按鈕）
 
-> 用途：在同一表單區塊內切換互斥的模式選項（如「依金額 / 依比例」、「境內 / 境外」）。
-> **不屬於操作動作，屬於表單控制項**，視覺重量應明顯輕於主要動作按鈕。
+**用途**：在同一區塊內切換 2–3 個檢視／內容（如「設定／歷史」），屬檢視切換、非表單輸入。表單中選互斥值用 Radio（§3.9）；頁級／多內容導覽用 Tabs（§3.6）——**Tab＝頁級導覽，Segmented＝區塊內輕量檢視切換**。
 
-#### 規格
+**實作層**：§0.3 第 2 層（Angular Material `mat-button-toggle-group` ＋ `.mode-toggle`；表單全寬用 `.mode-toggle-fill`）。
+
+**HTML**
+
+```html
+<mat-button-toggle-group class="mode-toggle" [(ngModel)]="view" aria-label="檢視切換">
+  <mat-button-toggle value="settings">設定</mat-button-toggle>
+  <mat-button-toggle value="history">歷史</mat-button-toggle>
+</mat-button-toggle-group>
+```
+
+**規格**
 
 | 狀態 | Background | Text color | Border |
 |---|---|---|---|
 | Default | `--color-neutral-0`（白） | `--color-neutral-600`（`#666666`） | `1px --color-neutral-200`（`#D9D9D9`） |
 | **Hover** | `--color-neutral-0`（白） | `--color-neutral-800`（`#333333`） | `1px --color-neutral-300`（`#B3B3B3`） |
-| Active | `--color-brand-primary-50`（`#FFF0EC`） | `--color-brand-primary-400`（`#F04D29`） | `1px --color-brand-primary-400`（`#F04D29`） |
+| Active | `--color-action-primary`（`#F04D29`） | `--color-neutral-0`（白） | `1px --color-action-primary`（`#F04D29`） |
 | Disabled | `--color-neutral-100` | `--color-neutral-400` | `1px --color-neutral-150` |
 
-- 尺寸：高度 SM（`36px`），font-size `14px`，border-radius `8px`
-- **禁止**使用 Filled（橘紅底色 + 白字）作為 active 狀態，該樣式保留給主要操作按鈕（Primary）
+- 尺寸：高度 SM（`36px`），font-size `14px`，border-radius `8px`；Active 字重 `700` 強化選中
 - **Hover 不得使用品牌色**：懸停只收緊邊框至 `--color-neutral-300`（#B3B3B3），品牌橘紅（`#F04D29`）保留給 Active（已選中）。此規則適用於所有「選取類」互動元素，例如分段切換、卡片型單選、幣別選擇、門檻選擇與篩選 pill。主要行動按鈕與導覽 tab 不受此限制。
 - 通常以 `flex: 1` 並列，寬度平均分配
-
-#### 與主按鈕的區分原則
-
-| | Segmented Control active | Primary 主按鈕 |
-|---|---|---|
-| Background | 淺橘（`#FFF0EC`） | 橘紅（`#F04D29`） |
-| Text | 橘紅 | 白色 |
-| 語義 | 選取狀態 | 執行動作 |
 
 ---
 
 ### 3.6 Tabs（頁籤）
 
-> 本節套用前文〈元件選型與 Angular Material 使用原則〉通則於 tab：tab 的「行為」（導覽列的鍵盤操作、無障礙焦點、配路由）值得交給 Material，「純視覺切換」則用原生 button + token。據此 tab 分兩類，底層刻意不同。
+> 本節套用前文〈元件實作選型原則〉通則於 tab：tab 的「行為」（導覽列的鍵盤操作、無障礙焦點、配路由）值得交給 Material，「純視覺切換」則用原生 button + token。據此 tab 分兩類，底層刻意不同。
 
 #### 先分語意：兩類 tab，底層刻意不同
 
@@ -488,7 +519,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 |---|---|---|---|
 | **頁面主導覽**（切換整頁區塊／配路由） | `mat-tab-nav-bar` + `mat-tab-link` | `.ds-tab-nav--page` | Material 幫你管 active 狀態、鍵盤導覽、無障礙焦點；且它內部 DOM 簡單（就是 `<a>`），需要覆寫的內部 class 少，升級風險可控。例：帳戶總覽 / 委託查詢 / 已實現損益 / 設定異動。 |
 | **內容切換**（同一份資料換顯示欄組） | 語意化 `<button role="tab">` + `*ngIf` 自控顯隱 | `.ds-content-tab` | 內容切換用 `*ngIf` 自己控就好，不需要 Material 的內容投影。**純 button 完全不碰 Material 內部，V15 升級零負擔**；也避免 `mat-tab-nav-panel` 包覆內容區造成表格 / 卡片 / footer / RWD 破版。例：基金搜尋的績效表現 / 最新淨值 / 年度報酬率 / 年度最大跌幅。 |
-| **同區塊互斥設定值（不是 tab）** | `mat-button-toggle-group` / radio | — | 外觀像橫向選項，但語意是「單選設定」不是「頁籤」。例：Pay 出方式「依金額 / 依比例」、門檻類型「市值守護 / 增值啟動」。不使用任何 tab class。 |
+| **同區塊互斥設定值（不是 tab）** | Radio（§3.9） | — | 外觀像橫向選項，但語意是「單選設定」不是「頁籤」。例：Pay 出方式「依金額 / 依比例」、門檻類型「市值守護 / 增值啟動」。用 Radio、不使用任何 tab class；區塊內檢視切換另見 Segmented §3.5。 |
 
 #### 為什麼內容切換 tab 不用 `mat-tab-nav-bar`
 
@@ -608,7 +639,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 
 #### 搜尋型膠囊 Input
 
-搜尋型 input 用於「搜尋與篩選」工具列，視覺語言需與 Filter Chips（§3.4）一致。當搜尋框與 chips 同區出現時，搜尋框不得使用偏方角外框，應改用膠囊圓角，讓整組工具看起來屬於同一組控制項。
+搜尋型 input 用於「搜尋與篩選」工具列，視覺語言需與 Filter Chips（§3.3）一致。當搜尋框與 chips 同區出現時，搜尋框不得使用偏方角外框，應改用膠囊圓角，讓整組工具看起來屬於同一組控制項。
 
 **結構規則**
 
@@ -734,6 +765,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 | `--color-input-radio-ripple` | `#FFF0EC` | Hover 圓形光暈背景 |
 
 - **選取狀態**：內部填入實心圓點。
+- **互動**（radio／checkbox 共用）：整個可點區（含 label）一律 `cursor: pointer`；hover 以 ripple 圓形光暈（外擴 `8px`、不擴及文字列）回饋、不改邊框色；Material v14 預設與本規則不一致時以本規則覆寫。
 
 ### 3.10 Checkbox
 
@@ -744,6 +776,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 | `--color-input-checkbox-ripple` | `#FFF0EC` | Hover 圓形光暈背景 |
 
 - **選取狀態**：背景填滿並顯示白色勾選符號。
+- **互動**：同 §3.9 Radio（可點區 `cursor: pointer`、hover ripple 圓形光暈）。
 
 ### 3.11 Inline Hint Panel
 
@@ -757,7 +790,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 - 點擊 icon 展開 / 收合下方說明區塊。
 - 展開後會下推內容，不浮在畫面上方。
 - 內容可包含粗體、換行與多段文字。
-- Icon 使用 Bootstrap Icons：`bi bi-info-circle`。
+- 觸發 icon 為 §3.2 無框圖示鈕（glyph `info-circle`）；尺寸／色以 §3.2 為準，此處不重複定義。
 
 ```html
 <label class="form-label">
@@ -772,22 +805,7 @@ V14 升級到 V15 / MDC 時，Material 內部 DOM 與 class 可能改名或重�
 ```
 
 ```css
-.hint-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-neutral-400);
-  font-size: 14px;
-  cursor: pointer;
-}
-
-.hint-icon:hover,
-.hint-icon:focus-visible {
-  color: var(--color-brand-tertiary-400);
-}
+/* .hint-icon 視覺見 §3.2 無框圖示鈕「inline 說明 icon 例外」，此處不重複定義 */
 
 .hint-panel {
   max-height: 0;
