@@ -47,7 +47,7 @@
         <button type="button" class="chip" *ngFor="let c of visibleCategories; trackBy: trackByValue" [class.is-selected]="categoryFilters.includes(c)" (click)="toggleCategoryFilter(c)">{{ c }}</button>
       </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('category') || isFilterExpanded('category')">
-        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('category')" [attr.aria-label]="isFilterExpanded('category') ? '收合基金類型' : '展開基金類型'">
+        <button class="ds-icon-button" type="button" (click)="toggleFilterExpanded('category')" [attr.aria-label]="isFilterExpanded('category') ? '收合基金類型' : '展開基金類型'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('category')" [class.bi-chevron-down]="!isFilterExpanded('category')"></i>
         </button>
       </div>
@@ -60,7 +60,7 @@
         <button type="button" class="chip" *ngFor="let ccy of visiblePricingCurrencies; trackBy: trackByValue" [class.is-selected]="pricingCcyFilters.includes(ccy)" (click)="togglePricingCcyFilter(ccy)">{{ ccy }}</button>
       </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('pricingCcy') || isFilterExpanded('pricingCcy')">
-        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('pricingCcy')" [attr.aria-label]="isFilterExpanded('pricingCcy') ? '收合計價幣別' : '展開計價幣別'">
+        <button class="ds-icon-button" type="button" (click)="toggleFilterExpanded('pricingCcy')" [attr.aria-label]="isFilterExpanded('pricingCcy') ? '收合計價幣別' : '展開計價幣別'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('pricingCcy')" [class.bi-chevron-down]="!isFilterExpanded('pricingCcy')"></i>
         </button>
       </div>
@@ -84,7 +84,7 @@
         </div>
       </div>
       <div class="fs-filter-actions">
-        <button class="fs-filter-more fs-filter-more--icon" type="button" *ngIf="hasHiddenOptions('brand') || isFilterExpanded('brand')" (click)="toggleFilterExpanded('brand')" [attr.aria-label]="isFilterExpanded('brand') ? '收合基金品牌' : '展開基金品牌'">
+        <button class="ds-icon-button" type="button" *ngIf="hasHiddenOptions('brand') || isFilterExpanded('brand')" (click)="toggleFilterExpanded('brand')" [attr.aria-label]="isFilterExpanded('brand') ? '收合基金品牌' : '展開基金品牌'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('brand')" [class.bi-chevron-down]="!isFilterExpanded('brand')"></i>
         </button>
       </div>
@@ -97,7 +97,7 @@
         <button type="button" class="chip" *ngFor="let r of visibleRegions; trackBy: trackByValue" [class.is-selected]="regionFilters.includes(r)" (click)="toggleRegionFilter(r)">{{ r }}</button>
       </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('region') || isFilterExpanded('region')">
-        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('region')" [attr.aria-label]="isFilterExpanded('region') ? '收合投資區域' : '展開投資區域'">
+        <button class="ds-icon-button" type="button" (click)="toggleFilterExpanded('region')" [attr.aria-label]="isFilterExpanded('region') ? '收合投資區域' : '展開投資區域'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('region')" [class.bi-chevron-down]="!isFilterExpanded('region')"></i>
         </button>
       </div>
@@ -110,7 +110,7 @@
         <button type="button" class="chip" *ngFor="let g of visibleGroups; trackBy: trackByValue" [class.is-selected]="groupFilters.includes(g)" (click)="toggleGroupFilter(g)">{{ g }}</button>
       </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('group') || isFilterExpanded('group')">
-        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('group')" [attr.aria-label]="isFilterExpanded('group') ? '收合基金組別' : '展開基金組別'">
+        <button class="ds-icon-button" type="button" (click)="toggleFilterExpanded('group')" [attr.aria-label]="isFilterExpanded('group') ? '收合基金組別' : '展開基金組別'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('group')" [class.bi-chevron-down]="!isFilterExpanded('group')"></i>
         </button>
       </div>
@@ -123,7 +123,7 @@
         <button type="button" class="chip" *ngFor="let r of lipperRatings" [class.is-selected]="lipperFilters.includes(r)" (click)="toggleLipperFilter(r)">{{ r }}</button>
       </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('lipper') || isFilterExpanded('lipper')">
-        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('lipper')" [attr.aria-label]="isFilterExpanded('lipper') ? '收合理柏總回報' : '展開理柏總回報'">
+        <button class="ds-icon-button" type="button" (click)="toggleFilterExpanded('lipper')" [attr.aria-label]="isFilterExpanded('lipper') ? '收合理柏總回報' : '展開理柏總回報'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('lipper')" [class.bi-chevron-down]="!isFilterExpanded('lipper')"></i>
         </button>
       </div>
@@ -136,7 +136,7 @@
         <button type="button" class="chip" *ngFor="let r of riskLevels" [class.is-selected]="riskFilters.includes(r)" (click)="toggleRiskFilter(r)">{{ r }}</button>
       </div>
       <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('risk') || isFilterExpanded('risk')">
-        <button class="fs-filter-more fs-filter-more--icon" type="button" (click)="toggleFilterExpanded('risk')" [attr.aria-label]="isFilterExpanded('risk') ? '收合風險等級' : '展開風險等級'">
+        <button class="ds-icon-button" type="button" (click)="toggleFilterExpanded('risk')" [attr.aria-label]="isFilterExpanded('risk') ? '收合風險等級' : '展開風險等級'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('risk')" [class.bi-chevron-down]="!isFilterExpanded('risk')"></i>
         </button>
       </div>
@@ -308,7 +308,7 @@
           </ng-container>
 
           <td class="col-buy">
-            <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">BUY</button>
+            <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">Buy</button>
           </td>
         </tr>
       </tbody>
@@ -319,10 +319,10 @@
   <!-- 手機卡片版（ov-fund-main 風格，4 tab 各自欄位）；桌機隱藏 -->
   <div class="fs-fund-cards" [class.fs-view-active]="viewMode==='card'">
     <article *ngFor="let f of pagedFunds; trackBy: trackByFundId" class="fs-fund-card" [class.is-expanded]="activeTab !== 'rating' && isCardExpanded(f.fundId)">
-      <button class="fs-fund-card-head" type="button" (click)="activeTab !== 'rating' && toggleCard(f.fundId)" [attr.aria-expanded]="activeTab !== 'rating' ? isCardExpanded(f.fundId) : null">
+      <div class="fs-fund-card-head">
         <div class="fs-fund-card-top">
           <span class="fs-fund-card-code">{{ f.fundId }}</span>
-          <i class="bi" *ngIf="activeTab !== 'rating'" [ngClass]="isCardExpanded(f.fundId) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+          <button class="ds-icon-button" type="button" *ngIf="activeTab !== 'rating'" (click)="toggleCard(f.fundId)"><i class="bi" [ngClass]="isCardExpanded(f.fundId) ? 'bi-chevron-up' : 'bi-chevron-down'"></i></button>
         </div>
         <strong class="fs-fund-card-name">{{ f.name }}</strong>
         <div class="fs-fund-card-metrics">
@@ -372,12 +372,12 @@
             <div class="fs-fund-card-metric"><span class="m-lbl">波動度</span><span class="m-val">{{ f.stdDev.toFixed(2) }}</span></div>
           </ng-container>
         </div>
-      </button>
+      </div>
       <div class="fs-fund-card-foot">
         <span class="fs-fund-card-navdate">
           <ng-container *ngIf="activeTab === 'nav'"><span class="m-lbl">淨值日</span>{{ f.navDate }}</ng-container>
         </span>
-        <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">BUY</button>
+        <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">Buy</button>
       </div>
       <div class="fs-fund-card-detail" *ngIf="activeTab !== 'rating' && isCardExpanded(f.fundId)">
         <ng-container *ngIf="activeTab==='perf'">

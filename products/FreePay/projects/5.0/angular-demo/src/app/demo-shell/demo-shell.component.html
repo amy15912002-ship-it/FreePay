@@ -255,11 +255,10 @@
       <section class="block" id="pay-settings-block" *ngIf="!isAddOnMode">
         <div class="block-header">
           <h2 class="block-title">Pay 出設定</h2>
-          <button type="button" role="switch" class="ds-switch"
+          <button type="button" role="switch" class="ds-switch" aria-label="Pay 出設定"
             [class.is-on]="payActive" [attr.aria-checked]="payActive"
             (click)="togglePayActive(!payActive)">
-            <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="bi bi-check2 ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
-            <span class="ds-switch__label">{{ payActive ? '啟用' : '停用' }}</span>
+            <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
           </button>
         </div>
 
@@ -274,7 +273,7 @@
             <div class="form-label">
               Pay 出方式
               <button
-                class="hint-icon"
+                class="ds-icon-button hint-toggle"
                 type="button"
                 aria-label="Pay 出方式說明"
                 [attr.aria-expanded]="payModeHintOpen"
@@ -364,7 +363,7 @@
             <div class="form-label">
               自由 Pay 基準日
               <button
-                class="hint-icon"
+                class="ds-icon-button hint-toggle"
                 type="button"
                 aria-label="自由 Pay 基準日說明"
                 [attr.aria-expanded]="dateHintOpen"
@@ -406,12 +405,10 @@
           <div>
             <h2 class="block-title">觸發門檻</h2>
           </div>
-          <button type="button" role="switch" class="ds-switch"
+          <button type="button" role="switch" class="ds-switch" aria-label="觸發門檻"
             [class.is-on]="thresholdEnabled" [attr.aria-checked]="thresholdEnabled"
-            [disabled]="!payActive"
             (click)="toggleThreshold(!thresholdEnabled)">
-            <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="bi bi-check2 ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
-            <span class="ds-switch__label">{{ thresholdEnabled ? '啟用' : '停用' }}</span>
+            <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
           </button>
         </div>
 
@@ -565,7 +562,7 @@
                 贖回單位數
                 <button
                   *ngIf="redeemMode === 'all' && redeemOrderingUnits > 0"
-                  class="hint-icon redeem-inline-hint"
+                  class="ds-icon-button hint-toggle"
                   type="button"
                   aria-label="贖回單位數說明"
                   (click)="payModeHintOpen = !payModeHintOpen"
@@ -686,7 +683,7 @@
         <div class="fp-field">
           <div class="fp-input-box fp-input-box--line">
             <input class="fp-input" [type]="pwdVisible ? 'text' : 'password'" [(ngModel)]="pwd" autocomplete="off" placeholder="輸入密碼" aria-label="交易密碼">
-            <button class="fp-input-affix" type="button" (click)="pwdVisible = !pwdVisible" [attr.aria-label]="pwdVisible ? '隱藏密碼' : '顯示密碼'">
+            <button class="ds-icon-button" type="button" (click)="pwdVisible = !pwdVisible" [attr.aria-label]="pwdVisible ? '隱藏密碼' : '顯示密碼'">
               <i class="bi" [class.bi-eye]="!pwdVisible" [class.bi-eye-slash]="pwdVisible"></i>
             </button>
           </div>
@@ -728,7 +725,6 @@
     <button class="ds-action-button" mat-stroked-button type="button" (click)="previous()">上一步</button>
     <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="actionDisabled" (click)="next()">
       {{ primaryActionLabel }}
-      <i class="bi bi-check-lg" *ngIf="primaryActionIsSubmit"></i>
     </button>
   </div>
 </div>

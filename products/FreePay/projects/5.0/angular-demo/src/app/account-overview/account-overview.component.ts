@@ -12,7 +12,6 @@ type DetailTxType = 'all' | 'A' | 'R' | 'RDM';
 type DetailTimeType = '3M' | '6M' | '1Y' | 'YTD' | 'ALL' | 'CUSTOM';
 type ChangeSortKey = 'code' | 'effectDate' | 'ccy' | 'tradeType' | 'before' | 'after';
 type FundSortKey = 'name' | 'ccy' | 'market' | 'profit' | 'retWith' | 'pay' | 'cost' | 'paid' | 'retWithout';
-type SettingsEditView = 'single' | 'expanded';
 type ExpandedSettingStep = 'edit' | 'confirm' | 'done';
 type PayEditMode = 'amount' | 'ratio';
 type ThresholdEditMode = 'none' | 'protect' | 'unlock';
@@ -52,7 +51,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   ];
   changeSearch = '';
   changeView: 'history' | 'settings' = 'settings';
-  settingsEditView: SettingsEditView = 'single';
   expandedSettingStep: ExpandedSettingStep = 'edit';
   expandedSettingAgreedTerms = false;
   expandedSettingPwd = '';
@@ -150,6 +148,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
 
   expandedFundRows = new Set<string>();
   expandedSettingRows = new Set<string>();
+  expandedSettingDateHints = new Set<string>();
   settingDrafts: Record<string, SettingDraft> = {};
   selectedOrders = new Set<string>();
   cancelPwd = '';
@@ -313,6 +312,24 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     draft.payDay = day;
   }
 
+  isSettingDateHintOpen(fpNo: string): boolean {
+    return this.expandedSettingDateHints.has(fpNo);
+  }
+
+  toggleSettingDateHint(fpNo: string): void {
+    this.expandedSettingDateHints.has(fpNo)
+      ? this.expandedSettingDateHints.delete(fpNo)
+      : this.expandedSettingDateHints.add(fpNo);
+  }
+
+  showSettingLongDateHint(draft: SettingDraft): boolean {
+    return Number(draft.payDay) >= 29;
+  }
+
+  settingLongDateHintText(draft: SettingDraft): string {
+    return `若當月無 ${Number(draft.payDay)} 日，自動遞延至下個營業日執行。`;
+  }
+
   setDraftThresholdValue(draft: SettingDraft, value: number): void {
     draft.thresholdValue = value;
   }
@@ -428,6 +445,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     this.expandedSettingAgreedTerms = false;
     this.expandedSettingPwd = '';
     this.expandedSettingPwdVisible = false;
+    this.expandedSettingDateHints.clear();
     this.clearAllSettingDrafts();
   }
 

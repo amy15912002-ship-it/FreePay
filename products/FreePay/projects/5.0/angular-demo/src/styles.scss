@@ -589,23 +589,6 @@ textarea {
   &::placeholder { color: var(--color-input-placeholder); }
 }
 
-// 後綴：icon 鈕（如密碼顯示切換）
-.fp-input-affix {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 auto;
-  width: 28px;
-  height: 28px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  color: var(--color-text-secondary);
-  cursor: pointer;
-
-  &:hover { color: var(--color-text-primary); }
-}
-
 // 後綴：靜態單位（如 %）
 .fp-input-suffix {
   flex: 0 0 auto;
@@ -627,6 +610,15 @@ textarea {
 .mat-checkbox-checked.mat-primary .mat-checkbox-background,
 .mat-checkbox-indeterminate.mat-primary .mat-checkbox-background {
   background-color: var(--color-input-checkbox-checked);
+}
+
+/* radio 群組容器：flex 換行、統一間距，跨 demo 共用 */
+.choice-radio-group {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+  min-height: 40px;
 }
 
 // ── Shared demo chrome (used across all demo components) ─────────────────
@@ -941,7 +933,7 @@ table { font-variant-numeric: tabular-nums; }
 }
 
 // 內容切換 tab：語意化 button tablist，不依賴 Material，跨版本零負擔。
-// 標準見 DesignSystem.md §3.5 Tabs。fund-select 解凍後 fs-tab 收斂至此（僅改 class 名）。
+// 標準見 DesignSystem.md §3.8 Tabs。fund-select 解凍後 fs-tab 收斂至此（僅改 class 名）。
 .ds-content-tab {
   display: flex;
   align-items: flex-end;
@@ -1055,9 +1047,13 @@ table { font-variant-numeric: tabular-nums; }
   opacity: 1;
 }
 
+// 選中勾：CSS 手繪（border 兩邊組成 √），精確控制粗細/大小，不受字形限制
 .ds-switch__icon--on {
-  font-size: 16px;
-  color: var(--color-action-primary);
+  width: 10px;
+  height: 6px;
+  border-left: 2px solid var(--color-action-primary);
+  border-bottom: 2px solid var(--color-action-primary);
+  transform: translate(-50%, -75%) rotate(-45deg);
   opacity: 0;
 }
 
@@ -1087,12 +1083,6 @@ table { font-variant-numeric: tabular-nums; }
 .ds-switch:disabled {
   cursor: not-allowed;
   opacity: .5;
-}
-
-.ds-switch__label {
-  font-size: 14px;
-  font-weight: 500;
-  color: var(--color-text-primary);
 }
 
 // mat-button-toggle-group colour tokens (design system override)
@@ -1130,14 +1120,15 @@ table { font-variant-numeric: tabular-nums; }
 }
 
 .mode-toggle .mat-button-toggle-checked {
-  background: var(--color-bg-brand-subtle);
-  color: var(--color-action-primary);
+  background: var(--color-action-primary);
+  color: var(--color-neutral-0);
+  border-color: var(--color-action-primary);
   font-weight: 700;
 }
 
 .mode-toggle .mat-button-toggle-checked:hover {
-  background: var(--color-bg-brand-subtle);
-  color: var(--color-action-primary);
+  background: var(--color-action-primary);
+  color: var(--color-neutral-0);
 }
 
 .mode-toggle-fill {
@@ -1221,6 +1212,8 @@ table { font-variant-numeric: tabular-nums; }
   border-color: var(--color-neutral-300);
 }
 
+/* 短字標 Buy／Sell：英文短字覆寫 base 的 16px → 12/700（§3.2.3 短字標例外） */
+.circle-btn--buy,
 .circle-btn--sell {
   font-size: 12px;
   font-weight: 700;
@@ -1231,9 +1224,6 @@ table { font-variant-numeric: tabular-nums; }
   border-color: var(--color-brand-primary-400);
   background: var(--color-brand-primary-400);
   color: var(--color-text-on-brand);
-  font-size: 12px;
-  font-weight: 700;
-  line-height: 1;
 }
 
 .circle-btn--buy:hover {

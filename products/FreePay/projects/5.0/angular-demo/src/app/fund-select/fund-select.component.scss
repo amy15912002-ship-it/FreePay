@@ -267,43 +267,6 @@
   }
 }
 
-.fs-filter-more {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  height: 32px;
-  padding: 0 10px;
-  border: 1px solid var(--color-neutral-200);
-  border-radius: 8px;
-  background: var(--color-neutral-0);
-  color: var(--color-text-secondary);
-  font-family: var(--font-primary);
-  font-size: 14px;
-  cursor: pointer;
-
-  .bi {
-    margin-right: 4px;
-  }
-}
-
-.fs-filter-more--icon {
-  width: 32px;
-  padding: 0;
-  border: none;
-  background: transparent;
-  border-radius: 50%;
-
-  .bi {
-    margin-right: 0;
-    font-size: 16px;
-    line-height: 1;
-  }
-
-  &:hover {
-    color: var(--color-text-primary);
-  }
-}
-
 .fs-filter-row--brand {
   grid-template-columns: 84px minmax(0, 1fr) auto;
 
@@ -422,12 +385,6 @@
 
 .fs-filter-options {
   min-width: 0;
-}
-
-.fs-filter-more {
-  color: var(--color-text-secondary);
-  font-weight: 500;
-  white-space: nowrap;
 }
 
 // ── 績效 tabs ───────────────────────────────────────────
@@ -889,24 +846,6 @@
     grid-row: 1;
   }
 
-  .fs-filter-more {
-    height: 30px;
-    padding: 0 8px;
-    font-size: 14px;
-  }
-
-  .fs-filter-more--icon {
-    width: 30px;
-    padding: 0;
-    border-radius: 50%;
-
-    .bi {
-      margin-right: 0;
-      font-size: 14px;
-      line-height: 1;
-    }
-  }
-
   .fs-brand-keyword {
     width: 100%;
     height: 34px;
@@ -995,17 +934,6 @@
     display: block;
     width: 100%;
     padding: 16px 16px 12px;
-    border: none;
-    background: transparent;
-    text-align: left;
-    cursor: pointer;
-
-    &:focus { outline: none; }
-
-    &:focus-visible {
-      outline: 2px solid var(--color-action-primary);
-      outline-offset: -2px;
-    }
   }
 
   .fs-fund-card-top {
@@ -1018,7 +946,7 @@
 
   .fs-fund-card-name {
     display: block;
-    margin: 6px 0 14px;
+    margin: 0 0 14px;
     color: var(--color-text-primary);
     font-size: 16px;
     font-weight: 700;

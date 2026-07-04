@@ -140,7 +140,7 @@
               <div class="grid-id">
                 <div class="grid-code-row">
                   <span class="grid-code">{{ f.code }}</span>
-                  <button class="detail-icon-btn grid-detail-btn" type="button"
+                  <button class="ds-icon-button grid-detail-btn" type="button"
                     (click)="openDetail(f.contracts[0].fpNo); $event.stopPropagation()" aria-label="查看明細">
                     <i class="bi bi-file-text"></i>
                   </button>
@@ -197,7 +197,7 @@
                   aria-label="贖回"
                   title="贖回"
                 >
-                  SELL
+                  Sell
                 </button>
                 <button
                   class="circle-btn circle-btn--buy"
@@ -206,7 +206,7 @@
                   aria-label="加碼"
                   title="加碼"
                 >
-                  BUY
+                  Buy
                 </button>
               </div>
             </div>
@@ -414,7 +414,7 @@
           <div class="fp-field ov-cancel-pwd-field">
             <div class="fp-input-box fp-input-box--line">
               <input class="fp-input" [type]="cancelPwdVisible ? 'text' : 'password'" [(ngModel)]="cancelPwd" autocomplete="off" placeholder="輸入交易密碼" aria-label="交易密碼">
-              <button class="fp-input-affix" type="button" (click)="cancelPwdVisible = !cancelPwdVisible" [attr.aria-label]="cancelPwdVisible ? '隱藏密碼' : '顯示密碼'">
+              <button class="ds-icon-button" type="button" (click)="cancelPwdVisible = !cancelPwdVisible" [attr.aria-label]="cancelPwdVisible ? '隱藏密碼' : '顯示密碼'">
                 <i class="bi" [class.bi-eye]="!cancelPwdVisible" [class.bi-eye-slash]="cancelPwdVisible"></i>
               </button>
             </div>
@@ -487,7 +487,7 @@
               <div class="grid-id">
                 <div class="grid-code-row">
                   <span class="grid-code">{{ item.code }}</span>
-                  <button class="detail-icon-btn grid-detail-btn" type="button" (click)="openDetail(item.fpNo)" aria-label="查看交易明細">
+                  <button class="ds-icon-button grid-detail-btn" type="button" (click)="openDetail(item.fpNo)" aria-label="查看交易明細">
                     <i class="bi bi-file-text"></i>
                   </button>
                   <button
@@ -573,17 +573,9 @@
               <mat-button-toggle value="history">歷史</mat-button-toggle>
             </mat-button-toggle-group>
             <span class="ov-order-count" *ngIf="changeView === 'history'">{{ filteredChangeLogs.length }} 筆</span>
-            <span class="ov-order-count" *ngIf="changeView === 'settings' && settingsEditView === 'single'">{{ settingsFunds.length }} 筆可異動契約</span>
-            <span class="ov-order-count" *ngIf="changeView === 'settings' && settingsEditView === 'expanded'">
+            <span class="ov-order-count" *ngIf="changeView === 'settings'">
               {{ settingsFunds.length }} 筆可異動契約・已修改 {{ modifiedSettingCount }} 筆
             </span>
-          </div>
-          <div class="ov-demo-switch ov-change-demo-switch" *ngIf="changeView === 'settings'">
-            <span class="ov-demo-tag">DEMO</span>
-            <mat-button-toggle-group class="mode-toggle mode-toggle--sub" [(ngModel)]="settingsEditView" aria-label="Demo 設定模式">
-              <mat-button-toggle value="single">單筆</mat-button-toggle>
-              <mat-button-toggle value="expanded">批次</mat-button-toggle>
-            </mat-button-toggle-group>
           </div>
           <div class="ov-change-search" *ngIf="changeView === 'history'">
             <i class="bi bi-search" aria-hidden="true"></i>
@@ -603,12 +595,12 @@
                 <span class="grid-sortable" (click)="setChangeSort('after')">異動後 <i class="bi" [ngClass]="changeSortIcon('after')" [class.is-active]="changeSortKey === 'after'"></i></span>
               </div>
             </div>
-            <article class="grid-row" *ngFor="let r of filteredChangeLogs" [class.is-expanded]="isChangeExpanded(r.id)" (click)="toggleChangeRow(r.id)">
+            <article class="grid-row" *ngFor="let r of filteredChangeLogs" [class.is-expanded]="isChangeExpanded(r.id)">
               <div class="grid-main">
                 <div class="grid-id">
                   <div class="grid-code-row">
                     <span class="grid-code">{{ r.code }}</span>
-                    <i class="bi change-chevron" [ngClass]="isChangeExpanded(r.id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+                    <button class="ds-icon-button grid-expand-btn grid-expand-btn--mobile" type="button" (click)="toggleChangeRow(r.id)"><i class="bi" [ngClass]="isChangeExpanded(r.id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i></button>
                   </div>
                   <strong>{{ r.fund }}</strong>
                 </div>
@@ -625,43 +617,8 @@
           </div>
         </section>
 
-        <section class="ov-order-section" aria-label="設定調整" *ngIf="changeView === 'settings' && settingsEditView === 'single'">
-          <div class="grid-table grid-table--settings">
-            <div class="grid-head">
-              <div class="grid-id-head">基金名稱</div>
-              <div class="grid-body grid-body--head">
-                <span>交易幣別</span>
-                <span>Pay 出方式</span>
-                <span>月 Pay 金額</span>
-                <span>基準日</span>
-                <span>觸發門檻</span>
-              </div>
-              <div class="grid-actions-head">操作</div>
-            </div>
-            <article class="grid-row" *ngFor="let f of settingsFunds; trackBy: trackByFund">
-              <div class="grid-main">
-                <div class="grid-id">
-                  <span class="grid-code">{{ f.code }}</span>
-                  <strong class="grid-name">{{ f.name }}</strong>
-                </div>
-                <div class="grid-body">
-                  <span data-label="交易幣別">{{ f.txCcy }}</span>
-                  <span data-label="Pay 出方式">{{ payMethodText(f.contracts[0]) }}</span>
-                  <span data-label="月 Pay 金額">{{ fmtN(f.contracts[0].pay) }}</span>
-                  <span data-label="基準日">{{ payDayText(f.contracts[0]) }}</span>
-                  <span data-label="觸發門檻">{{ f.contracts[0].threshold }}</span>
-                </div>
-                <div class="grid-actions">
-                  <button class="circle-btn" type="button" (click)="onAction('異動', f.contracts[0].fpNo)" aria-label="異動設定" title="異動設定"><i class="bi bi-gear ov-action-icon ov-action-icon--setting"></i></button>
-                </div>
-              </div>
-            </article>
-            <div class="grid-empty" *ngIf="settingsFunds.length === 0">查無可異動契約</div>
-          </div>
-        </section>
-
         <mat-horizontal-stepper
-          *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep !== 'done'"
+          *ngIf="changeView === 'settings' && expandedSettingStep !== 'done'"
           class="material-flow-stepper setting-flow-stepper"
           labelPosition="bottom"
           [linear]="false"
@@ -684,7 +641,7 @@
           </mat-step>
         </mat-horizontal-stepper>
 
-        <section class="ov-order-section" aria-label="展開編輯設定" *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep === 'edit'">
+        <section class="ov-order-section" aria-label="批次編輯設定" *ngIf="changeView === 'settings' && expandedSettingStep === 'edit'">
           <div class="setting-edit-toolbar">
             <button
               class="setting-edit-toggle-all"
@@ -703,7 +660,12 @@
               [class.is-expanded]="isSettingExpanded(f.id)"
               [class.is-modified]="isSettingDraftModified(f.contracts[0])">
               <ng-container *ngIf="settingDraftOf(f.contracts[0]) as draft">
-                <button class="setting-edit-head" type="button" (click)="toggleSettingRow(f.id)" [attr.aria-expanded]="isSettingExpanded(f.id)">
+                <button
+                  class="setting-edit-head"
+                  type="button"
+                  [class.has-state]="isSettingDraftModified(f.contracts[0], draft)"
+                  (click)="toggleSettingRow(f.id)"
+                  [attr.aria-expanded]="isSettingExpanded(f.id)">
                   <span class="setting-edit-id">
                     <span class="grid-code">{{ f.code }}・{{ f.txCcy }}</span>
                     <strong>{{ f.name }}</strong>
@@ -737,11 +699,10 @@
                     <section class="setting-flow-block">
                       <div class="block-header">
                         <h3 class="block-title">Pay 出設定</h3>
-                      <button type="button" role="switch" class="ds-switch"
+                      <button type="button" role="switch" class="ds-switch" aria-label="Pay 出設定"
                         [class.is-on]="draft.payActive" [attr.aria-checked]="draft.payActive"
                         (click)="draft.payActive = !draft.payActive">
-                        <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="bi bi-check2 ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
-                        <span class="ds-switch__label">{{ draft.payActive ? '啟用' : '停用' }}</span>
+                        <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
                       </button>
                       </div>
 
@@ -756,11 +717,24 @@
                         <mat-radio-button color="primary" value="ratio">依比例</mat-radio-button>
                       </mat-radio-group>
 
-                            <label class="setting-edit-field pay-mode-panel" *ngIf="draft.payMode === 'amount'" [class.is-error]="settingMonthlyPayError(draft)">
-                              <span>每月 Pay 金額</span>
-                              <input type="number" min="1" [(ngModel)]="draft.monthlyPay" [ngModelOptions]="{ standalone: true }">
-                      <small class="setting-edit-field-error" *ngIf="settingMonthlyPayError(draft)">{{ settingMonthlyPayError(draft) }}</small>
-                    </label>
+                            <div class="fp-field pay-mode-panel" *ngIf="draft.payMode === 'amount'" [class.is-error]="settingMonthlyPayError(draft)">
+                              <label class="fp-field-label" [attr.for]="'setting-monthly-pay-' + draft.fpNo">每月 Pay 金額</label>
+                              <div class="fp-input-box fp-input-box--line">
+                                <input
+                                  [id]="'setting-monthly-pay-' + draft.fpNo"
+                                  class="fp-input"
+                                  type="text"
+                                  inputmode="numeric"
+                                  [(ngModel)]="draft.monthlyPay"
+                                  [ngModelOptions]="{ standalone: true }"
+                                  appThousands
+                                  required
+                                  placeholder="輸入金額"
+                                >
+                              </div>
+                              <div class="fp-field-hint" *ngIf="!settingMonthlyPayError(draft)">請輸入每月固定 Pay 金額</div>
+                              <div class="fp-field-error" *ngIf="settingMonthlyPayError(draft)">{{ settingMonthlyPayError(draft) }}</div>
+                            </div>
 
                             <div *ngIf="draft.payMode === 'ratio'" class="pay-mode-panel" [class.is-error]="settingAnnualRateError(draft)">
                               <div class="ratio-slider">
@@ -790,14 +764,30 @@
                                   </div>
                                 </div>
                               </div>
-                              <small class="setting-edit-field-error" *ngIf="settingAnnualRateError(draft)">{{ settingAnnualRateError(draft) }}</small>
+                              <div class="fp-field-error" *ngIf="settingAnnualRateError(draft)">{{ settingAnnualRateError(draft) }}</div>
                             </div>
                           </div>
                         </div>
 
                         <div class="pay-setting-group pay-setting-step pay-setting-step--date">
                           <div class="pay-setting-step-title">
-                            <div class="form-label">自由 Pay 基準日</div>
+                            <div class="form-label">
+                              自由 Pay 基準日
+                              <button
+                                class="ds-icon-button hint-toggle"
+                                type="button"
+                                aria-label="自由 Pay 基準日說明"
+                                [attr.aria-expanded]="isSettingDateHintOpen(draft.fpNo)"
+                                (click)="toggleSettingDateHint(draft.fpNo); $event.stopPropagation()"
+                              >
+                                <i class="bi bi-info-circle"></i>
+                              </button>
+                            </div>
+                          </div>
+                          <div class="hint-panel" [class.is-open]="isSettingDateHintOpen(draft.fpNo)" (click)="$event.stopPropagation()">
+                            自由 Pay 基準日為贖回申請日，實際入帳時間視基金公司付款作業而定，一般而言平均約 7～10 個營業日入帳。<br><br>
+                            變更設定於營業日 14:00 前下單視為當日申請；14:00 以後下單則視為次一營業日申請。設定自由 Pay 基準日若距首次申購日不足 30 個日曆日時，將於屆滿 30 日後之最近一次自由 Pay 基準日開始執行。<br><br>
+                            若當月無設定之基準日（如 29、30、31 日），則遞延至下個營業日申請。
                           </div>
                           <div class="pay-setting-panel pay-setting-panel--date date-section">
                             <div class="date-grid">
@@ -812,7 +802,10 @@
                                 {{ day }}
                               </button>
                             </div>
-                            <small class="setting-edit-field-error" *ngIf="settingPayDayError(draft)">{{ settingPayDayError(draft) }}</small>
+                            <div class="helper date-long-hint" *ngIf="showSettingLongDateHint(draft)">
+                              <span>{{ settingLongDateHintText(draft) }}</span>
+                            </div>
+                            <div class="fp-field-error" *ngIf="settingPayDayError(draft)">{{ settingPayDayError(draft) }}</div>
                           </div>
                         </div>
                       </ng-container>
@@ -821,11 +814,10 @@
                     <section class="setting-flow-block" *ngIf="draft.payActive">
                       <div class="block-header threshold-head">
                         <h3 class="block-title">觸發門檻</h3>
-                        <button type="button" role="switch" class="ds-switch"
+                        <button type="button" role="switch" class="ds-switch" aria-label="觸發門檻"
                           [class.is-on]="draft.thresholdMode !== 'none'" [attr.aria-checked]="draft.thresholdMode !== 'none'"
                           (click)="toggleDraftThreshold(draft, draft.thresholdMode === 'none')">
-                          <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="bi bi-check2 ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
-                          <span class="ds-switch__label">{{ draft.thresholdMode !== 'none' ? '啟用' : '停用' }}</span>
+                          <span class="ds-switch__track"><span class="ds-switch__thumb"><i class="bi bi-dash-lg ds-switch__icon ds-switch__icon--off" aria-hidden="true"></i><i class="ds-switch__icon ds-switch__icon--on" aria-hidden="true"></i></span></span>
                         </button>
                       </div>
                       <div class="pay-paused-box" *ngIf="draft.thresholdMode === 'none'">
@@ -873,15 +865,24 @@
                                 </button>
                                 <button mat-stroked-button class="threshold-option" type="button" [class.is-active]="draftThresholdCustomActive(draft)" (click)="selectDraftCustomThreshold(draft)">自訂</button>
                               </div>
-                              <label class="setting-edit-field threshold-custom-field" *ngIf="draftThresholdCustomActive(draft)" [class.is-error]="settingThresholdError(draft)">
-                                <span>{{ draft.thresholdMode === 'protect' ? '市值守護門檻' : '增值啟動門檻' }}</span>
-                                <input type="number"
-                                  [min]="draft.thresholdMode === 'protect' ? 70 : 101"
-                                  [max]="draft.thresholdMode === 'protect' ? 100 : 200"
-                                  [(ngModel)]="draft.thresholdValue"
-                                  [ngModelOptions]="{ standalone: true }">
-                                <small class="setting-edit-field-error" *ngIf="settingThresholdError(draft)">{{ settingThresholdError(draft) }}</small>
-                              </label>
+                              <div class="fp-field threshold-custom-field" *ngIf="draftThresholdCustomActive(draft)" [class.is-error]="settingThresholdError(draft)">
+                                <label class="fp-field-label" [attr.for]="'setting-threshold-' + draft.fpNo">{{ draft.thresholdMode === 'protect' ? '市值守護門檻' : '增值啟動門檻' }}</label>
+                                <div class="fp-input-box fp-input-box--line">
+                                  <input
+                                    [id]="'setting-threshold-' + draft.fpNo"
+                                    class="fp-input"
+                                    type="text"
+                                    inputmode="numeric"
+                                    [(ngModel)]="draft.thresholdValue"
+                                    [ngModelOptions]="{ standalone: true }"
+                                    required
+                                    placeholder="輸入比例"
+                                  >
+                                  <span class="fp-input-suffix">%</span>
+                                </div>
+                                <div class="fp-field-hint" *ngIf="!settingThresholdError(draft)">{{ draft.thresholdMode === 'protect' ? '可輸入 70–100 的整數' : '可輸入 101–200 的整數' }}</div>
+                                <div class="fp-field-error" *ngIf="settingThresholdError(draft)">{{ settingThresholdError(draft) }}</div>
+                              </div>
                             </div>
                           </div>
                         </div>
@@ -904,7 +905,7 @@
           </div>
         </section>
 
-        <section class="setting-confirm" aria-label="設定異動確認" *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep === 'confirm'">
+        <section class="setting-confirm" aria-label="設定異動確認" *ngIf="changeView === 'settings' && expandedSettingStep === 'confirm'">
           <div class="setting-confirm-block">
             <div class="block-header">
               <h2 class="block-title">確認設定異動</h2>
@@ -985,7 +986,7 @@
             <div class="fp-field ov-cancel-pwd-field">
               <div class="fp-input-box fp-input-box--line">
                 <input class="fp-input" [type]="expandedSettingPwdVisible ? 'text' : 'password'" [(ngModel)]="expandedSettingPwd" autocomplete="off" placeholder="輸入交易密碼" aria-label="交易密碼">
-                <button class="fp-input-affix" type="button" (click)="expandedSettingPwdVisible = !expandedSettingPwdVisible" [attr.aria-label]="expandedSettingPwdVisible ? '隱藏密碼' : '顯示密碼'">
+                <button class="ds-icon-button" type="button" (click)="expandedSettingPwdVisible = !expandedSettingPwdVisible" [attr.aria-label]="expandedSettingPwdVisible ? '隱藏密碼' : '顯示密碼'">
                   <i class="bi" [class.bi-eye]="!expandedSettingPwdVisible" [class.bi-eye-slash]="expandedSettingPwdVisible"></i>
                 </button>
               </div>
@@ -1000,7 +1001,7 @@
           </div>
         </section>
 
-        <section class="setting-confirm setting-confirm--done" aria-label="設定異動完成" *ngIf="changeView === 'settings' && settingsEditView === 'expanded' && expandedSettingStep === 'done'">
+        <section class="setting-confirm setting-confirm--done" aria-label="設定異動完成" *ngIf="changeView === 'settings' && expandedSettingStep === 'done'">
           <div class="success-block setting-done-block">
             <div class="success-ring"><i class="bi bi-check-circle-fill"></i></div>
             <h2>委託已成功送出</h2>

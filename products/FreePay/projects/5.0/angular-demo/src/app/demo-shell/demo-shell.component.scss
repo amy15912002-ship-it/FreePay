@@ -274,36 +274,6 @@
   font-weight: 500;
 }
 
-.hint-icon {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex: 0 0 16px;
-  width: 16px;
-  height: 16px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1;
-  cursor: pointer;
-}
-
-.hint-icon:hover,
-.hint-icon:focus-visible {
-  color: var(--color-brand-tertiary-400);
-  outline: none;
-}
-
-.hint-icon i {
-  pointer-events: none;
-  display: block;
-  width: 16px;
-  height: 16px;
-  line-height: 16px;
-}
-
 .hint-panel {
   max-height: 0;
   overflow: hidden;
@@ -334,6 +304,11 @@
   padding: 10px 12px;
   opacity: 1;
   transform: translateY(0);
+}
+
+/* 關閉時 0 高，抵銷 pay-setting-step 對它的一段 flex gap，避免 title 與內容多一段距離 */
+.pay-setting-step > .hint-panel:not(.is-open) {
+  margin-top: -10px;
 }
 
 .ccy-selector {
@@ -476,14 +451,6 @@
       transform: translateX(-100%);
     }
   }
-}
-
-.choice-radio-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 24px;
-  min-height: 40px;
 }
 
 .date-grid {

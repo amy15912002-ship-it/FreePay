@@ -415,20 +415,18 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 18px;
-  height: 18px;
+  width: 32px;
+  height: 32px;
   padding: 0;
   border: none;
   border-radius: 50%;
   background: transparent;
-  color: var(--color-text-secondary);
-  font-size: 14px;
+  font-size: 16px;
   line-height: 1;
   cursor: pointer;
 
   &:hover,
   &:focus-visible {
-    color: var(--color-brand-tertiary-400);
     outline: none;
   }
 }
@@ -676,7 +674,6 @@
   align-items: center;
   justify-content: flex-end;
   gap: 8px;
-  padding-right: 20px;
 }
 
 .grid-code-row {
@@ -791,23 +788,6 @@
 .ov-cancel-actions {
   display: flex;
   gap: 8px;
-}
-
-// ── Detail icon button ────────────────────────────────────────
-
-.detail-icon-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2px 4px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: var(--color-text-secondary);
-  font-size: 16px;
-  line-height: 1;
-
-  &:hover { color: var(--color-text-primary); }
 }
 
 // ── Detail modal overlay ──────────────────────────────────────
@@ -1015,8 +995,6 @@
 
   .grid-expand-btn {
     position: static;
-    width: 28px;
-    height: 28px;
     font-size: 16px;
   }
 
@@ -1093,10 +1071,7 @@
     }
 
     .grid-detail-btn {
-      width: 28px;
-      height: 28px;
       margin-left: 0;
-      color: var(--color-text-secondary);
     }
 
     .grid-body--row {
@@ -1355,14 +1330,6 @@
   min-width: 0;
 }
 
-
-// 設定調整列表：桌機欄寬對齊帳總 ov-fund-main（基金名 280、操作 172、中間設定值平均）
-.ov-settings-table {
-  th.col-fund, td.col-fund { width: 280px; }
-  th.col-action, td.col-action { width: 88px; }
-}
-
-
 // ════════════════════════════════════════════════════════════
 // 標準資料列 grid-table（設計系統：div + grid，取代 <table>）
 //   桌機：表頭與每列共用同一 grid template -> 欄位天然對齊
@@ -1461,22 +1428,6 @@
   }
 
   .grid-actions { grid-area: actions; justify-content: flex-start; }
-}
-
-// modifier：設定調整（識別 280 / 內容 1fr / 操作 88；內容 5 子欄）
-.grid-table--settings {
-  .grid-head, .grid-main { grid-template-columns: 280px 1fr 88px; }
-  .grid-body { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-}
-
-.mode-toggle--sub {
-  .mat-button-toggle-label-content {
-    min-width: 88px;
-  }
-}
-
-.ov-change-demo-switch {
-  margin-left: auto;
 }
 
 .setting-edit-list {
@@ -1600,20 +1551,31 @@
   &.is-modified {
     border-color: var(--color-action-primary);
   }
+
+  &.is-expanded .setting-edit-head {
+    grid-template-areas: "id icon";
+    padding-top: 14px;
+    padding-bottom: 14px;
+  }
+
+  &.is-expanded .setting-edit-head.has-state {
+    grid-template-areas: "id state icon";
+  }
 }
 
 .setting-edit-head {
   display: grid;
-  grid-template-columns: 1fr auto 32px;
+  grid-template-columns: minmax(0, 1fr) 32px;
   grid-template-areas:
-    "id state icon"
-    "summary summary summary";
+    "id icon"
+    "summary summary";
   align-items: center;
   gap: 12px 16px;
   width: 100%;
   padding: 16px 20px;
   border: 0;
-  background: transparent;
+  border-bottom: 1px solid transparent;
+  background: var(--color-neutral-50);
   color: var(--color-text-primary);
   font: inherit;
   text-align: left;
@@ -1623,6 +1585,17 @@
     grid-area: icon;
     justify-self: center;
   }
+
+  &.has-state {
+    grid-template-columns: minmax(0, 1fr) auto 32px;
+    grid-template-areas:
+      "id state icon"
+      "summary summary summary";
+  }
+}
+
+.setting-edit-card.is-expanded .setting-edit-head {
+  border-bottom-color: var(--color-border-default);
 }
 
 .setting-edit-id {
@@ -1657,7 +1630,6 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 26px;
-  padding-top: 4px;
   color: var(--color-text-secondary);
 }
 
@@ -1686,7 +1658,6 @@
 
 .setting-edit-panel {
   padding: 20px 20px 20px;
-  border-top: 1px solid var(--color-border-default);
 }
 
 .setting-flow {
@@ -1769,12 +1740,36 @@
   font-weight: 500;
 }
 
-.choice-radio-group {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 12px 24px;
-  min-height: 40px;
+.hint-panel {
+  max-height: 0;
+  overflow: hidden;
+  margin-top: 0;
+  margin-bottom: 0;
+  padding: 0 12px;
+  background: var(--color-neutral-50);
+  border: 1px solid var(--color-neutral-150);
+  border-radius: 6px;
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.75;
+  opacity: 0;
+  transform: translateY(-4px);
+  transform-origin: top;
+  transition:
+    max-height .22s ease,
+    margin .22s ease,
+    padding .22s ease,
+    opacity .16s ease,
+    transform .22s ease;
+}
+
+.hint-panel.is-open {
+  max-height: 240px;
+  margin-top: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .pay-mode-panel {
@@ -1932,6 +1927,15 @@
   color: var(--color-text-on-brand);
 }
 
+.helper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--color-input-helper);
+  font-size: 14px;
+}
+
 .threshold-head {
   align-items: flex-start;
 }
@@ -2025,69 +2029,12 @@
   min-width: 0;
 }
 
-.setting-edit-control,
-.setting-edit-field {
-  display: grid;
-  align-content: start;
-  gap: 8px;
-  min-width: 0;
-}
-
-.setting-edit-control--wide {
-  grid-column: 1 / -1;
-}
-
-.setting-edit-label,
-.setting-edit-field > span {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-}
-
 .setting-radio-row {
   display: flex;
   flex-wrap: wrap;
   align-items: center;
   gap: 8px 20px;
   min-height: 36px;
-}
-
-.setting-edit-field input {
-  width: 100%;
-  height: 40px;
-  padding: 0;
-  border: 0;
-  border-bottom: 1px solid var(--color-border-strong);
-  border-radius: 0;
-  background: transparent;
-  color: var(--color-text-primary);
-  font: inherit;
-  outline: none;
-
-  &:focus {
-    border-bottom-color: var(--color-action-primary);
-  }
-}
-
-.setting-edit-field small {
-  color: var(--color-text-secondary);
-  font-size: 13px;
-}
-
-.setting-edit-field.is-error > span {
-  color: var(--color-input-label-error);
-}
-
-.setting-edit-field.is-error input {
-  border-bottom-color: var(--color-input-border-error);
-}
-
-.setting-edit-field.is-error input:focus {
-  border-bottom-color: var(--color-input-border-error);
-}
-
-.setting-edit-field .setting-edit-field-error {
-  color: var(--color-input-helper-error);
-  font-size: 14px;
 }
 
 .setting-edit-actions {
@@ -2376,35 +2323,20 @@
 }
 
 @media (max-width: 1024px) {
-  .grid-table--settings .grid-head,
-  .grid-table--settings .grid-main { grid-template-columns: 200px 1fr 88px; }
-
   .setting-edit-head {
-    grid-template-columns: 1fr auto 32px;
+    grid-template-columns: minmax(0, 1fr) 32px;
+  }
+
+  .setting-edit-head.has-state {
+    grid-template-columns: minmax(0, 1fr) auto 32px;
   }
 
   .setting-edit-form {
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-// 手機：設定齒輪移到識別頭右上角（取代孤立在卡片底部），與帳總手機識別頭右側操作一致
+
 @media (max-width: 767px) {
-  .grid-table--settings .grid-main { grid-template-areas: "id actions" "body body"; }
-  .grid-table--settings .grid-actions { grid-area: actions; justify-self: end; align-self: start; }
-
-  .mode-toggle--sub {
-    width: 100%;
-  }
-
-  .ov-change-demo-switch {
-    width: 100%;
-    margin-left: 0;
-  }
-
-  .mode-toggle--sub .mat-button-toggle {
-    flex: 1 1 0;
-  }
-
   .setting-edit-toolbar {
     justify-content: flex-end;
   }
@@ -2435,7 +2367,8 @@
     }
   }
 
-  .setting-edit-head {
+  .setting-edit-head,
+  .setting-edit-head.has-state {
     grid-template-columns: minmax(0, 1fr) 24px;
     grid-template-areas:
       "id icon"
@@ -2453,9 +2386,18 @@
   }
   .setting-edit-head > i { grid-area: icon; }
 
+  .setting-edit-card.is-expanded .setting-edit-head {
+    grid-template-areas: "id icon";
+  }
+
+  .setting-edit-card.is-expanded .setting-edit-head.has-state {
+    grid-template-areas:
+      "id icon"
+      "state state";
+  }
+
   .setting-edit-summary {
     gap: 8px 0;
-    padding-top: 2px;
   }
 
   .setting-edit-summary-kv {
@@ -2703,8 +2645,6 @@
 .grid-table--change {
   .grid-head, .grid-main { grid-template-columns: 280px 1fr; }
   .grid-body { grid-template-columns: repeat(5, minmax(0, 1fr)); }
-  .grid-row { cursor: pointer; }
-  .change-chevron { display: none; } // 桌機不顯示折疊箭頭（全欄已顯示）
 }
 // 無操作欄，最後一欄補右 padding 20（桌機/中屏；手機用卡片內距）
 @media (min-width: 768px) {
@@ -2735,12 +2675,6 @@
 // 手機折疊：收合顯示生效日/異動項目，展開才顯示交易幣別/異動前/異動後
 @media (max-width: 767px) {
   .grid-table--change .grid-code-row { display: flex; align-items: center; }
-  .grid-table--change .change-chevron {
-    display: inline-flex;
-    margin-left: auto;
-    color: var(--color-text-secondary);
-    font-size: 16px;
-  }
   .grid-table--change .change-more { display: none; }
   .grid-table--change .grid-row.is-expanded .change-more { display: flex; }
   // 收合時最後可見是「異動項目」（change-more 隱藏），清掉它的底線
@@ -2749,8 +2683,7 @@
   .ov-change-search { max-width: none; flex-basis: 100%; }
 }
 
-// 斑馬紋：委託查詢／異動歷史／設定調整 偶數列灰底（多列數據表助橫向閱讀，與帳總/交易明細/總覽一致）
+// 斑馬紋：委託查詢／異動歷史 偶數列灰底（多列數據表助橫向閱讀，與帳總/交易明細/總覽一致）
 // grid-row 皆為 <article>，nth-of-type 不含 grid-head(div)
 .grid-table--order .grid-row:nth-of-type(even) .grid-main,
-.grid-table--change .grid-row:nth-of-type(even) .grid-main,
-.grid-table--settings .grid-row:nth-of-type(even) .grid-main { background: var(--color-bg-subtle); }
+.grid-table--change .grid-row:nth-of-type(even) .grid-main { background: var(--color-bg-subtle); }

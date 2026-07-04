@@ -741,10 +741,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.activeStep === 'confirm' ? '確認送出' : '下一步';
   }
 
-  get primaryActionIsSubmit(): boolean {
-    return this.activeStep === 'confirm';
-  }
-
   setStep(step: DemoStep): void {
     const targetIndex = this.steps.findIndex(item => item.key === step);
     if (targetIndex <= this.stepIndex || this.activeStep === 'done') {
@@ -870,7 +866,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   @HostListener('document:click', ['$event'])
   closeHintsOnOutsideClick(event: MouseEvent): void {
     const target = event.target as HTMLElement | null;
-    if (!target || target.closest('.hint-icon, .hint-panel')) return;
+    if (!target || target.closest('.hint-toggle, .hint-panel')) return;
     this.payModeHintOpen = false;
     this.dateHintOpen = false;
   }
