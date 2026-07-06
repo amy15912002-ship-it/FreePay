@@ -140,7 +140,7 @@
     &.is-active {
       width: 18px;
       border-radius: 3px;
-      background: var(--color-brand-primary-400);
+      background: var(--color-action-primary);
     }
   }
 
@@ -197,7 +197,7 @@
 }
 
 .ccy-accent--primary {
-  border-left: 5px solid var(--color-brand-primary-400);
+  border-left: 5px solid var(--color-action-primary);
 }
 .ccy-accent--secondary {
   border-left: 5px solid var(--color-brand-secondary-400);
@@ -1799,7 +1799,7 @@
 }
 
 .ratio-range-control {
-  --ratio-track-active: var(--color-brand-primary-400);
+  --ratio-track-active: var(--color-action-primary);
   position: relative;
   margin-top: 16px;
   padding-bottom: 24px;
@@ -1849,7 +1849,7 @@
     height: 22px;
     margin-top: -8px;
     appearance: none;
-    border: 3px solid var(--color-brand-primary-400);
+    border: 3px solid var(--color-action-primary);
     border-radius: 50%;
     background: var(--color-bg-base);
     box-shadow: var(--shadow-sm);
@@ -2513,28 +2513,6 @@
 
   .setting-doc-list {
     grid-template-columns: 1fr;
-  }
-
-  .agree-label {
-    display: flex;
-    align-items: flex-start;
-
-    ::ng-deep .mat-checkbox-layout {
-      white-space: normal;
-      align-items: flex-start;
-    }
-
-    ::ng-deep .mat-checkbox-label {
-      white-space: normal;
-      line-height: 1.6;
-      font-size: 14px;
-      color: var(--color-text-secondary);
-    }
-
-    ::ng-deep .mat-checkbox-inner-container {
-      flex-shrink: 0;
-      margin-top: 2px;
-    }
   }
 
   .setting-confirm--done {

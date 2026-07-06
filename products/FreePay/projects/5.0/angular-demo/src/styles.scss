@@ -274,7 +274,7 @@ textarea {
 /* Filled：橙紅實心，hover/pressed 加深一階 */
 .ds-action-button.mat-raised-button.mat-primary,
 .ds-action-button.mat-flat-button.mat-primary {
-  background-color: var(--color-brand-primary-400);
+  background-color: var(--color-action-primary);
   color: var(--color-neutral-0);
 }
 
@@ -291,8 +291,8 @@ textarea {
 /* Outline·品牌：透明底＋橙紅 1px 描邊與字，hover 淺品牌底（醒目靠顏色，不靠粗細）*/
 .ds-action-button.mat-stroked-button.mat-primary {
   border-width: 1px;
-  border-color: var(--color-brand-primary-400);
-  color: var(--color-brand-primary-400);
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
 }
 
 .ds-action-button.mat-stroked-button.mat-primary:hover {
@@ -607,11 +607,6 @@ textarea {
   color: var(--color-input-helper-error);
 }
 
-.mat-checkbox-checked.mat-primary .mat-checkbox-background,
-.mat-checkbox-indeterminate.mat-primary .mat-checkbox-background {
-  background-color: var(--color-input-checkbox-checked);
-}
-
 /* radio 群組容器：flex 換行、統一間距，跨 demo 共用 */
 .choice-radio-group {
   display: flex;
@@ -619,6 +614,29 @@ textarea {
   align-items: center;
   gap: 12px 24px;
   min-height: 40px;
+}
+
+/* 條款同意等長 label checkbox：label 換行、頂端對齊，跨 demo 共用（各頁自加間距） */
+.agree-label {
+  display: flex;
+  align-items: flex-start;
+
+  .mat-checkbox-layout {
+    white-space: normal;
+    align-items: flex-start;
+  }
+
+  .mat-checkbox-label {
+    white-space: normal;
+    line-height: 1.6;
+    font-size: 14px;
+    color: var(--color-text-secondary);
+  }
+
+  .mat-checkbox-inner-container {
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
 }
 
 // ── Shared demo chrome (used across all demo components) ─────────────────
@@ -1085,59 +1103,43 @@ table { font-variant-numeric: tabular-nums; }
   opacity: .5;
 }
 
-// mat-button-toggle-group colour tokens (design system override)
-// .mode-toggle        — colours only; width is determined by context
-// .mode-toggle-fill   — adds full-width stretch (for form settings blocks)
-.mode-toggle .mat-button-toggle {
+// Segmented control — 原生接合式段控（DesignSystem §3.7）；照 mat-button-toggle 外觀重建、脫離 Material
+.ds-segmented {
+  display: inline-flex;
+}
+
+.ds-segmented__item {
+  box-sizing: border-box;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   height: 36px;
-  border-color: var(--color-neutral-200);
+  padding: 0 16px;
+  border: 1px solid var(--color-border-strong);
+  background: var(--color-neutral-0);
   color: var(--color-neutral-600);
+  font: inherit;
   font-size: 14px;
+  cursor: pointer;
+  margin-left: -1px; // 共邊：與前一顆重疊，避免雙線
+  transition: border-color .12s, background .12s, color .12s;
 }
 
-.mode-toggle .mat-button-toggle-button,
-.mode-toggle .mat-button-toggle-label-content {
-  height: 36px;
-  line-height: 36px;
-}
+.ds-segmented__item:first-child { margin-left: 0; border-radius: 8px 0 0 8px; }
+.ds-segmented__item:last-child { border-radius: 0 8px 8px 0; }
 
-.mode-toggle.mat-button-toggle-group {
-  border-radius: 8px;
-}
-
-.mode-toggle .mat-button-toggle:first-child {
-  border-radius: 8px 0 0 8px;
-}
-
-.mode-toggle .mat-button-toggle:last-child {
-  border-radius: 0 8px 8px 0;
-}
-
-.mode-toggle .mat-button-toggle:hover {
+.ds-segmented__item:hover {
   border-color: var(--color-neutral-300);
   color: var(--color-neutral-800);
-  background: var(--color-neutral-0);
+  z-index: 1; // hover 邊蓋過鄰居
 }
 
-.mode-toggle .mat-button-toggle-checked {
+.ds-segmented__item.is-active {
   background: var(--color-action-primary);
-  color: var(--color-neutral-0);
   border-color: var(--color-action-primary);
-  font-weight: 700;
-}
-
-.mode-toggle .mat-button-toggle-checked:hover {
-  background: var(--color-action-primary);
   color: var(--color-neutral-0);
-}
-
-.mode-toggle-fill {
-  width: 100%;
-  max-width: 100%;
-}
-
-.mode-toggle-fill .mat-button-toggle {
-  flex: 1 1 0;
+  font-weight: 700;
+  z-index: 2; // active 邊最上層
 }
 
 // Filter chips：原生 button 篩選 pill（DesignSystem §3.3）
@@ -1152,7 +1154,7 @@ table { font-variant-numeric: tabular-nums; }
   align-items: center;
   min-height: 32px;
   padding: 6px 10px;
-  border: 1px solid var(--color-neutral-200);
+  border: 1px solid var(--color-border-strong);
   border-radius: 999px;
   background: var(--color-neutral-0);
   color: var(--color-neutral-800);
@@ -1198,7 +1200,7 @@ table { font-variant-numeric: tabular-nums; }
   flex: 0 0 auto;
   width: 32px;
   height: 32px;
-  border: 1px solid var(--color-neutral-200);
+  border: 1px solid var(--color-border-strong);
   border-radius: 50%;
   background: var(--color-neutral-0);
   color: var(--color-neutral-800);
@@ -1221,8 +1223,8 @@ table { font-variant-numeric: tabular-nums; }
 }
 
 .circle-btn--buy {
-  border-color: var(--color-brand-primary-400);
-  background: var(--color-brand-primary-400);
+  border-color: var(--color-action-primary);
+  background: var(--color-action-primary);
   color: var(--color-text-on-brand);
 }
 
@@ -1234,14 +1236,14 @@ table { font-variant-numeric: tabular-nums; }
 
 // 描邊·品牌（§3.2 圓形按鈕變體）：白底＋橙紅描邊與 icon，hover 淺品牌底。排序鈕用之
 .circle-btn--brand-outline {
-  border-color: var(--color-brand-primary-400);
-  color: var(--color-brand-primary-400);
+  border-color: var(--color-action-primary);
+  color: var(--color-action-primary);
 }
 
 .circle-btn--brand-outline:hover {
-  border-color: var(--color-brand-primary-400);
+  border-color: var(--color-action-primary);
   background: var(--color-bg-brand-subtle);
-  color: var(--color-brand-primary-400);
+  color: var(--color-action-primary);
 }
 
 // Notes / disclaimer block (注意事項)

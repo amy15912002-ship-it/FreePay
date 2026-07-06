@@ -18,10 +18,10 @@
           <h2 class="block-title" id="ov-summary-title">總覽</h2>
           <div class="ov-demo-switch">
             <span class="ov-demo-tag">DEMO</span>
-            <mat-button-toggle-group class="mode-toggle" [(ngModel)]="summaryDemoMode" aria-label="Demo 幣別數量">
-              <mat-button-toggle value="multi">多幣別</mat-button-toggle>
-              <mat-button-toggle value="single">單幣別</mat-button-toggle>
-            </mat-button-toggle-group>
+            <div class="ds-segmented" role="radiogroup" aria-label="Demo 幣別數量">
+              <button type="button" role="radio" class="ds-segmented__item" [class.is-active]="summaryDemoMode === 'multi'" [attr.aria-checked]="summaryDemoMode === 'multi'" (click)="summaryDemoMode = 'multi'">多幣別</button>
+              <button type="button" role="radio" class="ds-segmented__item" [class.is-active]="summaryDemoMode === 'single'" [attr.aria-checked]="summaryDemoMode === 'single'" (click)="summaryDemoMode = 'single'">單幣別</button>
+            </div>
           </div>
         </div>
         <div class="ov-sum-scroll-wrap">
@@ -568,10 +568,10 @@
       <div class="ov-tab-stack">
         <div class="ov-change-topbar">
           <div class="ov-change-topbar-left">
-            <mat-button-toggle-group class="mode-toggle" [(ngModel)]="changeView" aria-label="檢視切換">
-              <mat-button-toggle value="settings">設定</mat-button-toggle>
-              <mat-button-toggle value="history">歷史</mat-button-toggle>
-            </mat-button-toggle-group>
+            <div class="ds-segmented" role="radiogroup" aria-label="檢視切換">
+              <button type="button" role="radio" class="ds-segmented__item" [class.is-active]="changeView === 'settings'" [attr.aria-checked]="changeView === 'settings'" (click)="changeView = 'settings'">設定</button>
+              <button type="button" role="radio" class="ds-segmented__item" [class.is-active]="changeView === 'history'" [attr.aria-checked]="changeView === 'history'" (click)="changeView = 'history'">歷史</button>
+            </div>
             <span class="ov-order-count" *ngIf="changeView === 'history'">{{ filteredChangeLogs.length }} 筆</span>
             <span class="ov-order-count" *ngIf="changeView === 'settings'">
               {{ settingsFunds.length }} 筆可異動契約・已修改 {{ modifiedSettingCount }} 筆

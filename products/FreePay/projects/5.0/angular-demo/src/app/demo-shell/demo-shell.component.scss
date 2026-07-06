@@ -340,7 +340,7 @@
 }
 
 .ratio-range-control {
-  --ratio-track-active: var(--color-brand-primary-400);
+  --ratio-track-active: var(--color-action-primary);
   position: relative;
   margin-top: 16px;
   padding-bottom: 24px;
@@ -393,7 +393,7 @@
     margin-top: -8px;
     -webkit-appearance: none;
     appearance: none;
-    border: 3px solid var(--color-brand-primary-400);
+    border: 3px solid var(--color-action-primary);
     border-radius: 50%;
     background: var(--color-bg-base);
     box-shadow: var(--shadow-sm);
@@ -418,7 +418,7 @@
   &::-moz-range-thumb {
     width: 16px;
     height: 16px;
-    border: 3px solid var(--color-brand-primary-400);
+    border: 3px solid var(--color-action-primary);
     border-radius: 50%;
     background: var(--color-bg-base);
     box-shadow: var(--shadow-sm);
@@ -737,27 +737,9 @@
   }
 }
 
+// 外觀走全域 .agree-label；此處只補與上方內容的間距
 .agree-label {
-  display: flex;
-  align-items: flex-start;
   margin-top: 16px;
-
-  ::ng-deep .mat-checkbox-layout {
-    white-space: normal;
-    align-items: flex-start;
-  }
-
-  ::ng-deep .mat-checkbox-label {
-    white-space: normal;
-    line-height: 1.6;
-    font-size: 14px;
-    color: var(--color-text-secondary);
-  }
-
-  ::ng-deep .mat-checkbox-inner-container {
-    margin-top: 2px;
-    flex-shrink: 0;
-  }
 }
 
 .doc-list {
@@ -1499,7 +1481,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
 }
 
 .batch-row-cell--total-amount {
-  color: var(--color-brand-primary-400);
+  color: var(--color-action-primary);
   font-size: 16px;
   font-weight: 500;
 }
@@ -1565,7 +1547,7 @@ $batch-grid: 28px minmax(108px, 1fr) repeat(5, minmax(0, 1fr));
   white-space: nowrap;
 
   &.is-shortterm {
-    color: var(--color-brand-primary-400);
+    color: var(--color-action-primary);
     font-weight: 500;
   }
 }
