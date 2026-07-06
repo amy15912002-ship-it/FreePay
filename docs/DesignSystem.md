@@ -53,22 +53,22 @@
 
 #### 元件選型三層框架
 
-新元件先依三層框架決定實作方式，不以外觀相似度判斷。
+新元件依三層決定實作，不以外觀相似度判斷；各元件層級見 §3 各章「實作層」。
 
 | 層級 | 選型 | 適用情境 | 原則 |
 |---|---|---|---|
-| 1 | 原生 HTML + token | 外觀為主、互動單純 | 不引入 Material；語意化 HTML ＋ token ＋ 平台 class 控外觀 |
-| 2 | Angular Material + 設計系統 class | 需 Material 協助複雜互動／狀態／可及性，且無需深度改動視覺 | 用官方標籤與狀態 API；平台外觀只加語意 class 或外層 wrapper |
-| 3 | 自訂設計系統元件 | 跨頁重複、Material 不合產品語意或結構 | 抽成平台 class／component，結構、RWD、狀態、文案可跨專案重用 |
+| 1 | 原生 HTML ＋ token | 外觀為主、互動單純 | 不引入 Material；語意化 HTML ＋ token ＋ 平台 class |
+| 2 | Angular Material ＋ 設計系統 class | 需 Material 處理複雜互動／狀態／可及性 | 用官方標籤與狀態 API；版面靠平台 class／wrapper、顏色走主題旋鈕，不深層覆寫 `.mat-*` |
+| 3 | 自訂設計系統元件 | 跨頁重複、Material 不合語意 | 抽成平台 class／component，可跨專案重用 |
 
-各元件實際層級見 §3 各章「實作層」標注。
+#### 第 2 層改色：先走旋鈕，沒旋鈕才複寫
 
-#### 第 2 層 Material 使用與升級護欄
+Material 元件的顏色由主題的三個**旋鈕**（`primary`／`accent`／`warn`）決定：設計系統色餵進旋鈕，元件用 `color="…"` 選旋鈕。
 
-Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（本專案現況 v14，原則不綁版本；前端寫法另見工程約定）。護欄：
+- **有旋鈕的部位** → 改主題調色盤（走旋鈕）。升級改版仍自動生效、全站一致——**首選**。
+- **沒旋鈕的部位**（如 checkbox 的 `frame`、hover 深一階、描邊色）→ 只能**複寫**內部 class；會在 Material v15（MDC 把 `.mat-*` 改名 `.mdc-*`）後失效，屬脆弱做法。
 
-- 平台視覺只加外層 wrapper 或設計系統 class（如 `.ds-action-button`），**不深層覆寫 `.mat-*`**。
-- 必須覆寫內部 selector 時，標註原因、範圍與 MDC 升級風險；不為單一 demo 新增全域 selector。
+**護欄**：能走旋鈕就走旋鈕；非複寫不可時集中於全域一處、標 MDC 升級風險，不為單一 demo 新增全域 selector。
 
 ### 0.4 強制遵循規則
 
@@ -297,7 +297,7 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 
 ## 3. 元件
 
-> **焦點可見（無障礙必須）**：所有互動元件在鍵盤／點擊聚焦時，焦點必須清楚可見，不得 `outline: none` 而無替代焦點樣式。具體 focus 樣式由各元件章自訂（如 §3.7 Input 的 Tertiary 光暈）。
+> **焦點可見（無障礙必須）**：所有互動元件在鍵盤／點擊聚焦時，焦點必須清楚可見，不得 `outline: none` 而無替代焦點樣式。具體 focus 樣式由各元件章自訂（如 §3.9 Input 的 Tertiary 光暈）。
 
 ---
 
@@ -350,29 +350,11 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 
 ### 3.2 圖示鈕（Icon Button）
 
-**用途**：以 icon 表達動作或狀態的按鈕。三形態依用途選，沿用 §3.1 變體配色（顏色與狀態見 §3.1）。
+**用途**：以 icon 表達動作或狀態的按鈕，分三型（3.2.1–3.2.3）。沿用 §3.1 變體配色（顏色與狀態見 §3.1）。glyph 一律 Bootstrap Icons、命名 `bi-*`；icon-only 必填 `aria-label`。
 
 **實作層**：§0.3 第 1 層（原生 button ＋ token；`.ds-icon-button`／`.circle-btn`）。
 
-**HTML**
-
-```html
-<button class="ds-icon-button" aria-label="展開"><i class="bi bi-chevron-down"></i></button>        <!-- 無框 -->
-<button class="circle-btn circle-btn--brand-outline" aria-label="篩選"><i class="bi bi-funnel"></i></button> <!-- 描邊圓 -->
-<button class="circle-btn circle-btn--buy" aria-label="申購">BUY</button>                           <!-- 實心圓 -->
-```
-
-**類型**（皆 `32×32`、icon `16`；icon-only 必填 `aria-label`）
-
-| 類型 | 外形 | 沿用變體 | 用途 |
-|---|---|---|---|
-| 無框圖示 | 無框無底 | Text（字 `#333333`、hover `#1A1A1A`）| 展開／收合、關閉、內聯小動作、說明觸發（ⓘ 點開 §3.11）|
-| 描邊圓 | 圓框 `1px`、`50%` | Outline·中性／品牌 | 篩選 trigger、排序、次要圓形動作 |
-| 實心圓 | 填滿 `50%` | Filled（品牌）| 主要圓形動作、`BUY`／`SELL` 短字標 |
-
-**選中／作用中**：用 **icon 填滿**（描邊圓 ＋ 實心 icon）表示；**整顆填滿（實心圓）保留給主要動作**，不用於選中，以免撞臉。例：篩選有套用 ＝ 描邊圓 ＋ 實心漏斗。
-
-**icon 選用**（每顆都要指定 glyph；常用對照，Bootstrap Icons）
+**icon 選用**（每顆都要指定 glyph；常用對照）
 
 | 功能 | glyph |
 |---|---|
@@ -384,9 +366,48 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 | 檢視切換 | `grid-1x2` / `list-ul` |
 | 說明／提示 | `info-circle` |
 
-**短字標例外**：實心圓可放 `BUY`／`SELL` 短字標——採英文（品牌慣例）；`14px` 溢出可用 `12px / 700`（僅此例覆寫「桌機不得 12px」）。
+#### 3.2.1 無框圖示鈕
 
-**inline 說明 icon 例外**：嵌在文字標籤內的說明觸發 icon（§3.11），可縮為 `16×16`、icon `14px` 以對齊 label 文字；色彩與狀態同無框形態。
+**用途**：展開／收合、關閉、內聯小動作、說明觸發（ⓘ 點開 §3.11）。
+
+**外觀**：透明底、無邊，沿用 §3.1 Text 變體（字 `#333333`、hover `#1A1A1A`）。
+
+**尺寸**：外框透明但保留點擊熱區——獨立操作預設 `32×32`（無障礙最小觸控）；密集容器（如格狀列）可縮至 `28×28`；貼齊輸入框時取輸入框高。glyph `16px`。
+
+```html
+<button class="ds-icon-button" aria-label="關閉"><i class="bi bi-x-lg"></i></button>
+```
+
+**資訊／狀態 icon**：說明觸發（§3.11）、狀態提醒等內嵌資訊 icon 同走標準尺寸（`32×32`、glyph `16`），不縮小。差別只在**可帶語意色**——中性說明用 Text 色，狀態指示用語意色（如警示黃，見 §1）。
+
+#### 3.2.2 描邊圓（Outlined Circle）
+
+**用途**：篩選 trigger、排序、次要圓形動作（含 `Sell` 等次要短字標，字級見 §3.2.3 短字標例外）。
+
+**外觀**：圓框 `1px`、`50%`，沿用 Outline·中性／品牌變體。
+
+**尺寸**：`32×32`、glyph `16px`。
+
+**選中／作用中**：用 **icon 填滿**（描邊圓 ＋ 實心 icon）表示，不整顆填滿以免撞實心圓。例：篩選有套用 ＝ 描邊圓 ＋ 實心漏斗（`funnel-fill`）。
+
+```html
+<button class="circle-btn circle-btn--brand-outline" aria-label="篩選"><i class="bi bi-funnel"></i></button>
+<button class="circle-btn circle-btn--sell" aria-label="贖回">Sell</button>
+```
+
+#### 3.2.3 實心圓（Filled Circle）
+
+**用途**：主要圓形動作（如 `Buy` 短字標）。整顆填滿保留給主要動作，不用於選中或次要動作，以免撞描邊圓。
+
+**外觀**：填滿 `50%`，沿用 Filled（品牌）變體。
+
+**尺寸**：`32×32`。
+
+**短字標例外（描邊圓／實心圓通用）**：`Buy`／`Sell` 採英文短字標（品牌慣例）；`14px` 溢出可用 `12px / 700`（僅此例覆寫「桌機不得 12px」）。
+
+```html
+<button class="circle-btn circle-btn--buy" aria-label="申購">Buy</button>
+```
 
 ---
 
@@ -413,26 +434,93 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 | `.filter-chips--sheet` | `30px` | `6px 7px` | `12px` | `6px` | `999px` | 手機 sheet（`12px` 限手機，見 §2.2）|
 
 
-**狀態**（`—` ＝ 同 Default；HEX ↔ token 見 §1）
+**外觀**（`—` ＝ 同 Default）
 
 |  | Default | Hover | Selected | Selected + Hover |
 |---|---|---|---|---|
-| 底 | `#FFFFFF` | — | `#FFF0EC` | `#FCCFBE` |
-| 邊 | `#D9D9D9` | `#B3B3B3` | `#F04D29` | `#F04D29` |
-| 字 | `#333333` | — | `#F04D29` | `#F04D29` |
+| 底 | `--color-neutral-0` `#FFFFFF` | — | `--color-bg-brand-subtle` `#FFF0EC` | `--color-brand-primary-100` `#FCCFBE` |
+| 邊 | `--color-neutral-200` `#D9D9D9` | `--color-neutral-300` `#B3B3B3` | `--color-action-primary` `#F04D29` | `--color-action-primary` `#F04D29` |
+| 字 | `--color-neutral-800` `#333333` | — | `--color-action-primary` `#F04D29` | `--color-action-primary` `#F04D29` |
 | 字重 | `400` | — | `700` | `700` |
 
-**收合／展開**：容器 `.filter-chips` 為 `flex`，切換 `flex-wrap`——收合 `nowrap`（截斷）、展開 `wrap`（全顯）。
+**行為**：點擊切換選取（多選）。容器 `.filter-chips` 為 `flex`，切換 `flex-wrap` 控收合／展開——收合 `nowrap`（截斷）、展開 `wrap`（全顯）。
 
 **維護**：chip 尺寸／狀態只由 `.filter-chips` 及 modifier 控制，頁面不覆寫單顆 chip；需既有以外的尺寸，新增 modifier 補入本節。
 
 ---
 
-### 3.4 Switch（開關）
+### 3.4 Checkbox
 
-**用途**：即時**啟用／停用**單一功能（如 Pay 出、觸發門檻），切換**當下即生效**、不隨表單送出。與 Segmented（互斥選項）、Checkbox（表單多選）語意不同。
+**用途**：表單多選或單一確認（如訂單多選、條款同意）。
 
-**實作層**：§0.3 第 1 層（原生 `<button role="switch">` ＋ token，不用 Material slide-toggle）。
+**實作層**：§0.3 第 2 層（Angular Material `mat-checkbox`，`color="primary"`）。
+
+**HTML**
+
+```html
+<!-- 條款同意 -->
+<mat-checkbox color="primary" [(ngModel)]="agreedTerms">我已閱讀並同意相關約定</mat-checkbox>
+<!-- 列表多選 -->
+<mat-checkbox color="primary" [checked]="isSelected(id)" (change)="toggle(id)"></mat-checkbox>
+```
+
+**外觀**
+
+| 狀態 | 部位（Material 原名） | 旋鈕（程式碼） | 顏色來源（設計系統） | Hex |
+|---|---|---|---|---|
+| `checked` | `background`（底） | `color="primary"` | §1.1 品牌色 primary | `#F04D29` |
+| `checked` | `checkmark`（勾） | `color="primary"`（對比色） | primary 對比色（白） | `#FFFFFF` |
+| `indeterminate`（半選/未定） | `mixedmark`（橫線） | `color="primary"` | §1.1 品牌色 primary | `#F04D29` |
+| hover | `ripple`（光暈） | `color="primary"`（低透明） | §1.1 品牌色 primary | `#F04D29`（淡） |
+| 未選 | `frame`（外框） | —（無 `color=`） | Material 中性基色，非設計系統 | 中性灰（預設） |
+| `disabled` | 整體 | — | Material 預設 | 降透明 |
+
+> **改色**：有 `color=` 的部位改主題 `primary` 調色盤（全站生效）；`—` 的部位不吃旋鈕，要上設計系統色只能覆寫內部 class（§0.3 護欄）。
+
+**行為**（radio 共用）：整個可點區（含 label）與鍵盤 Space 皆可切換、`cursor: pointer`；值隨表單送出。
+
+**維護**：長 label 換行用全域 `.agree-label`；密集列表多選可改用 icon 勾選（`bi-check-square`）。
+
+---
+
+### 3.5 Radio
+
+**用途**：一組互斥選項中單選（如 Pay 出方式「依金額／依比例」、門檻類型「市值守護／增值啟動」）。
+
+**實作層**：§0.3 第 2 層（Angular Material `mat-radio-button`，`color="primary"`；群組容器 `.choice-radio-group`）。
+
+**HTML**
+
+```html
+<mat-radio-group class="choice-radio-group" [(ngModel)]="payMode">
+  <mat-radio-button color="primary" value="amount">依金額</mat-radio-button>
+  <mat-radio-button color="primary" value="ratio">依比例</mat-radio-button>
+</mat-radio-group>
+```
+
+**外觀**
+
+| 狀態 | 部位（Material 原名） | 旋鈕（程式碼） | 顏色來源（設計系統） | Hex |
+|---|---|---|---|---|
+| `checked` | `outer-circle`（外圈） | `color="primary"` | §1.1 品牌色 primary | `#F04D29` |
+| `checked` | `inner-circle`（內圓點） | `color="primary"` | §1.1 品牌色 primary | `#F04D29` |
+| hover | `ripple`（光暈） | `color="primary"`（低透明） | §1.1 品牌色 primary | `#F04D29`（淡） |
+| 未選 | `outer-circle`（外圈） | —（無 `color=`） | Material 中性基色，非設計系統 | 中性灰（預設） |
+| `disabled` | 整體 | — | Material 預設 | 降透明 |
+
+> **改色**：有 `color=` 的部位改主題 `primary` 調色盤（全站生效）；`—` 的部位不吃旋鈕，要上設計系統色只能覆寫內部 class（§0.3 護欄）。
+
+**行為**：同 §3.4 Checkbox；惟選中後無法取消——點自己不會變回未選，只能改選同組其他顆。
+
+**維護**：群組容器用全域 `.choice-radio-group`（`flex` 換行、`gap 12px 24px`、`min-height 40px`）。
+
+---
+
+### 3.6 Switch（開關）
+
+**用途**：即時**啟用／停用**單一功能（如 Pay 出、觸發門檻），切換**當下即生效**、不隨表單送出。
+
+**實作層**：§0.3 第 1 層。原生 `<button role="switch">` ＋ token，不掛任何 Material 元件（不用 `mat-slide-toggle`）；但外觀與結構**照 Material v20（M3）switch 重建**——佈局、尺寸沿用其規格，只把顏色換成平台 token。
 
 **HTML**
 
@@ -451,18 +539,21 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 | 部位 | 規格 |
 |---|---|
 | 軌道 track | `52 × 32px`、圓角 `16px` 全圓、`2px` 邊框 |
-| thumb | `24px` 正圓，兩態同尺寸（照 v20 顯示 icon 版），僅平移不縮放 |
+| thumb | `24px` 正圓，兩態同尺寸、僅平移不縮放；off 靠左、on 滑至右（`translateX` 2→22px）|
 | state layer | `40px` 圓，hover／focus 於 thumb 周圍淡開 |
 | icon | off 橫線／on 手繪勾（`10 × 6px`、`2px`）|
 
-**狀態**
+**外觀**
 
-| 狀態 | Track | Thumb | Icon |
-|---|---|---|---|
-| 未選 off | `--color-neutral-100` 底、`--color-neutral-300` 邊 | `--color-neutral-500` 灰、靠左 | 橫線（`--color-neutral-0`）|
-| 選中 on | `--color-action-primary` 填滿 | `--color-neutral-0` 白、滑至右 | 手繪勾（`--color-action-primary`）|
-| Hover／Focus | — | thumb 周圍 state layer 淡圓（focus 即「焦點可見」）| — |
-| Disabled | 整體 `opacity: .5`、`cursor: not-allowed` | — | — |
+| 部位·屬性 | off（未選） | on（選中） |
+|---|---|---|
+| `track` 底 | `--color-neutral-100` `#F2F2F2` | `--color-action-primary` `#F04D29` |
+| `track` 邊 | `--color-neutral-300` `#B3B3B3` | `--color-action-primary` `#F04D29` |
+| `thumb` 底 | `--color-neutral-500` `#808080` | `--color-neutral-0` `#FFFFFF` |
+| `icon` | `icon--off` 橫線 `#FFFFFF` | `icon--on` 勾 `#F04D29` |
+
+- **hover／focus**：`thumb::before` state layer 淡圓（hover `.08`／focus `.12`，色同 thumb 底）；focus 即「焦點可見」替代樣式。
+- **disabled**：整體 `opacity: .5`、`cursor: not-allowed`。
 
 **行為**
 
@@ -477,9 +568,9 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 
 ---
 
-### 3.5 Segmented Control（Toggle 選取按鈕）
+### 3.7 Segmented Control（Toggle 選取按鈕）
 
-**用途**：在同一區塊內切換 2–3 個檢視／內容（如「設定／歷史」），屬檢視切換、非表單輸入。表單中選互斥值用 Radio（§3.9）；頁級／多內容導覽用 Tabs（§3.6）——**Tab＝頁級導覽，Segmented＝區塊內輕量檢視切換**。
+**用途**：在同一區塊內切換 2–3 個檢視／內容（如「設定／歷史」），屬檢視切換、非表單輸入。表單中選互斥值用 Radio（§3.5）；頁級／多內容導覽用 Tabs（§3.8）——**Tab＝頁級導覽，Segmented＝區塊內輕量檢視切換**。
 
 **實作層**：§0.3 第 2 層（Angular Material `mat-button-toggle-group` ＋ `.mode-toggle`；表單全寬用 `.mode-toggle-fill`）。
 
@@ -507,7 +598,7 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 
 ---
 
-### 3.6 Tabs（頁籤）
+### 3.8 Tabs（頁籤）
 
 > 本節套用前文〈元件實作選型原則〉通則於 tab：tab 的「行為」（導覽列的鍵盤操作、無障礙焦點、配路由）值得交給 Material，「純視覺切換」則用原生 button + token。據此 tab 分兩類，底層刻意不同。
 
@@ -519,7 +610,7 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 |---|---|---|---|
 | **頁面主導覽**（切換整頁區塊／配路由） | `mat-tab-nav-bar` + `mat-tab-link` | `.ds-tab-nav--page` | Material 幫你管 active 狀態、鍵盤導覽、無障礙焦點；且它內部 DOM 簡單（就是 `<a>`），需要覆寫的內部 class 少，升級風險可控。例：帳戶總覽 / 委託查詢 / 已實現損益 / 設定異動。 |
 | **內容切換**（同一份資料換顯示欄組） | 語意化 `<button role="tab">` + `*ngIf` 自控顯隱 | `.ds-content-tab` | 內容切換用 `*ngIf` 自己控就好，不需要 Material 的內容投影。**純 button 完全不碰 Material 內部，V15 升級零負擔**；也避免 `mat-tab-nav-panel` 包覆內容區造成表格 / 卡片 / footer / RWD 破版。例：基金搜尋的績效表現 / 最新淨值 / 年度報酬率 / 年度最大跌幅。 |
-| **同區塊互斥設定值（不是 tab）** | Radio（§3.9） | — | 外觀像橫向選項，但語意是「單選設定」不是「頁籤」。例：Pay 出方式「依金額 / 依比例」、門檻類型「市值守護 / 增值啟動」。用 Radio、不使用任何 tab class；區塊內檢視切換另見 Segmented §3.5。 |
+| **同區塊互斥設定值（不是 tab）** | Radio（§3.5） | — | 外觀像橫向選項，但語意是「單選設定」不是「頁籤」。例：Pay 出方式「依金額 / 依比例」、門檻類型「市值守護 / 增值啟動」。用 Radio、不使用任何 tab class；區塊內檢視切換另見 Segmented §3.7。 |
 
 #### 為什麼內容切換 tab 不用 `mat-tab-nav-bar`
 
@@ -618,7 +709,7 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 
 ---
 
-### 3.7 Input（輸入框）
+### 3.9 Input（輸入框）
 
 #### 結構與標題
 
@@ -740,7 +831,7 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 - **不得出現「（選填）」**；必填／選填由 Label 旁 `*` 區分。選填欄位若無格式提示，placeholder 可留空。
 - 欄位前後綴（幣別、百分比等）只在需求明確時加入，不預設補上。
 
-### 3.8 Upload 區域狀態（含已上傳檔案列表）
+### 3.10 Upload 區域狀態（含已上傳檔案列表）
 
 | Token | Hex | 用途 |
 |---|---|---|
@@ -756,28 +847,6 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 | `--color-input-file-remove-hover` | `#C23B1A` | 刪除按鈕 hover（Primary 600，示意危險）|
 | `--color-input-file-remove-hover-bg` | `#FFF0EC` | 刪除按鈕 hover 底色 |
 
-### 3.9 Radio
-
-| Token | Hex | 用途 |
-|---|---|---|
-| `--color-input-radio-border` | `#999999` | 未選取邊框 |
-| `--color-input-radio-checked` | `#F04D29` | 選取狀態邊框與填充色 |
-| `--color-input-radio-ripple` | `#FFF0EC` | Hover 圓形光暈背景 |
-
-- **選取狀態**：內部填入實心圓點。
-- **互動**（radio／checkbox 共用）：整個可點區（含 label）一律 `cursor: pointer`；hover 以 ripple 圓形光暈（外擴 `8px`、不擴及文字列）回饋、不改邊框色；Material v14 預設與本規則不一致時以本規則覆寫。
-
-### 3.10 Checkbox
-
-| Token | Hex | 用途 |
-|---|---|---|
-| `--color-input-checkbox-border` | `#999999` | 未選取邊框 |
-| `--color-input-checkbox-checked` | `#F04D29` | 選取狀態背景與勾選色 |
-| `--color-input-checkbox-ripple` | `#FFF0EC` | Hover 圓形光暈背景 |
-
-- **選取狀態**：背景填滿並顯示白色勾選符號。
-- **互動**：同 §3.9 Radio（可點區 `cursor: pointer`、hover ripple 圓形光暈）。
-
 ### 3.11 Inline Hint Panel
 
 短提示可使用 Angular Material v14 tooltip；但若說明內容超過一句、包含規則、換行或需要使用者閱讀，應使用下推式 inline hint panel。
@@ -790,12 +859,12 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 - 點擊 icon 展開 / 收合下方說明區塊。
 - 展開後會下推內容，不浮在畫面上方。
 - 內容可包含粗體、換行與多段文字。
-- 觸發 icon 為 §3.2 無框圖示鈕（glyph `info-circle`）；尺寸／色以 §3.2 為準，此處不重複定義。
+- 觸發 icon 為 §3.2.1 無框圖示鈕（glyph `info-circle`）；尺寸／色以 §3.2.1 為準，此處不重複定義。
 
 ```html
 <label class="form-label">
   說明標題
-  <button class="hint-icon" type="button" aria-expanded="false" aria-controls="hint-id">
+  <button class="ds-icon-button" type="button" aria-expanded="false" aria-controls="hint-id">
     <i class="bi bi-info-circle"></i>
   </button>
 </label>
@@ -805,7 +874,7 @@ Angular Material 只用於複雜行為元件，非所有 UI 的預設基底（�
 ```
 
 ```css
-/* .hint-icon 視覺見 §3.2 無框圖示鈕「inline 說明 icon 例外」，此處不重複定義 */
+/* 觸發鈕＝無框圖示鈕 .ds-icon-button（§3.2.1），此處不重複定義 */
 
 .hint-panel {
   max-height: 0;
