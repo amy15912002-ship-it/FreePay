@@ -175,14 +175,12 @@ $freepay-theme: mat.define-light-theme((
   --color-bg-subtle: var(--color-neutral-50);
   --color-bg-muted: var(--color-neutral-100);
   --color-bg-brand-subtle: var(--color-brand-primary-50);
-  --color-bg-info-subtle: var(--color-brand-tertiary-50);
   --color-text-heading: var(--color-neutral-900);
   --color-text-primary: var(--color-neutral-900);
   --color-text-secondary: var(--color-neutral-600);
   --color-text-on-brand: var(--color-neutral-0);
   --color-border-default: var(--color-neutral-150);
   --color-border-strong: var(--color-neutral-200);
-  --color-border-info: var(--color-brand-tertiary-100);
   --color-action-primary: var(--color-brand-primary-400);
   --color-input-bg: var(--color-neutral-0);
   --color-input-bg-disabled: var(--color-neutral-100);
@@ -201,12 +199,6 @@ $freepay-theme: mat.define-light-theme((
   --color-input-helper-error: var(--color-brand-primary-600);
   --color-input-shadow-focus: 0 0 0 3px var(--color-brand-tertiary-50);
   --color-input-shadow-error: 0 0 0 3px var(--color-brand-primary-50);
-  --color-input-radio-border: var(--color-neutral-400);
-  --color-input-radio-checked: var(--color-brand-primary-400);
-  --color-input-radio-ripple: var(--color-brand-primary-50);
-  --color-input-checkbox-border: var(--color-neutral-400);
-  --color-input-checkbox-checked: var(--color-brand-primary-400);
-  --color-input-checkbox-ripple: var(--color-brand-primary-50);
   --shadow-sm: 0 2px 12px rgba(0, 0, 0, 0.08);
   --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.18);
@@ -299,7 +291,7 @@ textarea {
   background-color: var(--color-bg-brand-subtle);
 }
 
-/* Outline·中性：透明底＋灰 1px 描邊與灰字（不含 mat-primary；排除 threshold-option 等選取按鈕） */
+/* Outline·中性：透明底＋灰 1px 描邊與灰字（不含 mat-primary；排除 chip 等選取元件） */
 .ds-action-button.mat-stroked-button:not(.mat-primary) {
   border-width: 1px;
   border-color: var(--color-border-strong);
@@ -920,46 +912,16 @@ table { font-variant-numeric: tabular-nums; }
 .val-up   { color: var(--color-price-up); }
 .val-down { color: var(--color-price-down); }
 
-// Platform tab nav based on Angular Material v14 mat-tab-nav-bar.
-// Use .ds-tab-nav for page-level tab navigation across products.
-.ds-tab-nav {
-  display: flex;
-  align-items: stretch;
-  justify-content: space-between;
-  gap: 16px;
-  border-bottom: 1px solid var(--color-border-default);
-}
-
-.ds-tab-nav .mat-tab-nav-bar {
-  flex: 1;
-  min-width: 0;
-  border-bottom: none;
-}
-
-.ds-tab-nav--page .mat-tab-link {
-  height: 64px;
-  min-width: 0;
-  padding: 0 32px;
-  font-family: var(--font-primary);
-  font-size: 20px;
-  opacity: 1;
-}
-
-.ds-tab-nav .mat-tab-link.mat-tab-label-active {
-  color: var(--color-action-primary);
-  font-weight: 700;
-}
-
-// 內容切換 tab：語意化 button tablist，不依賴 Material，跨版本零負擔。
-// 標準見 DesignSystem.md §3.8 Tabs。fund-select 解凍後 fs-tab 收斂至此（僅改 class 名）。
-.ds-content-tab {
+// Tabs（頁籤）：原生底線頁籤，零 Material 依賴。標準見 DesignSystem.md §3.8。
+// .ds-tab 基底＝小尺寸（內容切換）；.ds-tab--page＝大尺寸（頁級導覽）。外觀參考 Material Design，非 mat-tab 重建。
+.ds-tab {
   display: flex;
   align-items: flex-end;
   gap: 24px;
   border-bottom: 1px solid var(--color-border-default);
 }
 
-.ds-content-tab__item {
+.ds-tab__item {
   padding: 10px 4px;
   white-space: nowrap;
   background: none;
@@ -972,22 +934,27 @@ table { font-variant-numeric: tabular-nums; }
   transition: color .12s, border-color .12s;
 }
 
-.ds-content-tab__item:hover { color: var(--color-text-primary); }
+.ds-tab__item:hover { color: var(--color-text-primary); }
 
-.ds-content-tab__item.is-active {
+.ds-tab__item.is-active {
   color: var(--color-action-primary);
   border-bottom-color: var(--color-action-primary);
   font-weight: 700;
 }
 
-@media (max-width: 767px) {
-  .ds-tab-nav--page .mat-tab-link {
-    height: 48px;
-    padding: 0 14px;
-    font-size: 14px;
-  }
+// 大尺寸（頁級導覽）：間距靠 item 內距，字級與高度放大、內容置中
+.ds-tab--page { gap: 0; }
+.ds-tab--page .ds-tab__item {
+  display: inline-flex;
+  align-items: center;
+  height: 64px;
+  padding: 0 32px;
+  font-size: 20px;
+}
 
-  .ds-content-tab { overflow-x: auto; }
+@media (max-width: 767px) {
+  .ds-tab { overflow-x: auto; }
+  .ds-tab--page .ds-tab__item { height: 48px; padding: 0 14px; font-size: 14px; }
 }
 
 // ── Switch（開關）─────────────────────────────────────
@@ -1149,7 +1116,14 @@ table { font-variant-numeric: tabular-nums; }
   gap: 8px;
 }
 
-.filter-chips .chip {
+.choice-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.chip {
   display: inline-flex;
   align-items: center;
   min-height: 32px;
@@ -1167,11 +1141,11 @@ table { font-variant-numeric: tabular-nums; }
 }
 
 // 高對比原則（長輩友善）：預設已深字 #333333，hover 只收緊邊框
-.filter-chips .chip:hover {
+.chip:hover {
   border-color: var(--color-neutral-300);
 }
 
-.filter-chips .chip.is-selected {
+.chip.is-selected {
   background: var(--color-bg-brand-subtle);
   border-color: var(--color-action-primary);
   color: var(--color-action-primary);
@@ -1179,7 +1153,7 @@ table { font-variant-numeric: tabular-nums; }
 }
 
 // 選中態 hover：品牌身份走品牌軸，底色再深一階（不套中性 Hover 列）
-.filter-chips .chip.is-selected:hover {
+.chip.is-selected:hover {
   background: var(--color-brand-primary-100);
 }
 

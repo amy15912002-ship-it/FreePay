@@ -420,8 +420,6 @@
         <div
           *ngIf="thresholdEnabled"
           class="threshold-body"
-          [class.is-protect]="thresholdMode === 'protect'"
-          [class.is-unlock]="thresholdMode === 'unlock'"
         >
           <mat-radio-group
             class="choice-radio-group threshold-mode-radio-group"
@@ -440,25 +438,23 @@
                   {{ thresholdPreviewLead }} <span class="threshold-preview-emphasis">{{ thresholdValue }}%</span> {{ thresholdPreviewSuffix }}
                 </div>
               <div class="threshold-option-area">
-              <div class="threshold-option-grid" *ngIf="thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
+              <div class="choice-chips" *ngIf="thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
                 <button
                   *ngFor="let value of protectThresholdOptions"
-                  mat-stroked-button
-                  class="threshold-option"
+                  class="chip"
                   type="button"
                   role="radio"
-                  [class.is-active]="!thresholdCustomActive && thresholdValue === value"
+                  [class.is-selected]="!thresholdCustomActive && thresholdValue === value"
                   [attr.aria-checked]="!thresholdCustomActive && thresholdValue === value"
                   (click)="setThresholdValue(value)"
                 >
                   {{ value }}%
                 </button>
                 <button
-                  mat-stroked-button
-                  class="threshold-option"
+                  class="chip"
                   type="button"
                   role="radio"
-                  [class.is-active]="thresholdCustomActive"
+                  [class.is-selected]="thresholdCustomActive"
                   [attr.aria-checked]="thresholdCustomActive"
                   (click)="selectCustomThreshold()"
                 >
@@ -466,25 +462,23 @@
                 </button>
               </div>
 
-              <div class="threshold-option-grid" *ngIf="thresholdMode === 'unlock'" role="radiogroup" aria-label="增值啟動門檻">
+              <div class="choice-chips" *ngIf="thresholdMode === 'unlock'" role="radiogroup" aria-label="增值啟動門檻">
                 <button
                   *ngFor="let value of unlockPresetThresholdOptions"
-                  mat-stroked-button
-                  class="threshold-option"
+                  class="chip"
                   type="button"
                   role="radio"
-                  [class.is-active]="!thresholdCustomActive && thresholdValue === value"
+                  [class.is-selected]="!thresholdCustomActive && thresholdValue === value"
                   [attr.aria-checked]="!thresholdCustomActive && thresholdValue === value"
                   (click)="setThresholdValue(value)"
                 >
                   {{ value }}%
                 </button>
                 <button
-                  mat-stroked-button
-                  class="threshold-option"
+                  class="chip"
                   type="button"
                   role="radio"
-                  [class.is-active]="thresholdCustomActive"
+                  [class.is-selected]="thresholdCustomActive"
                   [attr.aria-checked]="thresholdCustomActive"
                   (click)="selectCustomThreshold()"
                 >

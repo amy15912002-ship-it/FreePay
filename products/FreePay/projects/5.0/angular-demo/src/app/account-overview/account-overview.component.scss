@@ -17,7 +17,7 @@
   gap: 40px;
 }
 
-// ── Tab nav bar ─────────────────────────────────────────────
+// ── Tab 內容面板 ─────────────────────────────────────────────
 
 .ov-tab-panel {
   display: flex;
@@ -1944,26 +1944,6 @@
   display: flex;
   flex-direction: column;
   gap: 16px;
-
-  &.is-protect {
-    --th-border: var(--color-brand-tertiary-300);
-    --th-accent: var(--color-brand-tertiary-400);
-    --th-tint: var(--color-bg-info-subtle);
-  }
-
-  &.is-unlock {
-    --th-border: var(--color-action-primary);
-    --th-accent: var(--color-action-primary);
-    --th-tint: var(--color-bg-brand-subtle);
-  }
-
-  .threshold-option.is-active,
-  .threshold-option.is-active:hover,
-  .threshold-option.is-active:focus-visible {
-    border-color: var(--th-border);
-    background: var(--th-tint);
-    color: var(--th-accent);
-  }
 }
 
 .threshold-selector-panel,
@@ -1980,7 +1960,7 @@
   padding: 16px 18px;
   border: 0;
   border-radius: 8px;
-  background: linear-gradient(180deg, var(--color-bg-base) 0%, var(--th-tint) 100%);
+  background: var(--color-bg-base);
 }
 
 .threshold-preview-label {
@@ -1991,36 +1971,7 @@
 }
 
 .threshold-preview-emphasis {
-  color: var(--th-accent);
-}
-
-.threshold-option-grid {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-start;
-  gap: 8px;
-}
-
-.threshold-option {
-  min-width: 86px;
-  height: 36px;
-  border-color: var(--color-border-strong);
-  background: var(--color-bg-base);
-  color: var(--color-neutral-800);
-  font-size: 14px;
-  font-weight: 500;
-}
-
-// 高對比原則（長輩友善）：預設已深字 #333333，hover/focus 只收緊邊框
-.threshold-option:hover,
-.threshold-option:focus-visible {
-  border-color: var(--color-neutral-300);
-  background: var(--color-bg-base);
-  outline: none;
-}
-
-.threshold-option.is-active {
-  font-weight: 700;
+  color: var(--color-action-primary);
 }
 
 .threshold-custom-field {
@@ -2435,11 +2386,6 @@
 
   .threshold-preview {
     padding: 14px;
-  }
-
-  .threshold-option {
-    flex: 1 1 calc(50% - 8px);
-    min-width: 0;
   }
 
   .setting-edit-form,

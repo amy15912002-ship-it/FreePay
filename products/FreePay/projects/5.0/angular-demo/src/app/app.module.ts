@@ -7,11 +7,8 @@ import { MatCheckboxModule } from '@angular/material/checkbox';
 import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatMenuModule } from '@angular/material/menu';
 import { MatRadioModule } from '@angular/material/radio';
 import { MatStepperModule } from '@angular/material/stepper';
-import { MatTabsModule } from '@angular/material/tabs';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -44,12 +41,9 @@ import { ThousandsDirective } from './thousands.directive';
     MatCheckboxModule,
     MatDatepickerModule,
     MatFormFieldModule,
-    MatInputModule,
-    MatMenuModule,
     MatNativeDateModule,
     MatRadioModule,
-    MatStepperModule,
-    MatTabsModule
+    MatStepperModule
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'zh-TW' }

@@ -183,11 +183,11 @@
   <!-- 績效 tabs -->
   <div class="fs-tabs-row">
     <div class="fs-tabs" role="tablist">
-      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='perf'" (click)="setTab('perf')">績效表現</button>
-      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='nav'" (click)="setTab('nav')">最新淨值</button>
-      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='rating'" (click)="setTab('rating')">基金評等</button>
-      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='roi'" (click)="setTab('roi')">年度報酬率</button>
-      <button class="fs-tab" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
+      <button class="ds-tab__item" type="button" role="tab" [class.is-active]="activeTab==='perf'" (click)="setTab('perf')">績效表現</button>
+      <button class="ds-tab__item" type="button" role="tab" [class.is-active]="activeTab==='nav'" (click)="setTab('nav')">最新淨值</button>
+      <button class="ds-tab__item" type="button" role="tab" [class.is-active]="activeTab==='rating'" (click)="setTab('rating')">基金評等</button>
+      <button class="ds-tab__item" type="button" role="tab" [class.is-active]="activeTab==='roi'" (click)="setTab('roi')">年度報酬率</button>
+      <button class="ds-tab__item" type="button" role="tab" [class.is-active]="activeTab==='drop'" (click)="setTab('drop')">年度最大跌幅</button>
     </div>
     <div class="fs-view-toggle">
       <button class="circle-btn circle-btn--brand-outline ds-sort-trigger" type="button" (click)="openSortPanel()" aria-label="開啟排序">

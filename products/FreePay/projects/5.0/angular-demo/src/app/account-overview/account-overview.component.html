@@ -1,15 +1,13 @@
 <div class="ov-shell">
 
-  <div class="ds-tab-nav ds-tab-nav--page">
-    <nav mat-tab-nav-bar [tabPanel]="tabPanel" color="primary">
-      <a mat-tab-link [active]="activeTab === 'overview'" (click)="activeTab = 'overview'">帳戶總覽</a>
-      <a mat-tab-link [active]="activeTab === 'order'"   (click)="activeTab = 'order'">委託查詢/取消</a>
-      <a mat-tab-link [active]="activeTab === 'profit'"  (click)="activeTab = 'profit'">已實現損益</a>
-      <a mat-tab-link [active]="activeTab === 'change'"  (click)="activeTab = 'change'">設定異動</a>
-    </nav>
+  <div class="ds-tab ds-tab--page" role="tablist">
+    <button type="button" role="tab" class="ds-tab__item" [class.is-active]="activeTab === 'overview'" (click)="activeTab = 'overview'">帳戶總覽</button>
+    <button type="button" role="tab" class="ds-tab__item" [class.is-active]="activeTab === 'order'" (click)="activeTab = 'order'">委託查詢/取消</button>
+    <button type="button" role="tab" class="ds-tab__item" [class.is-active]="activeTab === 'profit'" (click)="activeTab = 'profit'">已實現損益</button>
+    <button type="button" role="tab" class="ds-tab__item" [class.is-active]="activeTab === 'change'" (click)="activeTab = 'change'">設定異動</button>
   </div>
 
-  <mat-tab-nav-panel #tabPanel class="ov-tab-panel">
+  <div class="ov-tab-panel">
 
     <ng-container *ngIf="activeTab === 'overview'">
 
@@ -825,7 +823,7 @@
                         <span>每月按設定基準日正常執行 Pay 出，不設觸發條件。</span>
                       </div>
 
-                      <div *ngIf="draft.thresholdMode !== 'none'" class="threshold-body" [class.is-protect]="draft.thresholdMode === 'protect'" [class.is-unlock]="draft.thresholdMode === 'unlock'">
+                      <div *ngIf="draft.thresholdMode !== 'none'" class="threshold-body">
                         <mat-radio-group class="choice-radio-group threshold-mode-radio-group" [(ngModel)]="draft.thresholdMode" [ngModelOptions]="{ standalone: true }" (ngModelChange)="setDraftThresholdMode(draft, $event)">
                         <mat-radio-button color="primary" value="protect">市值守護</mat-radio-button>
                         <mat-radio-button color="primary" value="unlock">增值啟動</mat-radio-button>
@@ -839,31 +837,29 @@
                               {{ draft.thresholdMode === 'protect' ? '時，暫停 Pay 出' : '時，開始 Pay 出' }}
                             </div>
                             <div class="threshold-option-area">
-                              <div class="threshold-option-grid" *ngIf="draft.thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
+                              <div class="choice-chips" *ngIf="draft.thresholdMode === 'protect'" role="radiogroup" aria-label="市值守護門檻">
                                 <button
                                   *ngFor="let value of protectThresholdOptions"
-                                  mat-stroked-button
-                                  class="threshold-option"
+                                  class="chip"
                                   type="button"
-                                  [class.is-active]="!draftThresholdCustomActive(draft) && draft.thresholdValue === value"
+                                  [class.is-selected]="!draftThresholdCustomActive(draft) && draft.thresholdValue === value"
                                   (click)="setDraftThresholdValue(draft, value)"
                                 >
                                   {{ value }}%
                                 </button>
-                                <button mat-stroked-button class="threshold-option" type="button" [class.is-active]="draftThresholdCustomActive(draft)" (click)="selectDraftCustomThreshold(draft)">自訂</button>
+                                <button class="chip" type="button" [class.is-selected]="draftThresholdCustomActive(draft)" (click)="selectDraftCustomThreshold(draft)">自訂</button>
                               </div>
-                              <div class="threshold-option-grid" *ngIf="draft.thresholdMode === 'unlock'" role="radiogroup" aria-label="增值啟動門檻">
+                              <div class="choice-chips" *ngIf="draft.thresholdMode === 'unlock'" role="radiogroup" aria-label="增值啟動門檻">
                                 <button
                                   *ngFor="let value of unlockThresholdOptions"
-                                  mat-stroked-button
-                                  class="threshold-option"
+                                  class="chip"
                                   type="button"
-                                  [class.is-active]="!draftThresholdCustomActive(draft) && draft.thresholdValue === value"
+                                  [class.is-selected]="!draftThresholdCustomActive(draft) && draft.thresholdValue === value"
                                   (click)="setDraftThresholdValue(draft, value)"
                                 >
                                   {{ value }}%
                                 </button>
-                                <button mat-stroked-button class="threshold-option" type="button" [class.is-active]="draftThresholdCustomActive(draft)" (click)="selectDraftCustomThreshold(draft)">自訂</button>
+                                <button class="chip" type="button" [class.is-selected]="draftThresholdCustomActive(draft)" (click)="selectDraftCustomThreshold(draft)">自訂</button>
                               </div>
                               <div class="fp-field threshold-custom-field" *ngIf="draftThresholdCustomActive(draft)" [class.is-error]="settingThresholdError(draft)">
                                 <label class="fp-field-label" [attr.for]="'setting-threshold-' + draft.fpNo">{{ draft.thresholdMode === 'protect' ? '市值守護門檻' : '增值啟動門檻' }}</label>
@@ -1020,7 +1016,7 @@
       </div>
     </ng-container>
 
-  </mat-tab-nav-panel>
+  </div>
 </div>
 
 <div class="detail-overlay" *ngIf="detailFpNo" (click)="closeDetail()">
