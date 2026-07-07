@@ -332,7 +332,7 @@ Material 元件的顏色由主題的三個**旋鈕**（`primary`／`accent`／`w
 | MD | `44px` | `12px 24px` | `14px / 500` | `88px` | 標準（預設，觸控友善）|
 | LG | `56px` | `16px 48px` | `16px / 500` | `160px` | 頁面主 CTA、hero |
 
-**狀態**（變體 × 狀態；`—` ＝ 無此狀態；HEX ↔ token 見 §1）
+**外觀**（變體 × 狀態；`—` ＝ 無此狀態；token 對照見表下）
 
 | 層級 | 變體 | 用途 | Default | Hover | Pressed | Disabled |
 |---|---|---|---|---|---|---|
@@ -341,6 +341,8 @@ Material 元件的顏色由主題的三個**旋鈕**（`primary`／`accent`／`w
 | **次要** | Outline 描邊·品牌 | 品牌強調：淺底「立即申購」 | 透明、邊 `1px #F04D29`、字 `#F04D29` | bg `#FFF0EC` | — | 邊 `#E6E6E6`、字 `#CCCCCC` |
 | **次要** | Outline 描邊·白 | 深底／品牌底上 | 透明、邊 `1px #FFFFFF`、字 `#FFFFFF` | 疊白 `10%`（半透）| — | 邊 `#E6E6E6`、字 `#CCCCCC` |
 | **最低** | Text 文字 | 純文字操作：清除、每頁筆數、頁首登出 | 透明、無框、字 `#333333` | 字加深至 `#1A1A1A`（深底則 `#FFFFFF`）| — | 字 `#CCCCCC` |
+
+> **token 對照**：`#F04D29` `--color-action-primary`｜`#C23B1A` `--color-brand-primary-600`（Filled hover）｜`#8C240D` `--color-brand-primary-800`（Filled pressed）｜`#FFF0EC` `--color-bg-brand-subtle`（品牌描邊 hover 底）｜`#D9D9D9` `--color-border-strong`｜`#B3B3B3` `--color-neutral-300`｜`#333333` `--color-neutral-800`｜`#1A1A1A` `--color-text-primary`｜`#E6E6E6` `--color-neutral-150`（disabled 底）｜`#CCCCCC` `--color-neutral-250`（disabled 字）｜`#FFFFFF` `--color-neutral-0`
 
 **排列與規則**
 
@@ -370,7 +372,7 @@ Material 元件的顏色由主題的三個**旋鈕**（`primary`／`accent`／`w
 
 **用途**：展開／收合、關閉、內聯小動作、說明觸發（ⓘ 點開 §3.11）。
 
-**外觀**：透明底、無邊，沿用 §3.1 Text 變體（字 `#333333`、hover `#1A1A1A`）。
+**外觀**：透明底、無邊，沿用 §3.1 Text 變體（字 `--color-neutral-800` `#333333`、hover `--color-text-primary` `#1A1A1A`）。
 
 **尺寸**：外框透明但保留點擊熱區——獨立操作預設 `32×32`（無障礙最小觸控）；密集容器（如格狀列）可縮至 `28×28`；貼齊輸入框時取輸入框高。glyph `16px`。
 
@@ -411,41 +413,52 @@ Material 元件的顏色由主題的三個**旋鈕**（`primary`／`accent`／`w
 
 ---
 
-### 3.3 Filter Chip（篩選 Pill）
+### 3.3 Chip（選項 Pill）
 
-**用途**：列表／搜尋／彈窗篩選，多選。
+**用途**：選項群——列表／搜尋／彈窗**篩選（多選）**，或一組互斥值的**選項（單選）**。同一顆膠囊，依容器語意切換多／單選。
 
-**實作層**：§0.3 第 1 層（原生 button ＋ `.filter-chips`）。
+**實作層**：§0.3 第 1 層（原生 button ＋ 全域 `.chip`）。
 
 **HTML**
 
 ```html
+<!-- Filter：多選，容器 role=group -->
 <div class="filter-chips" role="group" aria-label="基金類型篩選">
   <button type="button" class="chip" [class.is-selected]="isSel(c)"
           *ngFor="let c of categories" (click)="toggle(c)">{{ c }}</button>
+</div>
+
+<!-- Choice：單選，容器 role=radiogroup -->
+<div class="choice-chips" role="radiogroup" aria-label="門檻">
+  <button type="button" class="chip" [class.is-selected]="val === v"
+          *ngFor="let v of options" (click)="pick(v)">{{ v }}</button>
 </div>
 ```
 
 **尺寸**
 
-| Class | chip 高 | padding | 字級 | gap | 圓角 | 場景 |
-|---|---|---|---|---|---|---|
-| `.filter-chips`（基底）| `32px` | `6px 10px` | `14px` | `8px` | `999px` | 篩選列 |
-| `.filter-chips--sheet` | `30px` | `6px 7px` | `12px` | `6px` | `999px` | 手機 sheet（`12px` 限手機，見 §2.2）|
+| Class | chip 高 | padding | 字級 | 圓角 | 場景 |
+|---|---|---|---|---|---|
+| `.chip`（基底）| `32px` | `6px 10px` | `14px` | `999px` | 單顆通用 |
+| `.filter-chips--sheet .chip` | `30px` | `6px 7px` | `12px` | `999px` | 手機 sheet（`12px` 限手機，見 §2.2）|
 
+容器只管排版：`.filter-chips`（多選，`gap 8px`，切 `flex-wrap` 控收合／展開）、`.choice-chips`（單選，`gap 8px`，恆 `wrap`）。
 
 **外觀**（`—` ＝ 同 Default）
 
 |  | Default | Hover | Selected | Selected + Hover |
 |---|---|---|---|---|
 | 底 | `--color-neutral-0` `#FFFFFF` | — | `--color-bg-brand-subtle` `#FFF0EC` | `--color-brand-primary-100` `#FCCFBE` |
-| 邊 | `--color-neutral-200` `#D9D9D9` | `--color-neutral-300` `#B3B3B3` | `--color-action-primary` `#F04D29` | `--color-action-primary` `#F04D29` |
+| 邊 | `--color-border-strong` `#D9D9D9` | `--color-neutral-300` `#B3B3B3` | `--color-action-primary` `#F04D29` | `--color-action-primary` `#F04D29` |
 | 字 | `--color-neutral-800` `#333333` | — | `--color-action-primary` `#F04D29` | `--color-action-primary` `#F04D29` |
 | 字重 | `400` | — | `700` | `700` |
 
-**行為**：點擊切換選取（多選）。容器 `.filter-chips` 為 `flex`，切換 `flex-wrap` 控收合／展開——收合 `nowrap`（截斷）、展開 `wrap`（全顯）。
+**行為**
 
-**維護**：chip 尺寸／狀態只由 `.filter-chips` 及 modifier 控制，頁面不覆寫單顆 chip；需既有以外的尺寸，新增 modifier 補入本節。
+- **Filter（多選）**：點擊切換選取，可同時選多顆；容器 `flex-wrap` 控收合（`nowrap` 截斷）／展開（`wrap` 全顯）。
+- **Choice（單選）**：一組互斥值，選中後改選他顆、不可點自己取消（語意同 Radio §3.5，外形為填色膠囊）。
+
+**維護**：chip 尺寸／狀態只由全域 `.chip` 控制，頁面不覆寫單顆；容器（`.filter-chips`／`.choice-chips`）只管排版與選取語意。需既有以外尺寸，新增 modifier 補入本節。
 
 ---
 
@@ -570,142 +583,77 @@ Material 元件的顏色由主題的三個**旋鈕**（`primary`／`accent`／`w
 
 ### 3.7 Segmented Control（Toggle 選取按鈕）
 
-**用途**：在同一區塊內切換 2–3 個檢視／內容（如「設定／歷史」），屬檢視切換、非表單輸入。表單中選互斥值用 Radio（§3.5）；頁級／多內容導覽用 Tabs（§3.8）——**Tab＝頁級導覽，Segmented＝區塊內輕量檢視切換**。
+**用途**：同一區塊內切換 2–3 個檢視／內容（如「設定／歷史」）。  
 
-**實作層**：§0.3 第 2 層（Angular Material `mat-button-toggle-group` ＋ `.mode-toggle`；表單全寬用 `.mode-toggle-fill`）。
+**實作層**：§0.3 第 1 層。原生 `<button role="radio">` 群組 ＋ `.ds-segmented`，不掛 Material；外觀照 `mat-button-toggle` 接合式重建。
 
 **HTML**
 
 ```html
-<mat-button-toggle-group class="mode-toggle" [(ngModel)]="view" aria-label="檢視切換">
-  <mat-button-toggle value="settings">設定</mat-button-toggle>
-  <mat-button-toggle value="history">歷史</mat-button-toggle>
-</mat-button-toggle-group>
+<div class="ds-segmented" role="radiogroup" aria-label="檢視切換">
+  <button type="button" role="radio" class="ds-segmented__item"
+          [class.is-active]="view === 'settings'" (click)="view = 'settings'">設定</button>
+  <button type="button" role="radio" class="ds-segmented__item"
+          [class.is-active]="view === 'history'" (click)="view = 'history'">歷史</button>
+</div>
 ```
 
-**規格**
+**外觀**
 
 | 狀態 | Background | Text color | Border |
 |---|---|---|---|
-| Default | `--color-neutral-0`（白） | `--color-neutral-600`（`#666666`） | `1px --color-neutral-200`（`#D9D9D9`） |
+| Default | `--color-neutral-0`（白） | `--color-neutral-600`（`#666666`） | `1px --color-border-strong`（`#D9D9D9`） |
 | **Hover** | `--color-neutral-0`（白） | `--color-neutral-800`（`#333333`） | `1px --color-neutral-300`（`#B3B3B3`） |
 | Active | `--color-action-primary`（`#F04D29`） | `--color-neutral-0`（白） | `1px --color-action-primary`（`#F04D29`） |
 | Disabled | `--color-neutral-100` | `--color-neutral-400` | `1px --color-neutral-150` |
 
-- 尺寸：高度 SM（`36px`），font-size `14px`，border-radius `8px`；Active 字重 `700` 強化選中
-- **Hover 不得使用品牌色**：懸停只收緊邊框至 `--color-neutral-300`（#B3B3B3），品牌橘紅（`#F04D29`）保留給 Active（已選中）。此規則適用於所有「選取類」互動元素，例如分段切換、卡片型單選、幣別選擇、門檻選擇與篩選 pill。主要行動按鈕與導覽 tab 不受此限制。
-- 通常以 `flex: 1` 並列，寬度平均分配
+- 尺寸：高 `36px`、font-size `14px`、圓角 `8px`；Active 字重 `700`；通常 `flex: 1` 等分並列。
 
 ---
 
 ### 3.8 Tabs（頁籤）
 
-> 本節套用前文〈元件實作選型原則〉通則於 tab：tab 的「行為」（導覽列的鍵盤操作、無障礙焦點、配路由）值得交給 Material，「純視覺切換」則用原生 button + token。據此 tab 分兩類，底層刻意不同。
+**用途**：切換並列內容的頁籤。
 
-#### 先分語意：兩類 tab，底層刻意不同
+**實作層**：§0.3 第 1 層。原生 `<button role="tab">` ＋ `*ngIf` ＋ 全域 `.ds-tab`，零 Material 依賴；外觀為 Material Design 式底線頁籤（非 `mat-tab` 重建，同 §3.6 Switch 的原生化做法）。
 
-外觀相似不代表語意相同。tab 先分兩類，底層**故意採用不同實作**：
+**HTML**（大尺寸頁級導覽在容器加 `.ds-tab--page`）
 
-| 情境 | 底層 | 全域 class | 為什麼這樣選 |
-|---|---|---|---|
-| **頁面主導覽**（切換整頁區塊／配路由） | `mat-tab-nav-bar` + `mat-tab-link` | `.ds-tab-nav--page` | Material 幫你管 active 狀態、鍵盤導覽、無障礙焦點；且它內部 DOM 簡單（就是 `<a>`），需要覆寫的內部 class 少，升級風險可控。例：帳戶總覽 / 委託查詢 / 已實現損益 / 設定異動。 |
-| **內容切換**（同一份資料換顯示欄組） | 語意化 `<button role="tab">` + `*ngIf` 自控顯隱 | `.ds-content-tab` | 內容切換用 `*ngIf` 自己控就好，不需要 Material 的內容投影。**純 button 完全不碰 Material 內部，V15 升級零負擔**；也避免 `mat-tab-nav-panel` 包覆內容區造成表格 / 卡片 / footer / RWD 破版。例：基金搜尋的績效表現 / 最新淨值 / 年度報酬率 / 年度最大跌幅。 |
-| **同區塊互斥設定值（不是 tab）** | Radio（§3.5） | — | 外觀像橫向選項，但語意是「單選設定」不是「頁籤」。例：Pay 出方式「依金額 / 依比例」、門檻類型「市值守護 / 增值啟動」。用 Radio、不使用任何 tab class；區塊內檢視切換另見 Segmented §3.7。 |
+```html
+<div class="ds-tab" role="tablist">
+  <button class="ds-tab__item" type="button" role="tab"
+          [class.is-active]="tab==='perf'" (click)="setTab('perf')">績效表現</button>
+  <button class="ds-tab__item" type="button" role="tab"
+          [class.is-active]="tab==='nav'" (click)="setTab('nav')">最新淨值</button>
+</div>
+<div *ngIf="tab==='perf'"><!-- 內容用 *ngIf 自控 --></div>
+```
 
-#### 為什麼內容切換 tab 不用 `mat-tab-nav-bar`
+**外觀**
 
-這是刻意的工程取捨，理由有四：
-
-1. **語意錯置**：`mat-tab-nav-bar` 本質是「導覽列」（設計給路由用），用在同頁內容切換是把導航語意誤用。
-2. **破版風險**：它要搭 `mat-tab-nav-panel` 包覆內容，會改變內容區 DOM 流，可能讓既有表格、手機卡片、footer、sticky 區塊破版。
-3. **升級負債**：MDC 化（V15）後內部 class 整批改名，你越深度客制它的視覺，升級越痛。
-4. **根本不需要**：內容切換本來就用 `*ngIf` 控顯隱，用不到 Material 的面板機制——多引入一層 Material 只是徒增依賴。
-
-#### 樣式變體
-
-| Class | 用途 | 視覺規格 |
+| 部位 | Default | Active |
 |---|---|---|
-| `.ds-tab-nav` | 頁面導覽 tab 基底 | 負責 flex、底線、與 Material `mat-tab-nav-bar` 對齊。不可單獨代表尺寸。 |
-| `.ds-tab-nav--page` | 頁面主導覽 | link 高度 `64px`；文字 `20px`；手機高度 `48px`、文字 `14px`。 |
-| `.ds-content-tab` | 內容切換 tab（tablist 容器） | 語意化 button tablist，不依賴 Material。底線 `1px`；item 文字 `16px`、權重 `500`，active 權重 `700` + 品牌色底線。 |
+| 文字 | `--color-text-secondary` `#666666` | `--color-action-primary` `#F04D29` |
+| 字重 | `500` | `700` |
+| 底線 | `2px` 透明 | `2px` `--color-action-primary` `#F04D29` |
 
-> 兩類共用同一組視覺語言（底線高亮、active 字重 `700`、色 `secondary → primary`、`tabular` 字距），確保跨專案視覺一致；差異只在「底層元件」與「尺寸」。
+- Hover：文字轉 `--color-text-primary` `#1A1A1A`；容器底線 `1px` `--color-border-default` `#E6E6E6`。
 
-#### 標準 CSS（落地時照此，集中於設計系統層）
+**尺寸**（兩者外觀相同，只差大小與間距）
 
-```scss
-// 頁面主導覽：基於 Material mat-tab-nav-bar，僅覆寫必要外層
-.ds-tab-nav { display: flex; align-items: stretch; justify-content: space-between;
-  gap: 16px; border-bottom: 1px solid var(--color-border-default); }
-.ds-tab-nav .mat-tab-nav-bar { flex: 1; min-width: 0; border-bottom: none; }
-.ds-tab-nav--page .mat-tab-link { height: 64px; padding: 0 32px;
-  font-family: var(--font-primary); font-size: 20px; opacity: 1; }
-.ds-tab-nav .mat-tab-link.mat-tab-label-active { color: var(--color-action-primary); font-weight: 700; }
-@media (max-width: 767px) {
-  .ds-tab-nav--page .mat-tab-link { height: 48px; padding: 0 14px; font-size: 14px; }
-}
+| 尺寸 | Font | Height | Padding · Gap | 用途 |
+|---|---|---|---|---|
+| 小（`.ds-tab`）| `16px` | 隨內容 | item `10px 4px`、gap `24px` | 頁內內容切換 |
+| 大（`.ds-tab--page`）| `20px`（手機 `14px`）| `64px`（手機 `48px`）| `0 32px` | 頁級區域導覽 |
 
-// 內容切換：語意化 button tablist，零 Material 內部依賴
-.ds-content-tab { display: flex; align-items: flex-end; gap: 24px;
-  border-bottom: 1px solid var(--color-border-default); }
-.ds-content-tab__item {
-  padding: 10px 4px; white-space: nowrap;
-  background: none; border: none; border-bottom: 2px solid transparent;
-  color: var(--color-text-secondary); font-size: 16px; font-weight: 500;
-  cursor: pointer; transition: color .12s, border-color .12s;
-}
-.ds-content-tab__item:hover { color: var(--color-text-primary); }
-.ds-content-tab__item.is-active {
-  color: var(--color-action-primary);
-  border-bottom-color: var(--color-action-primary); font-weight: 700;
-}
-@media (max-width: 767px) { .ds-content-tab { overflow-x: auto; } }
-```
+**行為**
 
-#### 實作範例
+- 點擊或鍵盤切換；內容一律用 `*ngIf` 自控顯隱，不靠 Material 投影（避免包覆容器擠破表格／卡片）。
 
-頁面主導覽（Material nav-bar）：
+**維護**
 
-```html
-<div class="ds-tab-nav ds-tab-nav--page">
-  <nav mat-tab-nav-bar [tabPanel]="tabPanel" color="primary">
-    <a mat-tab-link [active]="activeTab === 'overview'" (click)="activeTab = 'overview'">帳戶總覽</a>
-    <a mat-tab-link [active]="activeTab === 'order'" (click)="activeTab = 'order'">委託查詢/取消</a>
-  </nav>
-</div>
-<mat-tab-nav-panel #tabPanel><!-- page content --></mat-tab-nav-panel>
-```
-
-內容切換（語意化 button tablist，內容用 `*ngIf` 自控）：
-
-```html
-<div class="ds-content-tab" role="tablist">
-  <button class="ds-content-tab__item" type="button" role="tab"
-          [class.is-active]="activeTab==='perf'" (click)="setTab('perf')">績效表現</button>
-  <button class="ds-content-tab__item" type="button" role="tab"
-          [class.is-active]="activeTab==='nav'" (click)="setTab('nav')">最新淨值</button>
-</div>
-<!-- 內容區直接用 *ngIf 切換，不需要 mat-tab-nav-panel -->
-<div *ngIf="activeTab==='perf'"><!-- 績效表格 --></div>
-<div *ngIf="activeTab==='nav'"><!-- 淨值表格 --></div>
-```
-
-#### 導入前檢查
-
-替換或新增 tab 前，先確認：
-
-1. 該區塊是「頁籤」還是「單選設定 / 篩選 / 狀態切換」？是後者就用 toggle / radio，不套任何 tab class。
-2. 是頁面導覽還是內容切換？兩者底層不同，先分對類別再選 class。
-3. 是否有右側工具列（列表 / 卡片切換、排序）？可在外層用頁面 layout flex 容納，tab 本體仍只用標準 class。
-4. 手機是否需要水平捲動？捲動區不應吃掉頁面主要寬度。
-
-#### 維護規則
-
-- Tab 樣式只允許集中在設計系統層（`styles.scss` 或未來共用 library），不得在單一 component 內重複覆寫 `.mat-tab-link` 或自刻一套同語意 tab。
-- 既有私有 tab（如 fund-select 的 `fs-tab`）收斂時，**只把 class 名對齊到 `.ds-content-tab`，不動 DOM 結構與 TS 邏輯**，風險極低。
-- 既有頁面導入需一頁一頁替換與驗收，不得一次跨多頁套用。
-- V15 / MDC 升級時，只需集中檢查 `.ds-tab-nav` 對 Material 內部 selector 的覆寫；`.ds-content-tab` 不依賴 Material，無需檢查。
-- **待清理**：`styles.scss` 早期預留的 `.ds-tab-nav--content`（基於 nav-bar 做內容 tab）為過時方向、目前無頁面使用，應移除並改用 `.ds-content-tab`。
+- 內容 tab 的 item 一律用全域 `.ds-tab__item`（fund-select 已由私有 `.fs-tab` 收斂）；tablist 旁若有共用底線的工具列（如排序鈕），tablist 容器維持頁面 layout、不強行改名整個容器。
+- Tab 樣式集中在 `styles.scss`，不在 component 內自刻同語意 tab。全原生、零 Material 依賴，無 MDC 升級顧慮。
 
 ---
 
