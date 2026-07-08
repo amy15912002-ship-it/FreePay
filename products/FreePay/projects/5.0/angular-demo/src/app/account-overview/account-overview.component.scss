@@ -9,9 +9,9 @@
 // ── Shell ──────────────────────────────────────────────
 
 .ov-shell {
-  width: min(1200px, 100%);
+  width: min(calc(1200px + var(--page-gutter) * 2), 100%);
   margin: 0 auto;
-  padding: 0;
+  padding: 0 var(--page-gutter);
   display: flex;
   flex-direction: column;
   gap: 40px;
@@ -785,10 +785,7 @@
   min-width: 200px;
 }
 
-.ov-cancel-actions {
-  display: flex;
-  gap: 8px;
-}
+// 排列由 .ds-button-row 提供（見 styles.scss §3.1）
 
 // ── Detail modal overlay ──────────────────────────────────────
 
@@ -926,7 +923,6 @@
 
 @media (max-width: 767px) {
   .ov-shell {
-    padding: 0 15px;
     gap: 24px;
   }
 
@@ -1470,77 +1466,6 @@
   }
 }
 
-.setting-flow-stepper {
-  width: min(800px, 100%);
-  margin: 0 auto 4px;
-  padding: 0;
-  background: transparent;
-
-  ::ng-deep .mat-horizontal-stepper-wrapper,
-  ::ng-deep .mat-stepper-horizontal {
-    background: transparent;
-  }
-
-  ::ng-deep .mat-horizontal-stepper-header {
-    overflow: visible;
-  }
-
-  ::ng-deep .mat-step-header:hover,
-  ::ng-deep .mat-step-header.cdk-keyboard-focused,
-  ::ng-deep .mat-step-header.cdk-program-focused {
-    background: transparent;
-  }
-
-  ::ng-deep .mat-horizontal-stepper-header:has(
-    .mat-step-icon:not(.mat-step-icon-selected):not(.mat-step-icon-state-edit):not(.mat-step-icon-state-done)
-  ) {
-    cursor: default;
-    pointer-events: none;
-  }
-
-  ::ng-deep .mat-step-icon {
-    width: 28px;
-    height: 28px;
-    margin: 0;
-    border: 2px solid var(--color-border-strong);
-    background: var(--color-bg-base);
-    color: var(--color-text-secondary);
-    font-size: 14px;
-    font-weight: 700;
-  }
-
-  ::ng-deep .mat-step-icon-selected,
-  ::ng-deep .mat-step-icon-state-edit,
-  ::ng-deep .mat-step-icon-state-done {
-    border-color: var(--color-brand-tertiary-400);
-    background: var(--color-brand-tertiary-400);
-    color: var(--color-text-on-brand);
-  }
-
-  ::ng-deep .mat-step-label {
-    color: var(--color-text-secondary);
-    font-family: var(--font-primary);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-  }
-
-  ::ng-deep .mat-step-label-selected {
-    color: var(--color-brand-tertiary-400);
-    font-weight: 700;
-  }
-
-  ::ng-deep .mat-stepper-horizontal-line,
-  ::ng-deep .mat-horizontal-stepper-header::before,
-  ::ng-deep .mat-horizontal-stepper-header::after {
-    top: 38px;
-    border-top-color: var(--color-border-strong);
-  }
-
-  ::ng-deep .mat-horizontal-content-container {
-    display: none;
-  }
-}
 
 .setting-edit-card {
   border: 1px solid var(--color-border-default);
@@ -1740,38 +1665,6 @@
   font-weight: 500;
 }
 
-.hint-panel {
-  max-height: 0;
-  overflow: hidden;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 0 12px;
-  background: var(--color-neutral-50);
-  border: 1px solid var(--color-neutral-150);
-  border-radius: 6px;
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.75;
-  opacity: 0;
-  transform: translateY(-4px);
-  transform-origin: top;
-  transition:
-    max-height .22s ease,
-    margin .22s ease,
-    padding .22s ease,
-    opacity .16s ease,
-    transform .22s ease;
-}
-
-.hint-panel.is-open {
-  max-height: 240px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  opacity: 1;
-  transform: translateY(0);
-}
-
 .pay-mode-panel {
   margin-top: 6px;
 }
@@ -1956,11 +1849,10 @@
 .threshold-preview {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px 18px;
+  gap: 12px;
+  padding: 0;
   border: 0;
-  border-radius: 8px;
-  background: var(--color-bg-base);
+  background: transparent;
 }
 
 .threshold-preview-label {
@@ -2232,15 +2124,7 @@
   }
 }
 
-.success-ring {
-  color: var(--color-brand-secondary-400);
-  font-size: 48px;
-  line-height: 1;
-}
-
 .done-actions {
-  display: flex;
-  gap: 10px;
   margin-top: 22px;
 }
 
@@ -2290,32 +2174,6 @@
 @media (max-width: 767px) {
   .setting-edit-toolbar {
     justify-content: flex-end;
-  }
-
-  .setting-flow-stepper {
-    width: 100%;
-    margin-bottom: 0;
-    padding: 4px 0 8px;
-
-    ::ng-deep .mat-horizontal-stepper-header {
-      padding: 0 4px;
-    }
-
-    ::ng-deep .mat-step-icon {
-      width: 24px;
-      height: 24px;
-      font-size: 12px;
-    }
-
-    ::ng-deep .mat-step-label {
-      font-size: 12px;
-    }
-
-    ::ng-deep .mat-stepper-horizontal-line,
-    ::ng-deep .mat-horizontal-stepper-header::before,
-    ::ng-deep .mat-horizontal-stepper-header::after {
-      top: 12px;
-    }
   }
 
   .setting-edit-head,
@@ -2465,25 +2323,12 @@
     width: 100%;
   }
 
-  .success-block h2 {
-    font-size: 22px;
-  }
-
   .order-box {
     padding: 12px 14px;
   }
 
   .sum-row {
     grid-template-columns: 96px minmax(0, 1fr);
-  }
-
-  .done-actions {
-    width: 100%;
-    justify-content: stretch;
-
-    button {
-      flex: 1;
-    }
   }
 }
 

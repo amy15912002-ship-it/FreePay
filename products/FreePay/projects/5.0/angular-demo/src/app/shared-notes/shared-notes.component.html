@@ -1,6 +1,10 @@
 <div class="notes-block" *ngIf="notes.length">
   <div class="notes-title">{{ title }}</div>
   <ul class="notes-list">
-    <li *ngFor="let note of notes">{{ note }}</li>
+    <li *ngFor="let note of notes">
+      <ng-container *ngFor="let part of noteParts(note); let last = last">
+        {{ part }}<a *ngIf="!last" [href]="faqUrl" target="_blank" rel="noopener noreferrer">{{ faqLabel }}</a>
+      </ng-container>
+    </li>
   </ul>
 </div>

@@ -7,9 +7,9 @@
 }
 
 .fs-shell {
-  width: min(1200px, 100%);
+  width: min(calc(1200px + var(--page-gutter) * 2), 100%);
   margin: 0 auto;
-  padding: 0;
+  padding: 0 var(--page-gutter);
   display: flex;
   flex-direction: column;
   gap: 20px;
@@ -568,7 +568,7 @@
 // ── RWD ─────────────────────────────────────────────────
 @media (max-width: 767px) {
   .fs-shell {
-    padding: 16px 15px 80px;
+    padding: 16px var(--page-gutter) 80px;
     gap: 14px;
   }
 

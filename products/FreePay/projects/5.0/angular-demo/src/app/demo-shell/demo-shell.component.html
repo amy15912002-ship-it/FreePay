@@ -1,30 +1,16 @@
-<div class="flow-page-title" *ngIf="activeStep !== 'done'">{{ flowPageTitle }}</div>
+<div class="flow-page-title">{{ flowPageTitle }}</div>
 
-<mat-horizontal-stepper
-  *ngIf="activeStep !== 'done'"
-  class="material-flow-stepper"
-  labelPosition="bottom"
-  [linear]="false"
-  [selectedIndex]="stepIndex"
-  (selectionChange)="onStepperSelectionChange($event.selectedIndex)"
->
-  <ng-template matStepperIcon="number" let-index="index">
-    <span *ngIf="index < lastStepIndex">{{ index + 1 }}</span>
-    <i *ngIf="index === lastStepIndex" class="bi bi-check"></i>
-  </ng-template>
-  <ng-template matStepperIcon="edit" let-index="index">
-    <i *ngIf="index < lastStepIndex" class="bi bi-check"></i>
-    <i *ngIf="index === lastStepIndex" class="bi bi-check"></i>
-  </ng-template>
-  <ng-template matStepperIcon="done" let-index="index">
-    <i *ngIf="index < lastStepIndex" class="bi bi-check"></i>
-    <i *ngIf="index === lastStepIndex" class="bi bi-check"></i>
-  </ng-template>
-
-  <mat-step *ngFor="let step of steps; let i = index; trackBy: trackStep" [completed]="i < stepIndex">
-    <ng-template matStepLabel>{{ step.label }}</ng-template>
-  </mat-step>
-</mat-horizontal-stepper>
+<div class="ds-stepper">
+  <div
+    class="ds-stepper__step"
+    *ngFor="let step of steps; let i = index; trackBy: trackStep"
+    [class.is-reached]="i <= stepIndex"
+    [class.is-current]="i === stepIndex"
+  >
+    <span class="ds-stepper__label">{{ step.label }}</span>
+    <span class="ds-stepper__marker">{{ i + 1 }}</span>
+  </div>
+</div>
 
 <div class="page-body">
   <main class="main-content">
@@ -283,11 +269,11 @@
               </button>
             </div>
           </div>
-          <div class="hint-panel" [class.is-open]="payModeHintOpen">
+          <fp-info-modal [open]="payModeHintOpen" title="Pay 出方式說明" (closed)="payModeHintOpen = false">
             <strong>依金額</strong>：每月固定提領設定之金額。<br>
             <strong>依比例</strong>：每月固定按最新市值之年化自由 Pay 率（上限 15%）提領。<br><br>
             提領單位數以贖回前一日的最新淨值估算，實際金額將依交易淨值而定，可能與設定金額有差異。
-          </div>
+          </fp-info-modal>
           <div class="pay-setting-panel pay-setting-panel--mode">
           <div class="form-group">
           <mat-radio-group
@@ -373,11 +359,11 @@
               </button>
             </div>
           </div>
-          <div class="hint-panel" [class.is-open]="dateHintOpen">
+          <fp-info-modal [open]="dateHintOpen" title="自由 Pay 基準日說明" (closed)="dateHintOpen = false">
             自由 Pay 基準日為贖回申請日，實際入帳時間視基金公司付款作業而定，一般而言平均約 7～10 個營業日入帳。<br><br>
             變更設定於營業日 14:00 前下單視為當日申請；14:00 以後下單則視為次一營業日申請。設定自由 Pay 基準日若距首次申購日不足 30 個日曆日時，將於屆滿 30 日後之最近一次自由 Pay 基準日開始執行。<br><br>
             若當月無設定之基準日（如 29、30、31 日），則遞延至下個營業日申請。
-          </div>
+          </fp-info-modal>
           <div class="pay-setting-panel pay-setting-panel--date date-section">
           <div class="date-grid">
             <button
@@ -559,16 +545,16 @@
                   class="ds-icon-button hint-toggle"
                   type="button"
                   aria-label="贖回單位數說明"
-                  (click)="payModeHintOpen = !payModeHintOpen"
+                  (click)="redeemUnitsHintOpen = true"
                 >
                   <i class="bi bi-info-circle"></i>
                 </button>
               </span>
               <strong>{{ formatUnits(redeemUnits) }}</strong>
             </div>
-            <div class="hint-panel" [class.is-open]="payModeHintOpen">
+            <fp-info-modal [open]="redeemUnitsHintOpen" title="贖回單位數說明" (closed)="redeemUnitsHintOpen = false">
               已扣除在途中之單位數 {{ formatUnits(redeemOrderingUnits) }}。
-            </div>
+            </fp-info-modal>
             <div class="sum-row"><span>參考淨值</span><strong>{{ formatNav(redeemNav) }} <small class="ref-meta">({{ redeemNavDate }})</small></strong></div>
             <div class="sum-row"><span>參考匯率</span><strong>{{ redeemExchangeRate === 1 ? '-' : formatNav(redeemExchangeRate) }}</strong></div>
             <div class="sum-row" *ngIf="redeemMode === 'partial' || redeemMode === 'batch'"><span>剩餘約當市值</span><strong>{{ formatNumber(postRedeemMarketValue, selectedContract?.currencyCode) }}</strong></div>
@@ -688,8 +674,6 @@
     <!-- s-done：完成 -->
     <section class="screen" *ngIf="activeStep === 'done'">
       <section class="success-block">
-        <div class="success-ring"><i class="bi bi-check-circle-fill"></i></div>
-        <h2>委託已成功送出</h2>
         <div class="order-box">
           <div class="sum-row"><span>委託時間</span><strong>2026/05/12 14:30</strong></div>
           <div class="sum-row"><span>基金</span><strong><span class="fund-code">{{ scenario?.fundId }}</span>{{ scenario?.fundName }}</strong></div>
@@ -703,10 +687,10 @@
           <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode"><span>{{ isModifyMode ? '自由 Pay 基準日' : '首次基準生效日' }}</span><strong>{{ isModifyMode ? ('每月 ' + form.controls.day.value + ' 日') : scenario?.firstRdmDate }}</strong></div>
           <div class="sum-row"><span>{{ isRedeemMode ? '收款帳號' : '扣款帳號' }}</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
         </div>
-        <div class="done-actions">
+        <div class="done-actions ds-button-row">
           <button class="ds-action-button" mat-stroked-button type="button" (click)="queryTrade()">委託查詢</button>
-          <button class="ds-action-button" *ngIf="!isRedeemMode" mat-raised-button color="primary" type="button" (click)="reset()">繼續申購</button>
-          <button class="ds-action-button" *ngIf="isRedeemMode" mat-raised-button color="primary" type="button" (click)="goOverview()">帳戶總覽</button>
+          <button class="ds-action-button" *ngIf="!isRedeemMode" mat-flat-button color="primary" type="button" (click)="reset()">繼續申購</button>
+          <button class="ds-action-button" *ngIf="isRedeemMode" mat-flat-button color="primary" type="button" (click)="goOverview()">帳戶總覽</button>
         </div>
         <fp-notes [notes]="doneNotes"></fp-notes>
       </section>
@@ -715,21 +699,14 @@
 </div>
 
 <div class="action-bar" *ngIf="activeStep !== 'done'">
-  <div class="action-inner">
+  <div class="action-inner ds-button-row">
     <button class="ds-action-button" mat-stroked-button type="button" (click)="previous()">上一步</button>
-    <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="actionDisabled" (click)="next()">
+    <button class="ds-action-button" mat-flat-button color="primary" type="button" [disabled]="actionDisabled" (click)="next()">
       {{ primaryActionLabel }}
     </button>
   </div>
 </div>
 
-<div class="low-pay-notice-overlay" *ngIf="lowPayNoticeOpen" (click)="closeLowPayNotice()">
-  <section class="low-pay-notice-dialog" role="dialog" aria-modal="true" aria-labelledby="low-pay-notice-title" (click)="$event.stopPropagation()">
-    <button class="low-pay-notice-close" type="button" aria-label="關閉提醒" (click)="closeLowPayNotice()">
-      <i class="bi bi-x-lg"></i>
-    </button>
-    <h2 id="low-pay-notice-title">提醒</h2>
-    <p>每次自由 Pay 執行匯出款項時將被扣匯費 30 元（非集保簽約銀行），故自由 Pay 金額設定低於 30 元將累積在集保，累積至 30 元以上再一併匯出。</p>
-    <button class="low-pay-notice-primary" type="button" (click)="closeLowPayNotice()">我知道了</button>
-  </section>
-</div>
+<fp-info-modal [open]="lowPayNoticeOpen" title="提醒" (closed)="closeLowPayNotice()">
+  每次自由 Pay 執行匯出款項時將被扣匯費 30 元（非集保簽約銀行），故自由 Pay 金額設定低於 30 元將累積在集保，累積至 30 元以上再一併匯出。
+</fp-info-modal>

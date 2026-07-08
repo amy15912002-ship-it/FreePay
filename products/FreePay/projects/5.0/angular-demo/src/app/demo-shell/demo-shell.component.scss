@@ -7,9 +7,9 @@
 }
 
 .flow-page-title {
-  width: min(800px, 100%);
-  margin: 0 auto 14px;
-  padding: 4px 0 0;
+  width: min(calc(800px + var(--page-gutter) * 2), 100%);
+  margin: 0 auto 24px;
+  padding: 4px var(--page-gutter) 0;
   color: var(--color-text-heading);
   font-size: 20px;
   font-weight: 700;
@@ -17,86 +17,12 @@
   text-align: center;
 }
 
-.material-flow-stepper {
-  width: min(800px, 100%);
-  margin: 0 auto;
-  padding: 0 0 18px;
-  background: transparent;
 
-  ::ng-deep .mat-horizontal-stepper-wrapper,
-  ::ng-deep .mat-stepper-horizontal {
-    background: transparent;
-  }
-
-  ::ng-deep .mat-horizontal-stepper-header {
-    overflow: visible;
-  }
-
-  ::ng-deep .mat-step-header:hover,
-  ::ng-deep .mat-step-header.cdk-keyboard-focused,
-  ::ng-deep .mat-step-header.cdk-program-focused {
-    background: transparent;
-  }
-
-  // 未到達的步驟不可點擊：icon 沒有 selected / edit / done 任何一個狀態
-  ::ng-deep .mat-horizontal-stepper-header:has(
-    .mat-step-icon:not(.mat-step-icon-selected):not(.mat-step-icon-state-edit):not(.mat-step-icon-state-done)
-  ) {
-    cursor: default;
-    pointer-events: none;
-  }
-
-  ::ng-deep .mat-step-icon {
-    width: 28px;
-    height: 28px;
-    margin: 0;
-    border: 2px solid var(--color-border-strong);
-    background: var(--color-bg-base);
-    color: var(--color-text-secondary);
-    font-size: 14px;
-    font-weight: 700;
-  }
-
-  ::ng-deep .mat-step-icon-selected,
-  ::ng-deep .mat-step-icon-state-edit,
-  ::ng-deep .mat-step-icon-state-done {
-    border-color: var(--color-brand-tertiary-400);
-    background: var(--color-brand-tertiary-400);
-    color: var(--color-text-on-brand);
-  }
-
-  ::ng-deep .mat-step-label {
-    color: var(--color-text-secondary);
-    font-family: var(--font-primary);
-    font-size: 14px;
-    font-weight: 500;
-    line-height: 1.4;
-  }
-
-  ::ng-deep .mat-step-label-selected {
-    color: var(--color-brand-tertiary-400);
-    font-weight: 700;
-  }
-
-  ::ng-deep .mat-stepper-horizontal-line {
-    border-top-color: var(--color-border-strong);
-    top: 38px; // icon 28px, padding-top 24px → center at 38px
-  }
-
-  ::ng-deep .mat-horizontal-stepper-header::before,
-  ::ng-deep .mat-horizontal-stepper-header::after {
-    top: 38px;
-  }
-
-  ::ng-deep .mat-horizontal-content-container {
-    display: none;
-  }
-}
-
+// 外框＝內容 800 ＋ 左右各一個 --page-gutter；視窗窄於外框才出現 gutter，桌機維持 800 內容寬（見 DS §5.1）
 .page-body {
-  width: min(800px, 100%);
+  width: min(calc(800px + var(--page-gutter) * 2), 100%);
   margin: 0 auto;
-  padding: 0;
+  padding: 0 var(--page-gutter);
 }
 
 .fund-card {
@@ -272,43 +198,6 @@
   color: var(--color-input-label);
   font-size: 14px;
   font-weight: 500;
-}
-
-.hint-panel {
-  max-height: 0;
-  overflow: hidden;
-  margin-top: 0;
-  margin-bottom: 0;
-  padding: 0 12px;
-  background: var(--color-neutral-50);
-  border: 1px solid var(--color-neutral-150);
-  border-radius: 6px;
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  line-height: 1.75;
-  opacity: 0;
-  transform: translateY(-4px);
-  transform-origin: top;
-  transition:
-    max-height .22s ease,
-    margin .22s ease,
-    padding .22s ease,
-    opacity .16s ease,
-    transform .22s ease;
-}
-
-.hint-panel.is-open {
-  max-height: 240px;
-  margin-top: 8px;
-  margin-bottom: 12px;
-  padding: 10px 12px;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-/* 關閉時 0 高，抵銷 pay-setting-step 對它的一段 flex gap，避免 title 與內容多一段距離 */
-.pay-setting-step > .hint-panel:not(.is-open) {
-  margin-top: -10px;
 }
 
 .ccy-selector {
@@ -512,7 +401,7 @@
 .threshold-selector-panel {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
   padding: 0;
 }
 
@@ -531,11 +420,10 @@
 .threshold-preview {
   display: flex;
   flex-direction: column;
-  gap: 14px;
-  padding: 16px 18px;
+  gap: 12px;
+  padding: 0;
   border: 0;
-  border-radius: 8px;
-  background: var(--color-bg-base);
+  background: transparent;
 }
 
 .threshold-preview-label {
@@ -547,14 +435,19 @@
 
 .threshold-preview-emphasis {
   display: inline-block;
-  color: inherit;
+  color: var(--color-action-primary);
   font-weight: inherit;
 }
 
 .threshold-estimate {
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 4px;
+  margin-top: 2px;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-subtle);
 
   span {
     color: var(--color-text-secondary);
@@ -738,19 +631,6 @@
   text-align: center;
 }
 
-.success-ring {
-  color: var(--color-brand-secondary-400);
-  font-size: 48px;
-  line-height: 1;
-}
-
-.success-block h2 {
-  margin: 14px 0 8px;
-  color: var(--color-text-heading);
-  font-size: 28px;
-  font-weight: 700;
-}
-
 .order-box {
   width: 100%;
   padding: 14px 18px;
@@ -763,8 +643,6 @@
 
 
 .done-actions {
-  display: flex;
-  gap: 10px;
   margin-top: 22px;
 }
 
@@ -930,81 +808,11 @@
   background: var(--color-bg-base);
 }
 
+// 排列（flex／gap／置中／手機 50%）由 .ds-button-row 提供，這裡只管容器寬度與定位
 .action-inner {
-  display: flex;
-  justify-content: center;
-  gap: 12px;
-  width: min(800px, 100%);
+  width: min(calc(800px + var(--page-gutter) * 2), 100%);
   margin: 24px auto 0;
-  padding: 14px 0;
-}
-
-.low-pay-notice-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 1000;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px;
-  background: var(--color-overlay-scrim);
-}
-
-.low-pay-notice-dialog {
-  position: relative;
-  width: min(512px, 100%);
-  padding: 22px 28px 22px;
-  border-radius: 8px;
-  background: var(--color-bg-base);
-  box-shadow: var(--shadow-lg);
-  text-align: center;
-
-  h2 {
-    margin: 0 0 28px;
-    color: var(--color-text-heading);
-    font-size: 20px;
-    font-weight: 700;
-    line-height: 1.4;
-  }
-
-  p {
-    margin: 0 auto 24px;
-    color: var(--color-text-primary);
-    font-size: 16px;
-    line-height: 1.75;
-    text-align: left;
-  }
-}
-
-.low-pay-notice-close {
-  position: absolute;
-  top: 14px;
-  right: 14px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 32px;
-  height: 32px;
-  padding: 0;
-  border: 0;
-  border-radius: 50%;
-  background: transparent;
-  color: var(--color-text-secondary);
-  font-size: 16px;
-  cursor: pointer;
-}
-
-.low-pay-notice-primary {
-  min-width: 136px;
-  min-height: 44px;
-  padding: 0 28px;
-  border: 0;
-  border-radius: 999px;
-  background: var(--color-action-primary);
-  color: var(--color-text-on-brand);
-  font-size: 16px;
-  font-weight: 500;
-  cursor: pointer;
+  padding: 14px var(--page-gutter);
 }
 
 @media (max-width: 767px) {
@@ -1026,44 +834,12 @@
     margin-top: 0;
   }
 
-  .success-block h2 {
-    font-size: 22px;
-  }
-
   .flow-page-title {
     width: 100%;
     margin: 0 0 8px;
-    padding: 0 15px;
+    padding: 0 var(--page-gutter);
     font-size: 18px;
     text-align: center;
-  }
-
-  .material-flow-stepper {
-    width: 100%;
-    padding: 10px 15px 12px;
-
-    ::ng-deep .mat-horizontal-stepper-header {
-      padding: 0 4px;
-    }
-
-    ::ng-deep .mat-step-icon {
-      width: 24px;
-      height: 24px;
-      font-size: 12px;
-    }
-
-    ::ng-deep .mat-step-label {
-      font-size: 12px;
-    }
-
-    ::ng-deep .mat-stepper-horizontal-line {
-      top: 12px; // icon 24px, padding-top 0 → center at 12px
-    }
-
-    ::ng-deep .mat-horizontal-stepper-header::before,
-    ::ng-deep .mat-horizontal-stepper-header::after {
-      top: 12px;
-    }
   }
 
   .fund-name {
@@ -1078,38 +854,6 @@
 }
 
 @media (max-width: 480px) {
-  .material-flow-stepper {
-    padding: 10px 15px 20px;
-
-    ::ng-deep .mat-horizontal-stepper-header {
-      padding: 0 2px;
-    }
-
-    ::ng-deep .mat-step-icon {
-      width: 20px;
-      height: 20px;
-      font-size: 12px;
-    }
-
-    ::ng-deep .mat-step-label {
-      min-width: 0;
-    }
-
-    ::ng-deep .mat-stepper-horizontal-line {
-      top: 10px; // icon 20px, padding-top 0 → center at 10px
-    }
-
-    ::ng-deep .mat-horizontal-stepper-header::before,
-    ::ng-deep .mat-horizontal-stepper-header::after {
-      top: 10px;
-    }
-  }
-
-  .page-body {
-    width: 100%;
-    padding: 0 15px;
-  }
-
   .block {
     border-radius: 8px;
     padding: 18px 16px;
@@ -1137,7 +881,7 @@
   }
 
   .action-inner {
-    padding: 12px 15px;
+    padding: 12px var(--page-gutter);
   }
 
   .doc-list {
@@ -1171,15 +915,6 @@
       color: var(--color-text-secondary);
       font-size: 14px;
       font-weight: 400;
-    }
-  }
-
-  .done-actions {
-    width: 100%;
-    justify-content: stretch;
-
-    button {
-      flex: 1;
     }
   }
 

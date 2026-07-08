@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { Component, OnDestroy, OnInit } from '@angular/core';
 import { AbstractControl, FormBuilder, ValidationErrors, ValidatorFn, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
@@ -61,6 +61,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   pwdVisible = false;
   payModeHintOpen = false;
   dateHintOpen = false;
+  redeemUnitsHintOpen = false;
   lowPayNoticeOpen = false;
   selectedContract: Contract | null = null;
   selectedCurrency: CurrencyOption | null = null;
@@ -242,13 +243,13 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   get steps(): Array<{ key: DemoStep; label: string; description: string }> {
     if (this.isRedeemMode) {
       return [
-        { key: 'settings', label: '設定', description: '選擇贖回方式' },
+        { key: 'settings', label: '輸入', description: '選擇贖回方式' },
         { key: 'confirm', label: '確認', description: '確認試算與送出' },
         { key: 'done', label: '完成', description: '委託完成' }
       ];
     }
     return [
-      { key: 'settings', label: '設定', description: '金額、Pay 設定' },
+      { key: 'settings', label: '輸入', description: '金額、Pay 設定' },
       { key: 'confirm', label: '確認', description: '確認摘要並送出' },
       { key: 'done', label: '完成', description: '委託完成' }
     ];
@@ -281,44 +282,40 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   get redeemSettingNotes(): string[] {
     return [
-      '約當市值依最新淨值與參考匯率估算，實際贖回金額以基金公司回覆為準。',
-      '實際贖回單位數以客戶基金帳上可用單位數為限。',
-      '指定批次僅顯示可贖回批次；無可贖回批次時不提供指定贖回。'
+      '贖回申請下單截止時間為每營業日下午14:00前截止，如逾時，則順延至次一營業日辦理，本處所指營業日為台灣當地營業日，若遇基金為非營業/報價日則交易日順延，實際日期將以基金公司回覆為準。各基金營業/報價日相關規定，及申購／贖回及轉換(轉申購)淨值日說明，可至常見問題/投資實務查詢，或詳見各基金公開說明書或依個別基金公司規定為準。',
+      '實際贖回/轉出單位數依客戶基金帳上餘額為限，惟部分贖回/轉出單位數可能因未達交割日而導致交易失敗，請以基金最新公開說明書或投資人須知為準。部份贖回/轉出單位數採取先進先出法自庫存單位數中扣除。',
+      '若贖回/轉出單位數過小，或本次贖回/轉出後剩餘之庫存單位數過低，有可能依各基金公司規定導致交易失敗而將單位數餘留帳上，或交易成立後因金額過低不足以匯出至您約定的贖回帳戶中。相關交易規則以各基金公司及基金最新公開說明書或投資人須知為準。',
+      '贖回款項約3-10個工作天入帳於集保結算所留存之約定贖回帳戶。贖回款項匯款相關費用，集保結算所並得逕行於款項中扣除。如款項不足支付匯款費用，集保將暫不予匯款，併未來款項足額後再行處理。您可至常見問題/投資實務參考詳細規定。',
+      '匯率係由臺灣集中保管結算所之收付銀行(華南銀行)提供。',
+      '自然人每日使用電子交易系統除依電子交易作業準則規範外，於本公司網路交易系統進行贖回及轉換，總額以新台幣3,000萬元（或等值外幣）為上限，確切金額上限依各銀行規定為準。',
+      '嚴禁擇時交易及短線交易，若基金機構或總代理人認定投資人從事此類交易時，基金機構或總代理人有權拒絕受理投資人所提出之任何申購、贖回或轉換申請，絕無異議。您可至常見問題/投資實務參考詳細規定。',
+      '參考淨值說明：資料由 Lipper(資訊源) 提供，不代表實際交易淨值，實際交易淨值將以基金公司公告為準。'
     ];
   }
 
   get doneNotes(): string[] {
     if (this.isRedeemMode) {
-      const notes = [
-        '您的贖回委託已送出，若超過本營業日 14:00，將視為次一營業日交易。',
+      return [
+        '提醒您，若超過本營業日交易時間14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。',
         '贖回款項入帳時間依各基金公司作業而定。'
       ];
-      if (this.showRedeemAnnualRateNotice) {
-        notes.push('若本次贖回後年化提領率超過建議上限，畫面將顯示年化提領率提醒；此提醒不影響贖回委託送出。');
-      }
-      return notes;
     }
 
     if (this.isModifyMode) {
       return [
-        '您的自由 Pay 設定異動委託已送出，若超過本營業日 14:00，將視為次一營業日交易。',
-        '設定生效狀態可至「委託查詢 / 取消」查看。',
-        '異動生效後，後續 Pay 出將依新的設定執行。'
+        '提醒您，若超過本營業日交易時間14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。'
       ];
     }
 
     if (this.isAddOnMode) {
       return [
-        '您的加碼委託已送出，若超過本營業日 13:00，將視為次一營業日交易。',
-        '預計 3–4 個營業日後申購確認書入帳。',
+        '提醒您，若超過本營業日交易時間13:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。',
         '加碼確認後將計入既有契約，Pay 設定維持既有契約設定。'
       ];
     }
 
     return [
-      '您的自由 Pay 申購委託已送出，若超過本營業日 13:00，將視為次一營業日交易。',
-      '預計 3–4 個營業日後申購確認書入帳。',
-      `首次 Pay 將於設定基準日（每月 ${this.form.controls.day.value} 日）執行；若距申購確認日不足 30 日，將順延至屆滿後的第一個基準日。`
+      '提醒您，若超過本營業日交易時間13:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。'
     ];
   }
 
@@ -741,18 +738,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return this.activeStep === 'confirm' ? '確認送出' : '下一步';
   }
 
-  setStep(step: DemoStep): void {
-    const targetIndex = this.steps.findIndex(item => item.key === step);
-    if (targetIndex <= this.stepIndex || this.activeStep === 'done') {
-      this.activeStep = step;
-    }
-  }
-
-  onStepperSelectionChange(index: number): void {
-    const step = this.steps[index];
-    if (!step) return;
-    this.setStep(step.key);
-  }
 
   selectCurrency(currencyCode: string): void {
     if (!this.canSwitchCurrency) return;
@@ -861,14 +846,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     } else {
       this.dateHintOpen = !this.dateHintOpen;
     }
-  }
-
-  @HostListener('document:click', ['$event'])
-  closeHintsOnOutsideClick(event: MouseEvent): void {
-    const target = event.target as HTMLElement | null;
-    if (!target || target.closest('.hint-toggle, .hint-panel')) return;
-    this.payModeHintOpen = false;
-    this.dateHintOpen = false;
   }
 
   toggleThreshold(enabled: boolean): void {
@@ -1084,6 +1061,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.resetThresholdState();
     this.payModeHintOpen = false;
     this.dateHintOpen = false;
+    this.redeemUnitsHintOpen = false;
     this.lowPayNoticeOpen = false;
     this.lowPayNoticeAcknowledged = false;
     this.applyPayModeValidators();

@@ -45,7 +45,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   readonly protectThresholdOptions = [95, 90, 80];
   readonly unlockThresholdOptions = [105, 110, 120];
   readonly expandedSettingSteps = [
-    { key: 'edit' as ExpandedSettingStep, label: '設定' },
+    { key: 'edit' as ExpandedSettingStep, label: '輸入' },
     { key: 'confirm' as ExpandedSettingStep, label: '確認' },
     { key: 'done' as ExpandedSettingStep, label: '完成' },
   ];
@@ -124,25 +124,24 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
 
   get overviewNotes(): string[] {
     return [
-      '約當市值 = 單位數 × 最新淨值 × 參考匯率，僅供參考，實際金額以基金公司回覆為準。',
-      '投資組合損益與報酬率為試算資料，若資料不符，仍以交易平台與集保紀錄為準。',
+      '約當市值 = 單位數 × 最新淨值 × 參考匯率。',
+      '投資組合損益與報酬率為試算資料，若資料不符，應以臺灣集中保管結算所電腦記錄為準。',
       '觸發門檻依 Pay 出基準日前一日最新市值判斷；市值守護為低於門檻暫停 Pay 出，增值啟動為超過門檻開始 Pay 出。'
     ];
   }
 
   get orderNotes(): string[] {
     return [
-      '當日申購、加碼委託可於 13:00 前取消；逾時則視為次一營業日交易。',
-      '當日異動、贖回委託可於 14:00 前取消；逾時則視為次一營業日交易。',
-      '委託狀態以交易平台實際處理結果為準。'
+      '當日申請之申購(含加碼)委託可於 13:00 前取消；若逾時則無法取消，將於次一營業日生效。',
+      '當日申請之異動/贖回委託可於 14:00 前取消；若逾時則無法取消，將於次一營業日生效。',
+      '交易相關問題您可至常見問題參考詳細規定，若您有任何疑問，請洽客服專線02-27208126，將有專人為您線上服務。'
     ];
   }
 
   get profitNotes(): string[] {
     return [
-      '已實現損益為已完成贖回或 Pay 出交易後之試算結果。',
-      '含 Pay 報酬率已納入已 Pay 金額；不含 Pay 報酬率僅以贖回金額計算。',
-      '外幣交易可能受匯率影響，實際損益仍以交易確認書與平台紀錄為準。'
+      '您在本平台的基金交易紀錄系統皆會保留，若需查看尚未完成的交易，可至「在途交易」查詢。',
+      '投資組合損益係依資料期間內已完成交易程序的資料計算，實際紀錄仍以臺灣集中保管結算所留存資料為準，歡迎至集保網站查詢(www.tdcc.com.tw)。'
     ];
   }
 
@@ -150,6 +149,7 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   expandedSettingRows = new Set<string>();
   expandedSettingDateHints = new Set<string>();
   settingDrafts: Record<string, SettingDraft> = {};
+  clearDraftsConfirmOpen = false;
   selectedOrders = new Set<string>();
   cancelPwd = '';
   cancelPwdVisible = false;
@@ -186,15 +186,15 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
 
   // ── Profit ──
 
-  get profitSummaryByCcy(): Array<{ ccy: string; paid: number; redeem: number; cost: number; profit: number; rate: number }> {
-    const grouped = new Map<string, { ccy: string; paid: number; redeem: number; cost: number; profit: number; rate: number }>();
+  get profitSummaryByCcy(): Array<{ ccy: string; paid: number; redeem: number; cost: number; redeemProfit: number; rate: number }> {
+    const grouped = new Map<string, { ccy: string; paid: number; redeem: number; cost: number; redeemProfit: number; rate: number }>();
     for (const row of this.allProfits) {
-      const item = grouped.get(row.ccy) ?? { ccy: this.ccyText(row.ccy), paid: 0, redeem: 0, cost: 0, profit: 0, rate: 0 };
+      const item = grouped.get(row.ccy) ?? { ccy: this.ccyText(row.ccy), paid: 0, redeem: 0, cost: 0, redeemProfit: 0, rate: 0 };
       item.paid += row.totalPaid;
       item.redeem += row.redeemAmount;
       item.cost += row.cost;
-      item.profit += row.profit;
-      item.rate = item.cost ? (item.profit / item.cost) * 100 : 0;
+      item.redeemProfit = item.redeem - item.cost;
+      item.rate = item.cost ? ((item.redeem + item.paid - item.cost) / item.cost) * 100 : 0;
       grouped.set(row.ccy, item);
     }
     return Array.from(grouped.values());
@@ -449,21 +449,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     this.clearAllSettingDrafts();
   }
 
-  setExpandedSettingStep(step: ExpandedSettingStep): void {
-    if (step === 'edit') {
-      this.backToExpandedSettingEdit();
-      return;
-    }
-    if (step === 'confirm' && this.canSubmitExpandedSettings) {
-      this.openExpandedSettingsConfirm();
-    }
-  }
-
-  onExpandedSettingStepperChange(index: number): void {
-    const step = this.expandedSettingSteps[index];
-    if (!step) return;
-    this.setExpandedSettingStep(step.key);
-  }
 
   trackExpandedSettingStep(_: number, step: { key: ExpandedSettingStep }): string {
     return step.key;
@@ -698,6 +683,14 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   // 已實現損益：不含 Pay 報酬率 = (贖回金額 − 投入成本) / 投入成本 × 100
   profitReturnNoPay(item: Pick<ProfitRecord, 'cost' | 'redeemAmount'>): number {
     return item.cost ? ((item.redeemAmount - item.cost) / item.cost) * 100 : 0;
+  }
+
+  profitReturnWithPay(item: Pick<ProfitRecord, 'cost' | 'redeemAmount' | 'totalPaid'>): number {
+    return item.cost ? ((item.redeemAmount + item.totalPaid - item.cost) / item.cost) * 100 : 0;
+  }
+
+  redeemProfit(item: Pick<ProfitRecord, 'cost' | 'redeemAmount'>): number {
+    return item.redeemAmount - item.cost;
   }
 
   payMethodText(contract: OvContract): string {

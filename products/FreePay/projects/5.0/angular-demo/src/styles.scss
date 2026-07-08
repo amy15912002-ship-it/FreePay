@@ -203,6 +203,9 @@ $freepay-theme: mat.define-light-theme((
   --shadow-md: 0 6px 24px rgba(0, 0, 0, 0.12);
   --shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.18);
   --color-overlay-scrim: rgba(0, 0, 0, 0.45);
+
+  // 版面：頁面容器左右 safe margin（gutter）。見 DesignSystem.md §5.1。
+  --page-gutter: 15px;
 }
 
 * {
@@ -231,7 +234,6 @@ textarea {
 }
 
 .mat-button,
-.mat-raised-button,
 .mat-stroked-button,
 .mat-flat-button {
   border-radius: 8px;
@@ -264,18 +266,15 @@ textarea {
 }
 
 /* Filled：橙紅實心，hover/pressed 加深一階 */
-.ds-action-button.mat-raised-button.mat-primary,
 .ds-action-button.mat-flat-button.mat-primary {
   background-color: var(--color-action-primary);
   color: var(--color-neutral-0);
 }
 
-.ds-action-button.mat-raised-button.mat-primary:hover,
 .ds-action-button.mat-flat-button.mat-primary:hover {
   background-color: var(--color-brand-primary-600);
 }
 
-.ds-action-button.mat-raised-button.mat-primary:active,
 .ds-action-button.mat-flat-button.mat-primary:active {
   background-color: var(--color-brand-primary-800);
 }
@@ -313,9 +312,7 @@ textarea {
   cursor: not-allowed;
 }
 
-.ds-action-button.mat-raised-button.mat-button-disabled,
 .ds-action-button.mat-flat-button.mat-button-disabled,
-.ds-action-button.mat-raised-button.mat-button-disabled:hover,
 .ds-action-button.mat-flat-button.mat-button-disabled:hover {
   background-color: var(--color-neutral-150);
   color: var(--color-neutral-250);
@@ -326,6 +323,20 @@ textarea {
   border-color: var(--color-neutral-150);
   background-color: transparent;
   color: var(--color-neutral-250);
+}
+
+/* §3.1 按鈕組排列：桌機／平板水平置中；手機（≤767）純雙鈕各佔 50%。
+   主鈕在右由 DOM 序決定（次要在前），不用 order；含狀態標籤的工具列不套此類。 */
+.ds-button-row {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+}
+
+@media (max-width: 767px) {
+  .ds-button-row > .ds-action-button {
+    flex: 1;
+  }
 }
 
 /* §3.1 Text 變體（內容區/淺底）：純文字動作，無框、hover 加深至主要文字色。
@@ -955,6 +966,194 @@ table { font-variant-numeric: tabular-nums; }
 @media (max-width: 767px) {
   .ds-tab { overflow-x: auto; }
   .ds-tab--page .ds-tab__item { height: 48px; padding: 0 14px; font-size: 14px; }
+}
+
+// Stepper（步驟指示條）：原生步驟指示，零 Material。標準見 DesignSystem.md §3.9。
+// 純視覺進度條——內容由頁面 *ngIf 自控，不投影進 stepper。步驟不可點（導覽走頁面上一步／下一步鈕）。
+// 標題在圖標上方；一律顯示數字（無勾）；未進入＝實心淺灰、已到達＝填藍綠、當前＝數字放大。
+.ds-stepper {
+  --ds-stepper-circle: 28px;
+  display: flex;
+  width: min(calc(800px + var(--page-gutter) * 2), 100%);
+  margin: 0 auto;
+  padding: 0 var(--page-gutter) 24px;
+}
+
+.ds-stepper__step {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+  cursor: default;
+}
+
+// 連接線：兩圓之間、位於圓心高度（標題 20px ＋ gap 8px 之下）、繞開圓
+.ds-stepper__step:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  top: calc(28px + var(--ds-stepper-circle) / 2);
+  left: calc(50% + var(--ds-stepper-circle) / 2 + 4px);
+  right: calc(-50% + var(--ds-stepper-circle) / 2 + 4px);
+  border-top: 1px solid var(--color-border-strong);
+}
+
+// 標題在圖標上方，固定高度讓連接線對齊
+.ds-stepper__label {
+  height: 20px;
+  color: var(--color-text-secondary);
+  font-family: var(--font-primary);
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 20px;
+  text-align: center;
+}
+
+// 圓形數字圖標：未進入＝實心淺灰、數字灰
+.ds-stepper__marker {
+  box-sizing: border-box;
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--ds-stepper-circle);
+  height: var(--ds-stepper-circle);
+  border-radius: 50%;
+  background: var(--color-neutral-150);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 700;
+  transition: transform .18s ease;
+}
+
+// 已到達（含當前）：填藍綠、白字
+.ds-stepper__step.is-reached .ds-stepper__marker {
+  background: var(--color-brand-tertiary-300);
+  color: var(--color-text-on-brand);
+}
+
+// 當前步驟（輸入中）：數字圖標放大、標題反白加粗
+.ds-stepper__step.is-current .ds-stepper__marker {
+  transform: scale(1.3);
+}
+
+.ds-stepper__step.is-current .ds-stepper__label {
+  color: var(--color-brand-tertiary-300);
+  font-weight: 700;
+}
+
+@media (max-width: 767px) {
+  .ds-stepper { --ds-stepper-circle: 24px; width: 100%; padding: 10px var(--page-gutter) 12px; }
+  .ds-stepper__marker { font-size: 12px; }
+  .ds-stepper__label { font-size: 12px; }
+}
+
+@media (max-width: 480px) {
+  .ds-stepper { --ds-stepper-circle: 20px; padding: 10px var(--page-gutter) 20px; }
+}
+
+// Modal（資訊型）：白底、標題＋關閉、內容、單顆「我知道了」。標準見 DesignSystem.md §3.10。
+// 用於純說明（沒有要取消的東西）；確認/破壞性動作走確認型 Modal（另定）。
+.ds-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16px;
+  background: var(--color-overlay-scrim);
+  animation: ds-modal-fade .16s ease;
+}
+
+.ds-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(420px, 100%);
+  max-height: calc(100vh - 32px);
+  overflow-y: auto;
+  border-radius: 16px;
+  background: var(--color-bg-base);
+  box-shadow: var(--shadow-lg);
+  animation: ds-modal-pop .18s ease;
+}
+
+.ds-modal__head {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 18px 48px;
+}
+
+.ds-modal__title {
+  margin: 0;
+  color: var(--color-text-heading);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.ds-modal__close {
+  position: absolute;
+  top: 50%;
+  right: 16px;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--color-neutral-800);
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.ds-modal__close:hover { color: var(--color-text-primary); }
+
+.ds-modal__body {
+  padding: 4px 24px 12px;
+  color: var(--color-neutral-800);
+  font-size: 16px;
+  line-height: 1.75;
+  text-align: left;
+}
+
+.ds-modal__foot {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  padding: 8px 24px 24px;
+}
+
+// 確認型：橙 header、取消/確認兩顆
+.ds-modal--confirm .ds-modal__head {
+  border-radius: 16px 16px 0 0;
+  background: var(--color-action-primary);
+}
+
+.ds-modal--confirm .ds-modal__title { color: var(--color-text-on-brand); }
+
+.ds-modal--confirm .ds-modal__close { color: var(--color-text-on-brand); }
+.ds-modal--confirm .ds-modal__close:hover { color: var(--color-text-on-brand); opacity: .75; }
+
+.ds-modal--confirm .ds-modal__body { padding-top: 16px; }
+
+@keyframes ds-modal-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes ds-modal-pop {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 // ── Switch（開關）─────────────────────────────────────

@@ -8,13 +8,14 @@ import { MAT_DATE_LOCALE, MatNativeDateModule } from '@angular/material/core';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatRadioModule } from '@angular/material/radio';
-import { MatStepperModule } from '@angular/material/stepper';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
 import { DemoShellComponent } from './demo-shell/demo-shell.component';
 import { AccountOverviewComponent } from './account-overview/account-overview.component';
 import { FundSelectComponent } from './fund-select/fund-select.component';
+import { InfoModalComponent } from './info-modal/info-modal.component';
+import { ConfirmModalComponent } from './confirm-modal/confirm-modal.component';
 import { FreepayIntroComponent } from './freepay-intro/freepay-intro.component';
 import { FooterComponent } from './footer/footer.component';
 import { SharedNotesComponent } from './shared-notes/shared-notes.component';
@@ -26,6 +27,8 @@ import { ThousandsDirective } from './thousands.directive';
     DemoShellComponent,
     AccountOverviewComponent,
     FundSelectComponent,
+    InfoModalComponent,
+    ConfirmModalComponent,
     FreepayIntroComponent,
     FooterComponent,
     SharedNotesComponent,
@@ -42,8 +45,7 @@ import { ThousandsDirective } from './thousands.directive';
     MatDatepickerModule,
     MatFormFieldModule,
     MatNativeDateModule,
-    MatRadioModule,
-    MatStepperModule
+    MatRadioModule
   ],
   providers: [
     { provide: MAT_DATE_LOCALE, useValue: 'zh-TW' }

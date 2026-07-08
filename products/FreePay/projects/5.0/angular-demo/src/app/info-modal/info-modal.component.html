@@ -1,0 +1,14 @@
+<div class="ds-modal-overlay" *ngIf="open" (click)="closed.emit(); $event.stopPropagation()">
+  <div class="ds-modal" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="ds-modal__head">
+      <h2 class="ds-modal__title">{{ title }}</h2>
+      <button class="ds-modal__close" type="button" aria-label="關閉" (click)="closed.emit()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </header>
+    <div class="ds-modal__body"><ng-content></ng-content></div>
+    <footer class="ds-modal__foot">
+      <button class="ds-action-button" mat-flat-button color="primary" type="button" (click)="closed.emit()">我知道了</button>
+    </footer>
+  </div>
+</div>

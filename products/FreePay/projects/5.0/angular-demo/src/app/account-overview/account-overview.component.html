@@ -107,7 +107,7 @@
               </button>
             </div>
             <div class="ds-sort-sheet-actions">
-              <button class="ds-action-button" mat-raised-button color="primary" type="button" (click)="applyFundSort()">套用排序</button>
+              <button class="ds-action-button" mat-flat-button color="primary" type="button" (click)="applyFundSort()">套用排序</button>
             </div>
           </section>
         </div>
@@ -418,9 +418,9 @@
             </div>
           </div>
         </div>
-        <div class="ov-cancel-actions">
+        <div class="ov-cancel-actions ds-button-row">
           <button class="ds-action-button" mat-stroked-button type="button" (click)="selectedOrders.clear()">清除選取</button>
-          <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="cancelDisabled" (click)="submitCancel()">確認取消</button>
+          <button class="ds-action-button" mat-flat-button color="primary" type="button" [disabled]="cancelDisabled" (click)="submitCancel()">確認取消</button>
         </div>
       </div>
 
@@ -439,10 +439,10 @@
           <div class="grid-head">
             <div class="grid-body">
               <span>交易幣別</span>
-              <span>已 Pay 金額</span>
+              <span>損益</span>
               <span>贖回金額</span>
               <span>投入成本</span>
-              <span>已實現損益</span>
+              <span>已 Pay 金額</span>
               <span>含 Pay 報酬率</span>
             </div>
           </div>
@@ -450,10 +450,10 @@
             <div class="grid-main">
               <div class="grid-body">
                 <span data-label="交易幣別">{{ row.ccy }}</span>
-                <span data-label="已 Pay 金額">{{ fmtN(row.paid) }}</span>
+                <span data-label="損益" [ngClass]="numClass(row.redeemProfit)">{{ fmtSigned(row.redeemProfit) }}</span>
                 <span data-label="贖回金額">{{ fmtN(row.redeem) }}</span>
                 <span data-label="投入成本">{{ fmtN(row.cost) }}</span>
-                <span data-label="已實現損益" [ngClass]="numClass(row.profit)">{{ fmtSigned(row.profit) }}</span>
+                <span data-label="已 Pay 金額">{{ fmtN(row.paid) }}</span>
                 <span data-label="含 Pay 報酬率" [ngClass]="numClass(row.rate)">{{ fmtRate(row.rate) }}</span>
               </div>
             </div>
@@ -474,8 +474,8 @@
               <span>交易/計價幣別</span>
               <span>贖回金額</span>
               <span>投入成本</span>
+              <span>損益</span>
               <span>已 Pay 金額</span>
-              <span>已實現損益</span>
               <span>含 Pay 報酬率</span>
               <span>不含 Pay 報酬率</span>
             </div>
@@ -509,8 +509,8 @@
                 </div>
                 <div class="grid-metric">
                   <div class="grid-kv grid-kv--profit">
-                    <span class="grid-kv-lbl">已實現損益</span>
-                    <span [ngClass]="numClass(item.profit)">{{ fmtSigned(item.profit) }}</span>
+                    <span class="grid-kv-lbl">損益</span>
+                    <span [ngClass]="numClass(redeemProfit(item))">{{ fmtSigned(redeemProfit(item)) }}</span>
                   </div>
                 </div>
                 <div class="grid-metric">
@@ -524,9 +524,9 @@
                 <div class="grid-kv grid-kv--ccy"><span class="grid-kv-lbl">交易/計價幣別</span><span>{{ ccyText(item.ccy) }} / {{ ccyText(item.fundCcy) }}</span></div>
                 <div class="grid-kv"><span class="grid-kv-lbl">贖回金額</span><span>{{ fmtN(item.redeemAmount) }}</span></div>
                 <div class="grid-kv"><span class="grid-kv-lbl">投入成本</span><span>{{ fmtN(item.cost) }}</span></div>
+                <div class="grid-kv grid-kv--profit"><span class="grid-kv-lbl">損益</span><span [ngClass]="numClass(redeemProfit(item))">{{ fmtSigned(redeemProfit(item)) }}</span></div>
                 <div class="grid-kv"><span class="grid-kv-lbl">已 Pay 金額</span><span>{{ fmtN(item.totalPaid) }}</span></div>
-                <div class="grid-kv grid-kv--profit"><span class="grid-kv-lbl">已實現損益</span><span [ngClass]="numClass(item.profit)">{{ fmtSigned(item.profit) }}</span></div>
-                <div class="grid-kv grid-kv--return-with"><span class="grid-kv-lbl">含 Pay 報酬率</span><span [ngClass]="numClass(item.returnRate)">{{ fmtRate(item.returnRate) }}</span></div>
+                <div class="grid-kv grid-kv--return-with"><span class="grid-kv-lbl">含 Pay 報酬率</span><span [ngClass]="numClass(profitReturnWithPay(item))">{{ fmtRate(profitReturnWithPay(item)) }}</span></div>
                 <div class="grid-kv grid-kv--return-no-pay"><span class="grid-kv-lbl">不含 Pay 報酬率</span><span [ngClass]="numClass(profitReturnNoPay(item))">{{ fmtRate(profitReturnNoPay(item)) }}</span></div>
               </div>
             </div>
@@ -546,7 +546,7 @@
                 </div>
                 <div class="grid-extra-kv">
                   <span>含 Pay 報酬率</span>
-                  <strong [ngClass]="numClass(item.returnRate)">{{ fmtRate(item.returnRate) }}</strong>
+                  <strong [ngClass]="numClass(profitReturnWithPay(item))">{{ fmtRate(profitReturnWithPay(item)) }}</strong>
                 </div>
               </div>
             </div>
@@ -615,29 +615,17 @@
           </div>
         </section>
 
-        <mat-horizontal-stepper
-          *ngIf="changeView === 'settings' && expandedSettingStep !== 'done'"
-          class="material-flow-stepper setting-flow-stepper"
-          labelPosition="bottom"
-          [linear]="false"
-          [selectedIndex]="expandedSettingStepIndex"
-          (selectionChange)="onExpandedSettingStepperChange($event.selectedIndex)"
-        >
-          <ng-template matStepperIcon="number" let-index="index">
-            <span *ngIf="index < expandedSettingLastStepIndex">{{ index + 1 }}</span>
-            <i *ngIf="index === expandedSettingLastStepIndex" class="bi bi-check"></i>
-          </ng-template>
-          <ng-template matStepperIcon="edit" let-index="index">
-            <i class="bi bi-check"></i>
-          </ng-template>
-          <ng-template matStepperIcon="done" let-index="index">
-            <i class="bi bi-check"></i>
-          </ng-template>
-
-          <mat-step *ngFor="let step of expandedSettingSteps; let i = index; trackBy: trackExpandedSettingStep" [completed]="i < expandedSettingStepIndex">
-            <ng-template matStepLabel>{{ step.label }}</ng-template>
-          </mat-step>
-        </mat-horizontal-stepper>
+        <div class="ds-stepper" *ngIf="changeView === 'settings'">
+          <div
+            class="ds-stepper__step"
+            *ngFor="let step of expandedSettingSteps; let i = index; trackBy: trackExpandedSettingStep"
+            [class.is-reached]="i <= expandedSettingStepIndex"
+            [class.is-current]="i === expandedSettingStepIndex"
+          >
+            <span class="ds-stepper__label">{{ step.label }}</span>
+            <span class="ds-stepper__marker">{{ i + 1 }}</span>
+          </div>
+        </div>
 
         <section class="ov-order-section" aria-label="批次編輯設定" *ngIf="changeView === 'settings' && expandedSettingStep === 'edit'">
           <div class="setting-edit-toolbar">
@@ -782,11 +770,11 @@
                               </button>
                             </div>
                           </div>
-                          <div class="hint-panel" [class.is-open]="isSettingDateHintOpen(draft.fpNo)" (click)="$event.stopPropagation()">
+                          <fp-info-modal [open]="isSettingDateHintOpen(draft.fpNo)" title="自由 Pay 基準日說明" (closed)="toggleSettingDateHint(draft.fpNo)">
                             自由 Pay 基準日為贖回申請日，實際入帳時間視基金公司付款作業而定，一般而言平均約 7～10 個營業日入帳。<br><br>
                             變更設定於營業日 14:00 前下單視為當日申請；14:00 以後下單則視為次一營業日申請。設定自由 Pay 基準日若距首次申購日不足 30 個日曆日時，將於屆滿 30 日後之最近一次自由 Pay 基準日開始執行。<br><br>
                             若當月無設定之基準日（如 29、30、31 日），則遞延至下個營業日申請。
-                          </div>
+                          </fp-info-modal>
                           <div class="pay-setting-panel pay-setting-panel--date date-section">
                             <div class="date-grid">
                               <button
@@ -896,9 +884,20 @@
 
           <div class="setting-edit-bar" *ngIf="modifiedSettingCount > 0">
             <span>已修改 {{ modifiedSettingCount }} 筆</span>
-            <button class="ds-action-button ds-action-button--ghost" type="button" (click)="clearAllSettingDrafts()">取消全部修改</button>
-            <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="!canSubmitExpandedSettings" (click)="openExpandedSettingsConfirm()">下一步</button>
+            <button class="ds-action-button ds-action-button--ghost" type="button" (click)="clearDraftsConfirmOpen = true">取消全部修改</button>
+            <button class="ds-action-button" mat-flat-button color="primary" type="button" [disabled]="!canSubmitExpandedSettings" (click)="openExpandedSettingsConfirm()">下一步</button>
           </div>
+
+          <fp-confirm-modal
+            [open]="clearDraftsConfirmOpen"
+            title="取消全部修改"
+            cancelLabel="返回"
+            confirmLabel="確定取消"
+            (confirmed)="clearAllSettingDrafts(); clearDraftsConfirmOpen = false"
+            (cancelled)="clearDraftsConfirmOpen = false"
+          >
+            確定要取消全部修改嗎？已編輯的 {{ modifiedSettingCount }} 筆設定將全部還原。
+          </fp-confirm-modal>
         </section>
 
         <section class="setting-confirm" aria-label="設定異動確認" *ngIf="changeView === 'settings' && expandedSettingStep === 'confirm'">
@@ -993,23 +992,21 @@
             <span>共 {{ modifiedSettingCount }} 筆設定異動</span>
             <small class="setting-submit-hint" *ngIf="expandedSettingSubmitDisabled">{{ expandedSettingSubmitHint }}</small>
             <button class="ds-action-button ds-action-button--ghost" type="button" (click)="backToExpandedSettingEdit()">上一步</button>
-            <button class="ds-action-button" mat-raised-button color="primary" type="button" [disabled]="expandedSettingSubmitDisabled" (click)="submitExpandedSettings()">確認送出</button>
+            <button class="ds-action-button" mat-flat-button color="primary" type="button" [disabled]="expandedSettingSubmitDisabled" (click)="submitExpandedSettings()">確認送出</button>
           </div>
         </section>
 
         <section class="setting-confirm setting-confirm--done" aria-label="設定異動完成" *ngIf="changeView === 'settings' && expandedSettingStep === 'done'">
           <div class="success-block setting-done-block">
-            <div class="success-ring"><i class="bi bi-check-circle-fill"></i></div>
-            <h2>委託已成功送出</h2>
             <div class="order-box">
               <div class="sum-row"><span>委託時間</span><strong>2026/05/12 14:30</strong></div>
               <div class="sum-row"><span>交易類型</span><strong>設定異動</strong></div>
               <div class="sum-row"><span>異動筆數</span><strong>{{ modifiedSettingCount }} 筆</strong></div>
               <div class="sum-row"><span>狀態說明</span><strong>設定生效狀態可至「委託查詢 / 取消」查看。</strong></div>
             </div>
-            <div class="done-actions">
+            <div class="done-actions ds-button-row">
               <button class="ds-action-button" mat-stroked-button type="button" (click)="queryTrade()">委託查詢</button>
-              <button class="ds-action-button" mat-raised-button color="primary" type="button" (click)="resetExpandedSettingFlow()">返回設定</button>
+              <button class="ds-action-button" mat-flat-button color="primary" type="button" (click)="resetExpandedSettingFlow()">返回設定</button>
             </div>
           </div>
         </section>

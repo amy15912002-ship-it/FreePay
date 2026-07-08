@@ -44,10 +44,13 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   readonly groups = FUND_GROUPS;
   readonly lipperRatings = LIPPER_RATINGS;
   readonly riskLevels = RISK_LEVELS;
-  readonly searchNotes = [
-    '波動度以近 1 年年化標準差表示，數值越大代表淨值波動程度越高。',
-    '各項績效、淨值與年度報酬率為過去資料，不代表未來績效表現。'
-  ];
+  get searchNotes(): string[] {
+    return [
+      '波動度以近 1 年年化標準差表示，數值越大代表淨值波動程度越高。',
+      `資料來源: Lipper & 投信投顧公會 & 台灣集中保管結算所。資料更新日期：${this.latestNavDate}。`,
+      '各系列基金之淨值是由Lipper(資訊源)所提供，淨值可能因系統更新作業與實際狀況有所差異，相關淨值僅供參考，各系列基金之申購/贖回/轉換淨值仍應以台灣集中保管結算所資料為準，歡迎您至集保網站查詢(www.tdcc.com.tw)。'
+    ];
+  }
   readonly domiciles: DomicileOption[] = ['境內', '境外'];
   readonly years = [2021, 2022, 2023, 2024, 2025];
   readonly yearsDesc = this.years.map((year, index) => ({ year, index })).reverse();
@@ -93,6 +96,12 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
 
   get pricingCurrencies(): PricingCcyOption[] {
     return FUND_PRICING_CCY;
+  }
+
+  get latestNavDate(): string {
+    return this.funds
+      .map(fund => fund.navDate)
+      .sort((a, b) => b.localeCompare(a))[0] ?? '';
   }
 
   keyword = '';            // 輸入中的字（驅動建議下拉）

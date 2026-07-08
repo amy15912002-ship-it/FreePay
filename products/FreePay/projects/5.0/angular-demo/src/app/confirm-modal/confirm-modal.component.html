@@ -1,0 +1,15 @@
+<div class="ds-modal-overlay" *ngIf="open" (click)="cancelled.emit(); $event.stopPropagation()">
+  <div class="ds-modal ds-modal--confirm" role="dialog" aria-modal="true" (click)="$event.stopPropagation()">
+    <header class="ds-modal__head">
+      <h2 class="ds-modal__title">{{ title }}</h2>
+      <button class="ds-modal__close" type="button" aria-label="關閉" (click)="cancelled.emit()">
+        <i class="bi bi-x-lg"></i>
+      </button>
+    </header>
+    <div class="ds-modal__body"><ng-content></ng-content></div>
+    <footer class="ds-modal__foot">
+      <button class="ds-action-button" mat-stroked-button type="button" (click)="cancelled.emit()">{{ cancelLabel }}</button>
+      <button class="ds-action-button" mat-flat-button color="primary" type="button" (click)="confirmed.emit()">{{ confirmLabel }}</button>
+    </footer>
+  </div>
+</div>
