@@ -1,0 +1,23 @@
+<div class="ds-stepper">
+  <!-- 手機精簡版：當前步驟＋計數＋進度條。置首，讓桌機最後一個 __step 仍為 :last-child（連接線不外溢、末步 label 不套 current teal） -->
+  <div class="ds-stepper__mobile">
+    <div class="ds-stepper__mobile-row">
+      <span class="ds-stepper__mobile-num">{{ currentIndex + 1 }}</span>
+      <span class="ds-stepper__mobile-label">{{ currentLabel }}</span>
+      <span class="ds-stepper__mobile-count"><b>{{ currentIndex + 1 }}</b> / {{ steps.length }}</span>
+    </div>
+    <div class="ds-stepper__mobile-track">
+      <span class="ds-stepper__mobile-fill" [style.width.%]="progress"></span>
+    </div>
+  </div>
+  <!-- 桌機：全步驟並列 -->
+  <div
+    class="ds-stepper__step"
+    *ngFor="let step of steps; let i = index; trackBy: trackByStep"
+    [class.is-reached]="i <= currentIndex"
+    [class.is-current]="i === currentIndex"
+  >
+    <span class="ds-stepper__label">{{ step.label }}</span>
+    <span class="ds-stepper__marker">{{ i + 1 }}</span>
+  </div>
+</div>

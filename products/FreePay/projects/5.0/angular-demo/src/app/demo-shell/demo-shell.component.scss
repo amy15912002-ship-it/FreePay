@@ -137,7 +137,7 @@
   p { margin: 0; }
 }
 
-// Input（輸入框）元件樣式已移至全域 styles.scss（DesignSystem §2.1）
+// Input（輸入框）元件樣式已移至全域 styles.scss（DesignSystem §3.11）
 
 .form-group,
 .date-section {
@@ -498,6 +498,7 @@
   span {
     color: var(--color-text-secondary);
     font-size: 14px;
+    white-space: nowrap;
   }
 
   strong {
@@ -873,7 +874,7 @@
   }
 
   .sum-row {
-    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-columns: auto minmax(0, 1fr);
   }
 
   .redeem-panel {
@@ -922,7 +923,7 @@
 
 // ── 升級四：申購批次層贖回 ────────────────────────────
 
-// 贖回方式 radio button group（design system §2.3）
+// 贖回方式 radio button group（design system §3.5）
 // 字型／顏色由 Material theme（mat.radio-theme + define-typography-config）自動處理
 .redeem-mode-radio-group {
   display: flex;

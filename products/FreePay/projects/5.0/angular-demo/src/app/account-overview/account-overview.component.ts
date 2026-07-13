@@ -1,4 +1,4 @@
-import { Component, HostListener, OnDestroy, OnInit } from '@angular/core';
+import { AfterViewInit, Component, HostListener, OnDestroy, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subscription } from 'rxjs';
 import {
@@ -34,7 +34,7 @@ const REFERENCE_DATE = new Date('2026-05-12T00:00:00');
   templateUrl: './account-overview.component.html',
   styleUrls: ['./account-overview.component.scss']
 })
-export class AccountOverviewComponent implements OnInit, OnDestroy {
+export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestroy {
   readonly funds = OV_FUNDS;
   readonly altOrders = MOCK_ALT_ORDERS;
   readonly chgOrders = MOCK_CHG_ORDERS;
@@ -73,6 +73,20 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
+    if (this.route.snapshot.data['standaloneChange']) {
+      this.standaloneChange = true;
+      this.activeTab = 'change';
+      this.changeView = 'settings';
+      // 單筆入口：帶 fpNo 進來 → 展開該基金卡並記下聚焦目標（AfterViewInit 再捲入）；找不到就退回頂端收合
+      const fpNo = this.route.snapshot.queryParamMap.get('fpNo');
+      if (fpNo) {
+        const fund = this.settingsFunds.find(f => f.contracts.some(c => c.fpNo === fpNo));
+        if (fund) {
+          this.expandedSettingRows.add(fund.id);
+          this.focusFundId = fund.id;
+        }
+      }
+    }
     this.routeSub = this.route.queryParamMap.subscribe(query => {
       const tab = query.get('tab');
       if (tab === 'overview' || tab === 'order' || tab === 'profit' || tab === 'change') {
@@ -87,6 +101,22 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
 
   ngOnDestroy(): void {
     this.routeSub?.unsubscribe();
+  }
+
+  ngAfterViewInit(): void {
+    // 單筆入口：等清單渲染後平滑捲到目標卡並短暫高亮
+    if (this.focusFundId) {
+      setTimeout(() => this.scrollToFocusedFund(), 50);
+    }
+  }
+
+  private scrollToFocusedFund(): void {
+    if (!this.focusFundId) return;
+    const el = document.getElementById('setting-card-' + this.focusFundId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    this.highlightFundId = this.focusFundId;
+    setTimeout(() => { this.highlightFundId = null; }, 1600);
   }
 
   // 總覽摘要：由持有明細（funds）依交易幣別即時彙總，不另存一份
@@ -120,6 +150,11 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   activeTab: OvTab = 'overview';
+  // 由 /demo/change-settings 路由（data.standaloneChange）進入時為 true：隱藏 tab 列、顯示 pagetitle、只跑異動設定流程
+  standaloneChange = false;
+  // 單筆入口帶 fpNo 進來時的聚焦目標：focusFundId 觸發定錨＋展開，highlightFundId 控制短暫高亮
+  focusFundId: string | null = null;
+  highlightFundId: string | null = null;
   orderFilter: OrderFilter = 'all';
 
   get overviewNotes(): string[] {
@@ -449,11 +484,6 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
     this.clearAllSettingDrafts();
   }
 
-
-  trackExpandedSettingStep(_: number, step: { key: ExpandedSettingStep }): string {
-    return step.key;
-  }
-
   settingChangeItems(contract: OvContract, draft: SettingDraft): Array<{ label: string; before: string; after: string }> {
     const original = this.buildSettingDraft(contract);
     const items: Array<{ label: string; before: string; after: string }> = [];
@@ -740,7 +770,12 @@ export class AccountOverviewComponent implements OnInit, OnDestroy {
   }
 
   onAction(action: string, fpNo: string): void {
-    const mode = action === '加碼' ? 'addOn' : action === '異動' ? 'modify' : action === '贖回' ? 'redeem' : null;
+    if (action === '異動') {
+      // 單筆入口改導向批次「異動設定」流程；帶 fpNo 作為聚焦提示（展開＋定錨該基金卡，非單筆模式）
+      this.router.navigate(['/demo/change-settings'], { queryParams: { fpNo } });
+      return;
+    }
+    const mode = action === '加碼' ? 'addOn' : action === '贖回' ? 'redeem' : null;
     if (mode) {
       const fund = this.funds.find(f => f.contracts.some(c => c.fpNo === fpNo));
       if (fund) {

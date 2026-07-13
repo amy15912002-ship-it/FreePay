@@ -141,7 +141,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     const addonContract = ctx.contractFpNo
       ? this.scenario.contracts.find(c => c.fpNo === ctx.contractFpNo) ?? null
       : null;
-    this.addOnDirect = (ctx.mode === 'addOn' || ctx.mode === 'modify' || ctx.mode === 'redeem') && addonContract !== null;
+    this.addOnDirect = (ctx.mode === 'addOn' || ctx.mode === 'redeem') && addonContract !== null;
     this.selectedCurrency = this.scenario.availableCurrencies[0] ?? null;
 
     if (this.addOnDirect && addonContract) {
@@ -207,12 +207,8 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   get isAddOnMode(): boolean {
     // 5.0 起：模式由「該幣別是否有既有契約」自動判斷
     if (this.flowContext.mode === 'addOn') return true;
-    if (this.flowContext.mode === 'modify' || this.flowContext.mode === 'redeem') return false;
+    if (this.flowContext.mode === 'redeem') return false;
     return this.hasContractForSelectedCurrency;
-  }
-
-  get isModifyMode(): boolean {
-    return this.flowContext.mode === 'modify';
   }
 
   get isRedeemMode(): boolean {
@@ -257,7 +253,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   get flowPageTitle(): string {
     if (this.isRedeemMode) return '自由Pay-基金贖回';
-    if (this.isModifyMode) return '自由Pay-設定異動';
     if (this.isAddOnMode) return '自由Pay-加碼申購';
     return '自由Pay-基金申購';
   }
@@ -276,7 +271,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   get transactionTypeLabel(): string {
     if (this.isRedeemMode) return '贖回';
-    if (this.isModifyMode) return '異動設定';
     return this.isAddOnMode ? '加碼' : '新申購';
   }
 
@@ -298,12 +292,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       return [
         '提醒您，若超過本營業日交易時間14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。',
         '贖回款項入帳時間依各基金公司作業而定。'
-      ];
-    }
-
-    if (this.isModifyMode) {
-      return [
-        '提醒您，若超過本營業日交易時間14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。'
       ];
     }
 
@@ -940,10 +928,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return Number(value || 0).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 4 });
   }
 
-  trackStep(_: number, step: { key: DemoStep }): DemoStep {
-    return step.key;
-  }
-
   private numericAmountValidators(min: number): ValidatorFn[] {
     return [
       Validators.required,
@@ -968,10 +952,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
       this.form.controls.ratio.updateValueAndValidity({ emitEvent: false });
     } else {
       this.applyPayModeValidators();
-    }
-
-    if (this.isModifyMode && this.selectedContract) {
-      this.applyContractSettings(this.selectedContract);
     }
   }
 
@@ -1068,32 +1048,6 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     this.redeemMode = null;
     this.partialRedeemInputMode = 'amount';
     this.selectedBatchIds.clear();
-  }
-
-  private applyContractSettings(contract: Contract): void {
-    this.payActive = true;
-    this.payMode = contract.payMode;
-    this.form.controls.amount.clearValidators();
-    this.form.controls.amount.setValue(contract.costBasis, { emitEvent: false });
-    this.form.controls.amount.updateValueAndValidity({ emitEvent: false });
-    this.form.controls.monthlyPay.setValue(contract.payMode === 'amount' ? contract.monthlyPay : null, { emitEvent: false });
-    this.form.controls.ratio.setValue(contract.payMode === 'ratio' ? contract.annualRate : null, { emitEvent: false });
-    this.form.controls.day.setValue(contract.payDay, { emitEvent: false });
-
-    this.thresholdEnabled = contract.thresholdMode !== 'none';
-    this.thresholdMode = contract.thresholdMode === 'unlock' ? 'unlock' : 'protect';
-    this.thresholdValue = contract.thresholdMode === 'none' ? 80 : contract.thresholdValue;
-    const presets = this.thresholdMode === 'protect'
-      ? this.protectThresholdOptions
-      : this.unlockPresetThresholdOptions;
-    this.thresholdCustomActive = contract.thresholdMode !== 'none'
-      && !presets.includes(contract.thresholdValue);
-    this.form.controls.thresholdCustom.setValue(
-      this.thresholdCustomActive ? contract.thresholdValue : (this.thresholdMode === 'protect' ? 80 : 110),
-      { emitEvent: false }
-    );
-    this.applyThresholdCustomValidators();
-    this.applyPayModeValidators();
   }
 
 }

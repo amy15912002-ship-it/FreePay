@@ -1,16 +1,6 @@
 <div class="flow-page-title">{{ flowPageTitle }}</div>
 
-<div class="ds-stepper">
-  <div
-    class="ds-stepper__step"
-    *ngFor="let step of steps; let i = index; trackBy: trackStep"
-    [class.is-reached]="i <= stepIndex"
-    [class.is-current]="i === stepIndex"
-  >
-    <span class="ds-stepper__label">{{ step.label }}</span>
-    <span class="ds-stepper__marker">{{ i + 1 }}</span>
-  </div>
-</div>
+<fp-stepper [steps]="steps" [currentIndex]="stepIndex"></fp-stepper>
 
 <div class="page-body">
   <main class="main-content">
@@ -191,7 +181,7 @@
       </ng-container>
 
       <ng-template #purchaseSettings>
-      <section class="block" *ngIf="!isModifyMode">
+      <section class="block">
         <div class="block-header">
           <h2 class="block-title">{{ amountSectionTitle }}</h2>
         </div>
@@ -570,7 +560,7 @@
         <ng-template #purchaseConfirmSummary>
           <div class="sum-table">
             <div class="sum-row"><span>交易類型</span><strong>{{ transactionTypeLabel }}</strong></div>
-            <div class="sum-row" *ngIf="!isModifyMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
+            <div class="sum-row"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
             <ng-container *ngIf="!isAddOnMode">
               <div class="sum-row" *ngIf="payMode === 'amount'">
                 <span>每月 Pay 金額</span>
@@ -581,7 +571,7 @@
                 <strong class="hl">年化 {{ form.controls.ratio.value }}%</strong>
               </div>
               <div class="sum-row"><span>自由 Pay 基準日</span><strong>每月 {{ form.controls.day.value }} 日</strong></div>
-              <div class="sum-row" *ngIf="!isModifyMode"><span>預計首次基準日</span><strong>{{ scenario?.firstRdmDate }}</strong></div>
+              <div class="sum-row"><span>預計首次基準日</span><strong>{{ scenario?.firstRdmDate }}</strong></div>
               <div class="sum-row"><span>觸發門檻</span><strong>{{ thresholdText }}</strong></div>
             </ng-container>
           </div>
@@ -681,10 +671,10 @@
           <div class="sum-row" *ngIf="isRedeemMode"><span>贖回單位數</span><strong>{{ formatUnits(redeemUnits) }}</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode"><span>約當市值</span><strong class="hl">{{ formatMoney(redeemReferenceAmount, selectedContract?.currencyCode) }}</strong></div>
           <div class="sum-row" *ngIf="isRedeemMode"><span>含 Pay 報酬率</span><strong [ngClass]="rateClass(redeemReferenceReturnRate)">{{ formatRate(redeemReferenceReturnRate) }}</strong></div>
-          <div class="sum-row" *ngIf="!isModifyMode && !isRedeemMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
+          <div class="sum-row" *ngIf="!isRedeemMode"><span>申購金額</span><strong class="hl">{{ formatMoney(amount) }}</strong></div>
           <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode && payMode === 'amount'"><span>每月 Pay 金額</span><strong class="hl">{{ formatMoney(monthlyPay) }}</strong></div>
           <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode && payMode === 'ratio'"><span>每月 Pay 比例</span><strong class="hl">年化 {{ form.controls.ratio.value }}%</strong></div>
-          <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode"><span>{{ isModifyMode ? '自由 Pay 基準日' : '首次基準生效日' }}</span><strong>{{ isModifyMode ? ('每月 ' + form.controls.day.value + ' 日') : scenario?.firstRdmDate }}</strong></div>
+          <div class="sum-row" *ngIf="!isAddOnMode && !isRedeemMode"><span>首次基準生效日</span><strong>{{ scenario?.firstRdmDate }}</strong></div>
           <div class="sum-row"><span>{{ isRedeemMode ? '收款帳號' : '扣款帳號' }}</span><strong>{{ scenario?.bank }}<br>{{ scenario?.acc }}</strong></div>
         </div>
         <div class="done-actions ds-button-row">

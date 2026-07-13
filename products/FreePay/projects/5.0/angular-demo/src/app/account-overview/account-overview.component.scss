@@ -35,6 +35,15 @@
   gap: 40px;
 }
 
+// standalone「異動設定」頁的頁標題（對齊申購流程 flow-page-title 樣式）
+.ov-flow-title {
+  color: var(--color-text-heading);
+  font-size: 20px;
+  font-weight: 700;
+  line-height: 1.35;
+  text-align: center;
+}
+
 // ── Section / Scroll wrap：垂直容器，gap 12 ────────────────────
 
 .ov-section,
@@ -1433,7 +1442,16 @@
 
 .setting-edit-toolbar {
   display: flex;
-  justify-content: flex-end;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+}
+
+.setting-edit-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .setting-edit-toggle-all {
@@ -1472,6 +1490,7 @@
   border-radius: 8px;
   background: var(--color-bg-base);
   overflow: hidden;
+  scroll-margin-top: 88px; // 捲入時避開 sticky header（桌機 72／手機 56）
 
   &.is-modified {
     border-color: var(--color-action-primary);
@@ -1523,6 +1542,18 @@
   border-bottom-color: var(--color-border-default);
 }
 
+// 單筆入口聚焦：短暫 outline 高亮（outline 不受卡片 overflow:hidden 裁切）
+.setting-edit-card.is-focus-highlight {
+  outline: 3px solid transparent;
+  outline-offset: 2px;
+  animation: setting-focus-pulse 1.6s ease-out;
+}
+
+@keyframes setting-focus-pulse {
+  0% { outline-color: var(--color-brand-tertiary-300); }
+  100% { outline-color: transparent; }
+}
+
 .setting-edit-id {
   grid-area: id;
   display: flex;
@@ -1556,6 +1587,9 @@
   align-items: center;
   gap: 8px 26px;
   color: var(--color-text-secondary);
+  background: var(--color-bg-base);
+  border-radius: 8px;
+  padding: 12px 16px;
 }
 
 .setting-edit-summary-kv {
@@ -2172,10 +2206,6 @@
 }
 
 @media (max-width: 767px) {
-  .setting-edit-toolbar {
-    justify-content: flex-end;
-  }
-
   .setting-edit-head,
   .setting-edit-head.has-state {
     grid-template-columns: minmax(0, 1fr) 24px;
@@ -2205,15 +2235,33 @@
       "state state";
   }
 
+  // 手機：單欄 label-value 列（對齊委託查詢 grid-body 手機卡片）
   .setting-edit-summary {
-    gap: 8px 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    padding: 0 14px;
   }
 
   .setting-edit-summary-kv {
-    flex: 1 1 50%;
-    min-width: 132px;
-    padding-right: 0;
+    width: 100%;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+    min-height: 52px;
+    padding: 10px 0;
     border-right: 0;
+    border-bottom: 1px solid var(--color-border-default);
+    font-size: 16px; // 對齊委託查詢 grid-body 值/label 字級
+
+    &:last-child { border-bottom: none; }
+
+    strong {
+      min-width: 0;
+      font-weight: 400; // 對齊委託查詢：值不加粗，靠顏色與 label 區分
+      text-align: right;
+      overflow-wrap: anywhere;
+    }
   }
 
   .setting-edit-panel {

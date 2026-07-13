@@ -1,10 +1,9 @@
 <div class="ov-shell">
 
-  <div class="ds-tab ds-tab--page" role="tablist">
+  <div class="ds-tab ds-tab--page" role="tablist" *ngIf="!standaloneChange">
     <button type="button" role="tab" class="ds-tab__item" [class.is-active]="activeTab === 'overview'" (click)="activeTab = 'overview'">帳戶總覽</button>
     <button type="button" role="tab" class="ds-tab__item" [class.is-active]="activeTab === 'order'" (click)="activeTab = 'order'">委託查詢/取消</button>
     <button type="button" role="tab" class="ds-tab__item" [class.is-active]="activeTab === 'profit'" (click)="activeTab = 'profit'">已實現損益</button>
-    <button type="button" role="tab" class="ds-tab__item" [class.is-active]="activeTab === 'change'" (click)="activeTab = 'change'">設定異動</button>
   </div>
 
   <div class="ov-tab-panel">
@@ -564,18 +563,13 @@
     <!-- ── tab 4：異動紀錄（全契約平鋪、無篩選） ── -->
     <ng-container *ngIf="activeTab === 'change'">
       <div class="ov-tab-stack">
-        <div class="ov-change-topbar">
+        <div class="ov-flow-title" *ngIf="standaloneChange">自由Pay-異動設定</div>
+        <div class="ov-change-topbar" *ngIf="changeView === 'history'">
           <div class="ov-change-topbar-left">
-            <div class="ds-segmented" role="radiogroup" aria-label="檢視切換">
-              <button type="button" role="radio" class="ds-segmented__item" [class.is-active]="changeView === 'settings'" [attr.aria-checked]="changeView === 'settings'" (click)="changeView = 'settings'">設定</button>
-              <button type="button" role="radio" class="ds-segmented__item" [class.is-active]="changeView === 'history'" [attr.aria-checked]="changeView === 'history'" (click)="changeView = 'history'">歷史</button>
-            </div>
-            <span class="ov-order-count" *ngIf="changeView === 'history'">{{ filteredChangeLogs.length }} 筆</span>
-            <span class="ov-order-count" *ngIf="changeView === 'settings'">
-              {{ settingsFunds.length }} 筆可異動契約・已修改 {{ modifiedSettingCount }} 筆
-            </span>
+            <button type="button" class="ds-text-link" (click)="changeView = 'settings'"><i class="bi bi-arrow-left" aria-hidden="true"></i> 返回</button>
+            <span class="ov-order-count">{{ filteredChangeLogs.length }} 筆</span>
           </div>
-          <div class="ov-change-search" *ngIf="changeView === 'history'">
+          <div class="ov-change-search">
             <i class="bi bi-search" aria-hidden="true"></i>
             <input type="text" [(ngModel)]="changeSearch" placeholder="搜尋基金代碼或名稱" autocomplete="off" aria-label="搜尋基金">
             <button type="button" class="ov-search-clear" *ngIf="changeSearch" (click)="changeSearch=''" aria-label="清除搜尋"><i class="bi bi-x-circle-fill"></i></button>
@@ -615,36 +609,42 @@
           </div>
         </section>
 
-        <div class="ds-stepper" *ngIf="changeView === 'settings'">
-          <div
-            class="ds-stepper__step"
-            *ngFor="let step of expandedSettingSteps; let i = index; trackBy: trackExpandedSettingStep"
-            [class.is-reached]="i <= expandedSettingStepIndex"
-            [class.is-current]="i === expandedSettingStepIndex"
-          >
-            <span class="ds-stepper__label">{{ step.label }}</span>
-            <span class="ds-stepper__marker">{{ i + 1 }}</span>
-          </div>
-        </div>
+        <fp-stepper
+          *ngIf="changeView === 'settings'"
+          [steps]="expandedSettingSteps"
+          [currentIndex]="expandedSettingStepIndex"
+        ></fp-stepper>
 
         <section class="ov-order-section" aria-label="批次編輯設定" *ngIf="changeView === 'settings' && expandedSettingStep === 'edit'">
           <div class="setting-edit-toolbar">
-            <button
-              class="setting-edit-toggle-all"
-              type="button"
-              [disabled]="settingsFunds.length === 0"
-              (click)="toggleAllSettingRows()"
-              [attr.aria-label]="allSettingRowsExpanded ? '全部收合' : '全部展開'"
-            >
-              <span>全部</span>
-              <i class="bi" [ngClass]="allSettingRowsExpanded ? 'bi-chevron-up' : 'bi-chevron-down'" aria-hidden="true"></i>
-            </button>
+            <span class="ov-order-count">{{ settingsFunds.length }} 筆可異動契約・已修改 {{ modifiedSettingCount }} 筆</span>
+            <div class="setting-edit-toolbar-actions">
+              <button
+                class="ds-action-button ds-action-button--sm"
+                mat-stroked-button
+                color="primary"
+                type="button"
+                (click)="changeView = 'history'"
+              >異動紀錄</button>
+              <button
+                class="setting-edit-toggle-all"
+                type="button"
+                [disabled]="settingsFunds.length === 0"
+                (click)="toggleAllSettingRows()"
+                [attr.aria-label]="allSettingRowsExpanded ? '全部收合' : '全部展開'"
+              >
+                <span>全部</span>
+                <i class="bi" [ngClass]="allSettingRowsExpanded ? 'bi-chevron-up' : 'bi-chevron-down'" aria-hidden="true"></i>
+              </button>
+            </div>
           </div>
           <div class="setting-edit-list">
             <article class="setting-edit-card"
               *ngFor="let f of settingsFunds; trackBy: trackByFund"
+              [id]="'setting-card-' + f.id"
               [class.is-expanded]="isSettingExpanded(f.id)"
-              [class.is-modified]="isSettingDraftModified(f.contracts[0])">
+              [class.is-modified]="isSettingDraftModified(f.contracts[0])"
+              [class.is-focus-highlight]="highlightFundId === f.id">
               <ng-container *ngIf="settingDraftOf(f.contracts[0]) as draft">
                 <button
                   class="setting-edit-head"

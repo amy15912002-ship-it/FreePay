@@ -9,6 +9,7 @@ const routes: Routes = [
   { path: '', redirectTo: 'demo/freepay-intro', pathMatch: 'full' },
   { path: 'demo/freepay-intro', component: FreepayIntroComponent },
   { path: 'demo/overview', component: AccountOverviewComponent },
+  { path: 'demo/change-settings', component: AccountOverviewComponent, data: { standaloneChange: true } },
   { path: 'demo/search', component: FundSelectComponent },
   { path: 'demo/flow', component: DemoShellComponent },
   { path: '**', redirectTo: 'demo/freepay-intro' }

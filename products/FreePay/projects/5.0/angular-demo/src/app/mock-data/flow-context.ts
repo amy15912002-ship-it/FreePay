@@ -1,4 +1,4 @@
-export type EntryMode = 'new' | 'addOn' | 'modify' | 'redeem';
+export type EntryMode = 'new' | 'addOn' | 'redeem';
 
 export interface FlowContext {
   mode: EntryMode;
@@ -7,5 +7,5 @@ export interface FlowContext {
 }
 
 export function isEntryMode(value: string | null): value is EntryMode {
-  return value === 'new' || value === 'addOn' || value === 'modify' || value === 'redeem';
+  return value === 'new' || value === 'addOn' || value === 'redeem';
 }

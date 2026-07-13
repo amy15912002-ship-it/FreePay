@@ -183,18 +183,14 @@ $freepay-theme: mat.define-light-theme((
   --color-border-strong: var(--color-neutral-200);
   --color-action-primary: var(--color-brand-primary-400);
   --color-input-bg: var(--color-neutral-0);
-  --color-input-bg-disabled: var(--color-neutral-100);
   --color-input-border-default: var(--color-neutral-200);
   --color-input-border-hover: var(--color-neutral-300);
   --color-input-border-focus: var(--color-brand-tertiary-300);
   --color-input-border-error: var(--color-brand-primary-400);
-  --color-input-border-disabled: var(--color-neutral-150);
   --color-input-text: var(--color-neutral-900);
   --color-input-placeholder: var(--color-neutral-400);
-  --color-input-text-disabled: var(--color-neutral-250);
   --color-input-label: var(--color-neutral-600);
   --color-input-label-error: var(--color-brand-primary-600);
-  --color-input-label-disabled: var(--color-neutral-250);
   --color-input-helper: var(--color-neutral-400);
   --color-input-helper-error: var(--color-brand-primary-600);
   --color-input-shadow-focus: 0 0 0 3px var(--color-brand-tertiary-50);
@@ -350,6 +346,24 @@ textarea {
 }
 
 .ds-text-button:hover {
+  color: var(--color-text-primary);
+}
+
+/* §3.1 文字連結：導向另一頁／檢視的 Text 變體。文字＋箭頭——前進尾隨 bi-chevron-right、返回前導 bi-chevron-left。 */
+.ds-text-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: var(--color-neutral-800);
+  font-size: 14px;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.ds-text-link:hover {
   color: var(--color-text-primary);
 }
 
@@ -522,7 +536,7 @@ textarea {
   color: var(--color-input-text);
 }
 
-// ── Input（輸入框）元件 — DesignSystem §2.1 ──
+// ── Input（輸入框）元件 — DesignSystem §3.11 ──
 // 原生 input + token；標題置頂；外框 / 底線兩變體（設計師依版面選用）
 .fp-field {
   display: flex;
@@ -720,7 +734,7 @@ textarea {
 .fp-site-nav-action {
   display: inline-flex;
   align-items: center;
-  color: var(--color-neutral-150) !important;
+  color: var(--color-brand-secondary-400) !important;
   font-size: 16px;
   font-weight: 700;
   text-decoration: none;
@@ -729,7 +743,7 @@ textarea {
 
 .fp-site-nav-action:hover,
 .fp-site-nav-action:focus-visible {
-  color: var(--color-neutral-0) !important;
+  color: var(--color-brand-secondary-300) !important;
 }
 
 .fp-site-login {
@@ -867,7 +881,7 @@ textarea {
   .fp-site-nav-action {
     padding: 12px 0;
     border-bottom: 1px solid color-mix(in srgb, var(--color-neutral-0) 8%, transparent);
-    color: var(--color-neutral-150) !important;
+    color: var(--color-brand-secondary-400) !important;
   }
 
   .fp-site-login--text {
@@ -971,6 +985,9 @@ table { font-variant-numeric: tabular-nums; }
 // Stepper（步驟指示條）：原生步驟指示，零 Material。標準見 DesignSystem.md §3.9。
 // 純視覺進度條——內容由頁面 *ngIf 自控，不投影進 stepper。步驟不可點（導覽走頁面上一步／下一步鈕）。
 // 標題在圖標上方；一律顯示數字（無勾）；未進入＝實心淺灰、已到達＝填藍綠、當前＝數字放大。
+// fp-stepper host 需 block 化，內部 .ds-stepper 的 margin:0 auto 置中才生效
+fp-stepper { display: block; }
+
 .ds-stepper {
   --ds-stepper-circle: 28px;
   display: flex;
@@ -1035,24 +1052,89 @@ table { font-variant-numeric: tabular-nums; }
   color: var(--color-text-on-brand);
 }
 
-// 當前步驟（輸入中）：數字圖標放大、標題反白加粗
+// 當前步驟：數字圖標放大（標題加粗見下）
 .ds-stepper__step.is-current .ds-stepper__marker {
   transform: scale(1.3);
 }
 
-.ds-stepper__step.is-current .ds-stepper__label {
+// 已到達（含已完成與當前）標題同圖標＝藍綠；當前再加粗以示所在
+.ds-stepper__step.is-reached .ds-stepper__label {
   color: var(--color-brand-tertiary-300);
+}
+
+.ds-stepper__step.is-current .ds-stepper__label {
   font-weight: 700;
 }
 
-@media (max-width: 767px) {
-  .ds-stepper { --ds-stepper-circle: 24px; width: 100%; padding: 10px var(--page-gutter) 12px; }
-  .ds-stepper__marker { font-size: 12px; }
-  .ds-stepper__label { font-size: 12px; }
-}
+// 手機精簡版預設隱藏（桌機顯示全步驟並列）
+.ds-stepper__mobile { display: none; }
 
-@media (max-width: 480px) {
-  .ds-stepper { --ds-stepper-circle: 20px; padding: 10px var(--page-gutter) 20px; }
+@media (max-width: 767px) {
+  // 手機改精簡版：當前步驟 ＋ 進度條 ＋ N/總數，取代全步驟並列
+  .ds-stepper {
+    display: block;
+    width: 100%;
+    padding: 10px var(--page-gutter) 14px;
+  }
+
+  .ds-stepper__step { display: none; }
+  .ds-stepper__mobile { display: block; }
+
+  .ds-stepper__mobile-row {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .ds-stepper__mobile-num {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--color-brand-tertiary-300);
+    color: var(--color-text-on-brand);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .ds-stepper__mobile-label {
+    min-width: 0;
+    color: var(--color-brand-tertiary-300);
+    font-size: 16px;
+    font-weight: 700;
+  }
+
+  .ds-stepper__mobile-count {
+    flex: 0 0 auto;
+    margin-left: auto;
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    font-weight: 500;
+
+    b {
+      color: var(--color-brand-tertiary-300);
+      font-weight: 700;
+    }
+  }
+
+  .ds-stepper__mobile-track {
+    margin-top: 10px;
+    height: 6px;
+    border-radius: 999px;
+    background: var(--color-border-strong);
+    overflow: hidden;
+  }
+
+  .ds-stepper__mobile-fill {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background: var(--color-brand-tertiary-300);
+    transition: width .25s ease;
+  }
 }
 
 // Modal（資訊型）：白底、標題＋關閉、內容、單顆「我知道了」。標準見 DesignSystem.md §3.10。

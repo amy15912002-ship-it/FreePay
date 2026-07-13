@@ -19,6 +19,7 @@ import { ConfirmModalComponent } from './confirm-modal/confirm-modal.component';
 import { FreepayIntroComponent } from './freepay-intro/freepay-intro.component';
 import { FooterComponent } from './footer/footer.component';
 import { SharedNotesComponent } from './shared-notes/shared-notes.component';
+import { StepperComponent } from './stepper/stepper.component';
 import { ThousandsDirective } from './thousands.directive';
 
 @NgModule({
@@ -32,6 +33,7 @@ import { ThousandsDirective } from './thousands.directive';
     FreepayIntroComponent,
     FooterComponent,
     SharedNotesComponent,
+    StepperComponent,
     ThousandsDirective
   ],
   imports: [
