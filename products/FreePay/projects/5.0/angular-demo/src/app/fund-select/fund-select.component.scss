@@ -471,6 +471,11 @@
   color: var(--color-action-primary);
 }
 
+.rating-score-max {
+  color: var(--color-action-primary);
+  font-weight: 700;
+}
+
 .fs-empty {
   padding: 40px 0;
   text-align: center;
@@ -678,17 +683,7 @@
     }
   }
 
-  ::ng-deep .fs-filter-sheet-body {
-    .filter-chips {
-      gap: 6px;
-    }
-
-    .filter-chips .chip {
-      min-height: 30px;
-      padding: 6px 7px;
-      font-size: 12px;
-    }
-  }
+  // sheet 內 chip 小尺寸由全域 .filter-chips--sheet 提供（DesignSystem §3.3），模板以 inSheet 旗標掛類
 
   .fs-filter-sheet-actions {
     display: grid;
@@ -902,37 +897,23 @@
     }
   }
 
-  .fs-fund-card {
-    border: 1px solid var(--color-border-default);
-    border-radius: 12px;
-    background: var(--color-bg-subtle);
-    overflow: hidden;
+  // 卡殼／代碼列／名稱走全域 grid-table 手機卡（DesignSystem §6.9），此處只留比較卡特有部位
+
+  // 顯式 areas 同帳總 --fund 手機（"mpay factions" 底列模式）：metric 區與 navdate/actions 底列
+  .fs-fund-card .grid-main {
+    grid-template-areas:
+      "id id"
+      "metrics metrics"
+      "navdate actions";
+    gap: 12px 8px;
+    padding: 14px 14px 16px;
   }
 
-  .fs-fund-card-head {
-    display: block;
-    width: 100%;
-    padding: 16px 16px 12px;
-  }
-
-  .fs-fund-card-top {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: var(--color-text-secondary);
-    font-size: 14px;
-  }
-
-  .fs-fund-card-name {
-    display: block;
-    margin: 0 0 14px;
-    color: var(--color-text-primary);
-    font-size: 16px;
-    font-weight: 700;
-    line-height: 1.4;
-  }
+  // 展開鈕靠右（帳總以 grid-expand-btn--mobile 達成，此處直接推齊）
+  .fs-fund-card .grid-code-row .ds-icon-button { margin-left: auto; }
 
   .fs-fund-card-metrics {
+    grid-area: metrics; // 比較卡特有 metric 區（非 .grid-body，不套白底資料塊）
     display: grid;
     grid-template-columns: repeat(3, 1fr);
   }
@@ -957,59 +938,35 @@
     .m-val {
       color: var(--color-text-primary);
       font-size: 16px;
-      font-weight: 700;
+      font-weight: 500;
       white-space: nowrap;
 
       &.val-up { color: var(--color-price-up); }
       &.val-down { color: var(--color-price-down); }
+      &.rating-score-max { color: var(--color-action-primary); }
     }
   }
 
-  .fs-fund-card-foot {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 12px 16px 16px;
-
-    .fs-fund-card-navdate {
-      color: var(--color-text-primary);
-      font-size: 14px;
-
-      .m-lbl {
-        margin-right: 8px;
-        color: var(--color-text-secondary);
-      }
-    }
+  // 底列：navdate 左格、操作鈕右格（同帳總 mpay/factions）
+  .fs-fund-card .grid-actions {
+    grid-area: actions;
+    justify-content: flex-end;
+    gap: 8px;
   }
 
-  .fs-fund-card-detail {
-    margin: 0 14px 16px;
-    padding: 0 14px;
-    border-radius: 8px;
-    background: var(--color-bg-base);
-  }
+  .fs-fund-card-navdate {
+    grid-area: navdate;
+    align-self: center;
+    color: var(--color-text-primary);
+    font-size: 14px;
 
-  .fs-fund-card-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding: 13px 0;
-
-    &:not(:last-child) {
-      border-bottom: 1px solid var(--color-border-default);
-    }
-
-    .r-lbl {
+    .m-lbl {
+      margin-right: 8px;
       color: var(--color-text-secondary);
-      font-size: 14px;
-    }
-
-    .r-val {
-      color: var(--color-text-primary);
-      font-size: 16px;
-
-      &.val-up { color: var(--color-price-up); }
-      &.val-down { color: var(--color-price-down); }
     }
   }
+
+  // 展開明細白塊（.grid-extra／.grid-extra-kv）由全域 grid-table 基底提供（DesignSystem §6.10）
+  // 滿分評等橙色強調（同桌機表格／卡頭 m-val 的 rating-score-max）
+  .fs-fund-card .grid-extra-kv strong.rating-score-max { color: var(--color-action-primary); }
 }

@@ -24,7 +24,8 @@ type SortKey =
   | 'perf.ytd' | 'perf.m3' | 'perf.m6' | 'perf.y1' | 'perf.y2' | 'perf.y3' | 'perf.y5' | 'stdDev'
   | 'roi.0' | 'roi.1' | 'roi.2' | 'roi.3' | 'roi.4'
   | 'drop.0' | 'drop.1' | 'drop.2' | 'drop.3' | 'drop.4'
-  | 'navDate' | 'nav' | 'navChange' | 'navChangePct' | 'currency' | 'risk' | 'lipper';
+  | 'navDate' | 'nav' | 'navChange' | 'navChangePct' | 'currency' | 'risk' | 'lipper'
+  | 'stableReturn' | 'capitalPreservation' | 'esgScore';
 type PerfKey = keyof Fund['perf'];
 type SortOption = { key: SortKey; label: string };
 
@@ -47,6 +48,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   get searchNotes(): string[] {
     return [
       '波動度以近 1 年年化標準差表示，數值越大代表淨值波動程度越高。',
+      '理柏基金評級為投資人選擇基金的重要參考，該機構將全球基金的總資產、平均年酬率、波動性、相對同類型基金的表現，以量化的方式彙總呈現。理柏提供在台灣註冊銷售的基金評級共有三種，包括「總回報、穩定回報、保本能力」，各評級指標依表現差異分五等；領先的 20% 評級為 5，之後的 20% 評級為 4，中間的 20% 評級為 3，再之後的 20% 評級為 2，最後的 20% 評級為 1。',
       `資料來源: Lipper & 投信投顧公會 & 台灣集中保管結算所。資料更新日期：${this.latestNavDate}。`,
       '各系列基金之淨值是由Lipper(資訊源)所提供，淨值可能因系統更新作業與實際狀況有所差異，相關淨值僅供參考，各系列基金之申購/贖回/轉換淨值仍應以台灣集中保管結算所資料為準，歡迎您至集保網站查詢(www.tdcc.com.tw)。'
     ];
@@ -79,7 +81,8 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     { key: 'drop.1', label: '2022' },
     { key: 'drop.2', label: '2023' },
     { key: 'drop.3', label: '2024' },
-    { key: 'drop.4', label: '2025' }
+    { key: 'drop.4', label: '2025' },
+    { key: 'stdDev', label: '波動度' }
   ];
   readonly navSortOptions: SortOption[] = [
     { key: 'navChangePct', label: '日漲跌幅' },
@@ -89,9 +92,11 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     { key: 'currency', label: '幣別' }
   ];
   readonly ratingSortOptions: SortOption[] = [
-    { key: 'risk', label: '風險等級' },
     { key: 'lipper', label: '理柏總回報' },
-    { key: 'stdDev', label: '波動度' }
+    { key: 'stableReturn', label: '穩定回報' },
+    { key: 'capitalPreservation', label: '保本能力' },
+    { key: 'risk', label: '風險等級' },
+    { key: 'esgScore', label: 'ESG評分' }
   ];
 
   get pricingCurrencies(): PricingCcyOption[] {
@@ -111,6 +116,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   readonly searchMinChars = 2;
   private searchDebounce: any;   // setTimeout handle（瀏覽器/Node 型別歧義，用 any 簡化）
   brandKeyword = '';
+  groupKeyword = '';
   expandedFilters: Record<CollapsibleFilter, boolean> = {
     category: false,
     pricingCcy: false,
@@ -261,6 +267,12 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     return this.brands.filter(brand => brand.toLowerCase().includes(kw));
   }
 
+  get filteredGroups(): string[] {
+    const kw = this.groupKeyword.trim().toLowerCase();
+    if (!kw) return this.groups;
+    return this.groups.filter(group => group.toLowerCase().includes(kw));
+  }
+
   get visibleCategories(): FundCategory[] {
     return this.categories;
   }
@@ -274,7 +286,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   }
 
   get visibleGroups(): string[] {
-    return this.groups;
+    return this.filteredGroups;
   }
 
   get emptyStateMessage(): string {
@@ -302,6 +314,9 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     if (key === 'currency') return f.pricingCurrency;
     if (key === 'risk') return f.risk;
     if (key === 'lipper') return f.lipper;
+    if (key === 'stableReturn') return this.stableReturnRating(f);
+    if (key === 'capitalPreservation') return this.capitalPreservationRating(f);
+    if (key === 'esgScore') return this.esgScore(f);
     return 0;
   }
 
@@ -351,6 +366,25 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     return f.yearRoi[this.years.length - 1] ?? 0;
   }
 
+  stableReturnRating(f: Fund): number {
+    const positiveYears = f.yearRoi.filter(value => value > 0).length;
+    return this.clampRating(Math.round((f.lipper + positiveYears) / 2));
+  }
+
+  capitalPreservationRating(f: Fund): number {
+    const worstDrop = Math.max(...f.yearMaxDrop.map(value => Math.abs(value)));
+    if (f.stdDev <= 6 && worstDrop <= 8) return 5;
+    if (f.stdDev <= 10 && worstDrop <= 12) return 4;
+    if (f.stdDev <= 15 && worstDrop <= 18) return 3;
+    if (f.stdDev <= 22 && worstDrop <= 26) return 2;
+    return 1;
+  }
+
+  esgScore(f: Fund): number {
+    const seed = Array.from(f.fundId).reduce((sum, char) => sum + char.charCodeAt(0), 0);
+    return Number((60 + (seed % 220) / 10).toFixed(1));
+  }
+
   mobileSortSummaryLabel(): string {
     if (!this.shouldShowMobileSortSummary()) return '';
     const option = this.mobileSortOptions.find(opt => opt.key === this.sortKey);
@@ -365,6 +399,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
 
   mobileSortSummaryClass(f: Fund): string {
     if (!this.shouldShowMobileSortSummary()) return '';
+    if (this.isRatingScoreKey(this.sortKey)) return this.ratingScoreClass(Number(this.fieldValue(f, this.sortKey)));
     if (!this.isSignedSortKey(this.sortKey)) return '';
     return this.numClass(Number(this.fieldValue(f, this.sortKey)));
   }
@@ -375,7 +410,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     if (this.activeTab === 'perf') return !['perf.ytd', 'perf.m3', 'perf.m6'].includes(this.sortKey);
     if (this.activeTab === 'nav') return !['nav', 'navChange', 'navChangePct', 'navDate'].includes(this.sortKey);
     if (this.activeTab === 'roi') return !['roi.4', 'roi.3', 'roi.2'].includes(this.sortKey);
-    if (this.activeTab === 'drop') return !['drop.4', 'drop.3', 'drop.2'].includes(this.sortKey);
+    if (this.activeTab === 'drop') return !['drop.4', 'drop.3', 'stdDev'].includes(this.sortKey);
     if (this.activeTab === 'rating') return false;
     return false;
   }
@@ -388,14 +423,23 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
       || key === 'navChangePct';
   }
 
+  private isRatingScoreKey(key: SortKey): boolean {
+    return key === 'lipper' || key === 'stableReturn' || key === 'capitalPreservation';
+  }
+
   private formatSortValue(f: Fund, key: SortKey): string {
     const value = this.fieldValue(f, key);
     if (key === 'currency' || key === 'navDate' || key === 'fundId' || key === 'name' || key === 'risk') {
       return String(value);
     }
     if (key === 'nav' || key === 'navChange') return this.fmtNav(Number(value));
-    if (key === 'lipper' || key === 'stdDev') return String(value);
+    if (key === 'lipper' || key === 'stdDev' || key === 'stableReturn' || key === 'capitalPreservation') return String(value);
+    if (key === 'esgScore') return Number(value).toFixed(1);
     return this.fmtPct(Number(value));
+  }
+
+  private clampRating(value: number): number {
+    return Math.min(5, Math.max(1, value));
   }
 
   roiSortKey(index: number): SortKey {
@@ -465,6 +509,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   clearFilters(): void {
     // 關鍵字搜尋與篩選脫鉤：清除篩選不動關鍵字（要清用搜尋框的 ⊗）
     this.brandKeyword = '';
+    this.groupKeyword = '';
     this.filterPanelOpen = false;
     this.expandedFilters = {
       category: false,
@@ -514,6 +559,9 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.expandedFilters[group] = !this.expandedFilters[group];
     if (group === 'brand' && !this.expandedFilters.brand) {
       this.brandKeyword = '';
+    }
+    if (group === 'group' && !this.expandedFilters.group) {
+      this.groupKeyword = '';
     }
     this.scheduleOverflowCheck();
   }
@@ -614,6 +662,10 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
 
   numClass(n: number): string {
     return n > 0 ? 'val-up' : n < 0 ? 'val-down' : '';
+  }
+
+  ratingScoreClass(score: number): string {
+    return score === 5 ? 'rating-score-max' : '';
   }
 
   sortIconClass(key: SortKey): string {

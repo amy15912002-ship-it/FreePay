@@ -294,6 +294,7 @@
               </div>
             </div>
           </article>
+          <div class="grid-empty" *ngIf="altOrders.length === 0">查無資料</div>
         </div>
       </section>
 
@@ -356,6 +357,7 @@
               </div>
             </div>
           </article>
+          <div class="grid-empty" *ngIf="chgOrders.length === 0">查無資料</div>
         </div>
       </section>
 
@@ -401,6 +403,7 @@
               </div>
             </div>
           </article>
+          <div class="grid-empty" *ngIf="rdmOrders.length === 0">查無資料</div>
         </div>
       </section>
 
@@ -466,7 +469,7 @@
           <h2 class="block-title" id="ov-profit-detail-title">明細</h2>
         </div>
 
-        <div class="grid-table grid-table--fund grid-table--profit" *ngIf="profitRows.length > 0">
+        <div class="grid-table grid-table--fund grid-table--profit">
           <div class="grid-head">
             <div class="grid-id-head">基金名稱</div>
             <div class="grid-body grid-body--row">
@@ -550,9 +553,8 @@
               </div>
             </div>
           </article>
+          <div class="grid-empty" *ngIf="profitRows.length === 0">查無資料</div>
         </div>
-
-        <div class="ov-empty" *ngIf="profitRows.length === 0">查無已實現損益資料</div>
 
         <fp-notes [notes]="profitNotes"></fp-notes>
       </section>
@@ -563,7 +565,7 @@
     <!-- ── tab 4：異動紀錄（全契約平鋪、無篩選） ── -->
     <ng-container *ngIf="activeTab === 'change'">
       <div class="ov-tab-stack">
-        <div class="ov-flow-title" *ngIf="standaloneChange">自由Pay-異動設定</div>
+        <div class="ov-flow-title" *ngIf="standaloneChange">{{ changeView === 'history' ? '自由Pay-異動紀錄' : '自由Pay-異動設定' }}</div>
         <div class="ov-change-topbar" *ngIf="changeView === 'history'">
           <div class="ov-change-topbar-left">
             <button type="button" class="ds-text-link" (click)="changeView = 'settings'"><i class="bi bi-arrow-left" aria-hidden="true"></i> 返回</button>
@@ -605,11 +607,12 @@
                 </div>
               </div>
             </article>
-            <div class="grid-empty" *ngIf="filteredChangeLogs.length === 0">查無異動紀錄</div>
+            <div class="grid-empty" *ngIf="filteredChangeLogs.length === 0">查無資料</div>
           </div>
         </section>
 
         <fp-stepper
+          class="ov-flow-stepper"
           *ngIf="changeView === 'settings'"
           [steps]="expandedSettingSteps"
           [currentIndex]="expandedSettingStepIndex"
@@ -874,7 +877,7 @@
                   </div>
 
                   <div class="setting-edit-actions">
-                    <button class="ds-action-button ds-action-button--ghost" type="button" *ngIf="isSettingDraftModified(f.contracts[0], draft)" (click)="resetSettingDraft(f.contracts[0])">取消此筆修改</button>
+                    <button class="ds-action-button" mat-stroked-button type="button" *ngIf="isSettingDraftModified(f.contracts[0], draft)" (click)="resetSettingDraft(f.contracts[0])">取消此筆修改</button>
                   </div>
                 </div>
               </ng-container>
@@ -883,7 +886,7 @@
 
           <div class="setting-edit-bar" *ngIf="modifiedSettingCount > 0">
             <span>已修改 {{ modifiedSettingCount }} 筆</span>
-            <button class="ds-action-button ds-action-button--ghost" type="button" (click)="clearDraftsConfirmOpen = true">取消全部修改</button>
+            <button class="ds-action-button" mat-stroked-button type="button" (click)="clearDraftsConfirmOpen = true">取消全部修改</button>
             <button class="ds-action-button" mat-flat-button color="primary" type="button" [disabled]="!canSubmitExpandedSettings" (click)="openExpandedSettingsConfirm()">下一步</button>
           </div>
 
@@ -964,7 +967,7 @@
               <p>1. 本服務係由本公司提供基金定期贖回及相關設定服務，非基金配息。您可選擇每月 Pay 金額或年化 Pay 比例，系統將依基金最近可取得之淨值及參考匯率估算贖回單位數與約當金額；實際資料仍以基金公司、交易平台及集保結算所回覆資料為準。</p>
               <p>2. 同一基金不同交易幣別視為不同契約，各契約之投入成本、約當市值、Pay 設定、觸發門檻及贖回狀態均分別計算，不跨幣別合併。</p>
               <p>3. 每月 Pay 金額或年化 Pay 比例不得超過本公司設定之年化提領率上限。觸發門檻依 Pay 出基準日前一日最新可取得之市值資料判斷。</p>
-              <p>4. 設定異動於營業日 14:00 前送出，視為當日申請；14:00 以後送出，則視為次一營業日申請。異動生效後，後續 Pay 出將依新的設定執行。</p>
+              <p>4. 本服務可選擇設定觸發門檻。方式一為約當市值低於投入成本指定比例時暫停 Pay 出，待市值回升至門檻後恢復；方式二為約當市值超過投入成本指定比例的月份開始 Pay 出，若市值跌回門檻以下則暫停。兩種方式互斥，不可同時設定；若未設定觸發門檻，系統將依原 Pay 設定執行。觸發門檻係依 Pay 出基準日前一日最新可取得之市值資料判斷，並可能因淨值、匯率或資料時點不同而與實際成交結果有差異。</p>
               <p><strong>二、 免責聲明</strong></p>
               <p>本公司不保證本服務絕不發生中斷及錯誤等情況；所有設定與交易結果仍以交易平台、基金公司及集保結算所實際處理結果為準。</p>
             </div>
@@ -990,7 +993,7 @@
           <div class="setting-edit-bar">
             <span>共 {{ modifiedSettingCount }} 筆設定異動</span>
             <small class="setting-submit-hint" *ngIf="expandedSettingSubmitDisabled">{{ expandedSettingSubmitHint }}</small>
-            <button class="ds-action-button ds-action-button--ghost" type="button" (click)="backToExpandedSettingEdit()">上一步</button>
+            <button class="ds-action-button" mat-stroked-button type="button" (click)="backToExpandedSettingEdit()">上一步</button>
             <button class="ds-action-button" mat-flat-button color="primary" type="button" [disabled]="expandedSettingSubmitDisabled" (click)="submitExpandedSettings()">確認送出</button>
           </div>
         </section>

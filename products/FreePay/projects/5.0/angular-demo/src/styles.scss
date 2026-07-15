@@ -117,18 +117,14 @@ $freepay-theme: mat.define-light-theme((
   density: 0
 ));
 
+// 只留 AppModule 實際載入的元件 theme（button/checkbox/datepicker/form-field/input/radio）
 @include mat.core-theme($freepay-theme);
 @include mat.button-theme($freepay-theme);
-@include mat.button-toggle-theme($freepay-theme);
 @include mat.checkbox-theme($freepay-theme);
-@include mat.chips-theme($freepay-theme);
 @include mat.datepicker-theme($freepay-theme);
 @include mat.form-field-theme($freepay-theme);
 @include mat.input-theme($freepay-theme);
-@include mat.menu-theme($freepay-theme);
 @include mat.radio-theme($freepay-theme);
-@include mat.stepper-theme($freepay-theme);
-@include mat.tabs-theme($freepay-theme);
 
 :root {
   --font-primary: 'Noto Sans TC', sans-serif;
@@ -1172,6 +1168,171 @@ fp-stepper { display: block; }
   font-weight: 700;
 }
 
+// ════════════════════════════════════════════════════════════
+// 標準資料列 grid-table 基底（DesignSystem §6.9）
+//   桌機：表頭與每列共用同一 grid template -> 欄位天然對齊
+//   手機：grid-template-areas 轉單列卡片（卡殼同時供基金搜尋比較卡共用）
+//   欄寬／內容子欄數由各頁 .grid-table--<變體> modifier 定義
+// ════════════════════════════════════════════════════════════
+.grid-table { display: flex; flex-direction: column; }
+
+.grid-head {
+  display: grid;
+  align-items: center;
+  gap: 20px;
+  padding: 12px 0;
+  background: var(--color-neutral-150);
+  border-bottom: 2px solid var(--color-neutral-250);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+.grid-id-head { padding-left: 20px; }
+.grid-actions-head { text-align: center; }
+
+.grid-row { border-bottom: 1px solid var(--color-border-default); }
+
+// 斑馬紋（§6.4）：多列數據表偶數列灰底助橫向閱讀；grid-row 為 <article>，nth-of-type 跳過 grid-head(div)
+// 可展開表連 .grid-extra 一起上色，展開區與所屬列同底
+// 僅桌機／中屏：手機卡片不套（§6.4），且不得蓋掉展開白塊（§6.6）
+@media (min-width: 768px) {
+  .grid-row:nth-of-type(even) .grid-main,
+  .grid-row:nth-of-type(even) .grid-extra { background: var(--color-bg-subtle); }
+}
+
+.grid-main {
+  display: grid;
+  align-items: center;
+  gap: 20px;
+  padding: 20px 0;
+}
+
+.grid-id {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding-left: 20px;
+  min-width: 0;
+}
+.grid-code { font-size: 14px; color: var(--color-text-secondary); }
+.grid-name { font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--color-text-heading); }
+// 帳總/profit/異動歷史用 <strong> 當基金名（非 .grid-name span），統一 500、避免瀏覽器預設 700
+.grid-id strong { display: block; font-size: 16px; font-weight: 500; line-height: 1.4; color: var(--color-text-heading); }
+
+// 代碼列：code＋內聯小按鈕（明細/展開）
+.grid-code-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.grid-body {
+  display: grid;
+  align-items: center;
+  min-width: 0;
+
+  > span { min-width: 0; text-align: center; }
+}
+
+.grid-actions { display: flex; align-items: center; justify-content: center; }
+
+.grid-empty { padding: 40px 0; text-align: center; color: var(--color-text-secondary); }
+
+// 前導選取欄（多選列表，如委託查詢）：桌機最左固定窄欄、手機卡片頭 id 行左側
+.grid-select { display: flex; align-items: center; justify-content: center; }
+.grid-select-head { display: block; }
+
+// 內容欄雙行值（如生效日 + 委託日）：桌機置中堆疊；手機改拆成獨立列（見 grid-only-*）
+.grid-stack { display: flex; flex-direction: column; align-items: center; min-width: 0; }
+.grid-stack .grid-sub { margin-top: 4px; font-size: 14px; color: var(--color-text-secondary); }
+
+@media (max-width: 767px) {
+  .grid-table { gap: 12px; }
+  .grid-head { display: none; }
+
+  .grid-row {
+    border-bottom: 0;
+    border-radius: 12px;
+    background: var(--color-bg-subtle);
+    overflow: hidden;
+  }
+
+  .grid-main {
+    grid-template-columns: 1fr auto !important;
+    grid-template-areas: "id id" "body body" "actions actions";
+    gap: 10px;
+    padding: 14px;
+  }
+
+  .grid-id { grid-area: id; padding-left: 0; }
+
+  // 資料區包白底圓角塊（對齊帳總 ov-fund-extra）：灰卡片頭 + 白底資料塊
+  .grid-body {
+    grid-area: body;
+    grid-template-columns: 1fr !important;
+    gap: 0;
+    padding: 0 14px;
+    background: var(--color-bg-base);
+    border-radius: 8px;
+
+    > span {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      min-height: 52px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--color-border-default);
+      text-align: right;
+
+      &::before { content: attr(data-label); color: var(--color-text-secondary); text-align: left; }
+      &:last-child { border-bottom: none; }
+    }
+  }
+
+  .grid-actions { grid-area: actions; justify-content: flex-start; }
+
+  // 展開明細白塊（§6.10 grid-extra）：帳總／已實現損益／比較卡共用
+  .grid-extra {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    margin: 0 14px 16px;
+    padding: 0 14px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--color-bg-base);
+  }
+
+  .grid-extra-content {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
+    width: 100%;
+  }
+
+  .grid-extra-kv {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 52px;
+    padding: 10px 0;
+    border-bottom: 1px solid var(--color-border-default);
+    font-size: 14px;
+
+    &:last-child { border-bottom: 0; }
+
+    span { color: var(--color-text-secondary); }
+
+    strong {
+      color: var(--color-text-primary);
+      font-size: 16px;
+      font-weight: 500;
+
+      &.val-up { color: var(--color-price-up); }
+      &.val-down { color: var(--color-price-down); }
+    }
+  }
+}
+
 // Modal（資訊型）：白底、標題＋關閉、內容、單顆「我知道了」。標準見 DesignSystem.md §3.10。
 // 用於純說明（沒有要取消的東西）；確認/破壞性動作走確認型 Modal（另定）。
 .ds-modal-overlay {
@@ -1534,6 +1695,13 @@ fp-stepper { display: block; }
   border-color: var(--color-action-primary);
   background: var(--color-bg-brand-subtle);
   color: var(--color-action-primary);
+}
+
+.circle-btn--brand-outline.circle-btn--brand-active,
+.circle-btn--brand-outline.circle-btn--brand-active:hover {
+  border-color: var(--color-action-primary);
+  background: var(--color-action-primary);
+  color: var(--color-text-on-brand);
 }
 
 // Notes / disclaimer block (注意事項)

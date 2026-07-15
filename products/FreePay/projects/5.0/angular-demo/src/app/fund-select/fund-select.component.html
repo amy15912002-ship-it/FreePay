@@ -27,10 +27,11 @@
     </label>
   </div>
 
-  <ng-template #filterControls>
+  <!-- 同一模板桌機/手機 sheet 各 outlet 一次；sheet 傳 inSheet 讓 chip 套 §3.3 sheet 小尺寸 -->
+  <ng-template #filterControls let-inSheet="inSheet">
     <div class="fs-filter-row">
       <span class="fs-filter-label">境內境外</span>
-      <div class="filter-chips fs-filter-options" role="group" aria-label="境內境外篩選">
+      <div class="filter-chips fs-filter-options" [class.filter-chips--sheet]="inSheet" role="group" aria-label="境內境外篩選">
         <button type="button" class="chip" [class.is-selected]="domicileFilters.length===0" (click)="clearFilterGroup('domicile')">全部</button>
         <button type="button" class="chip" *ngFor="let item of domiciles" [class.is-selected]="domicileFilters.includes(item)" (click)="toggleDomicileFilter(item)">{{ item }}</button>
       </div>
@@ -42,7 +43,7 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('category')">
       <span class="fs-filter-label">基金類型</span>
-      <div class="filter-chips fs-filter-options" role="group" aria-label="基金類型篩選" #chipArea data-filter-group="category">
+      <div class="filter-chips fs-filter-options" [class.filter-chips--sheet]="inSheet" role="group" aria-label="基金類型篩選" #chipArea data-filter-group="category">
         <button type="button" class="chip" [class.is-selected]="categoryFilters.length===0" (click)="clearFilterGroup('category')">全部</button>
         <button type="button" class="chip" *ngFor="let c of visibleCategories; trackBy: trackByValue" [class.is-selected]="categoryFilters.includes(c)" (click)="toggleCategoryFilter(c)">{{ c }}</button>
       </div>
@@ -55,7 +56,7 @@
 
     <div class="fs-filter-row fs-filter-row--compact fs-filter-row--pricing" [class.is-expanded]="isFilterExpanded('pricingCcy')">
       <span class="fs-filter-label">計價幣別</span>
-      <div class="filter-chips fs-filter-options" role="group" aria-label="計價幣別篩選" #chipArea data-filter-group="pricingCcy">
+      <div class="filter-chips fs-filter-options" [class.filter-chips--sheet]="inSheet" role="group" aria-label="計價幣別篩選" #chipArea data-filter-group="pricingCcy">
         <button type="button" class="chip" [class.is-selected]="pricingCcyFilters.length===0" (click)="clearFilterGroup('pricingCcy')">全部</button>
         <button type="button" class="chip" *ngFor="let ccy of visiblePricingCurrencies; trackBy: trackByValue" [class.is-selected]="pricingCcyFilters.includes(ccy)" (click)="togglePricingCcyFilter(ccy)">{{ ccy }}</button>
       </div>
@@ -72,7 +73,7 @@
         <input class="fs-brand-keyword" [(ngModel)]="brandKeyword" (input)="onBrandKeywordChange()" placeholder="輸入品牌關鍵字快速搜尋" autocomplete="off">
       </div>
       <div #brandFilterArea class="fs-brand-filter">
-        <div class="filter-chips fs-filter-options" role="group" aria-label="基金品牌篩選" #chipArea data-filter-group="brand">
+        <div class="filter-chips fs-filter-options" [class.filter-chips--sheet]="inSheet" role="group" aria-label="基金品牌篩選" #chipArea data-filter-group="brand">
           <button type="button" class="chip" [class.is-selected]="brandFilters.length===0" (click)="clearFilterGroup('brand')">全部</button>
           <button
             type="button"
@@ -92,7 +93,7 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('region')">
       <span class="fs-filter-label">投資區域</span>
-      <div class="filter-chips fs-filter-options" role="group" aria-label="投資區域篩選" #chipArea data-filter-group="region">
+      <div class="filter-chips fs-filter-options" [class.filter-chips--sheet]="inSheet" role="group" aria-label="投資區域篩選" #chipArea data-filter-group="region">
         <button type="button" class="chip" [class.is-selected]="regionFilters.length===0" (click)="clearFilterGroup('region')">全部</button>
         <button type="button" class="chip" *ngFor="let r of visibleRegions; trackBy: trackByValue" [class.is-selected]="regionFilters.includes(r)" (click)="toggleRegionFilter(r)">{{ r }}</button>
       </div>
@@ -103,14 +104,19 @@
       </div>
     </div>
 
-    <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('group')">
+    <div class="fs-filter-row fs-filter-row--compact fs-filter-row--brand" [class.is-expanded]="isFilterExpanded('group')">
       <span class="fs-filter-label">基金組別</span>
-      <div class="filter-chips fs-filter-options" role="group" aria-label="基金組別篩選" #chipArea data-filter-group="group">
-        <button type="button" class="chip" [class.is-selected]="groupFilters.length===0" (click)="clearFilterGroup('group')">全部</button>
-        <button type="button" class="chip" *ngFor="let g of visibleGroups; trackBy: trackByValue" [class.is-selected]="groupFilters.includes(g)" (click)="toggleGroupFilter(g)">{{ g }}</button>
+      <div class="fs-brand-search-row" *ngIf="isFilterExpanded('group')">
+        <input class="fs-brand-keyword" [(ngModel)]="groupKeyword" (input)="onBrandKeywordChange()" placeholder="輸入組別關鍵字快速搜尋" autocomplete="off">
       </div>
-      <div class="fs-filter-actions fs-filter-actions--mobile" *ngIf="hasHiddenOptions('group') || isFilterExpanded('group')">
-        <button class="ds-icon-button" type="button" (click)="toggleFilterExpanded('group')" [attr.aria-label]="isFilterExpanded('group') ? '收合基金組別' : '展開基金組別'">
+      <div class="fs-brand-filter">
+        <div class="filter-chips fs-filter-options" [class.filter-chips--sheet]="inSheet" role="group" aria-label="基金組別篩選" #chipArea data-filter-group="group">
+          <button type="button" class="chip" [class.is-selected]="groupFilters.length===0" (click)="clearFilterGroup('group')">全部</button>
+          <button type="button" class="chip" *ngFor="let g of visibleGroups; trackBy: trackByValue" [class.is-selected]="groupFilters.includes(g)" (click)="toggleGroupFilter(g)">{{ g }}</button>
+        </div>
+      </div>
+      <div class="fs-filter-actions">
+        <button class="ds-icon-button" type="button" *ngIf="hasHiddenOptions('group') || isFilterExpanded('group')" (click)="toggleFilterExpanded('group')" [attr.aria-label]="isFilterExpanded('group') ? '收合基金組別' : '展開基金組別'">
           <i class="bi" [class.bi-chevron-up]="isFilterExpanded('group')" [class.bi-chevron-down]="!isFilterExpanded('group')"></i>
         </button>
       </div>
@@ -118,7 +124,7 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('lipper')">
       <span class="fs-filter-label">理柏總回報</span>
-      <div class="filter-chips fs-filter-options" role="group" aria-label="理柏總回報篩選" #chipArea data-filter-group="lipper">
+      <div class="filter-chips fs-filter-options" [class.filter-chips--sheet]="inSheet" role="group" aria-label="理柏總回報篩選" #chipArea data-filter-group="lipper">
         <button type="button" class="chip" [class.is-selected]="lipperFilters.length===0" (click)="clearFilterGroup('lipper')">全部</button>
         <button type="button" class="chip" *ngFor="let r of lipperRatings" [class.is-selected]="lipperFilters.includes(r)" (click)="toggleLipperFilter(r)">{{ r }}</button>
       </div>
@@ -131,7 +137,7 @@
 
     <div class="fs-filter-row fs-filter-row--compact" [class.is-expanded]="isFilterExpanded('risk')">
       <span class="fs-filter-label">風險等級</span>
-      <div class="filter-chips fs-filter-options" role="group" aria-label="風險等級篩選" #chipArea data-filter-group="risk">
+      <div class="filter-chips fs-filter-options" [class.filter-chips--sheet]="inSheet" role="group" aria-label="風險等級篩選" #chipArea data-filter-group="risk">
         <button type="button" class="chip" [class.is-selected]="riskFilters.length===0" (click)="clearFilterGroup('risk')">全部</button>
         <button type="button" class="chip" *ngFor="let r of riskLevels" [class.is-selected]="riskFilters.includes(r)" (click)="toggleRiskFilter(r)">{{ r }}</button>
       </div>
@@ -157,7 +163,7 @@
         <h2>篩選</h2>
       </div>
       <div class="fs-filter-sheet-body">
-        <ng-container *ngTemplateOutlet="filterControls"></ng-container>
+        <ng-container *ngTemplateOutlet="filterControls; context: { inSheet: true }"></ng-container>
       </div>
       <div class="fs-filter-sheet-actions">
         <button class="ds-action-button" mat-stroked-button color="primary" type="button" (click)="clearFilters()">清空條件</button>
@@ -169,14 +175,14 @@
   <!-- 已篩條件 -->
   <div class="fs-summary">
     <div class="fs-summary-result">
-      <span>【相關結果共有 <strong>{{ filteredFunds.length }}</strong> 檔】</span>
+      <span>共 <strong>{{ filteredFunds.length }}</strong> 檔基金</span>
     </div>
     <div class="fs-summary-actions">
-      <button class="circle-btn circle-btn--brand-outline" type="button" (click)="openFilterPanel()" aria-label="篩選">
+      <button class="circle-btn circle-btn--brand-outline" [class.circle-btn--brand-active]="activeFilterCount > 0" type="button" (click)="openFilterPanel()" aria-label="篩選">
         <i class="bi" [ngClass]="activeFilterCount > 0 ? 'bi-funnel-fill' : 'bi-funnel'"></i>
       </button>
       <button *ngIf="viewMode==='card'" class="circle-btn circle-btn--brand-outline" type="button" (click)="setViewMode('table')" aria-label="切換為列表檢視"><i class="bi bi-list-ul"></i></button>
-      <button *ngIf="viewMode==='table'" class="circle-btn circle-btn--brand-outline" type="button" (click)="setViewMode('card')" aria-label="切換為卡片檢視"><i class="bi bi-grid-1x2"></i></button>
+      <button *ngIf="viewMode==='table'" class="circle-btn circle-btn--brand-outline" type="button" (click)="setViewMode('card')" aria-label="切換為卡片檢視"><i class="bi bi-grid-fill"></i></button>
     </div>
   </div>
 
@@ -251,6 +257,7 @@
 
           <ng-container *ngIf="activeTab==='drop'">
             <th *ngFor="let y of yearsDesc" (click)="setSort(dropSortKey(y.index))">{{ y.year }}<i class="bi fs-sort" [ngClass]="sortIconClass(dropSortKey(y.index))" [class.is-active]="isSortActive(dropSortKey(y.index))"></i></th>
+            <th (click)="setSort('stdDev')">波動度<i class="bi fs-sort" [ngClass]="sortIconClass('stdDev')" [class.is-active]="isSortActive('stdDev')"></i></th>
           </ng-container>
 
           <ng-container *ngIf="activeTab==='nav'">
@@ -262,9 +269,11 @@
           </ng-container>
 
           <ng-container *ngIf="activeTab==='rating'">
-            <th (click)="setSort('risk')">風險等級<i class="bi fs-sort" [ngClass]="sortIconClass('risk')" [class.is-active]="isSortActive('risk')"></i></th>
             <th (click)="setSort('lipper')">理柏總回報<i class="bi fs-sort" [ngClass]="sortIconClass('lipper')" [class.is-active]="isSortActive('lipper')"></i></th>
-            <th (click)="setSort('stdDev')">波動度<i class="bi fs-sort" [ngClass]="sortIconClass('stdDev')" [class.is-active]="isSortActive('stdDev')"></i></th>
+            <th (click)="setSort('stableReturn')">穩定回報<i class="bi fs-sort" [ngClass]="sortIconClass('stableReturn')" [class.is-active]="isSortActive('stableReturn')"></i></th>
+            <th (click)="setSort('capitalPreservation')">保本能力<i class="bi fs-sort" [ngClass]="sortIconClass('capitalPreservation')" [class.is-active]="isSortActive('capitalPreservation')"></i></th>
+            <th (click)="setSort('risk')">風險等級<i class="bi fs-sort" [ngClass]="sortIconClass('risk')" [class.is-active]="isSortActive('risk')"></i></th>
+            <th (click)="setSort('esgScore')">ESG評分<i class="bi fs-sort" [ngClass]="sortIconClass('esgScore')" [class.is-active]="isSortActive('esgScore')"></i></th>
           </ng-container>
 
           <th class="col-buy">申購</th>
@@ -291,6 +300,7 @@
 
           <ng-container *ngIf="activeTab==='drop'">
             <td *ngFor="let y of yearsDesc" [class]="numClass(f.yearMaxDrop[y.index])">{{ fmtPct(f.yearMaxDrop[y.index]) }}</td>
+            <td>{{ f.stdDev.toFixed(2) }}</td>
           </ng-container>
 
           <ng-container *ngIf="activeTab==='nav'">
@@ -302,9 +312,11 @@
           </ng-container>
 
           <ng-container *ngIf="activeTab==='rating'">
+            <td [class]="ratingScoreClass(f.lipper)">{{ f.lipper }}</td>
+            <td [class]="ratingScoreClass(stableReturnRating(f))">{{ stableReturnRating(f) }}</td>
+            <td [class]="ratingScoreClass(capitalPreservationRating(f))">{{ capitalPreservationRating(f) }}</td>
             <td>{{ f.risk }}</td>
-            <td>{{ f.lipper }}</td>
-            <td>{{ f.stdDev.toFixed(2) }}</td>
+            <td>{{ esgScore(f).toFixed(1) }}</td>
           </ng-container>
 
           <td class="col-buy">
@@ -318,13 +330,16 @@
 
   <!-- 手機卡片版（ov-fund-main 風格，4 tab 各自欄位）；桌機隱藏 -->
   <div class="fs-fund-cards" [class.fs-view-active]="viewMode==='card'">
-    <article *ngFor="let f of pagedFunds; trackBy: trackByFundId" class="fs-fund-card" [class.is-expanded]="activeTab !== 'rating' && isCardExpanded(f.fundId)">
-      <div class="fs-fund-card-head">
-        <div class="fs-fund-card-top">
-          <span class="fs-fund-card-code">{{ f.fundId }}</span>
-          <button class="ds-icon-button" type="button" *ngIf="activeTab !== 'rating'" (click)="toggleCard(f.fundId)"><i class="bi" [ngClass]="isCardExpanded(f.fundId) ? 'bi-chevron-up' : 'bi-chevron-down'"></i></button>
+    <!-- 卡殼結構同帳總手機卡（全域 grid-table §6.9）；metric 區為比較卡特有 -->
+    <article *ngFor="let f of pagedFunds; trackBy: trackByFundId" class="grid-row fs-fund-card" [class.is-expanded]="isCardExpanded(f.fundId)">
+      <div class="grid-main">
+        <div class="grid-id">
+          <div class="grid-code-row">
+            <span class="grid-code">{{ f.fundId }}</span>
+            <button class="ds-icon-button" type="button" (click)="toggleCard(f.fundId)"><i class="bi" [ngClass]="isCardExpanded(f.fundId) ? 'bi-chevron-up' : 'bi-chevron-down'"></i></button>
+          </div>
+          <strong>{{ f.name }}</strong>
         </div>
-        <strong class="fs-fund-card-name">{{ f.name }}</strong>
         <div class="fs-fund-card-metrics">
           <ng-container *ngIf="activeTab==='perf'">
             <div class="fs-fund-card-metric"><span class="m-lbl">今年</span><span class="m-val" [ngClass]="numClass(perfYtd(f))">{{ fmtPct(perfYtd(f)) }}</span></div>
@@ -363,43 +378,49 @@
               <div class="fs-fund-card-metric"><span class="m-lbl">{{ mobileSortSummaryLabel() }}</span><span class="m-val" [ngClass]="mobileSortSummaryClass(f)">{{ mobileSortSummaryValue(f) }}</span></div>
             </ng-container>
             <ng-template #dropDefaultThirdMetric>
-              <div class="fs-fund-card-metric"><span class="m-lbl">2023</span><span class="m-val" [ngClass]="numClass(f.yearMaxDrop[2])">{{ fmtPct(f.yearMaxDrop[2]) }}</span></div>
+              <div class="fs-fund-card-metric"><span class="m-lbl">波動度</span><span class="m-val">{{ f.stdDev.toFixed(2) }}</span></div>
             </ng-template>
           </ng-container>
           <ng-container *ngIf="activeTab==='rating'">
-            <div class="fs-fund-card-metric"><span class="m-lbl">風險等級</span><span class="m-val">{{ f.risk }}</span></div>
-            <div class="fs-fund-card-metric"><span class="m-lbl">理柏總回報</span><span class="m-val">{{ f.lipper }}</span></div>
-            <div class="fs-fund-card-metric"><span class="m-lbl">波動度</span><span class="m-val">{{ f.stdDev.toFixed(2) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">理柏總回報</span><span class="m-val" [ngClass]="ratingScoreClass(f.lipper)">{{ f.lipper }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">穩定回報</span><span class="m-val" [ngClass]="ratingScoreClass(stableReturnRating(f))">{{ stableReturnRating(f) }}</span></div>
+            <div class="fs-fund-card-metric"><span class="m-lbl">保本能力</span><span class="m-val" [ngClass]="ratingScoreClass(capitalPreservationRating(f))">{{ capitalPreservationRating(f) }}</span></div>
           </ng-container>
         </div>
-      </div>
-      <div class="fs-fund-card-foot">
+        <!-- 底列同帳總（mpay factions）：navdate 左、操作鈕右，各佔一格 -->
         <span class="fs-fund-card-navdate">
           <ng-container *ngIf="activeTab === 'nav'"><span class="m-lbl">淨值日</span>{{ f.navDate }}</ng-container>
         </span>
-        <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">Buy</button>
+        <div class="grid-actions">
+          <button class="circle-btn circle-btn--buy" type="button" (click)="onBuy(f)" [attr.aria-label]="'申購 ' + f.name">Buy</button>
+        </div>
       </div>
-      <div class="fs-fund-card-detail" *ngIf="activeTab !== 'rating' && isCardExpanded(f.fundId)">
+      <!-- 展開明細白塊：共用全域 .grid-extra／.grid-extra-kv（DesignSystem §6.10，同帳總手機展開） -->
+      <div class="grid-extra" *ngIf="isCardExpanded(f.fundId)">
         <ng-container *ngIf="activeTab==='perf'">
-          <div class="fs-fund-card-row" *ngIf="mobileSortSummaryValue(f)"><span class="r-lbl">6個月</span><span class="r-val" [ngClass]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">1年</span><span class="r-val" [ngClass]="numClass(f.perf.y1)">{{ fmtPct(f.perf.y1) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">2年</span><span class="r-val" [ngClass]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">3年</span><span class="r-val" [ngClass]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">5年</span><span class="r-val" [ngClass]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</span></div>
+          <div class="grid-extra-kv" *ngIf="mobileSortSummaryValue(f)"><span>6個月</span><strong [ngClass]="numClass(f.perf.m6)">{{ fmtPct(f.perf.m6) }}</strong></div>
+          <div class="grid-extra-kv"><span>1年</span><strong [ngClass]="numClass(f.perf.y1)">{{ fmtPct(f.perf.y1) }}</strong></div>
+          <div class="grid-extra-kv"><span>2年</span><strong [ngClass]="numClass(f.perf.y2)">{{ fmtPct(f.perf.y2) }}</strong></div>
+          <div class="grid-extra-kv"><span>3年</span><strong [ngClass]="numClass(f.perf.y3)">{{ fmtPct(f.perf.y3) }}</strong></div>
+          <div class="grid-extra-kv"><span>5年</span><strong [ngClass]="numClass(f.perf.y5)">{{ fmtPct(f.perf.y5) }}</strong></div>
         </ng-container>
         <ng-container *ngIf="activeTab==='nav'">
-          <div class="fs-fund-card-row" *ngIf="mobileSortSummaryValue(f)"><span class="r-lbl">日漲跌幅</span><span class="r-val" [ngClass]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</span></div>
-          <div class="fs-fund-card-row" *ngIf="sortKey !== 'currency'"><span class="r-lbl">幣別</span><span class="r-val">{{ f.pricingCurrency }}</span></div>
+          <div class="grid-extra-kv" *ngIf="mobileSortSummaryValue(f)"><span>日漲跌幅</span><strong [ngClass]="numClass(f.navChangePct)">{{ fmtPct(f.navChangePct) }}</strong></div>
+          <div class="grid-extra-kv" *ngIf="sortKey !== 'currency'"><span>幣別</span><strong>{{ f.pricingCurrency }}</strong></div>
         </ng-container>
         <ng-container *ngIf="activeTab==='roi'">
-          <div class="fs-fund-card-row" *ngIf="mobileSortSummaryValue(f)"><span class="r-lbl">2023</span><span class="r-val" [ngClass]="numClass(f.yearRoi[2])">{{ fmtPct(f.yearRoi[2]) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">2022</span><span class="r-val" [ngClass]="numClass(f.yearRoi[1])">{{ fmtPct(f.yearRoi[1]) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">2021</span><span class="r-val" [ngClass]="numClass(f.yearRoi[0])">{{ fmtPct(f.yearRoi[0]) }}</span></div>
+          <div class="grid-extra-kv" *ngIf="mobileSortSummaryValue(f)"><span>2023</span><strong [ngClass]="numClass(f.yearRoi[2])">{{ fmtPct(f.yearRoi[2]) }}</strong></div>
+          <div class="grid-extra-kv"><span>2022</span><strong [ngClass]="numClass(f.yearRoi[1])">{{ fmtPct(f.yearRoi[1]) }}</strong></div>
+          <div class="grid-extra-kv"><span>2021</span><strong [ngClass]="numClass(f.yearRoi[0])">{{ fmtPct(f.yearRoi[0]) }}</strong></div>
         </ng-container>
         <ng-container *ngIf="activeTab==='drop'">
-          <div class="fs-fund-card-row" *ngIf="mobileSortSummaryValue(f)"><span class="r-lbl">2023</span><span class="r-val" [ngClass]="numClass(f.yearMaxDrop[2])">{{ fmtPct(f.yearMaxDrop[2]) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">2022</span><span class="r-val" [ngClass]="numClass(f.yearMaxDrop[1])">{{ fmtPct(f.yearMaxDrop[1]) }}</span></div>
-          <div class="fs-fund-card-row"><span class="r-lbl">2021</span><span class="r-val" [ngClass]="numClass(f.yearMaxDrop[0])">{{ fmtPct(f.yearMaxDrop[0]) }}</span></div>
+          <div class="grid-extra-kv"><span>2023</span><strong [ngClass]="numClass(f.yearMaxDrop[2])">{{ fmtPct(f.yearMaxDrop[2]) }}</strong></div>
+          <div class="grid-extra-kv"><span>2022</span><strong [ngClass]="numClass(f.yearMaxDrop[1])">{{ fmtPct(f.yearMaxDrop[1]) }}</strong></div>
+          <div class="grid-extra-kv"><span>2021</span><strong [ngClass]="numClass(f.yearMaxDrop[0])">{{ fmtPct(f.yearMaxDrop[0]) }}</strong></div>
+        </ng-container>
+        <ng-container *ngIf="activeTab==='rating'">
+          <div class="grid-extra-kv"><span>風險等級</span><strong>{{ f.risk }}</strong></div>
+          <div class="grid-extra-kv"><span>ESG評分</span><strong>{{ esgScore(f).toFixed(1) }}</strong></div>
         </ng-container>
       </div>
     </article>
