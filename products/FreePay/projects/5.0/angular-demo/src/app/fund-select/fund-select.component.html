@@ -6,7 +6,7 @@
   <div class="fs-search-bar">
     <span class="fs-filter-label">基金搜尋</span>
     <label class="fs-search-field">
-      <input class="fs-keyword" [(ngModel)]="keyword" (input)="onKeywordInput()" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keyup.enter)="applyKeywordSearch()" placeholder="請輸入基金名稱或品牌關鍵字" autocomplete="off">
+      <input class="fs-keyword" [(ngModel)]="keyword" (input)="onKeywordInput()" (focus)="onSearchFocus()" (blur)="onSearchBlur()" (keyup.enter)="applyKeywordSearch()" placeholder="請輸入基金關鍵字" autocomplete="off">
       <button type="button" class="ds-icon-button fs-search-clear" *ngIf="keyword" (mousedown)="$event.preventDefault()" (click)="clearKeyword()" aria-label="清除搜尋"><i class="bi bi-x-circle-fill"></i></button>
       <button type="button" class="fs-search-go" (mousedown)="$event.preventDefault()" (click)="applyKeywordSearch()" aria-label="搜尋"><i class="bi bi-search" aria-hidden="true"></i></button>
       <div class="fs-search-suggest" *ngIf="searchFocused && keyword.trim().length >= searchMinChars">
@@ -222,10 +222,10 @@
           >{{ opt.label }}</button>
         </div>
         <span class="ds-sort-label">排序方向</span>
-        <button class="ds-sort-dir" type="button" (click)="togglePendingSortDirection()">
-          <i class="bi" [class.bi-caret-down-fill]="pendingSortDesc" [class.bi-caret-up-fill]="!pendingSortDesc"></i>
-          {{ pendingSortDesc ? '高到低' : '低到高' }}
-        </button>
+        <div class="choice-chips" role="radiogroup" aria-label="排序方向">
+          <button type="button" class="chip" *ngFor="let d of sortDirOptions"
+            [class.is-selected]="pendingSortDesc === d.desc" (click)="pendingSortDesc = d.desc">{{ d.label }}</button>
+        </div>
       </div>
       <div class="ds-sort-sheet-actions">
         <button class="ds-action-button" mat-flat-button color="primary" type="button" (click)="applyPendingSort()">套用排序</button>

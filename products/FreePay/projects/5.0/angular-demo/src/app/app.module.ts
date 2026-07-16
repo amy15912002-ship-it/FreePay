@@ -20,6 +20,7 @@ import { FreepayIntroComponent } from './freepay-intro/freepay-intro.component';
 import { FooterComponent } from './footer/footer.component';
 import { SharedNotesComponent } from './shared-notes/shared-notes.component';
 import { StepperComponent } from './stepper/stepper.component';
+import { TermsContentComponent } from './terms-content/terms-content.component';
 import { ThousandsDirective } from './thousands.directive';
 
 @NgModule({
@@ -34,6 +35,7 @@ import { ThousandsDirective } from './thousands.directive';
     FooterComponent,
     SharedNotesComponent,
     StepperComponent,
+    TermsContentComponent,
     ThousandsDirective
   ],
   imports: [

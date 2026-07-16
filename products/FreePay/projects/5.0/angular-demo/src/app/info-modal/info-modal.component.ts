@@ -12,6 +12,7 @@ import { Component, EventEmitter, HostListener, Input, Output } from '@angular/c
 export class InfoModalComponent {
   @Input() open = false;
   @Input() title = '';
+  @Input() centered = false;  // 單句結果提示置中（§3.10）；多行說明維持左對齊
   @Output() closed = new EventEmitter<void>();
 
   @HostListener('document:keydown.escape')

@@ -449,21 +449,6 @@ textarea {
     font-size: 14px;
   }
 
-  .ds-sort-dir {
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    min-height: 32px;
-    padding: 0 10px;
-    border: none;
-    border-radius: 16px;
-    background: var(--color-neutral-0);
-    color: var(--color-action-primary);
-    font-family: var(--font-primary);
-    font-size: 14px;
-    font-weight: 500;
-  }
-
   .ds-sort-sheet-actions {
     display: flex;
     justify-content: stretch;
@@ -664,7 +649,7 @@ textarea {
   gap: 24px;
   min-height: 72px;
   padding: 0 48px;
-  background: var(--color-neutral-850);
+  background: var(--color-neutral-800);
   box-shadow: 0 1px 0 color-mix(in srgb, var(--color-neutral-0) 8%, transparent);
 }
 
@@ -854,7 +839,7 @@ textarea {
     gap: 0;
     padding: 8px 16px 16px;
     border-top: 1px solid color-mix(in srgb, var(--color-neutral-0) 8%, transparent);
-    background: var(--color-neutral-850);
+    background: var(--color-neutral-800);
     box-shadow: var(--shadow-lg);
 
     &.is-open {
@@ -989,7 +974,7 @@ fp-stepper { display: block; }
   display: flex;
   width: min(calc(800px + var(--page-gutter) * 2), 100%);
   margin: 0 auto;
-  padding: 0 var(--page-gutter) 24px;
+  padding: 0 var(--page-gutter) 48px;  // 與下方內容的間距由 stepper 統一管理，各步驟一致
 }
 
 .ds-stepper__step {
@@ -1070,7 +1055,7 @@ fp-stepper { display: block; }
   .ds-stepper {
     display: block;
     width: 100%;
-    padding: 10px var(--page-gutter) 14px;
+    padding: 10px var(--page-gutter) 32px;
   }
 
   .ds-stepper__step { display: none; }
@@ -1238,6 +1223,8 @@ fp-stepper { display: block; }
 .grid-empty { padding: 40px 0; text-align: center; color: var(--color-text-secondary); }
 
 // 前導選取欄（多選列表，如委託查詢）：桌機最左固定窄欄、手機卡片頭 id 行左側
+// grid-only-* 的顯示切換由各變體以前綴 class 提高 specificity（如 .grid-table--order .grid-only-mobile），
+// 蓋過手機 .grid-body > span 的 display: flex
 .grid-select { display: flex; align-items: center; justify-content: center; }
 .grid-select-head { display: block; }
 
@@ -1424,6 +1411,9 @@ fp-stepper { display: block; }
 
 .ds-modal--confirm .ds-modal__body { padding-top: 16px; }
 
+// 單句結果提示置中（§3.10）；多行說明維持預設左對齊
+.ds-modal--centered .ds-modal__body { text-align: center; }
+
 @keyframes ds-modal-fade {
   from { opacity: 0; }
   to { opacity: 1; }
@@ -1600,6 +1590,335 @@ fp-stepper { display: block; }
   gap: 8px;
 }
 
+// ── 門檻預覽（申購流程與異動設定共用；頁面只留排版差異）──
+.threshold-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+}
+
+.threshold-preview-label {
+  color: var(--color-text-heading);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+}
+
+.threshold-preview-emphasis {
+  display: inline-block;
+  color: var(--color-action-primary);
+  font-weight: inherit;
+}
+
+.threshold-custom-field {
+  flex: 1 1 100%;
+  width: 100%;
+  min-width: 0;
+}
+
+// ── Pay 出設定表單（申購流程與異動設定共用；頁面只留排版差異）──
+.pay-setting-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.pay-setting-step {
+  gap: 10px;
+}
+
+.pay-setting-step + .pay-setting-step {
+  margin-top: 24px;
+}
+
+.pay-setting-step--date {
+  padding-top: 4px;
+}
+
+.pay-setting-step-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pay-setting-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.pay-mode-panel { margin-top: 6px; }
+
+.pay-paused-box {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 14px;
+  border-radius: 8px;
+  background: var(--color-bg-muted);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.7;
+
+  i { color: var(--color-text-secondary); }
+}
+
+.form-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  color: var(--color-input-label);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.helper {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+  color: var(--color-input-helper);
+  font-size: 14px;
+}
+
+// 比例滑桿（Pay 出比例）
+.ratio-slider {
+  padding: 12px 0 0;
+}
+
+.ratio-summary {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.ratio-value {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.slider-hint {
+  color: var(--color-input-helper);
+  font-size: 14px;
+}
+
+.ratio-range-control {
+  --ratio-track-active: var(--color-action-primary);
+  position: relative;
+  margin-top: 16px;
+  padding-bottom: 24px;
+}
+
+.ratio-track {
+  position: absolute;
+  top: 11px; // 定位校正：軌道對齊滑桿垂直中心（(滑桿高 28 − 軌高 6) / 2），§5.2 例外
+  left: 0;
+  right: 0;
+  height: 6px;
+  border-radius: 999px;
+  background: var(--color-border-default);
+  overflow: hidden;
+  pointer-events: none;
+
+  span {
+    display: block;
+    width: 0;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--ratio-track-active);
+  }
+}
+
+.ratio-range {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 28px;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+
+  &:focus {
+    outline: none;
+  }
+
+  &::-webkit-slider-runnable-track {
+    height: 6px;
+    border-radius: 999px;
+    background: transparent;
+  }
+
+  &::-webkit-slider-thumb {
+    width: 22px;
+    height: 22px;
+    margin-top: -8px;
+    -webkit-appearance: none;
+    appearance: none;
+    border: 3px solid var(--color-action-primary);
+    border-radius: 50%;
+    background: var(--color-bg-base);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:focus-visible::-webkit-slider-thumb {
+    box-shadow: var(--color-input-shadow-focus), var(--shadow-sm);
+  }
+
+  &::-moz-range-track {
+    height: 6px;
+    border-radius: 999px;
+    background: transparent;
+  }
+
+  &::-moz-range-progress {
+    height: 6px;
+    border-radius: 999px;
+    background: transparent;
+  }
+
+  &::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border: 3px solid var(--color-action-primary);
+    border-radius: 50%;
+    background: var(--color-bg-base);
+    box-shadow: var(--shadow-sm);
+  }
+
+  &:focus-visible::-moz-range-thumb {
+    box-shadow: var(--color-input-shadow-focus), var(--shadow-sm);
+  }
+}
+
+.ratio-range-scale {
+  position: relative;
+  height: 18px;
+  margin-top: 4px;
+  color: var(--color-input-helper);
+  font-size: 14px;
+  line-height: 1.4;
+
+  span {
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    white-space: nowrap;
+
+    &:first-child {
+      transform: translateX(0);
+    }
+
+    &:last-child {
+      transform: translateX(-100%);
+    }
+  }
+}
+
+// 觸發門檻區
+.threshold-head {
+  align-items: flex-start;
+}
+
+.threshold-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.threshold-selector-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 0;
+}
+
+.threshold-option-area {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+// 完成頁（成功區塊＋委託摘要）
+.success-block {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.success-ring {
+  color: var(--color-brand-secondary-400);
+  font-size: 36px;
+  line-height: 1;
+}
+
+@media (max-width: 767px) {
+  .success-ring { font-size: 28px; }
+}
+
+// 低於頁面主標題（20px）一階；同 success-ring 用品牌輔色
+.success-block h2 {
+  margin: 12px 0 24px;
+  color: var(--color-brand-secondary-400);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.order-box {
+  width: 100%;
+  padding: 14px 18px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 8px;
+  background: var(--color-bg-subtle);
+  text-align: left;
+}
+
+.sum-row {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr);
+  gap: 12px;
+  min-height: 44px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-border-default);
+  align-items: center;
+
+  &:last-child {
+    border-bottom: none;
+  }
+
+  span {
+    color: var(--color-text-secondary);
+    font-size: 14px;
+    white-space: nowrap;
+  }
+
+  strong {
+    color: var(--color-text-primary);
+    font-size: 16px;
+    font-weight: 500;
+    line-height: 1.5;
+    text-align: right;
+  }
+
+  .hl {
+    color: var(--color-action-primary);
+  }
+}
+
+.done-actions {
+  margin-top: 22px;
+}
+
 .chip {
   display: inline-flex;
   align-items: center;
@@ -1639,7 +1958,7 @@ fp-stepper { display: block; }
 
 .filter-chips--sheet .chip {
   min-height: 30px;
-  padding: 6px 7px;
+  padding: 6px 8px;
   font-size: 12px;
 }
 

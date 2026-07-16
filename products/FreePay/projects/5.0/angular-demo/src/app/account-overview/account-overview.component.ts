@@ -137,11 +137,17 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
     for (const g of groups) {
       g.ret = g.cost ? (g.profit / g.cost) * 100 : 0;
     }
-    return groups;
+    // 幣別順序同明細排序優先序：美元→台幣→其他（spec §8.3）
+    return groups.sort((a, b) => this.ccyPriority(a.ccy) - this.ccyPriority(b.ccy));
   }
 
   get displaySummaries(): OvSummary[] {
-    return this.summaryDemoMode === 'single' ? this.summaries.slice(0, 1) : this.summaries;
+    if (this.summaryDemoMode === 'single') {
+      // 單幣別情境模擬台幣單幣用戶
+      const twd = this.summaries.find(s => s.ccy === '台幣');
+      return twd ? [twd] : this.summaries.slice(0, 1);
+    }
+    return this.summaries;
   }
 
   onSumScroll(el: HTMLElement): void {
@@ -173,6 +179,11 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
     ];
   }
 
+  // 設定異動完成注意事項（spec §11.7；時間口徑同條款第 7 點）
+  readonly settingDoneNotes: string[] = [
+    '提醒您，若超過本營業日交易時間14:00，為下一營業日之交易，您可至「委託查詢/取消」單元查詢。'
+  ];
+
   get profitNotes(): string[] {
     return [
       '您在本平台的基金交易紀錄系統皆會保留，若需查看尚未完成的交易，可至「在途交易」查詢。',
@@ -186,6 +197,8 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
   settingDrafts: Record<string, SettingDraft> = {};
   clearDraftsConfirmOpen = false;
   selectedOrders = new Set<string>();
+  cancelledOrders = new Set<string>();
+  cancelSuccessOpen = false;
   cancelPwd = '';
   cancelPwdVisible = false;
 
@@ -214,9 +227,19 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
   get cancelDisabled(): boolean { return this.selectedCount === 0 || this.cancelPwd.trim() === ''; }
 
   submitCancel(): void {
-    alert(`已送出 ${this.selectedCount} 筆取消委託（Demo 示意）`);
+    if (this.cancelDisabled) return;
+    this.selectedOrders.forEach(id => this.cancelledOrders.add(id));
     this.selectedOrders.clear();
     this.cancelPwd = '';
+    this.cancelSuccessOpen = true;
+  }
+
+  isOrderCancelled(id: string): boolean {
+    return this.cancelledOrders.has(id);
+  }
+
+  orderStatusText(item: { id: string; status: string }): string {
+    return this.isOrderCancelled(item.id) ? '取消成功' : item.status;
   }
 
   // ── Profit ──
@@ -394,9 +417,15 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
 
   settingMonthlyPayError(draft: SettingDraft): string {
     if (!draft.payActive || draft.payMode !== 'amount') return '';
-    return !Number.isFinite(Number(draft.monthlyPay)) || Number(draft.monthlyPay) < 1
-      ? '請輸入月 Pay 金額'
-      : '';
+    if (!Number.isFinite(Number(draft.monthlyPay)) || Number(draft.monthlyPay) < 1) return '請輸入月 Pay 金額';
+    // 年化提領率上限（spec §12.2：申購／異動時皆阻擋），同申購流程檢核
+    const fund = this.settingsFunds.find(f => f.contracts[0]?.fpNo === draft.fpNo);
+    const cost = fund?.contracts[0]?.cost ?? 0;
+    if (cost > 0 && (Number(draft.monthlyPay) * 12 / cost) * 100 > 15) {
+      const cap = Math.floor(cost * 0.15 / 12);
+      return `年化提領率不可超過 15%，請輸入 ${this.fmtN(cap)} 以下的金額`;
+    }
+    return '';
   }
 
   settingAnnualRateError(draft: SettingDraft): string {
@@ -448,8 +477,8 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
 
   estimatedMonthlyPay(draft: SettingDraft): string {
     const fund = this.settingsFunds.find(f => f.contracts[0]?.fpNo === draft.fpNo);
-    const cost = fund?.contracts[0]?.cost ?? 0;
-    const amount = Math.round(cost * Number(draft.annualRate || 0) / 100 / 12);
+    const marketValue = fund?.contracts[0]?.market ?? 0;
+    const amount = Math.round(marketValue * Number(draft.annualRate || 0) / 100 / 12);
     return this.fmtN(amount);
   }
 
@@ -554,12 +583,34 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
     return this.changeSortKey === key && !this.changeSortDesc ? 'bi-caret-up-fill' : 'bi-caret-down-fill';
   }
 
-  // ── 明細：每欄排序（桌機表頭點擊；同 key 再點切換升降）──
+  // ── 明細：每欄排序（spec §8.4）──
+  // 金額欄與幣別欄以幣別分組（美元→台幣→其他為第一鍵），組內再排所選欄位——原幣金額不跨幣別比大小；
+  // 報酬率為比率、名稱為文字，可跨幣別比較，全表排序不分組。
+  private readonly ccySortOrder = ['美元', '台幣'];  // 未列幣別依序排最後
+
+  private ccyPriority(ccy: string): number {
+    const idx = this.ccySortOrder.indexOf(ccy);
+    return idx === -1 ? this.ccySortOrder.length : idx;
+  }
+
+  private isGroupedFundSortKey(key: FundSortKey): boolean {
+    return key === 'ccy' || key === 'market' || key === 'profit' || key === 'pay' || key === 'cost' || key === 'paid';
+  }
+
   get sortedFunds(): OvFund[] {
     if (!this.fundSortKey) return this.funds;
     const key = this.fundSortKey;
     const dir = this.fundSortDesc ? -1 : 1;
     return [...this.funds].sort((a, b) => {
+      if (this.isGroupedFundSortKey(key)) {
+        // 幣別欄：方向鍵反轉幣別順序；金額欄：幣別固定美元→台幣，方向鍵作用於組內數值
+        const ccyDiff = this.ccyPriority(a.txCcy) - this.ccyPriority(b.txCcy);
+        if (ccyDiff !== 0) return key === 'ccy' ? ccyDiff * (this.fundSortDesc ? 1 : -1) : ccyDiff;
+        // 點幣別欄時組內固定依約當市值高→低
+        const secondKey: FundSortKey = key === 'ccy' ? 'market' : key;
+        const secondDir = key === 'ccy' ? -1 : dir;
+        return (Number(this.fundFieldValue(a, secondKey)) - Number(this.fundFieldValue(b, secondKey))) * secondDir;
+      }
       const va = this.fundFieldValue(a, key);
       const vb = this.fundFieldValue(b, key);
       return (typeof va === 'number' && typeof vb === 'number'
@@ -568,9 +619,12 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
     });
   }
 
+  // 桌機同欄循環：高→低 → 低→高 → 回預設（首次申購日自然序）
   setFundSort(key: FundSortKey): void {
-    if (this.fundSortKey === key) this.fundSortDesc = !this.fundSortDesc;
-    else { this.fundSortKey = key; this.fundSortDesc = true; }
+    if (this.fundSortKey !== key) { this.fundSortKey = key; this.fundSortDesc = true; return; }
+    if (this.fundSortDesc) { this.fundSortDesc = false; return; }
+    this.fundSortKey = null;
+    this.fundSortDesc = true;
   }
 
   fundSortIcon(key: FundSortKey): string {
@@ -593,9 +647,10 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
 
   // 明細手機排序面板（複用全域 .ds-sort-* 殼）
   fundSortPanelOpen = false;
-  pendingFundSortKey: FundSortKey = 'market';
+  pendingFundSortKey: FundSortKey | null = null;
   pendingFundSortDesc = true;
-  readonly fundSortOptions: { key: FundSortKey; label: string }[] = [
+  readonly fundSortOptions: { key: FundSortKey | null; label: string }[] = [
+    { key: null, label: '預設（交易日）' },
     { key: 'name', label: '基金名稱' },
     { key: 'ccy', label: '交易/計價幣別' },
     { key: 'market', label: '約當市值' },
@@ -608,22 +663,30 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
   ];
 
   openFundSortPanel(): void {
-    this.pendingFundSortKey = this.fundSortKey ?? 'market';
+    this.pendingFundSortKey = this.fundSortKey;
     this.pendingFundSortDesc = this.fundSortDesc;
     this.fundSortPanelOpen = true;
   }
   closeFundSortPanel(): void { this.fundSortPanelOpen = false; }
-  selectPendingFundSort(key: FundSortKey): void {
-    if (this.pendingFundSortKey === key) this.pendingFundSortDesc = !this.pendingFundSortDesc;
-    else { this.pendingFundSortKey = key; this.pendingFundSortDesc = true; }
+  selectPendingFundSort(key: FundSortKey | null): void {
+    if (key === null) { this.pendingFundSortKey = null; return; }
+    if (this.pendingFundSortKey === key) { this.pendingFundSortDesc = !this.pendingFundSortDesc; return; }
+    this.pendingFundSortKey = key;
+    this.pendingFundSortDesc = key !== 'name';  // 名稱預設 A 到 Z；其餘 高→低／美元→台幣
   }
-  togglePendingFundSortDir(): void { this.pendingFundSortDesc = !this.pendingFundSortDesc; }
+  // 排序方向字樣依欄位語意：數值＝高低、幣別＝優先序、文字＝字母序；預設（未排序）無方向
+  get fundSortDirOptions(): { label: string; desc: boolean }[] {
+    if (this.pendingFundSortKey === null) return [];
+    if (this.pendingFundSortKey === 'ccy') return [{ label: '美元→台幣', desc: true }, { label: '台幣→美元', desc: false }];
+    if (this.pendingFundSortKey === 'name') return [{ label: 'A 到 Z', desc: false }, { label: 'Z 到 A', desc: true }];
+    return [{ label: '高到低', desc: true }, { label: '低到高', desc: false }];
+  }
   applyFundSort(): void {
     this.fundSortKey = this.pendingFundSortKey;
     this.fundSortDesc = this.pendingFundSortDesc;
     this.fundSortPanelOpen = false;
   }
-  trackByFundSortKey(_: number, opt: { key: FundSortKey }): string { return opt.key; }
+  trackByFundSortKey(_: number, opt: { key: FundSortKey | null }): string { return opt.key ?? 'default'; }
 
   private changeFieldValue(r: ChangeLogRecord, key: ChangeSortKey): string {
     switch (key) {
@@ -864,7 +927,7 @@ export class AccountOverviewComponent implements OnInit, AfterViewInit, OnDestro
 
   chgTypeText(t: string): string {
     const map: Record<string, string> = {
-      TAP: 'Pay方式', AL: 'Pay金額', P: 'Pay比例', D: '扣款日期', DL: '觸發門檻'
+      TAP: 'Pay方式', AL: 'Pay金額', P: 'Pay比例', D: '基準日', DL: '觸發門檻'
     };
     return map[t] ?? t;
   }

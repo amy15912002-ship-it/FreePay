@@ -99,11 +99,13 @@
                   [class.is-selected]="pendingFundSortKey === opt.key"
                   (click)="selectPendingFundSort(opt.key)">{{ opt.label }}</button>
               </div>
-              <span class="ds-sort-label">排序方向</span>
-              <button class="ds-sort-dir" type="button" (click)="togglePendingFundSortDir()">
-                <i class="bi" [class.bi-caret-down-fill]="pendingFundSortDesc" [class.bi-caret-up-fill]="!pendingFundSortDesc"></i>
-                {{ pendingFundSortDesc ? '高到低' : '低到高' }}
-              </button>
+              <ng-container *ngIf="fundSortDirOptions.length">
+                <span class="ds-sort-label">排序方向</span>
+                <div class="choice-chips" role="radiogroup" aria-label="排序方向">
+                  <button type="button" class="chip" *ngFor="let d of fundSortDirOptions"
+                    [class.is-selected]="pendingFundSortDesc === d.desc" (click)="pendingFundSortDesc = d.desc">{{ d.label }}</button>
+                </div>
+              </ng-container>
             </div>
             <div class="ds-sort-sheet-actions">
               <button class="ds-action-button" mat-flat-button color="primary" type="button" (click)="applyFundSort()">套用排序</button>
@@ -271,7 +273,7 @@
           <article class="grid-row" *ngFor="let item of altOrders; trackBy: trackById">
             <div class="grid-main">
               <div class="grid-select">
-                <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
+                <mat-checkbox color="primary" *ngIf="!isOrderCancelled(item.id)" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
               </div>
               <div class="grid-id">
                 <span class="grid-code">{{ item.code }}</span>
@@ -290,7 +292,7 @@
                 <span data-label="Pay 出方式">{{ fmtOrderPayMethod(item) }}</span>
                 <span data-label="基準日">{{ fmtOrderPayDay(item) }}</span>
                 <span data-label="觸發門檻">{{ fmtLimitMode(item.limitMode, item.limitVal) }}</span>
-                <span data-label="委託結果">{{ item.status }}</span>
+                <span data-label="委託結果">{{ orderStatusText(item) }}</span>
               </div>
             </div>
           </article>
@@ -319,7 +321,7 @@
           <article class="grid-row" *ngFor="let item of chgOrders; trackBy: trackById">
             <div class="grid-main">
               <div class="grid-select">
-                <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
+                <mat-checkbox color="primary" *ngIf="!isOrderCancelled(item.id)" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
               </div>
               <div class="grid-id">
                 <span class="grid-code">{{ item.code }}</span>
@@ -353,7 +355,7 @@
                     <span class="ov-cell-new">{{ item.newLimit }}</span>
                   </span>
                 </span>
-                <span data-label="委託結果">{{ item.status }}</span>
+                <span data-label="委託結果">{{ orderStatusText(item) }}</span>
               </div>
             </div>
           </article>
@@ -381,7 +383,7 @@
           <article class="grid-row" *ngFor="let item of rdmOrders; trackBy: trackById">
             <div class="grid-main">
               <div class="grid-select">
-                <mat-checkbox color="primary" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
+                <mat-checkbox color="primary" *ngIf="!isOrderCancelled(item.id)" [checked]="isOrderSelected(item.id)" (change)="toggleOrder(item.id)"></mat-checkbox>
               </div>
               <div class="grid-id">
                 <span class="grid-code">{{ item.code }}</span>
@@ -399,7 +401,7 @@
                 <span data-label="交易幣別">{{ ccyText(item.ccy) }}</span>
                 <span data-label="贖回單位數">{{ item.unit }}</span>
                 <span data-label="約當市值">{{ fmtN(item.amount) }}</span>
-                <span data-label="委託結果">{{ item.status }}</span>
+                <span data-label="委託結果">{{ orderStatusText(item) }}</span>
               </div>
             </div>
           </article>
@@ -428,6 +430,10 @@
 
       <fp-notes [notes]="orderNotes"></fp-notes>
       </div>
+
+      <fp-info-modal [open]="cancelSuccessOpen" [centered]="true" title="提醒" (closed)="cancelSuccessOpen = false">
+        委託取消成功。
+      </fp-info-modal>
 
     </ng-container>
 
@@ -603,7 +609,7 @@
                   <span data-label="異動項目">{{ chgTypeText(r.tradeType) }}</span>
                   <span data-label="交易幣別" class="change-more">{{ r.ccy }}</span>
                   <span data-label="異動前" class="change-more">{{ fmtChgBefore(r) }}</span>
-                  <span data-label="異動後" class="change-more"><span class="ov-cell-new">{{ fmtChgAfter(r) }}</span></span>
+                  <span data-label="異動後" class="change-more">{{ fmtChgAfter(r) }}</span>
                 </div>
               </div>
             </article>
@@ -961,16 +967,7 @@
             <div class="block-header">
               <h2 class="block-title">自由 Pay 理財服務條款</h2>
             </div>
-            <div class="terms-content setting-terms-content">
-              <p>當您同意使用鉅亨自由 Pay 功能，即視為您已詳細閱讀並同意遵守本服務條款。</p>
-              <p><strong>一、 本服務之內容</strong></p>
-              <p>1. 本服務係由本公司提供基金定期贖回及相關設定服務，非基金配息。您可選擇每月 Pay 金額或年化 Pay 比例，系統將依基金最近可取得之淨值及參考匯率估算贖回單位數與約當金額；實際資料仍以基金公司、交易平台及集保結算所回覆資料為準。</p>
-              <p>2. 同一基金不同交易幣別視為不同契約，各契約之投入成本、約當市值、Pay 設定、觸發門檻及贖回狀態均分別計算，不跨幣別合併。</p>
-              <p>3. 每月 Pay 金額或年化 Pay 比例不得超過本公司設定之年化提領率上限。觸發門檻依 Pay 出基準日前一日最新可取得之市值資料判斷。</p>
-              <p>4. 本服務可選擇設定觸發門檻。方式一為約當市值低於投入成本指定比例時暫停 Pay 出，待市值回升至門檻後恢復；方式二為約當市值超過投入成本指定比例的月份開始 Pay 出，若市值跌回門檻以下則暫停。兩種方式互斥，不可同時設定；若未設定觸發門檻，系統將依原 Pay 設定執行。觸發門檻係依 Pay 出基準日前一日最新可取得之市值資料判斷，並可能因淨值、匯率或資料時點不同而與實際成交結果有差異。</p>
-              <p><strong>二、 免責聲明</strong></p>
-              <p>本公司不保證本服務絕不發生中斷及錯誤等情況；所有設定與交易結果仍以交易平台、基金公司及集保結算所實際處理結果為準。</p>
-            </div>
+            <fp-terms-content variant="setting"></fp-terms-content>
             <mat-checkbox color="primary" class="agree-label" [(ngModel)]="expandedSettingAgreedTerms">
               本人已於交易前詳閱並同意以上相關文件及服務條款，且已閱讀及了解基金通路報酬揭露及風險預告，經充分評估符合投資需求。
             </mat-checkbox>
@@ -1000,17 +997,19 @@
 
         <section class="setting-confirm setting-confirm--done" aria-label="設定異動完成" *ngIf="changeView === 'settings' && expandedSettingStep === 'done'">
           <div class="success-block setting-done-block">
+            <div class="success-ring"><i class="bi bi-check-circle-fill"></i></div>
+            <h2>委託成功</h2>
             <div class="order-box">
               <div class="sum-row"><span>委託時間</span><strong>2026/05/12 14:30</strong></div>
               <div class="sum-row"><span>交易類型</span><strong>設定異動</strong></div>
               <div class="sum-row"><span>異動筆數</span><strong>{{ modifiedSettingCount }} 筆</strong></div>
-              <div class="sum-row"><span>狀態說明</span><strong>設定生效狀態可至「委託查詢 / 取消」查看。</strong></div>
             </div>
             <div class="done-actions ds-button-row">
               <button class="ds-action-button" mat-stroked-button type="button" (click)="queryTrade()">委託查詢</button>
               <button class="ds-action-button" mat-flat-button color="primary" type="button" (click)="resetExpandedSettingFlow()">返回設定</button>
             </div>
           </div>
+          <fp-notes [notes]="settingDoneNotes"></fp-notes>
         </section>
       </div>
     </ng-container>

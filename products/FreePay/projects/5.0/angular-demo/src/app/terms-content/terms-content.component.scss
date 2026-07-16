@@ -1,0 +1,31 @@
+:host {
+  display: block;
+}
+
+.terms-content {
+  max-height: 180px;
+  overflow-y: auto;
+  padding: 12px 14px;
+  border: 1px solid var(--color-border-default);
+  border-radius: 6px;
+  background: var(--color-bg-subtle);
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  line-height: 1.75;
+
+  p {
+    margin: 0 0 10px;
+
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+}
+
+.terms-content--setting {
+  max-height: 220px;
+  padding: 16px;
+  border-radius: 8px;
+  color: var(--color-text-primary);
+  line-height: 1.8;
+}

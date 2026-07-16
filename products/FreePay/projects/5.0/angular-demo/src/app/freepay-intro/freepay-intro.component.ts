@@ -14,13 +14,14 @@ import { Component } from '@angular/core';
     </main>
   `,
   styles: [`
+    /* 標準頁面容器（DesignSystem §5.1）：內容 1200 ＋ 左右各一個 gutter */
     .fp-empty-page {
-      width: min(1200px, 100%);
+      width: min(calc(1200px + var(--page-gutter) * 2), 100%);
       min-height: 360px;
       margin: 0 auto;
       display: grid;
       place-items: center;
-      padding: 0 20px;
+      padding: 0 var(--page-gutter);
     }
 
     .fp-empty-card {
@@ -44,10 +45,11 @@ import { Component } from '@angular/core';
       font-size: 24px;
     }
 
+    /* H3 級標題（§4.2：桌機 20 / 手機 18） */
     h1 {
       margin: 0;
       color: var(--color-text-heading);
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 500;
       line-height: 1.45;
     }
@@ -62,7 +64,6 @@ import { Component } from '@angular/core';
     @media (max-width: 767px) {
       .fp-empty-page {
         min-height: 300px;
-        padding: 0 15px;
       }
 
       .fp-empty-card {
@@ -70,7 +71,7 @@ import { Component } from '@angular/core';
       }
 
       h1 {
-        font-size: 20px;
+        font-size: 18px;
       }
     }
   `]

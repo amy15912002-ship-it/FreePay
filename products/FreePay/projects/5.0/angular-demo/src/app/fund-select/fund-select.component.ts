@@ -143,7 +143,7 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
   page = 1;
   sortPanelOpen = false;
   expandedCards = new Set<string>();
-  viewMode: 'card' | 'table' = 'card';   // 手機資料區：卡片（預設）／列表；桌機恆為表格，不受此值影響
+  viewMode: 'card' | 'table' = 'table';  // 手機資料區：表格（預設）／卡片；桌機恆為表格，不受此值影響
   filterPanelOpen = false;
   // 每個可收合篩選列：chip 是否換行（放不下一行）→ 需顯示展開鈕
   overflowState: Record<CollapsibleFilter, boolean> = {
@@ -334,7 +334,21 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
 
   selectPendingSort(key: SortKey): void {
     if (this.pendingSortKey === key) this.pendingSortDesc = !this.pendingSortDesc;
-    else { this.pendingSortKey = key; this.pendingSortDesc = true; }
+    else { this.pendingSortKey = key; this.pendingSortDesc = this.sortKeyKind(key) !== 'text'; } // 文字欄預設 A 到 Z
+  }
+
+  // 排序方向字樣依欄位語意：數值＝高低、日期＝新舊、文字＝字母序
+  private sortKeyKind(key: SortKey): 'number' | 'date' | 'text' {
+    if (key === 'navDate') return 'date';
+    if (key === 'fundId' || key === 'name' || key === 'currency') return 'text';
+    return 'number';
+  }
+
+  get sortDirOptions(): { label: string; desc: boolean }[] {
+    const kind = this.sortKeyKind(this.pendingSortKey);
+    if (kind === 'date') return [{ label: '新到舊', desc: true }, { label: '舊到新', desc: false }];
+    if (kind === 'text') return [{ label: 'A 到 Z', desc: false }, { label: 'Z 到 A', desc: true }];
+    return [{ label: '高到低', desc: true }, { label: '低到高', desc: false }];
   }
 
   applyPendingSort(): void {
@@ -349,16 +363,19 @@ export class FundSelectComponent implements AfterViewInit, OnDestroy {
     this.page = 1;
   }
 
-  togglePendingSortDirection(): void {
-    this.pendingSortDesc = !this.pendingSortDesc;
-  }
-
+  // 切 tab 重設為該 tab 的預設排序：sortKey 一定落在該 tab 的排序選項內，
+  // 排序 sheet 才有預設選中 chip，也避免沿用上一個 tab 的欄位排序
   setTab(tab: FundTab): void {
     this.activeTab = tab;
-    if (tab === 'perf') {
-      this.sortKey = 'perf.m6';
-      this.sortDesc = true;
-    }
+    const defaults: Record<FundTab, SortKey> = {
+      perf: 'perf.m6',
+      roi: 'roi.4',
+      drop: 'drop.4',
+      nav: 'navChangePct',
+      rating: 'lipper'
+    };
+    this.sortKey = defaults[tab];
+    this.sortDesc = true;
     this.page = 1;
   }
 

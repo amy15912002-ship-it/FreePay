@@ -835,7 +835,7 @@
     gap: 16px;
   }
 
-  // 手機資料區：卡片（預設）／列表切換鈕
+  // 手機資料區：表格（預設）／卡片切換鈕
   .fs-view-toggle {
     display: inline-flex;
     align-items: center;
@@ -846,7 +846,7 @@
 
   // .fs-view-btn 已改用全域 .circle-btn（作用中 --buy 實心／未選 --brand-outline 描邊）
 
-  // 卡片視圖（預設）：顯示卡片、隱藏表格
+  // 卡片視圖：由切換鈕啟用，顯示卡片、隱藏表格
   .fs-table-wrap {
     display: none;
   }
@@ -857,7 +857,7 @@
     gap: 12px;
   }
 
-  // 列表視圖：桌機表格原形橫向滾動；基金名稱欄固定於左、代碼欄隱藏
+  // 表格視圖（手機預設）：桌機表格原形橫向滾動；基金名稱欄固定於左、代碼欄隱藏
   .fs-table-wrap.fs-view-active {
     display: block;
     overflow-x: auto;

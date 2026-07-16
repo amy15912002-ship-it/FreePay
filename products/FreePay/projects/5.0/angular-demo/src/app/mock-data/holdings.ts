@@ -28,7 +28,7 @@ export interface HoldingContract {
   currencyCode: string;      // 交易幣別：'TWD' | 'USD' | 'JPY'
   startDate: string;         // 首次申購委託日 'YYYY/MM/DD'（= 第一個批次的 batchDate）
   payMode: PayMode;
-  monthlyPay: number;        // 目前每月 Pay 金額
+  monthlyPay: number;        // 依金額模式的目前每月 Pay 金額；依比例模式由 marketValue × annualRate 即時計算
   annualRate: number;        // 依比例模式的年化比例（%）；依金額模式為 0
   payDay: number;            // 自由 Pay 基準日（1–31）
   thresholdMode: ThresholdMode;
@@ -36,28 +36,15 @@ export interface HoldingContract {
   costBasis: number;         // 累積投入成本（= 所有批次 amount 加總）
   marketValue: number;       // 約當市值
   paidTotal: number;         // 已 Pay 累計金額
+  orderingUnits?: number;    // 在途贖回單位數（已送出未交割）；可贖回單位數須扣除（spec §7.3、§12.2）
   status: string;            // 交易狀態：'Y' | 'P' | 'A' | 'B' | 'W'
   payRateAlert?: boolean;    // mock：贖回成交後年化提領率 > 15%（帳總契約提醒 A，spec §7.1）
   payPaused?: boolean;       // mock：觸發門檻暫停 Pay 中（帳總契約提醒 B，spec §7.1）；文案依 thresholdMode 區分
   purchaseBatches: PurchaseBatch[]; // 申購批次清單（依日期排序，第一筆為首次申購）
 }
 
+// 陣列固定依首次申購日舊→新排列＝帳總明細「自然序」（spec §8.4）；新增契約請插入正確位置
 export const HOLDINGS: HoldingContract[] = [
-  {
-    // FP20240101 為「不顯示指定」示範：僅 1 筆 remainUnits > 0，不足以形成指定批次選擇
-    fpNo: 'FP20240101', fundId: 'TA123456', currencyCode: 'TWD',
-    startDate: '2024/01/01', payMode: 'amount', monthlyPay: 5000, annualRate: 0, payDay: 15,
-    thresholdMode: 'none', thresholdValue: 0,
-    costBasis: 220000, marketValue: 40000, paidTotal: 180000, status: 'Y', payRateAlert: true,
-    purchaseBatches: [
-      // 首次申購：完全消耗
-      { batchId: 'BFP20240101-1', batchDate: '2024/01/01', orderTime: '13:25:00', tDate: '2024/01/03',
-        amount: 120000, units: 8000, nav: 15.0, isPayTouched: true, remainUnits: 0, paidAmount: 120000 },
-      // 加碼：FIFO 下接續消耗（部分），仍有剩餘單位數；但可選批次僅 1 筆，故不顯示指定贖回
-      { batchId: 'BFP20240101-2', batchDate: '2024/09/12', orderTime: '10:42:30', tDate: '2024/09/16',
-        amount: 100000, units: 6250, nav: 16.0, isPayTouched: true, remainUnits: 2500, paidAmount: 60000 },
-    ],
-  },
   {
     fpNo: 'FP20230901', fundId: 'TA654321', currencyCode: 'TWD',
     startDate: '2023/09/01', payMode: 'ratio', monthlyPay: 1600, annualRate: 6, payDay: 6,
@@ -68,6 +55,22 @@ export const HOLDINGS: HoldingContract[] = [
         amount: 200000, units: 19047.6190, nav: 10.5, isPayTouched: true, remainUnits: 9523.8095, paidAmount: 180000 },
       { batchId: 'BFP20230901-2', batchDate: '2024/03/15', orderTime: '14:20:33', tDate: '2024/03/19',
         amount: 120000, units: 11428.5714, nav: 10.5, isPayTouched: false, remainUnits: 11428.5714, paidAmount: 0 },
+    ],
+  },
+  {
+    // FP20240101 為「不顯示指定」示範：僅 1 筆 remainUnits > 0，不足以形成指定批次選擇
+    // 同時為「在途贖回單位」示範：全部贖回顯示「在途中（已扣除）」列
+    fpNo: 'FP20240101', fundId: 'TA123456', currencyCode: 'TWD',
+    startDate: '2024/01/01', payMode: 'amount', monthlyPay: 5000, annualRate: 0, payDay: 15,
+    thresholdMode: 'none', thresholdValue: 0,
+    costBasis: 220000, marketValue: 40000, paidTotal: 180000, orderingUnits: 12.3456, status: 'Y', payRateAlert: true,
+    purchaseBatches: [
+      // 首次申購：完全消耗
+      { batchId: 'BFP20240101-1', batchDate: '2024/01/01', orderTime: '13:25:00', tDate: '2024/01/03',
+        amount: 120000, units: 8000, nav: 15.0, isPayTouched: true, remainUnits: 0, paidAmount: 120000 },
+      // 加碼：FIFO 下接續消耗（部分），仍有剩餘單位數；但可選批次僅 1 筆，故不顯示指定贖回
+      { batchId: 'BFP20240101-2', batchDate: '2024/09/12', orderTime: '10:42:30', tDate: '2024/09/16',
+        amount: 100000, units: 6250, nav: 16.0, isPayTouched: true, remainUnits: 2500, paidAmount: 60000 },
     ],
   },
   {
@@ -92,18 +95,6 @@ export const HOLDINGS: HoldingContract[] = [
     ],
   },
   {
-    fpNo: 'FP20250601', fundId: 'TA778899', currencyCode: 'TWD',
-    startDate: '2025/06/01', payMode: 'amount', monthlyPay: 3000, annualRate: 0, payDay: 15,
-    thresholdMode: 'protect', thresholdValue: 80,
-    costBasis: 280000, marketValue: 212000, paidTotal: 54000, status: 'Y', payPaused: true,
-    purchaseBatches: [
-      { batchId: 'BFP20250601-1', batchDate: '2025/06/01', orderTime: '10:30:00', tDate: '2025/06/04',
-        amount: 180000, units: 10112.3596, nav: 17.8, isPayTouched: true, remainUnits: 7078.6517, paidAmount: 54000 },
-      { batchId: 'BFP20250601-2', batchDate: '2026/01/20', orderTime: '11:08:42', tDate: '2026/01/22',
-        amount: 100000, units: 5347.5936, nav: 18.7, isPayTouched: false, remainUnits: 5347.5936, paidAmount: 0 },
-    ],
-  },
-  {
     fpNo: 'FP20240801', fundId: 'TA987654', currencyCode: 'JPY',
     startDate: '2024/08/01', payMode: 'amount', monthlyPay: 5000, annualRate: 0, payDay: 20,
     thresholdMode: 'none', thresholdValue: 0,
@@ -115,6 +106,18 @@ export const HOLDINGS: HoldingContract[] = [
         amount: 500000, units: 4878.0488, nav: 102.5, isPayTouched: false, remainUnits: 4878.0488, paidAmount: 0 },
       { batchId: 'BFP20240801-3', batchDate: '2025/12/05', orderTime: '13:55:02', tDate: '2025/12/09',
         amount: 300000, units: 2752.2936, nav: 109.0, isPayTouched: false, remainUnits: 2752.2936, paidAmount: 0 },
+    ],
+  },
+  {
+    fpNo: 'FP20250601', fundId: 'TA778899', currencyCode: 'TWD',
+    startDate: '2025/06/01', payMode: 'amount', monthlyPay: 3000, annualRate: 0, payDay: 15,
+    thresholdMode: 'protect', thresholdValue: 80,
+    costBasis: 280000, marketValue: 212000, paidTotal: 54000, status: 'Y', payPaused: true,
+    purchaseBatches: [
+      { batchId: 'BFP20250601-1', batchDate: '2025/06/01', orderTime: '10:30:00', tDate: '2025/06/04',
+        amount: 180000, units: 10112.3596, nav: 17.8, isPayTouched: true, remainUnits: 7078.6517, paidAmount: 54000 },
+      { batchId: 'BFP20250601-2', batchDate: '2026/01/20', orderTime: '11:08:42', tDate: '2026/01/22',
+        amount: 100000, units: 5347.5936, nav: 18.7, isPayTouched: false, remainUnits: 5347.5936, paidAmount: 0 },
     ],
   },
 ];

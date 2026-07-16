@@ -181,21 +181,30 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   private toScenarioContract(c: HoldingContract): Contract {
+    const monthlyPay = this.contractMonthlyPay(c);
     return {
       fpNo: c.fpNo,
       currencyCode: c.currencyCode,
       startDate: c.startDate,
-      monthlyPay: c.monthlyPay,
+      monthlyPay,
       payMode: c.payMode,
-      annualRate: c.annualRate || (c.costBasis ? Math.round((c.monthlyPay * 12 / c.costBasis) * 100) : 0),
+      annualRate: c.annualRate || (c.costBasis ? Math.round((monthlyPay * 12 / c.costBasis) * 100) : 0),
       payDay: c.payDay,
       thresholdMode: c.thresholdMode,
       thresholdValue: c.thresholdValue,
       threshold: this.contractThresholdText(c),
       marketValue: c.marketValue,
       costBasis: c.costBasis,
-      paidTotal: c.paidTotal
+      paidTotal: c.paidTotal,
+      orderingUnits: c.orderingUnits ?? 0
     };
+  }
+
+  private contractMonthlyPay(c: HoldingContract): number {
+    if (c.payMode === 'ratio') {
+      return Math.round(c.marketValue * c.annualRate / 100 / 12);
+    }
+    return c.monthlyPay;
   }
 
   private contractThresholdText(c: HoldingContract): string {
@@ -351,9 +360,13 @@ export class DemoShellComponent implements OnInit, OnDestroy {
 
   get monthlyPay(): number {
     if (this.payMode === 'ratio') {
-      return Math.round((this.amount * Number(this.form.controls.ratio.value || 0)) / 100 / 12);
+      return Math.round(this.ratioPayEstimateBase * Number(this.form.controls.ratio.value || 0) / 100 / 12);
     }
     return Number(this.form.controls.monthlyPay.value || 0);
+  }
+
+  get ratioPayEstimateBase(): number {
+    return this.selectedContract?.marketValue ?? this.amount;
   }
 
   get hasPayInput(): boolean {
@@ -463,7 +476,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
   }
 
   get redeemOrderingUnits(): number {
-    return this.selectedContract?.fpNo === 'FP20241201' ? 12.3456 : 0;
+    return this.selectedContract?.orderingUnits ?? 0;
   }
 
   get redeemableUnits(): number {
@@ -601,7 +614,7 @@ export class DemoShellComponent implements OnInit, OnDestroy {
     return Math.max(batch.units - batch.remainUnits, 0);
   }
 
-  private batchCostBasis(batch: PurchaseBatch): number {
+  batchCostBasis(batch: PurchaseBatch): number {
     if (batch.units <= 0) return 0;
     return batch.amount * (batch.remainUnits + this.batchPaidUnits(batch)) / batch.units;
   }

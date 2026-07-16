@@ -115,7 +115,7 @@
   color: var(--color-text-on-brand);
   background: var(--color-brand-tertiary-600);
   border-radius: 4px;
-  padding: 3px 7px;
+  padding: 4px 8px;
 }
 
 // identity wrapper：直式時透明（不影響多卡版面），橫式時才作為左欄
@@ -1049,7 +1049,7 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: baseline;
-    padding: 9px 4px;
+    padding: 8px 4px;
     border-bottom: 1px solid var(--color-border-default);
 
     .grid-kv-lbl { display: block; }
@@ -1341,228 +1341,10 @@
   font-size: 20px;
 }
 
-.pay-paused-box {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 14px;
-  border-radius: 8px;
-  background: var(--color-bg-muted);
-  color: var(--color-text-secondary);
-  font-size: 14px;
-
-  i {
-    color: var(--color-text-secondary);
-  }
-}
-
-.pay-setting-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.pay-setting-step {
-  gap: 10px;
-}
-
-.pay-setting-step + .pay-setting-step {
-  margin-top: 24px;
-}
-
-.pay-setting-step--date {
-  padding-top: 4px;
-}
-
-.pay-setting-step-title {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.pay-setting-panel {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding: 0;
-  border-radius: 0;
-  background: transparent;
-}
-
-.form-label {
-  display: inline-flex;
-  align-items: center;
-  gap: 5px;
-  color: var(--color-input-label);
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.pay-mode-panel {
-  margin-top: 6px;
-}
-
-.ratio-slider {
-  padding: 12px 0 0;
-}
-
-.ratio-summary {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.ratio-value {
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-}
-
-.slider-hint {
-  color: var(--color-input-helper);
-  font-size: 14px;
-}
-
-.ratio-range-control {
-  --ratio-track-active: var(--color-action-primary);
-  position: relative;
-  margin-top: 16px;
-  padding-bottom: 24px;
-}
-
-.ratio-track {
-  position: absolute;
-  top: 11px;
-  left: 0;
-  right: 0;
-  height: 6px;
-  border-radius: 999px;
-  background: var(--color-border-default);
-  overflow: hidden;
-  pointer-events: none;
-
-  span {
-    display: block;
-    height: 100%;
-    border-radius: inherit;
-    background: var(--ratio-track-active);
-  }
-}
-
-.ratio-range {
-  position: relative;
-  z-index: 1;
-  width: 100%;
-  height: 28px;
-  margin: 0;
-  appearance: none;
-  background: transparent;
-  cursor: pointer;
-
-  &:focus {
-    outline: none;
-  }
-
-  &::-webkit-slider-runnable-track {
-    height: 6px;
-    border-radius: 999px;
-    background: transparent;
-  }
-
-  &::-webkit-slider-thumb {
-    width: 22px;
-    height: 22px;
-    margin-top: -8px;
-    appearance: none;
-    border: 3px solid var(--color-action-primary);
-    border-radius: 50%;
-    background: var(--color-bg-base);
-    box-shadow: var(--shadow-sm);
-  }
-
-  &:focus-visible::-webkit-slider-thumb {
-    box-shadow: var(--color-input-shadow-focus), var(--shadow-sm);
-  }
-}
-
-.ratio-range-scale {
-  position: relative;
-  height: 18px;
-  margin-top: 4px;
-  color: var(--color-input-helper);
-  font-size: 14px;
-  line-height: 1.4;
-
-  span {
-    position: absolute;
-    top: 0;
-    transform: translateX(-50%);
-    white-space: nowrap;
-
-    &:first-child {
-      transform: translateX(0);
-    }
-
-    &:last-child {
-      transform: translateX(-100%);
-    }
-  }
-}
+// Pay 出設定表單（pay-setting-*／pay-paused-box／ratio-*／threshold-*／form-label／helper）
+// 與門檻預覽（threshold-preview 系列）皆已移至全域 styles.scss（申購/異動設定共用）
 
 // 固定日日期格狀樣式已移至全域 styles.scss（DesignSystem §3.12）
-
-.helper {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: 6px;
-  color: var(--color-input-helper);
-  font-size: 14px;
-}
-
-.threshold-head {
-  align-items: flex-start;
-}
-
-.threshold-body {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.threshold-selector-panel,
-.threshold-option-area {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.threshold-preview {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  padding: 0;
-  border: 0;
-  background: transparent;
-}
-
-.threshold-preview-label {
-  color: var(--color-text-heading);
-  font-size: 16px;
-  font-weight: 500;
-  line-height: 1.5;
-}
-
-.threshold-preview-emphasis {
-  color: var(--color-action-primary);
-}
-
-.threshold-custom-field {
-  flex: 1 1 100%;
-  width: 100%;
-  min-width: 0;
-}
 
 .setting-radio-row {
   display: flex;
@@ -1713,26 +1495,6 @@
   color: var(--color-text-secondary);
 }
 
-.setting-terms-content {
-  max-height: 220px;
-  overflow: auto;
-  padding: 16px;
-  border: 1px solid var(--color-border-default);
-  border-radius: 8px;
-  background: var(--color-bg-subtle);
-  color: var(--color-text-primary);
-  font-size: 14px;
-  line-height: 1.8;
-
-  p {
-    margin: 0 0 10px;
-  }
-
-  p:last-child {
-    margin-bottom: 0;
-  }
-}
-
 .setting-submit-hint {
   color: var(--color-input-helper-error);
   font-size: 14px;
@@ -1744,62 +1506,10 @@
   text-align: center;
 }
 
-.success-block {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-
-  h2 {
-    margin: 14px 0 8px;
-    color: var(--color-text-heading);
-    font-size: 28px;
-    font-weight: 700;
-  }
-}
+// .success-block／.order-box／.sum-row／.done-actions 已移至全域 styles.scss（Pay 出設定表單共用）
 
 .setting-done-block {
   width: 100%;
-}
-
-.order-box {
-  width: 100%;
-  padding: 14px 18px;
-  border: 1px solid var(--color-border-default);
-  border-radius: 8px;
-  background: var(--color-bg-subtle);
-  text-align: left;
-}
-
-.sum-row {
-  display: grid;
-  grid-template-columns: 120px minmax(0, 1fr);
-  gap: 12px;
-  min-height: 44px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--color-border-default);
-  align-items: center;
-
-  &:last-child {
-    border-bottom: none;
-  }
-
-  span {
-    color: var(--color-text-secondary);
-    font-size: 14px;
-  }
-
-  strong {
-    color: var(--color-text-primary);
-    font-size: 16px;
-    font-weight: 500;
-    line-height: 1.5;
-    text-align: right;
-  }
-}
-
-.done-actions {
-  margin-top: 22px;
 }
 
 @media (max-width: 1024px) {

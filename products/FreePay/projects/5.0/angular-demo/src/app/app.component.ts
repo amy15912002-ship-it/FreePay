@@ -54,6 +54,12 @@ import { Router } from '@angular/router';
 export class AppComponent {
   isMobileMenuOpen = false;
   isLoggedIn = false;
+  private readonly protectedRoutes = [
+    '/demo/overview',
+    '/demo/change-settings',
+    '/demo/flow',
+    '/demo/search',
+  ];
 
   constructor(private readonly router: Router) {}
 
@@ -69,8 +75,12 @@ export class AppComponent {
     this.isLoggedIn = !this.isLoggedIn;
     this.closeMobileMenu();
 
-    if (!this.isLoggedIn && this.router.url.startsWith('/demo/overview')) {
+    if (!this.isLoggedIn && this.isProtectedRoute(this.router.url)) {
       this.router.navigate(['/demo/freepay-intro']);
     }
+  }
+
+  private isProtectedRoute(url: string): boolean {
+    return this.protectedRoutes.some(route => url.startsWith(route));
   }
 }

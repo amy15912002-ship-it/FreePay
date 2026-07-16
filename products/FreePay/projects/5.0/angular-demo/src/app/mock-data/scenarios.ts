@@ -22,6 +22,7 @@ export interface Contract {
   marketValue: number;
   costBasis: number;
   paidTotal: number;
+  orderingUnits: number;
 }
 
 export interface ScenarioData {
